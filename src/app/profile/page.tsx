@@ -158,25 +158,25 @@ export default function ProfilePage() {
                                 </div>
                             </div>
 
-                            {/* Community Contribution */}
+                            {/* Bowling Statistics */}
                             <div className="mb-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Community Contribution</h3>
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Bowling Statistics</h3>
                                 <div className="space-y-3">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-gray-600">Posts:</span>
-                                        <span className="font-medium">56</span>
+                                        <span className="text-gray-600">Avg. Score:</span>
+                                        <span className="font-medium">{user?.stats?.average_score ? Math.round(user.stats.average_score) : '237'}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-gray-600">Views:</span>
-                                        <span className="font-medium">8.5k</span>
+                                        <span className="text-gray-600">High Game:</span>
+                                        <span className="font-medium">{user?.stats?.high_game || '300'}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-gray-600">Thanks:</span>
-                                        <span className="font-medium">105</span>
+                                        <span className="text-gray-600">High Series:</span>
+                                        <span className="font-medium">{user?.stats?.high_series || '854'}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-gray-600">Insightful:</span>
-                                        <span className="font-medium">435</span>
+                                        <span className="text-gray-600">Experience (yrs):</span>
+                                        <span className="font-medium">{user?.stats?.experience || '32'}</span>
                                     </div>
                                 </div>
                             </div>
