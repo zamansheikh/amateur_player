@@ -59,9 +59,10 @@ interface UserPost {
 interface UserPostCardProps {
     post: UserPost;
     onPostUpdate?: () => void;
+    onPostChange?: (updatedPost: UserPost) => void; // Add optimistic update support
 }
 
-export default function UserPostCard({ post, onPostUpdate }: UserPostCardProps) {
+export default function UserPostCard({ post, onPostUpdate, onPostChange }: UserPostCardProps) {
     const [isLiked, setIsLiked] = useState(false);
     const [localLikes, setLocalLikes] = useState(post.metadata.total_likes);
     const [comment, setComment] = useState('');
@@ -71,13 +72,14 @@ export default function UserPostCard({ post, onPostUpdate }: UserPostCardProps) 
     const [replyToComment, setReplyToComment] = useState<number | null>(null);
     const [replyText, setReplyText] = useState('');
     const [isReplying, setIsReplying] = useState(false);
+    const [localPost, setLocalPost] = useState(post);
 
     const handleLike = async () => {
         if (isLiking) return;
 
         try {
             setIsLiking(true);
-            await api.get(`/api/user/post/click-like/${post.metadata.id}`);
+            await api.get(`/api/user/post/click-like/${localPost.metadata.id}`);
 
             // Toggle like state
             const newLikedState = !isLiked;
@@ -101,17 +103,35 @@ export default function UserPostCard({ post, onPostUpdate }: UserPostCardProps) 
 
         try {
             setIsCommenting(true);
-            await api.post(`/api/user/post/add-comment/${post.metadata.id}`, {
+
+            // Call API and get the response with new comment data
+            const response = await api.post(`/api/user/post/add-comment/${localPost.metadata.id}`, {
                 text: comment.trim()
             });
+
+            // Optimistic update with the actual comment data from API
+            const newComment = response.data.comment;
+            const updatedPost: UserPost = {
+                ...localPost,
+                metadata: {
+                    ...localPost.metadata,
+                    total_comments: localPost.metadata.total_comments + 1
+                },
+                comments: [{
+                    total: localPost.comments[0].total + 1,
+                    comment_list: [newComment, ...localPost.comments[0].comment_list]
+                }]
+            };
+
+            setLocalPost(updatedPost);
 
             // Clear comment and close input
             setComment('');
             setShowCommentInput(false);
 
-            // Refresh the post to show new comment
-            if (onPostUpdate) {
-                onPostUpdate();
+            // Notify parent of the change (no need to refetch all posts)
+            if (onPostChange) {
+                onPostChange(updatedPost);
             }
         } catch (error) {
             console.error('Error adding comment:', error);
@@ -132,17 +152,35 @@ export default function UserPostCard({ post, onPostUpdate }: UserPostCardProps) 
 
         try {
             setIsReplying(true);
-            await api.post(`/api/user/post/add-reply/${commentId}`, {
+
+            // Call API and get the response with new reply data
+            const response = await api.post(`/api/user/post/add-reply/${commentId}`, {
                 text: replyText.trim()
             });
+
+            // Optimistic update - add reply to the specific comment
+            const newReply = response.data.reply;
+            const updatedPost: UserPost = {
+                ...localPost,
+                comments: [{
+                    ...localPost.comments[0],
+                    comment_list: localPost.comments[0].comment_list.map(comment =>
+                        comment.comment_id === commentId
+                            ? { ...comment, replies: [newReply, ...comment.replies] }
+                            : comment
+                    )
+                }]
+            };
+
+            setLocalPost(updatedPost);
 
             // Clear reply and close input
             setReplyText('');
             setReplyToComment(null);
 
-            // Refresh the post to show new reply
-            if (onPostUpdate) {
-                onPostUpdate();
+            // Notify parent of the change (no need to refetch all posts)
+            if (onPostChange) {
+                onPostChange(updatedPost);
             }
         } catch (error) {
             console.error('Error adding reply:', error);
@@ -184,13 +222,13 @@ export default function UserPostCard({ post, onPostUpdate }: UserPostCardProps) 
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                         <img
-                            src={post.author.profile_pic_url}
-                            alt={post.author.name}
+                            src={localPost.author.profile_pic_url}
+                            alt={localPost.author.name}
                             className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100"
                         />
                         <div>
-                            <h3 className="font-semibold text-gray-900 text-base">{post.author.name}</h3>
-                            <p className="text-sm text-gray-500">{post.metadata.created}</p>
+                            <h3 className="font-semibold text-gray-900 text-base">{localPost.author.name}</h3>
+                            <p className="text-sm text-gray-500">{localPost.metadata.created}</p>
                         </div>
                     </div>
                     {/* No follow button for user's own posts */}
@@ -199,15 +237,15 @@ export default function UserPostCard({ post, onPostUpdate }: UserPostCardProps) 
                 {/* Post Content */}
                 <div className="mb-4">
                     <p className="text-gray-800 leading-relaxed text-[15px] line-height-6">
-                        {renderTextWithTags(post.caption, post.tags)}
+                        {renderTextWithTags(localPost.caption, localPost.tags)}
                     </p>
                 </div>
 
                 {/* Post Images */}
-                {post.images && post.images.length > 0 && (
+                {localPost.images && localPost.images.length > 0 && (
                     <div className="mb-4 -mx-2">
                         <img
-                            src={post.images[0]}
+                            src={localPost.images[0]}
                             alt="Post content"
                             className="w-full h-72 object-cover rounded-xl"
                         />
@@ -235,7 +273,7 @@ export default function UserPostCard({ post, onPostUpdate }: UserPostCardProps) 
                         >
                             <MessageSquare className="w-5 h-5" />
                             <span className="text-sm font-medium">
-                                {post.metadata.total_comments} Comment{post.metadata.total_comments !== 1 ? 's' : ''}
+                                {localPost.metadata.total_comments} Comment{localPost.metadata.total_comments !== 1 ? 's' : ''}
                             </span>
                         </button>
                     </div>
@@ -246,9 +284,9 @@ export default function UserPostCard({ post, onPostUpdate }: UserPostCardProps) 
                 </div>
 
                 {/* Comments Preview */}
-                {post.comments[0].comment_list.length > 0 && (
+                {localPost.comments[0].comment_list.length > 0 && (
                     <div className="mb-3 space-y-3">
-                        {post.comments[0].comment_list.slice(0, 2).map((comment) => (
+                        {localPost.comments[0].comment_list.slice(0, 2).map((comment) => (
                             <div key={comment.comment_id} className="space-y-2">
                                 <div className="flex items-start gap-2">
                                     <img
@@ -333,9 +371,9 @@ export default function UserPostCard({ post, onPostUpdate }: UserPostCardProps) 
                                 )}
                             </div>
                         ))}
-                        {post.comments[0].comment_list.length > 2 && (
+                        {localPost.comments[0].comment_list.length > 2 && (
                             <button className="text-sm text-gray-500 hover:text-gray-700">
-                                View all {post.metadata.total_comments} comments
+                                View all {localPost.metadata.total_comments} comments
                             </button>
                         )}
                     </div>

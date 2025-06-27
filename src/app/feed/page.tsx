@@ -82,6 +82,14 @@ export default function FeedPage() {
         fetchFeed();
     }, []);
 
+    const handlePostChange = (updatedPost: FeedPost) => {
+        setPosts(prevPosts =>
+            prevPosts.map(post =>
+                post.metadata.id === updatedPost.metadata.id ? updatedPost : post
+            )
+        );
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-100">
@@ -142,6 +150,7 @@ export default function FeedPage() {
                                 key={post.metadata.id}
                                 post={post}
                                 onPostUpdate={fetchFeed}
+                                onPostChange={handlePostChange}
                             />
                         ))
                     )}

@@ -61,9 +61,10 @@ interface FeedPost {
 interface FeedPostCardProps {
     post: FeedPost;
     onPostUpdate?: () => void;
+    onPostChange?: (updatedPost: FeedPost) => void; // Add optimistic update support
 }
 
-export default function FeedPostCard({ post, onPostUpdate }: FeedPostCardProps) {
+export default function FeedPostCard({ post, onPostUpdate, onPostChange }: FeedPostCardProps) {
     const [isLiked, setIsLiked] = useState(false);
     const [localLikes, setLocalLikes] = useState(post.metadata.total_likes);
     const [comment, setComment] = useState('');
@@ -73,6 +74,13 @@ export default function FeedPostCard({ post, onPostUpdate }: FeedPostCardProps) 
     const [replyToComment, setReplyToComment] = useState<number | null>(null);
     const [replyText, setReplyText] = useState('');
     const [isReplying, setIsReplying] = useState(false);
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [localPost, setLocalPost] = useState(post);
+
+    // Initialize following state
+    useState(() => {
+        setIsFollowing(post.author.is_following);
+    });
 
     const handleLike = async () => {
         if (isLiking) return;
@@ -103,17 +111,35 @@ export default function FeedPostCard({ post, onPostUpdate }: FeedPostCardProps) 
 
         try {
             setIsCommenting(true);
-            await api.post(`/api/user/post/add-comment/${post.metadata.id}`, {
+
+            // Call API and get the response with new comment data
+            const response = await api.post(`/api/user/post/add-comment/${post.metadata.id}`, {
                 text: comment.trim()
             });
+
+            // Optimistic update with the actual comment data from API
+            const newComment = response.data.comment;
+            const updatedPost: FeedPost = {
+                ...localPost,
+                metadata: {
+                    ...localPost.metadata,
+                    total_comments: localPost.metadata.total_comments + 1
+                },
+                comments: [{
+                    total: localPost.comments[0].total + 1,
+                    comment_list: [newComment, ...localPost.comments[0].comment_list]
+                }]
+            };
+
+            setLocalPost(updatedPost);
 
             // Clear comment and close input
             setComment('');
             setShowCommentInput(false);
 
-            // Refresh the post to show new comment
-            if (onPostUpdate) {
-                onPostUpdate();
+            // Notify parent of the change (no need to refetch all posts)
+            if (onPostChange) {
+                onPostChange(updatedPost);
             }
         } catch (error) {
             console.error('Error adding comment:', error);
@@ -151,6 +177,38 @@ export default function FeedPostCard({ post, onPostUpdate }: FeedPostCardProps) 
             // Could add toast notification here
         } finally {
             setIsReplying(false);
+        }
+    };
+
+    const handleFollow = async () => {
+        if (isFollowing) return;
+
+        try {
+            // Optimistic update
+            setIsFollowing(true);
+            const updatedPost = {
+                ...localPost,
+                author: {
+                    ...localPost.author,
+                    is_following: true
+                }
+            };
+            setLocalPost(updatedPost);
+
+            // Call API
+            await api.post('/api/user/follow', {
+                user_id: post.author.user_id
+            });
+
+            // Notify parent of the change
+            if (onPostChange) {
+                onPostChange(updatedPost);
+            }
+        } catch (error) {
+            console.error('Error following user:', error);
+            // Revert optimistic update on error
+            setIsFollowing(post.author.is_following);
+            setLocalPost(post);
         }
     };
 
@@ -199,7 +257,7 @@ export default function FeedPostCard({ post, onPostUpdate }: FeedPostCardProps) 
                         <button className={`border px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${post.author.is_following
                             ? 'border-gray-300 text-gray-600 hover:bg-gray-50'
                             : 'border-green-600 text-green-600 hover:bg-green-50 hover:border-green-700'
-                            }`}>
+                            }`} onClick={handleFollow}>
                             {post.author.is_following ? 'Following' : '+ Follow'}
                         </button>
                     )}

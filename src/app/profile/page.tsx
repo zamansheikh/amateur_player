@@ -138,6 +138,14 @@ export default function ProfilePage() {
         }));
     };
 
+    const handlePostChange = (updatedPost: UserPost) => {
+        setPosts(prevPosts =>
+            prevPosts.map(post =>
+                post.metadata.id === updatedPost.metadata.id ? updatedPost : post
+            )
+        );
+    };
+
     return (
         <div className="min-h-screen bg-gray-100">
             <div className="max-w-5xl mx-auto px-6 py-6">
@@ -178,6 +186,7 @@ export default function ProfilePage() {
                                         key={post.metadata.id}
                                         post={post}
                                         onPostUpdate={fetchUserPosts}
+                                        onPostChange={handlePostChange}
                                     />
                                 ))
                             )}
