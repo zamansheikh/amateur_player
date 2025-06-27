@@ -67,7 +67,7 @@ export default function SignUpPage() {
                             height={48}
                             className="rounded-lg"
                         />
-                        <span className="text-2xl font-bold text-gray-900">Amateur Player</span>
+                        <span className="text-2xl font-bold text-gray-900">Bowlers Networkr</span>
                     </div>
                     <h2 className="text-3xl font-bold text-gray-900">Create your account</h2>
                     <p className="mt-2 text-sm text-gray-600">

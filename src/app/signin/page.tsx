@@ -46,7 +46,7 @@ export default function SignInPage() {
                             height={48}
                             className="rounded-lg"
                         />
-                        <span className="text-2xl font-bold text-gray-900">Amateur Player</span>
+                        <span className="text-2xl font-bold text-gray-900">Bowlers Network</span>
                     </div>
                     <h2 className="text-3xl font-bold text-gray-900">Sign in to your account</h2>
                     <p className="mt-2 text-sm text-gray-600">
@@ -106,31 +106,7 @@ export default function SignInPage() {
                             {isLoading ? 'Signing in...' : 'Sign in'}
                         </button>
                     </div>
-
-                    {/* Test Credentials */}
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                        <h3 className="text-sm font-medium text-blue-800 mb-2">Test Credentials</h3>
-                        <div className="space-y-1 text-xs text-blue-700">
-                            <p><strong>Username:</strong> Uri</p>
-                            <p><strong>Password:</strong> prottoy21</p>
-                        </div>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setUsername('Uri');
-                                setPassword('prottoy21');
-                            }}
-                            className="mt-2 text-xs text-blue-600 hover:text-blue-800 underline"
-                        >
-                            Fill credentials
-                        </button>
-                    </div>
-
-                    <div className="text-center">
-                        <p className="text-sm text-gray-600">
-                            Demo credentials: Use any email/username and password
-                        </p>
-                    </div>
+                    
                 </form>
             </div>
         </div>
