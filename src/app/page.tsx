@@ -224,7 +224,7 @@ export default function HomePage() {
                                 WebkitBackgroundClip: 'text',
                                 WebkitTextFillColor: 'transparent'
                             }}>
-                                Amateur Player
+                                Pro Players
                             </span>
                         </h1>
                         <p className="text-gray-600">
