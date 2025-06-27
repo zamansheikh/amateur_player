@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Trophy, Star, TrendingUp } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import ProPlayerModal from '@/components/ProPlayerModal';
@@ -77,14 +77,7 @@ export default function HomePage() {
         );
     };
 
-    // Sort pro players by XP to get top performers
-    const sortedProPlayers = proPlayers.sort((a, b) => b.xp - a.xp);
-    const topLegends = sortedProPlayers.slice(0, 3);
-    const risingStars = sortedProPlayers.slice(3, 15);
-
-    const PlayerCard = ({ player, size = 'normal', rank, onClick }: { player: ProPlayer, size?: 'normal' | 'large', rank: number, onClick: () => void }) => {
-        const isLarge = size === 'large';
-
+    const PlayerCard = ({ player, onClick }: { player: ProPlayer, onClick: () => void }) => {
         // Use card_theme from API or fallback to gradient
         const getCardStyle = () => {
             if (player.card_theme && player.card_theme.startsWith('#')) {
@@ -104,12 +97,6 @@ export default function HomePage() {
             }
         };
 
-        const cardClass = isLarge
-            ? "text-white p-6 rounded-2xl shadow-2xl transform scale-105 relative"
-            : "text-white p-4 rounded-xl shadow-lg";
-
-        const avatarClass = isLarge ? "w-16 h-16 text-2xl" : "w-12 h-12 text-lg";
-
         // Generate initials from name
         const getInitials = (name: string) => {
             if (!name) return player.username?.slice(0, 2).toUpperCase() || 'P';
@@ -118,48 +105,40 @@ export default function HomePage() {
 
         return (
             <div
-                className={`${cardClass} cursor-pointer hover:scale-105 transition-transform duration-200`}
+                className="text-white p-4 rounded-xl shadow-lg cursor-pointer hover:scale-105 transition-transform duration-200"
                 style={getCardStyle()}
                 onClick={onClick}
             >
-                {isLarge && (
-                    <div className="absolute -top-2 -right-2">
-                        <div className="bg-yellow-400 rounded-full p-2">
-                            <Trophy className="w-6 h-6 text-yellow-800" />
-                        </div>
-                    </div>
-                )}
-
                 <div className="text-center">
                     {player.profile_picture_url ? (
                         <img
                             src={player.profile_picture_url}
                             alt={player.name || player.username}
-                            className={`${avatarClass} rounded-full mx-auto mb-3 object-cover border-2 border-white border-opacity-50`}
+                            className="w-12 h-12 rounded-full mx-auto mb-3 object-cover border-2 border-white border-opacity-50"
                         />
                     ) : (
-                        <div className={`${avatarClass} bg-white bg-opacity-20 rounded-full mx-auto flex items-center justify-center font-bold mb-3`}>
+                        <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full mx-auto flex items-center justify-center font-bold mb-3 text-lg">
                             {getInitials(player.name)}
                         </div>
                     )}
 
-                    <h3 className={`font-bold ${isLarge ? 'text-xl' : 'text-lg'} mb-1`}>
+                    <h3 className="font-bold text-lg mb-1">
                         {player.name || player.username}
                     </h3>
-                    <p className={`text-white text-opacity-80 ${isLarge ? 'text-base' : 'text-sm'} mb-3`}>
+                    <p className="text-white text-opacity-80 text-sm mb-3">
                         @{player.username}
                     </p>
 
                     <div className="flex justify-between items-center mb-2">
                         <div>
                             <p className="text-white text-opacity-70 text-xs">Level</p>
-                            <p className={`font-bold ${isLarge ? 'text-2xl' : 'text-xl'}`}>
+                            <p className="font-bold text-xl">
                                 {player.level}
                             </p>
                         </div>
                         <div>
                             <p className="text-white text-opacity-70 text-xs">XP</p>
-                            <p className={`font-bold ${isLarge ? 'text-2xl' : 'text-xl'}`}>
+                            <p className="font-bold text-xl">
                                 {player.xp.toLocaleString()}
                             </p>
                         </div>
@@ -168,17 +147,14 @@ export default function HomePage() {
                     {player.stats?.average_score && player.stats.average_score > 0 && (
                         <div className="mb-2">
                             <p className="text-white text-opacity-70 text-xs">Avg Score</p>
-                            <p className={`font-bold ${isLarge ? 'text-lg' : 'text-base'}`}>
+                            <p className="font-bold text-base">
                                 {Math.round(player.stats.average_score)}
                             </p>
                         </div>
                     )}
 
-                    <div className={`bg-white bg-opacity-20 rounded-full px-3 py-1 ${isLarge ? 'text-base' : 'text-sm'} font-medium`}>
-                        {rank === 1 ? '🏆 1st Place' :
-                            rank === 2 ? '🥈 2nd Place' :
-                                rank === 3 ? '🥉 3rd Place' :
-                                    `Rank ${rank}`}
+                    <div className="bg-white bg-opacity-20 rounded-full px-3 py-1 text-sm font-medium">
+                        Pro Player
                     </div>
                 </div>
             </div>
@@ -224,87 +200,37 @@ export default function HomePage() {
                                 WebkitBackgroundClip: 'text',
                                 WebkitTextFillColor: 'transparent'
                             }}>
-                                Pro Players
+                                Bowlers Network
                             </span>
                         </h1>
                         <p className="text-gray-600">
-                            Join the community and climb the leaderboards
+                            Where amateurs meet the pros
                         </p>
                     </div>
                 </div>
             </div>
 
-            {/* Meet the Legends Section */}
+            {/* Pro Players Section */}
             <div className="py-12">
                 <div className="max-w-7xl mx-auto px-4">
                     <div className="text-center mb-8">
                         <div className="flex items-center justify-center gap-2 mb-2">
-                            <Trophy className="w-6 h-6 text-yellow-500" />
-                            <h2 className="text-3xl font-bold text-gray-900">Pro Player Legends</h2>
+                            <Star className="w-6 h-6 text-green-600" />
+                            <h2 className="text-3xl font-bold text-gray-900">Professional Bowlers</h2>
                         </div>
-                        <p className="text-gray-600">The elite professional bowlers leading the way.</p>
-                    </div>
-
-                    <div className="flex flex-col lg:flex-row items-end justify-center gap-6 mb-12">
-                        {/* 2nd Place */}
-                        {topLegends[1] && (
-                            <div className="order-1 lg:order-1">
-                                <PlayerCard
-                                    player={topLegends[1]}
-                                    rank={2}
-                                    onClick={() => handlePlayerClick(topLegends[1])}
-                                />
-                            </div>
-                        )}
-
-                        {/* 1st Place - Larger and elevated */}
-                        {topLegends[0] && (
-                            <div className="order-2 lg:order-2">
-                                <PlayerCard
-                                    player={topLegends[0]}
-                                    size="large"
-                                    rank={1}
-                                    onClick={() => handlePlayerClick(topLegends[0])}
-                                />
-                            </div>
-                        )}
-
-                        {/* 3rd Place */}
-                        {topLegends[2] && (
-                            <div className="order-3 lg:order-3">
-                                <PlayerCard
-                                    player={topLegends[2]}
-                                    rank={3}
-                                    onClick={() => handlePlayerClick(topLegends[2])}
-                                />
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            {/* Rising Stars Section */}
-            <div className="py-12 bg-white">
-                <div className="max-w-7xl mx-auto px-4">
-                    <div className="text-center mb-8">
-                        <div className="flex items-center justify-center gap-2 mb-2">
-                            <TrendingUp className="w-6 h-6 text-green-600" />
-                            <h2 className="text-3xl font-bold text-gray-900">More Pro Players</h2>
-                        </div>
-                        <p className="text-gray-600">Discover more professional bowlers in our community.</p>
+                        <p className="text-gray-600">Connect with professional bowlers from around the community.</p>
                     </div>
 
                     {/* Horizontally scrollable container */}
                     <div className="relative">
-                        <div className="flex gap-4 overflow-x-auto pb-4 px-4 scrollbar-hide" style={{
+                        <div className="flex gap-6 overflow-x-auto pb-6 px-4 scrollbar-hide" style={{
                             scrollbarWidth: 'none',
                             msOverflowStyle: 'none'
                         }}>
-                            {risingStars.map((player, index) => (
-                                <div key={player.user_id} className="flex-shrink-0 w-48">
+                            {proPlayers.map((player) => (
+                                <div key={player.user_id} className="flex-shrink-0 w-56">
                                     <PlayerCard
                                         player={player}
-                                        rank={index + 4}
                                         onClick={() => handlePlayerClick(player)}
                                     />
                                 </div>
@@ -312,34 +238,39 @@ export default function HomePage() {
                         </div>
 
                         {/* Gradient fade effects on sides */}
-                        <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent pointer-events-none"></div>
-                        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none"></div>
+                        <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-gray-100 to-transparent pointer-events-none"></div>
+                        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-gray-100 to-transparent pointer-events-none"></div>
                     </div>
                 </div>
             </div>
 
             {/* CTA Section */}
-            <div className="py-16 bg-gray-50">
+            <div className="py-16 bg-white">
                 <div className="max-w-4xl mx-auto text-center px-4">
-                    <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                        Ready to Join the Competition?
+                    <h2 className="text-4xl font-bold text-gray-900 mb-6">
+                        Welcome to Bowlers Network – Where Amateurs Meet the Pros
                     </h2>
-                    <p className="text-xl text-gray-600 mb-8">
-                        Create your account and start climbing the leaderboards today!
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link
-                            href="/signup"
-                            className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg text-lg font-medium transition-colors"
-                        >
-                            Join Now
-                        </Link>
-                        <Link
-                            href="/signin"
-                            className="border border-green-600 text-green-600 hover:bg-green-50 px-8 py-3 rounded-lg text-lg font-medium transition-colors"
-                        >
-                            Sign In
-                        </Link>
+                    
+                    <div className="text-left max-w-3xl mx-auto space-y-4 text-lg text-gray-700 mb-8">
+                        <p className="text-center">
+                            <strong>Step into the lane and level up your game! 🎳</strong>
+                        </p>
+                        
+                        <p>
+                            Bowlers Network is the ultimate hub for amateur bowlers to connect with professional players, track their journey, and showcase their skills.
+                        </p>
+                        
+                        <p>
+                            Every player gets their own trading card – a dynamic profile that highlights your XP, rank, and achievements. Watch your progress in real time with a personalized dashboard, designed to show your growth, milestones, and how you stack up in the community.
+                        </p>
+                        
+                        <p>
+                            Whether you're just starting out or chasing pro status, this is where passion meets progress.
+                        </p>
+                        
+                        <p className="text-center font-semibold">
+                            Let's roll.
+                        </p>
                     </div>
                 </div>
             </div>
