@@ -64,21 +64,21 @@ export default function FeedPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const fetchFeed = async () => {
-            try {
-                setLoading(true);
-                const response = await api.get('/api/feed');
-                setPosts(response.data);
-                setError(null);
-            } catch (err) {
-                console.error('Error fetching feed:', err);
-                setError('Failed to load feed');
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchFeed = async () => {
+        try {
+            setLoading(true);
+            const response = await api.get('/api/feed');
+            setPosts(response.data);
+            setError(null);
+        } catch (err) {
+            console.error('Error fetching feed:', err);
+            setError('Failed to load feed');
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchFeed();
     }, []);
 
@@ -138,7 +138,11 @@ export default function FeedPage() {
                         </div>
                     ) : (
                         posts.map((post) => (
-                            <FeedPostCard key={post.metadata.id} post={post} />
+                            <FeedPostCard
+                                key={post.metadata.id}
+                                post={post}
+                                onPostUpdate={fetchFeed}
+                            />
                         ))
                     )}
                 </div>

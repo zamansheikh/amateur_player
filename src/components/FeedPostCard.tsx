@@ -60,9 +60,10 @@ interface FeedPost {
 
 interface FeedPostCardProps {
     post: FeedPost;
+    onPostUpdate?: () => void;
 }
 
-export default function FeedPostCard({ post }: FeedPostCardProps) {
+export default function FeedPostCard({ post, onPostUpdate }: FeedPostCardProps) {
     const [isLiked, setIsLiked] = useState(false);
     const [localLikes, setLocalLikes] = useState(post.metadata.total_likes);
     const [comment, setComment] = useState('');
@@ -110,8 +111,10 @@ export default function FeedPostCard({ post }: FeedPostCardProps) {
             setComment('');
             setShowCommentInput(false);
 
-            // Optionally refresh the post or update comments count
-            // For now, we'll just close the input
+            // Refresh the post to show new comment
+            if (onPostUpdate) {
+                onPostUpdate();
+            }
         } catch (error) {
             console.error('Error adding comment:', error);
             // Could add toast notification here
@@ -139,8 +142,10 @@ export default function FeedPostCard({ post }: FeedPostCardProps) {
             setReplyText('');
             setReplyToComment(null);
 
-            // Optionally refresh the post or update replies
-            // For now, we'll just close the input
+            // Refresh the post to show new reply
+            if (onPostUpdate) {
+                onPostUpdate();
+            }
         } catch (error) {
             console.error('Error adding reply:', error);
             // Could add toast notification here

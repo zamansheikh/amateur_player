@@ -58,9 +58,10 @@ interface UserPost {
 
 interface UserPostCardProps {
     post: UserPost;
+    onPostUpdate?: () => void;
 }
 
-export default function UserPostCard({ post }: UserPostCardProps) {
+export default function UserPostCard({ post, onPostUpdate }: UserPostCardProps) {
     const [isLiked, setIsLiked] = useState(false);
     const [localLikes, setLocalLikes] = useState(post.metadata.total_likes);
     const [comment, setComment] = useState('');
@@ -108,8 +109,10 @@ export default function UserPostCard({ post }: UserPostCardProps) {
             setComment('');
             setShowCommentInput(false);
 
-            // Optionally refresh the post or update comments count
-            // For now, we'll just close the input
+            // Refresh the post to show new comment
+            if (onPostUpdate) {
+                onPostUpdate();
+            }
         } catch (error) {
             console.error('Error adding comment:', error);
             // Could add toast notification here
@@ -137,8 +140,10 @@ export default function UserPostCard({ post }: UserPostCardProps) {
             setReplyText('');
             setReplyToComment(null);
 
-            // Optionally refresh the post or update replies
-            // For now, we'll just close the input
+            // Refresh the post to show new reply
+            if (onPostUpdate) {
+                onPostUpdate();
+            }
         } catch (error) {
             console.error('Error adding reply:', error);
             // Could add toast notification here

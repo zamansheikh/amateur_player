@@ -65,21 +65,21 @@ export default function ProfilePage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const fetchUserPosts = async () => {
-            try {
-                setLoading(true);
-                const response = await api.get('/api/user/posts');
-                setPosts(response.data.posts);
-                setError(null);
-            } catch (err) {
-                console.error('Error fetching user posts:', err);
-                setError('Failed to load posts');
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchUserPosts = async () => {
+        try {
+            setLoading(true);
+            const response = await api.get('/api/user/posts');
+            setPosts(response.data.posts);
+            setError(null);
+        } catch (err) {
+            console.error('Error fetching user posts:', err);
+            setError('Failed to load posts');
+        } finally {
+            setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         fetchUserPosts();
     }, []);
 
@@ -119,7 +119,11 @@ export default function ProfilePage() {
                                 </div>
                             ) : (
                                 posts.map((post) => (
-                                    <UserPostCard key={post.metadata.id} post={post} />
+                                    <UserPostCard
+                                        key={post.metadata.id}
+                                        post={post}
+                                        onPostUpdate={fetchUserPosts}
+                                    />
                                 ))
                             )}
                         </div>
