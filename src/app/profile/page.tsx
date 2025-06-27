@@ -114,7 +114,7 @@ export default function ProfilePage() {
 
             console.log('Updating stats with payload:', payload);
 
-            await api.post('/api/users/stats', payload);
+            await api.post('api/user/stats/game-stats', payload);
 
             // Update user context or refetch user data
             // You might want to refresh the user data here
