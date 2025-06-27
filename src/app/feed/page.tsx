@@ -127,7 +127,7 @@ export default function FeedPage() {
                 </div>
 
                 {/* Create Post Section */}
-                <CreatePost />
+                <CreatePost onPostCreated={fetchFeed} />
 
                 {/* Posts Feed */}
                 <div className="space-y-6">
