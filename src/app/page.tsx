@@ -54,6 +54,67 @@ export default function HomePage() {
         fetchProPlayers();
     }, []);
 
+    // Auto-scroll functionality
+    useEffect(() => {
+        if (proPlayers.length === 0) return;
+
+        const scrollContainer = document.getElementById('pro-players-scroll');
+        if (!scrollContainer) return;
+
+        let scrollDirection = 1; // 1 for right, -1 for left
+        const scrollSpeed = 1; // pixels per interval
+        const scrollInterval = 50; // milliseconds
+
+        const autoScroll = setInterval(() => {
+            const { scrollLeft, scrollWidth, clientWidth } = scrollContainer;
+            
+            // Check if we've reached the end
+            if (scrollLeft + clientWidth >= scrollWidth - 10) {
+                scrollDirection = -1; // Start scrolling left
+            } else if (scrollLeft <= 10) {
+                scrollDirection = 1; // Start scrolling right
+            }
+
+            // Scroll in the current direction
+            scrollContainer.scrollLeft += scrollSpeed * scrollDirection;
+        }, scrollInterval);
+
+        // Pause auto-scroll on hover
+        const handleMouseEnter = () => clearInterval(autoScroll);
+        const handleMouseLeave = () => {
+            // Restart auto-scroll after mouse leaves
+            setTimeout(() => {
+                if (scrollContainer) {
+                    const newAutoScroll = setInterval(() => {
+                        const { scrollLeft, scrollWidth, clientWidth } = scrollContainer;
+                        
+                        if (scrollLeft + clientWidth >= scrollWidth - 10) {
+                            scrollDirection = -1;
+                        } else if (scrollLeft <= 10) {
+                            scrollDirection = 1;
+                        }
+
+                        scrollContainer.scrollLeft += scrollSpeed * scrollDirection;
+                    }, scrollInterval);
+                    
+                    // Store the new interval ID
+                    scrollContainer.dataset.autoScrollId = newAutoScroll.toString();
+                }
+            }, 1000); // Wait 1 second before restarting
+        };
+
+        scrollContainer.addEventListener('mouseenter', handleMouseEnter);
+        scrollContainer.addEventListener('mouseleave', handleMouseLeave);
+
+        return () => {
+            clearInterval(autoScroll);
+            if (scrollContainer) {
+                scrollContainer.removeEventListener('mouseenter', handleMouseEnter);
+                scrollContainer.removeEventListener('mouseleave', handleMouseLeave);
+            }
+        };
+    }, [proPlayers]);
+
     // Handle opening player modal
     const handlePlayerClick = (player: ProPlayer) => {
         setSelectedPlayer(player);
@@ -223,10 +284,15 @@ export default function HomePage() {
 
                     {/* Horizontally scrollable container */}
                     <div className="relative">
-                        <div className="flex gap-6 overflow-x-auto pb-6 px-4 scrollbar-hide" style={{
-                            scrollbarWidth: 'none',
-                            msOverflowStyle: 'none'
-                        }}>
+                        <div 
+                            id="pro-players-scroll"
+                            className="flex gap-6 overflow-x-auto pb-6 px-4 scrollbar-hide" 
+                            style={{
+                                scrollbarWidth: 'none',
+                                msOverflowStyle: 'none',
+                                scrollBehavior: 'smooth'
+                            }}
+                        >
                             {proPlayers.map((player) => (
                                 <div key={player.user_id} className="flex-shrink-0 w-56">
                                     <PlayerCard
