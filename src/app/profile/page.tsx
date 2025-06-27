@@ -1,7 +1,9 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { Heart, MessageSquare, Share, Plus, Edit, Users, Eye, ThumbsUp } from 'lucide-react';
+import { Edit, Users, Eye } from 'lucide-react';
+import PostCard from '@/components/PostCard';
+import CreatePost from '@/components/CreatePost';
 
 export default function ProfilePage() {
     const { user } = useAuth();
@@ -14,7 +16,7 @@ export default function ProfilePage() {
                 name: "Miles, Esther",
                 avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Miles",
             },
-            content: "Hello, friends! 🎳 With the sun shining bright and temperature rising, there's no better way to beat the heat than with a refreshing dip in the pool! 🌊☀️ Dive into Hello, friends!",
+            content: "Just bowled my personal best! 🎳 **247** in the third game tonight! The pins were falling like dominos. *So pumped* for league play next week! Who else is ready to roll some strikes? 🔥",
             image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500&h=300&fit=crop",
             likes: 350,
             comments: 15,
@@ -26,7 +28,7 @@ export default function ProfilePage() {
                 name: "Nguyen, Shane",
                 avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Shane",
             },
-            content: "Hello, friends! 🎳 With the sun shining bright and temperature rising, there's no better way to beat the heat than with a refreshing dip in the pool! 🌊☀️ Dive into Hello, friends! 🎳 With the sun shining bright and temperature rising, there's no better way to beat the heat than with a...",
+            content: "League night was **incredible**! 🎳 Our team took first place with a combined series of 2,847! *Special shoutout* to my teammates for the amazing support. Can't wait for championship rounds! 🏆",
             likes: 250,
             comments: 15,
             timeAgo: "3h"
@@ -37,7 +39,7 @@ export default function ProfilePage() {
                 name: "Black, Marvin",
                 avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Marvin",
             },
-            content: "Hello, friends! 🎳 With the sun shining bright and temperature rising, there's no better way to beat the heat than with a refreshing dip in the pool! 🌊☀️ Dive into Hello, friends! 🎳 With the sun shining bright and temperature rising, there's no better way to beat the heat than with a...",
+            content: "Pro tip for all my fellow bowlers: *Consistency beats power every time*. Focus on your **footwork** and **follow-through**. Been working on this technique for months and finally seeing results! 🎯",
             likes: 200,
             comments: 13,
             timeAgo: "5h"
@@ -52,98 +54,12 @@ export default function ProfilePage() {
                     {/* Main Content */}
                     <div className="lg:col-span-2">
                         {/* Create Post Section */}
-                        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                            <div className="flex items-start gap-4">
-                                <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center">
-                                    <span className="text-white font-medium">
-                                        {user?.name?.split(' ').map(n => n[0]).join('') || 'U'}
-                                    </span>
-                                </div>
-                                <div className="flex-1">
-                                    <input
-                                        type="text"
-                                        placeholder={`What's on your mind, ${user?.first_name || user?.name?.split(' ')[0] || 'Ron'}?`}
-                                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                                    />
-                                    <div className="flex items-center gap-4 mt-4">
-                                        <button className="flex items-center gap-2 text-gray-600 hover:text-green-600 transition-colors">
-                                            <Plus className="w-4 h-4" />
-                                            Create Post
-                                        </button>
-                                        <button className="flex items-center gap-2 text-gray-600 hover:text-green-600 transition-colors">
-                                            📎 Add Photo/Video
-                                        </button>
-                                        <button className="flex items-center gap-2 text-gray-600 hover:text-green-600 transition-colors">
-                                            🔗 Attach Link
-                                        </button>
-                                        <button className="ml-auto bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
-                                            Post
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <CreatePost />
 
                         {/* Posts Feed */}
                         <div className="space-y-6">
                             {posts.map((post) => (
-                                <div key={post.id} className="bg-white rounded-lg shadow-sm">
-                                    {/* Post Header */}
-                                    <div className="p-6 pb-4">
-                                        <div className="flex items-center justify-between mb-4">
-                                            <div className="flex items-center gap-3">
-                                                <img
-                                                    src={post.author.avatar}
-                                                    alt={post.author.name}
-                                                    className="w-10 h-10 rounded-full"
-                                                />
-                                                <div>
-                                                    <h3 className="font-medium text-gray-900">{post.author.name}</h3>
-                                                    <p className="text-sm text-gray-500">{post.timeAgo}</p>
-                                                </div>
-                                            </div>
-                                            <button className="text-green-600 border border-green-600 px-4 py-1 rounded-full text-sm hover:bg-green-50 transition-colors">
-                                                + Follow
-                                            </button>
-                                        </div>
-
-                                        {/* Post Content */}
-                                        <p className="text-gray-700 leading-relaxed mb-4">
-                                            {post.content}
-                                        </p>
-
-                                        {/* Post Image */}
-                                        {post.image && (
-                                            <div className="mb-4">
-                                                <img
-                                                    src={post.image}
-                                                    alt="Post content"
-                                                    className="w-full h-64 object-cover rounded-lg"
-                                                />
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* Post Actions */}
-                                    <div className="px-6 py-4 border-t border-gray-100">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-6">
-                                                <button className="flex items-center gap-2 text-gray-600 hover:text-red-500 transition-colors">
-                                                    <Heart className="w-5 h-5" />
-                                                    <span>{post.likes}</span>
-                                                </button>
-                                                <button className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors">
-                                                    <MessageSquare className="w-5 h-5" />
-                                                    <span>{post.comments} Comment</span>
-                                                </button>
-                                            </div>
-                                            <button className="flex items-center gap-2 text-gray-600 hover:text-green-500 transition-colors">
-                                                <Share className="w-5 h-5" />
-                                                Share
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
+                                <PostCard key={post.id} post={post} />
                             ))}
                         </div>
                     </div>
