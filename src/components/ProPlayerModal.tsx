@@ -16,14 +16,14 @@ interface ProPlayer {
     card_theme: string;
     is_pro: boolean;
     follower_count: number;
-    stats: {
+    stats?: {
         id: number;
         user_id: number;
         average_score: number;
         high_game: number;
         high_series: number;
         experience: number;
-    };
+    } | null;
     is_followed: boolean;
 }
 
@@ -138,8 +138,8 @@ export default function ProPlayerModal({ player, isOpen, onClose, onFollowUpdate
                             onClick={handleFollow}
                             disabled={isLoading}
                             className={`px-6 py-2.5 rounded-full font-semibold transition-all duration-200 ${isFollowing
-                                    ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                    : 'bg-green-600 text-white hover:bg-green-700'
+                                ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                : 'bg-green-600 text-white hover:bg-green-700'
                                 } disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
                             {isLoading ? 'Loading...' : isFollowing ? 'Following' : 'Follow'}
@@ -161,7 +161,9 @@ export default function ProPlayerModal({ player, isOpen, onClose, onFollowUpdate
                             <div className="text-sm text-gray-600">Followers</div>
                         </div>
                         <div className="bg-orange-50 rounded-xl p-4 text-center">
-                            <div className="text-2xl font-bold text-orange-600">{player.stats.experience}</div>
+                            <div className="text-2xl font-bold text-orange-600">
+                                {player.stats?.experience ?? 0}
+                            </div>
                             <div className="text-sm text-gray-600">Experience</div>
                         </div>
                     </div>
@@ -172,26 +174,40 @@ export default function ProPlayerModal({ player, isOpen, onClose, onFollowUpdate
                             <TrendingUp className="w-4 h-4" />
                             Bowling Stats
                         </h4>
-                        <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                                <span className="text-gray-600">Average Score:</span>
-                                <span className="font-semibold text-gray-900">
-                                    {player.stats.average_score > 0 ? Math.round(player.stats.average_score) : 'N/A'}
-                                </span>
+                        {!player.stats ||
+                            (player.stats.average_score === 0 && player.stats.high_game === 0 && player.stats.high_series === 0) ? (
+                            <div className="text-center py-4">
+                                <p className="text-gray-500 text-sm">No bowling stats available yet</p>
+                                <p className="text-gray-400 text-xs mt-1">Stats will appear after playing games</p>
                             </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-gray-600">High Game:</span>
-                                <span className="font-semibold text-gray-900">
-                                    {player.stats.high_game > 0 ? player.stats.high_game : 'N/A'}
-                                </span>
+                        ) : (
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-600">Average Score:</span>
+                                    <span className="font-semibold text-gray-900">
+                                        {player.stats?.average_score !== null && player.stats?.average_score !== undefined
+                                            ? Math.round(player.stats.average_score)
+                                            : '0'}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-600">High Game:</span>
+                                    <span className="font-semibold text-gray-900">
+                                        {player.stats?.high_game !== null && player.stats?.high_game !== undefined
+                                            ? player.stats.high_game
+                                            : '0'}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-600">High Series:</span>
+                                    <span className="font-semibold text-gray-900">
+                                        {player.stats?.high_series !== null && player.stats?.high_series !== undefined
+                                            ? player.stats.high_series
+                                            : '0'}
+                                    </span>
+                                </div>
                             </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-gray-600">High Series:</span>
-                                <span className="font-semibold text-gray-900">
-                                    {player.stats.high_series > 0 ? player.stats.high_series : 'N/A'}
-                                </span>
-                            </div>
-                        </div>
+                        )}
                     </div>
                 </div>
             </div>

@@ -18,14 +18,14 @@ interface ProPlayer {
     card_theme: string;
     is_pro: boolean;
     follower_count: number;
-    stats: {
+    stats?: {
         id: number;
         user_id: number;
         average_score: number;
         high_game: number;
         high_series: number;
         experience: number;
-    };
+    } | null;
     is_followed: boolean;
 }
 
@@ -165,7 +165,7 @@ export default function HomePage() {
                         </div>
                     </div>
 
-                    {player.stats.average_score > 0 && (
+                    {player.stats?.average_score && player.stats.average_score > 0 && (
                         <div className="mb-2">
                             <p className="text-white text-opacity-70 text-xs">Avg Score</p>
                             <p className={`font-bold ${isLarge ? 'text-lg' : 'text-base'}`}>
