@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 const navigation = [
-    { name: 'Home', href: '/', icon: Home },
+    { name: 'Pro Players', href: '/', icon: Home },
     { name: 'Feed', href: '/feed', icon: Rss },
     // Future pages - to be implemented
     // { name: 'Overview', href: '/overview', icon: BarChart3 },

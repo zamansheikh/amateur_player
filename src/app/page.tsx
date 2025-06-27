@@ -67,7 +67,7 @@ export default function HomePage() {
 
         const autoScroll = setInterval(() => {
             const { scrollLeft, scrollWidth, clientWidth } = scrollContainer;
-            
+
             // Check if we've reached the end
             if (scrollLeft + clientWidth >= scrollWidth - 10) {
                 scrollDirection = -1; // Start scrolling left
@@ -87,7 +87,7 @@ export default function HomePage() {
                 if (scrollContainer) {
                     const newAutoScroll = setInterval(() => {
                         const { scrollLeft, scrollWidth, clientWidth } = scrollContainer;
-                        
+
                         if (scrollLeft + clientWidth >= scrollWidth - 10) {
                             scrollDirection = -1;
                         } else if (scrollLeft <= 10) {
@@ -96,7 +96,7 @@ export default function HomePage() {
 
                         scrollContainer.scrollLeft += scrollSpeed * scrollDirection;
                     }, scrollInterval);
-                    
+
                     // Store the new interval ID
                     scrollContainer.dataset.autoScrollId = newAutoScroll.toString();
                 }
@@ -284,9 +284,9 @@ export default function HomePage() {
 
                     {/* Horizontally scrollable container */}
                     <div className="relative">
-                        <div 
+                        <div
                             id="pro-players-scroll"
-                            className="flex gap-6 overflow-x-auto pb-6 px-4 scrollbar-hide" 
+                            className="flex gap-6 overflow-x-auto pb-6 px-4 scrollbar-hide"
                             style={{
                                 scrollbarWidth: 'none',
                                 msOverflowStyle: 'none',
@@ -316,24 +316,24 @@ export default function HomePage() {
                     <h2 className="text-4xl font-bold text-gray-900 mb-6">
                         Welcome to Bowlers Network – Where Amateurs Meet the Pros
                     </h2>
-                    
+
                     <div className="text-left max-w-3xl mx-auto space-y-4 text-lg text-gray-700 mb-8">
                         <p className="text-center">
                             <strong>Step into the lane and level up your game! 🎳</strong>
                         </p>
-                        
+
                         <p>
                             Bowlers Network is the ultimate hub for amateur bowlers to connect with professional players, track their journey, and showcase their skills.
                         </p>
-                        
+
                         <p>
                             Every player gets their own trading card – a dynamic profile that highlights your XP, rank, and achievements. Watch your progress in real time with a personalized dashboard, designed to show your growth, milestones, and how you stack up in the community.
                         </p>
-                        
+
                         <p>
                             Whether you're just starting out or chasing pro status, this is where passion meets progress.
                         </p>
-                        
+
                         <p className="text-center font-semibold">
                             Let's roll.
                         </p>
