@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -59,10 +60,13 @@ export default function SignUpPage() {
             <div className="max-w-md w-full space-y-8">
                 <div className="text-center">
                     <div className="flex items-center justify-center gap-3 mb-6">
-                        <div className="w-12 h-12 rounded-lg flex items-center justify-center"
-                            style={{ background: 'linear-gradient(to right, #8BC342, #6fa332)' }}>
-                            <span className="text-white font-bold text-xl">A</span>
-                        </div>
+                        <Image
+                            src="/logo/logo.png"
+                            alt="Amateur Player Logo"
+                            width={48}
+                            height={48}
+                            className="rounded-lg"
+                        />
                         <span className="text-2xl font-bold text-gray-900">Amateur Player</span>
                     </div>
                     <h2 className="text-3xl font-bold text-gray-900">Create your account</h2>

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { Home, BarChart3, MessageCircle, Settings, Bell, Menu, X, LogOut, Rss } from 'lucide-react';
@@ -39,10 +40,19 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
                         <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
                         <div className="relative flex flex-col w-64 h-full bg-gray-900 shadow-xl">
                             <div className="flex items-center justify-between px-4 py-4 border-b border-gray-700">
-                                <span className="text-xl font-bold">
-                                    <span className="text-white">Bowlers </span>
-                                    <span className="text-green-400">Network</span>
-                                </span>
+                                <div className="flex items-center gap-3">
+                                    <Image
+                                        src="/logo/logo.png"
+                                        alt="Bowlers Network Logo"
+                                        width={32}
+                                        height={32}
+                                        className="rounded"
+                                    />
+                                    <span className="text-xl font-bold">
+                                        <span className="text-white">Bowlers </span>
+                                        <span className="text-green-400">Network</span>
+                                    </span>
+                                </div>
                                 <button onClick={() => setSidebarOpen(false)} className="p-2 text-gray-400 hover:text-gray-300">
                                     <X className="w-6 h-6" />
                                 </button>
@@ -77,9 +87,13 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
                         <div className="flex flex-col flex-grow border-r border-gray-800" style={{ backgroundColor: '#111B05' }}>
                             {/* Logo */}
                             <div className="flex items-center gap-3 px-6 py-6 border-b border-gray-800">
-                                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
-                                    <span className="font-bold text-lg" style={{ color: '#111B05' }}>B</span>
-                                </div>
+                                <Image
+                                    src="/logo/logo.png"
+                                    alt="Bowlers Network Logo"
+                                    width={40}
+                                    height={40}
+                                    className="rounded"
+                                />
                                 <span className="text-xl font-bold text-white">Bowlersnetwork</span>
                             </div>
 
