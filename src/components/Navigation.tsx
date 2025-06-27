@@ -73,11 +73,11 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
                 {/* Desktop sidebar */}
                 <div className="hidden lg:flex lg:flex-shrink-0">
                     <div className="flex flex-col w-64">
-                        <div className="flex flex-col flex-grow bg-green-800 border-r border-green-700">
+                        <div className="flex flex-col flex-grow border-r border-gray-800" style={{ backgroundColor: '#111B05' }}>
                             {/* Logo */}
-                            <div className="flex items-center gap-3 px-6 py-6 border-b border-green-700">
+                            <div className="flex items-center gap-3 px-6 py-6 border-b border-gray-800">
                                 <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
-                                    <span className="text-green-800 font-bold text-lg">B</span>
+                                    <span className="font-bold text-lg" style={{ color: '#111B05' }}>B</span>
                                 </div>
                                 <span className="text-xl font-bold text-white">Bowlersnetwork</span>
                             </div>
@@ -91,9 +91,19 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
                                             key={item.name}
                                             href={item.href}
                                             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-sm font-medium ${isActive
-                                                ? 'bg-green-700 text-white'
-                                                : 'text-green-100 hover:bg-green-700 hover:text-white'
+                                                ? 'text-white' : 'text-green-100 hover:text-white'
                                                 }`}
+                                            style={isActive ? { backgroundColor: 'rgba(255,255,255,0.1)' } : {}}
+                                            onMouseEnter={(e) => {
+                                                if (!isActive) {
+                                                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                if (!isActive) {
+                                                    e.currentTarget.style.backgroundColor = '';
+                                                }
+                                            }}
                                         >
                                             <item.icon className="w-5 h-5" />
                                             {item.name}
@@ -103,23 +113,23 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
                             </nav>
 
                             {/* User Profile */}
-                            <div className="px-4 py-4 border-t border-green-700">
-                                <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-green-700">
+                            <div className="px-4 py-4 border-t border-gray-800">
+                                <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition-colors">
                                     <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
-                                        <span className="text-green-800 font-medium text-sm">
+                                        <span className="font-medium text-sm" style={{ color: '#111B05' }}>
                                             {user?.name ? user.name.split(' ').map((n: string) => n[0]).join('') : 'U'}
                                         </span>
                                     </div>
                                     <div className="flex-1">
                                         <p className="text-sm font-medium text-white">{user?.name}</p>
-                                        <p className="text-xs text-green-200">{user?.email}</p>
+                                        <p className="text-xs text-gray-300">{user?.email}</p>
+                                        <Link
+                                            href="/profile"
+                                            className="text-xs text-gray-400 hover:text-white hover:underline"
+                                        >
+                                            View Profile
+                                        </Link>
                                     </div>
-                                    <Link
-                                        href="/profile"
-                                        className="text-green-200 hover:text-white text-xs hover:underline"
-                                    >
-                                        View Profile
-                                    </Link>
                                 </div>
                             </div>
 
@@ -127,7 +137,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
                             <div className="px-4 pb-4">
                                 <button
                                     onClick={signout}
-                                    className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-green-100 hover:bg-red-600 hover:text-white w-full text-sm font-medium"
+                                    className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-gray-300 hover:bg-red-600 hover:text-white w-full text-sm font-medium"
                                 >
                                     <LogOut className="w-5 h-5" />
                                     Sign Out
@@ -140,14 +150,14 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
                 {/* Main content */}
                 <div className="flex flex-col flex-1 overflow-hidden bg-gray-50">
                     {/* Mobile header */}
-                    <div className="lg:hidden bg-green-800 border-b border-green-700 px-4 py-3 flex items-center justify-between">
-                        <button onClick={() => setSidebarOpen(true)} className="p-2 text-green-100 hover:text-white">
+                    <div className="lg:hidden border-b border-gray-800 px-4 py-3 flex items-center justify-between" style={{ backgroundColor: '#111B05' }}>
+                        <button onClick={() => setSidebarOpen(true)} className="p-2 text-gray-300 hover:text-white">
                             <Menu className="w-6 h-6" />
                         </button>
                         <span className="text-lg font-bold text-white">Bowlersnetwork</span>
                         <button
                             onClick={signout}
-                            className="p-2 text-green-100 hover:text-red-400 transition-colors"
+                            className="p-2 text-gray-300 hover:text-red-400 transition-colors"
                             title="Sign out"
                         >
                             <LogOut className="w-5 h-5" />

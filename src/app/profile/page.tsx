@@ -46,11 +46,11 @@ export default function ProfilePage() {
 
     return (
         <div className="min-h-screen bg-gray-100">
-            <div className="max-w-7xl mx-auto px-4 py-6">
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                    
+            <div className="max-w-5xl mx-auto px-6 py-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
                     {/* Main Content */}
-                    <div className="lg:col-span-2 lg:col-start-2">
+                    <div className="lg:col-span-2">
                         {/* Create Post Section */}
                         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
                             <div className="flex items-start gap-4">
@@ -62,7 +62,7 @@ export default function ProfilePage() {
                                 <div className="flex-1">
                                     <input
                                         type="text"
-                                        placeholder="What's on your mind, Ron?"
+                                        placeholder={`What's on your mind, ${user?.first_name || user?.name?.split(' ')[0] || 'Ron'}?`}
                                         className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                     />
                                     <div className="flex items-center gap-4 mt-4">
@@ -106,12 +106,12 @@ export default function ProfilePage() {
                                                 + Follow
                                             </button>
                                         </div>
-                                        
+
                                         {/* Post Content */}
                                         <p className="text-gray-700 leading-relaxed mb-4">
                                             {post.content}
                                         </p>
-                                        
+
                                         {/* Post Image */}
                                         {post.image && (
                                             <div className="mb-4">
@@ -160,8 +160,8 @@ export default function ProfilePage() {
                                         className="w-20 h-20 rounded-full mx-auto mb-4"
                                     />
                                 </div>
-                                <h2 className="text-xl font-bold text-gray-900">{user?.name || "Jennifer Smith"}</h2>
-                                <p className="text-green-600 font-medium">Pro Player</p>
+                                <h2 className="text-xl font-bold text-gray-900">{user?.name || "User Name"}</h2>
+                                <p className="text-green-600 font-medium">{user?.is_pro ? "Pro Player" : "Amateur Player"}</p>
                                 <button className="text-green-600 text-sm hover:underline">Edit Profile</button>
                             </div>
 
@@ -172,7 +172,7 @@ export default function ProfilePage() {
                                     <div className="text-sm text-gray-600">Level</div>
                                 </div>
                                 <div className="bg-green-50 rounded-lg p-4 text-center">
-                                    <div className="text-2xl font-bold text-green-600">{user?.xp || 2240}</div>
+                                    <div className="text-2xl font-bold text-green-600">{user?.xp || 2881}</div>
                                     <div className="text-sm text-gray-600">XP</div>
                                 </div>
                             </div>
