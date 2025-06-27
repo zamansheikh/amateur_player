@@ -91,7 +91,7 @@ export default function ProfilePage() {
                     {/* Main Content */}
                     <div className="lg:col-span-2">
                         {/* Create Post Section */}
-                        <CreatePost />
+                        <CreatePost onPostCreated={fetchUserPosts} />
 
                         {/* Posts Feed */}
                         <div className="space-y-6">

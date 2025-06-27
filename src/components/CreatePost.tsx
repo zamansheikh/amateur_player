@@ -3,23 +3,80 @@
 import { ImageIcon, Video, Link2, Globe, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { api } from '@/lib/api';
 
-export default function CreatePost() {
+interface CreatePostProps {
+    onPostCreated?: () => void;
+}
+
+export default function CreatePost({ onPostCreated }: CreatePostProps) {
     const { user } = useAuth();
     const [postText, setPostText] = useState('');
     const [isPublic, setIsPublic] = useState(true);
+    const [isPosting, setIsPosting] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    // Function to extract hashtags from text
+    const extractHashtags = (text: string): string[] => {
+        const hashtagRegex = /#(\w+)/g;
+        const matches = text.match(hashtagRegex);
+        if (!matches) return [];
+        
+        // Remove # symbol and return unique tags
+        const tags = matches.map(tag => tag.substring(1));
+        return [...new Set(tags)];
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (postText.trim()) {
-            // Handle post submission here
-            console.log('Post submitted:', postText);
+        if (!postText.trim() || isPosting) return;
+
+        try {
+            setIsPosting(true);
+            
+            // Extract hashtags from the post text
+            const tags = extractHashtags(postText);
+            
+            // Prepare payload
+            const payload = {
+                caption: postText.trim(),
+                tags: tags
+            };
+
+            console.log('Sending post payload:', payload); // Debug log
+            
+            // Send POST request to create new post
+            await api.post('/api/user/posts', payload);
+            
+            // Clear the post text
             setPostText('');
+            
+            // Show success feedback
+            setShowSuccess(true);
+            setTimeout(() => setShowSuccess(false), 3000);
+            
+            // Notify parent component to refresh posts
+            if (onPostCreated) {
+                onPostCreated();
+            }
+            
+        } catch (error) {
+            console.error('Error creating post:', error);
+            // Could add toast notification here for errors
+        } finally {
+            setIsPosting(false);
         }
     };
 
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+            {/* Success Message */}
+            {showSuccess && (
+                <div className="mb-4 p-3 bg-green-100 border border-green-200 rounded-lg text-green-700 text-sm">
+                    ✓ Post created successfully!
+                </div>
+            )}
+            
             {/* Action Buttons Row */}
             <div className="flex items-center gap-6 mb-6">
                 <button className="flex items-center gap-3 text-gray-600 hover:text-blue-600 transition-colors">
@@ -58,10 +115,28 @@ export default function CreatePost() {
                         <textarea
                             value={postText}
                             onChange={(e) => setPostText(e.target.value)}
-                            placeholder={`What's on your mind, ${user?.first_name || user?.name?.split(' ')[0] || 'Bob'}?`}
+                            placeholder={`What's on your mind, ${user?.first_name || user?.name?.split(' ')[0] || 'there'}?`}
                             className="w-full min-h-[80px] p-4 text-gray-800 placeholder-gray-500 border-0 resize-none focus:outline-none text-lg"
                             rows={3}
+                            disabled={isPosting}
                         />
+                        
+                        {/* Show extracted hashtags preview */}
+                        {postText && extractHashtags(postText).length > 0 && (
+                            <div className="mt-2 px-4">
+                                <div className="flex flex-wrap gap-2">
+                                    <span className="text-sm text-gray-500">Tags:</span>
+                                    {extractHashtags(postText).map((tag, index) => (
+                                        <span 
+                                            key={index}
+                                            className="text-sm bg-green-100 text-green-700 px-2 py-1 rounded-full"
+                                        >
+                                            #{tag}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -75,10 +150,10 @@ export default function CreatePost() {
 
                     <button
                         type="submit"
-                        disabled={!postText.trim()}
+                        disabled={!postText.trim() || isPosting}
                         className="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold px-8 py-2.5 rounded-full transition-colors"
                     >
-                        Post
+                        {isPosting ? 'Posting...' : 'Post'}
                     </button>
                 </div>
             </form>
