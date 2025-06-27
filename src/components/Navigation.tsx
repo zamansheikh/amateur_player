@@ -3,12 +3,13 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { Home, BarChart3, MessageCircle, Settings, Bell, Menu, X, LogOut } from 'lucide-react';
+import { Home, BarChart3, MessageCircle, Settings, Bell, Menu, X, LogOut, Rss } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 const navigation = [
     { name: 'Home', href: '/', icon: Home },
+    { name: 'Feed', href: '/feed', icon: Rss },
     { name: 'Overview', href: '/overview', icon: BarChart3 },
     { name: 'Messages', href: '/messages', icon: MessageCircle },
     { name: 'My Teams', href: '/teams', icon: Settings },
