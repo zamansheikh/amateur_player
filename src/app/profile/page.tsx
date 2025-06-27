@@ -64,6 +64,14 @@ export default function ProfilePage() {
     const [posts, setPosts] = useState<UserPost[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [isEditingStats, setIsEditingStats] = useState(false);
+    const [isUpdatingStats, setIsUpdatingStats] = useState(false);
+    const [statsForm, setStatsForm] = useState({
+        average_score: 0,
+        high_game: 0,
+        high_series: 0,
+        experience: 0
+    });
 
     const fetchUserPosts = async () => {
         try {
@@ -81,7 +89,54 @@ export default function ProfilePage() {
 
     useEffect(() => {
         fetchUserPosts();
-    }, []);
+
+        // Initialize stats form with user data
+        if (user?.stats) {
+            setStatsForm({
+                average_score: user.stats.average_score || 0,
+                high_game: user.stats.high_game || 0,
+                high_series: user.stats.high_series || 0,
+                experience: user.stats.experience || 0
+            });
+        }
+    }, [user]);
+
+    const handleStatsUpdate = async () => {
+        try {
+            setIsUpdatingStats(true);
+
+            const payload = {
+                average_score: parseFloat(statsForm.average_score.toString()),
+                high_game: parseInt(statsForm.high_game.toString()),
+                high_series: parseInt(statsForm.high_series.toString()),
+                experience: parseInt(statsForm.experience.toString())
+            };
+
+            console.log('Updating stats with payload:', payload);
+
+            await api.post('/api/users/stats', payload);
+
+            // Update user context or refetch user data
+            // You might want to refresh the user data here
+            setIsEditingStats(false);
+
+            // Show success message
+            alert('Statistics updated successfully!');
+
+        } catch (error: any) {
+            console.error('Error updating stats:', error);
+            alert(`Failed to update statistics: ${error.response?.data?.message || error.message}`);
+        } finally {
+            setIsUpdatingStats(false);
+        }
+    };
+
+    const handleStatsFormChange = (field: string, value: string) => {
+        setStatsForm(prev => ({
+            ...prev,
+            [field]: value === '' ? 0 : parseFloat(value) || 0
+        }));
+    };
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -160,42 +215,101 @@ export default function ProfilePage() {
 
                             {/* Bowling Statistics */}
                             <div className="mb-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Bowling Statistics</h3>
-                                <div className="space-y-3">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-gray-600">Avg. Score:</span>
-                                        <span className="font-medium">{user?.stats?.average_score ? Math.round(user.stats.average_score) : '237'}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-gray-600">High Game:</span>
-                                        <span className="font-medium">{user?.stats?.high_game || '300'}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-gray-600">High Series:</span>
-                                        <span className="font-medium">{user?.stats?.high_series || '854'}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-gray-600">Experience (yrs):</span>
-                                        <span className="font-medium">{user?.stats?.experience || '32'}</span>
-                                    </div>
+                                <div className="flex justify-between items-center mb-4">
+                                    <h3 className="text-lg font-semibold text-gray-900">Bowling Statistics</h3>
+                                    <button
+                                        onClick={() => setIsEditingStats(!isEditingStats)}
+                                        className="text-green-600 text-sm hover:underline"
+                                    >
+                                        {isEditingStats ? 'Cancel' : 'Edit'}
+                                    </button>
                                 </div>
-                            </div>
 
-                            {/* Other Actions */}
-                            <div className="space-y-3">
-                                <h3 className="text-lg font-semibold text-gray-900">Other</h3>
-                                <button className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                                    <Edit className="w-4 h-4 text-gray-500" />
-                                    <span className="text-gray-700">Create Post</span>
-                                </button>
-                                <button className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                                    <Users className="w-4 h-4 text-gray-500" />
-                                    <span className="text-gray-700">Create Event</span>
-                                </button>
-                                <button className="flex items-center gap-3 w-full text-left p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                                    <Eye className="w-4 h-4 text-gray-500" />
-                                    <span className="text-gray-700">Create Poll</span>
-                                </button>
+                                {isEditingStats ? (
+                                    /* Edit Form */
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Average Score
+                                            </label>
+                                            <input
+                                                type="number"
+                                                step="0.1"
+                                                value={statsForm.average_score}
+                                                onChange={(e) => handleStatsFormChange('average_score', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                disabled={isUpdatingStats}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                High Game
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={statsForm.high_game}
+                                                onChange={(e) => handleStatsFormChange('high_game', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                disabled={isUpdatingStats}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                High Series
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={statsForm.high_series}
+                                                onChange={(e) => handleStatsFormChange('high_series', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                disabled={isUpdatingStats}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Experience (years)
+                                            </label>
+                                            <input
+                                                type="number"
+                                                value={statsForm.experience}
+                                                onChange={(e) => handleStatsFormChange('experience', e.target.value)}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                disabled={isUpdatingStats}
+                                            />
+                                        </div>
+
+                                        <button
+                                            onClick={handleStatsUpdate}
+                                            disabled={isUpdatingStats}
+                                            className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                                        >
+                                            {isUpdatingStats ? 'Updating...' : 'Update Statistics'}
+                                        </button>
+                                    </div>
+                                ) : (
+                                    /* Display Mode */
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-gray-600">Avg. Score:</span>
+                                            <span className="font-medium">{user?.stats?.average_score ? Math.round(user.stats.average_score) : '237'}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-gray-600">High Game:</span>
+                                            <span className="font-medium">{user?.stats?.high_game || '300'}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-gray-600">High Series:</span>
+                                            <span className="font-medium">{user?.stats?.high_series || '854'}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-gray-600">Experience (yrs):</span>
+                                            <span className="font-medium">{user?.stats?.experience || '32'}</span>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
