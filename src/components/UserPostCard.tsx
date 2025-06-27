@@ -2,6 +2,7 @@
 
 import { Heart, MessageSquare, Share, Send } from 'lucide-react';
 import { useState } from 'react';
+import { api } from '@/lib/api';
 
 interface UserPost {
     metadata: {
@@ -64,27 +65,85 @@ export default function UserPostCard({ post }: UserPostCardProps) {
     const [localLikes, setLocalLikes] = useState(post.metadata.total_likes);
     const [comment, setComment] = useState('');
     const [showCommentInput, setShowCommentInput] = useState(false);
+    const [isLiking, setIsLiking] = useState(false);
+    const [isCommenting, setIsCommenting] = useState(false);
+    const [replyToComment, setReplyToComment] = useState<number | null>(null);
+    const [replyText, setReplyText] = useState('');
+    const [isReplying, setIsReplying] = useState(false);
 
-    const handleLike = () => {
-        if (isLiked) {
-            setLocalLikes(prev => prev - 1);
-        } else {
-            setLocalLikes(prev => prev + 1);
+    const handleLike = async () => {
+        if (isLiking) return;
+
+        try {
+            setIsLiking(true);
+            await api.get(`/api/user/post/click-like/${post.metadata.id}`);
+
+            // Toggle like state
+            const newLikedState = !isLiked;
+            setIsLiked(newLikedState);
+            setLocalLikes(prev => newLikedState ? prev + 1 : prev - 1);
+        } catch (error) {
+            console.error('Error liking post:', error);
+            // Could add toast notification here
+        } finally {
+            setIsLiking(false);
         }
-        setIsLiked(!isLiked);
     };
 
     const handleComment = () => {
         setShowCommentInput(!showCommentInput);
     };
 
-    const handleCommentSubmit = (e: React.FormEvent) => {
+    const handleCommentSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (comment.trim()) {
-            // Handle comment submission here
-            console.log('Comment submitted:', comment);
+        if (!comment.trim() || isCommenting) return;
+
+        try {
+            setIsCommenting(true);
+            await api.post(`/api/user/post/add-comment/${post.metadata.id}`, {
+                text: comment.trim()
+            });
+
+            // Clear comment and close input
             setComment('');
             setShowCommentInput(false);
+
+            // Optionally refresh the post or update comments count
+            // For now, we'll just close the input
+        } catch (error) {
+            console.error('Error adding comment:', error);
+            // Could add toast notification here
+        } finally {
+            setIsCommenting(false);
+        }
+    };
+
+    const handleReply = (commentId: number) => {
+        setReplyToComment(replyToComment === commentId ? null : commentId);
+        setReplyText('');
+    };
+
+    const handleReplySubmit = async (e: React.FormEvent, commentId: number) => {
+        e.preventDefault();
+        if (!replyText.trim() || isReplying) return;
+
+        try {
+            setIsReplying(true);
+            await api.post(`/api/user/post/add-reply/${commentId}`, {
+                text: replyText.trim()
+            });
+
+            // Clear reply and close input
+            setReplyText('');
+            setReplyToComment(null);
+
+            // Optionally refresh the post or update replies
+            // For now, we'll just close the input
+        } catch (error) {
+            console.error('Error adding reply:', error);
+            // Could add toast notification here
+        } finally {
+            setIsReplying(false);
         }
     };
 
@@ -158,8 +217,8 @@ export default function UserPostCard({ post }: UserPostCardProps) {
                         <button
                             onClick={handleLike}
                             className={`flex items-center gap-2 transition-all duration-200 ${isLiked
-                                    ? 'text-red-500 hover:text-red-600'
-                                    : 'text-gray-600 hover:text-red-500'
+                                ? 'text-red-500 hover:text-red-600'
+                                : 'text-gray-600 hover:text-red-500'
                                 }`}
                         >
                             <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
@@ -183,18 +242,90 @@ export default function UserPostCard({ post }: UserPostCardProps) {
 
                 {/* Comments Preview */}
                 {post.comments[0].comment_list.length > 0 && (
-                    <div className="mb-3 space-y-2">
+                    <div className="mb-3 space-y-3">
                         {post.comments[0].comment_list.slice(0, 2).map((comment) => (
-                            <div key={comment.comment_id} className="flex items-start gap-2">
-                                <img
-                                    src={comment.user.profile_pic_url}
-                                    alt={comment.user.name}
-                                    className="w-6 h-6 rounded-full object-cover"
-                                />
-                                <div className="flex-1">
-                                    <span className="font-medium text-sm text-gray-900">{comment.user.name}</span>
-                                    <span className="text-sm text-gray-700 ml-2">{comment.text}</span>
+                            <div key={comment.comment_id} className="space-y-2">
+                                <div className="flex items-start gap-2">
+                                    <img
+                                        src={comment.user.profile_pic_url}
+                                        alt={comment.user.name}
+                                        className="w-6 h-6 rounded-full object-cover"
+                                    />
+                                    <div className="flex-1">
+                                        <div>
+                                            <span className="font-medium text-sm text-gray-900">{comment.user.name}</span>
+                                            <span className="text-sm text-gray-700 ml-2">{comment.text}</span>
+                                        </div>
+                                        <div className="flex items-center gap-3 mt-1">
+                                            <button
+                                                onClick={() => handleReply(comment.comment_id)}
+                                                className="text-xs text-gray-500 hover:text-green-600 font-medium transition-colors"
+                                            >
+                                                Reply
+                                            </button>
+                                            {comment.replies.length > 0 && (
+                                                <span className="text-xs text-gray-400">
+                                                    {comment.replies.length} {comment.replies.length === 1 ? 'reply' : 'replies'}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
+
+                                {/* Show some replies */}
+                                {comment.replies.length > 0 && (
+                                    <div className="ml-8 space-y-2">
+                                        {comment.replies.slice(0, 2).map((reply: any, replyIndex: number) => (
+                                            <div key={replyIndex} className="flex items-start gap-2">
+                                                <img
+                                                    src={reply.user?.profile_pic_url || '/default-avatar.png'}
+                                                    alt={reply.user?.name || 'User'}
+                                                    className="w-5 h-5 rounded-full object-cover"
+                                                />
+                                                <div className="flex-1">
+                                                    <span className="font-medium text-xs text-gray-900">{reply.user?.name}</span>
+                                                    <span className="text-xs text-gray-700 ml-2">{reply.text}</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {comment.replies.length > 2 && (
+                                            <button className="text-xs text-gray-500 hover:text-gray-700 ml-7">
+                                                View {comment.replies.length - 2} more replies
+                                            </button>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Reply Input */}
+                                {replyToComment === comment.comment_id && (
+                                    <div className="ml-8 mt-2">
+                                        <form onSubmit={(e) => handleReplySubmit(e, comment.comment_id)} className="flex items-center gap-2">
+                                            <div className="w-6 h-6 rounded-full bg-green-600 flex items-center justify-center flex-shrink-0">
+                                                <span className="text-white font-medium text-xs">U</span>
+                                            </div>
+                                            <div className="flex-1 relative">
+                                                <input
+                                                    type="text"
+                                                    value={replyText}
+                                                    onChange={(e) => setReplyText(e.target.value)}
+                                                    placeholder={`Reply to ${comment.user.name}...`}
+                                                    className="w-full px-3 py-1.5 bg-white border border-gray-200 rounded-full text-xs focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent pr-10 shadow-sm"
+                                                />
+                                                <button
+                                                    type="submit"
+                                                    disabled={!replyText.trim() || isReplying}
+                                                    className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 text-green-600 hover:text-green-700 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+                                                >
+                                                    {isReplying ? (
+                                                        <div className="w-3 h-3 animate-spin rounded-full border border-gray-300 border-t-green-600"></div>
+                                                    ) : (
+                                                        <Send className="w-3 h-3" />
+                                                    )}
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                )}
                             </div>
                         ))}
                         {post.comments[0].comment_list.length > 2 && (
@@ -222,10 +353,14 @@ export default function UserPostCard({ post }: UserPostCardProps) {
                                 />
                                 <button
                                     type="submit"
-                                    disabled={!comment.trim()}
+                                    disabled={!comment.trim() || isCommenting}
                                     className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-green-600 hover:text-green-700 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
                                 >
-                                    <Send className="w-4 h-4" />
+                                    {isCommenting ? (
+                                        <div className="w-4 h-4 animate-spin rounded-full border-2 border-gray-300 border-t-green-600"></div>
+                                    ) : (
+                                        <Send className="w-4 h-4" />
+                                    )}
                                 </button>
                             </div>
                         </form>
