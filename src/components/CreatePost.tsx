@@ -87,7 +87,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                     </div>
                     <span className="font-medium">Create Post</span>
                 </button>
-
+{/* 
                 <button className="flex items-center gap-3 text-gray-600 hover:text-red-600 transition-colors">
                     <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center">
                         <ImageIcon className="w-5 h-5 text-red-600" />
@@ -100,7 +100,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                         <Link2 className="w-5 h-5 text-green-600" />
                     </div>
                     <span className="font-medium">Attach Link</span>
-                </button>
+                </button> */}
             </div>
 
             {/* Main Post Input Area */}
