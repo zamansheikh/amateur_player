@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Trophy, Star, TrendingUp } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
+import ProPlayerModal from '@/components/ProPlayerModal';
 
 interface ProPlayer {
     user_id: number;
@@ -32,6 +33,8 @@ export default function HomePage() {
     const [proPlayers, setProPlayers] = useState<ProPlayer[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [selectedPlayer, setSelectedPlayer] = useState<ProPlayer | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchProPlayers = async () => {
@@ -51,12 +54,35 @@ export default function HomePage() {
         fetchProPlayers();
     }, []);
 
+    // Handle opening player modal
+    const handlePlayerClick = (player: ProPlayer) => {
+        setSelectedPlayer(player);
+        setIsModalOpen(true);
+    };
+
+    // Handle closing modal
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setSelectedPlayer(null);
+    };
+
+    // Handle follow status update
+    const handleFollowUpdate = (userId: number, isFollowed: boolean) => {
+        setProPlayers(players => 
+            players.map(player => 
+                player.user_id === userId 
+                    ? { ...player, is_followed: isFollowed, follower_count: isFollowed ? player.follower_count + 1 : player.follower_count - 1 }
+                    : player
+            )
+        );
+    };
+
     // Sort pro players by XP to get top performers
     const sortedProPlayers = proPlayers.sort((a, b) => b.xp - a.xp);
     const topLegends = sortedProPlayers.slice(0, 3);
     const risingStars = sortedProPlayers.slice(3, 15);
 
-    const PlayerCard = ({ player, size = 'normal', rank }: { player: ProPlayer, size?: 'normal' | 'large', rank: number }) => {
+    const PlayerCard = ({ player, size = 'normal', rank, onClick }: { player: ProPlayer, size?: 'normal' | 'large', rank: number, onClick: () => void }) => {
         const isLarge = size === 'large';
 
         // Use card_theme from API or fallback to gradient
@@ -91,7 +117,11 @@ export default function HomePage() {
         };
 
         return (
-            <div className={cardClass} style={getCardStyle()}>
+            <div 
+                className={`${cardClass} cursor-pointer hover:scale-105 transition-transform duration-200`} 
+                style={getCardStyle()}
+                onClick={onClick}
+            >
                 {isLarge && (
                     <div className="absolute -top-2 -right-2">
                         <div className="bg-yellow-400 rounded-full p-2">
@@ -219,21 +249,34 @@ export default function HomePage() {
                         {/* 2nd Place */}
                         {topLegends[1] && (
                             <div className="order-1 lg:order-1">
-                                <PlayerCard player={topLegends[1]} rank={2} />
+                                <PlayerCard 
+                                    player={topLegends[1]} 
+                                    rank={2} 
+                                    onClick={() => handlePlayerClick(topLegends[1])}
+                                />
                             </div>
                         )}
 
                         {/* 1st Place - Larger and elevated */}
                         {topLegends[0] && (
                             <div className="order-2 lg:order-2">
-                                <PlayerCard player={topLegends[0]} size="large" rank={1} />
+                                <PlayerCard 
+                                    player={topLegends[0]} 
+                                    size="large" 
+                                    rank={1} 
+                                    onClick={() => handlePlayerClick(topLegends[0])}
+                                />
                             </div>
                         )}
 
                         {/* 3rd Place */}
                         {topLegends[2] && (
                             <div className="order-3 lg:order-3">
-                                <PlayerCard player={topLegends[2]} rank={3} />
+                                <PlayerCard 
+                                    player={topLegends[2]} 
+                                    rank={3} 
+                                    onClick={() => handlePlayerClick(topLegends[2])}
+                                />
                             </div>
                         )}
                     </div>
@@ -259,7 +302,11 @@ export default function HomePage() {
                         }}>
                             {risingStars.map((player, index) => (
                                 <div key={player.user_id} className="flex-shrink-0 w-48">
-                                    <PlayerCard player={player} rank={index + 4} />
+                                    <PlayerCard 
+                                        player={player} 
+                                        rank={index + 4} 
+                                        onClick={() => handlePlayerClick(player)}
+                                    />
                                 </div>
                             ))}
                         </div>
@@ -296,6 +343,16 @@ export default function HomePage() {
                     </div>
                 </div>
             </div>
+
+            {/* Pro Player Modal */}
+            {selectedPlayer && (
+                <ProPlayerModal
+                    player={selectedPlayer}
+                    isOpen={isModalOpen}
+                    onClose={handleCloseModal}
+                    onFollowUpdate={handleFollowUpdate}
+                />
+            )}
         </div>
     );
 }
