@@ -2,49 +2,86 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { Edit, Users, Eye } from 'lucide-react';
-import PostCard from '@/components/PostCard';
+import { useState, useEffect } from 'react';
+import { api } from '@/lib/api';
+import UserPostCard from '@/components/UserPostCard';
 import CreatePost from '@/components/CreatePost';
+
+interface UserPost {
+    metadata: {
+        id: number;
+        uid: string;
+        post_privacy: string;
+        total_likes: number;
+        total_comments: number;
+        created_at: string;
+        updated_at: string;
+        created: string;
+        last_update: string;
+        has_text: boolean;
+        has_image: boolean;
+        has_video: boolean;
+        has_poll: boolean;
+        has_event: boolean;
+    };
+    author: {
+        user_id: number;
+        name: string;
+        profile_pic_url: string;
+    };
+    likes: [{
+        total: number;
+        likers: Array<{
+            user_id: number;
+            name: string;
+            profile_pic_url: string;
+        }>;
+    }];
+    comments: [{
+        total: number;
+        comment_list: Array<{
+            comment_id: number;
+            user: {
+                user_id: number;
+                name: string;
+                profile_pic_url: string;
+            };
+            text: string;
+            pics: any[];
+            replies: any[];
+        }>;
+    }];
+    caption: string;
+    images: any[];
+    videos: any[];
+    poll: any;
+    event: any;
+    tags: string[];
+}
 
 export default function ProfilePage() {
     const { user } = useAuth();
+    const [posts, setPosts] = useState<UserPost[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    // Mock data for posts
-    const posts = [
-        {
-            id: 1,
-            author: {
-                name: "Miles, Esther",
-                avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Miles",
-            },
-            content: "Just bowled my personal best! 🎳 **247** in the third game tonight! The pins were falling like dominos. *So pumped* for league play next week! Who else is ready to roll some strikes? 🔥",
-            image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500&h=300&fit=crop",
-            likes: 350,
-            comments: 15,
-            timeAgo: "2h"
-        },
-        {
-            id: 2,
-            author: {
-                name: "Nguyen, Shane",
-                avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Shane",
-            },
-            content: "League night was **incredible**! 🎳 Our team took first place with a combined series of 2,847! *Special shoutout* to my teammates for the amazing support. Can't wait for championship rounds! 🏆",
-            likes: 250,
-            comments: 15,
-            timeAgo: "3h"
-        },
-        {
-            id: 3,
-            author: {
-                name: "Black, Marvin",
-                avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Marvin",
-            },
-            content: "Pro tip for all my fellow bowlers: *Consistency beats power every time*. Focus on your **footwork** and **follow-through**. Been working on this technique for months and finally seeing results! 🎯",
-            likes: 200,
-            comments: 13,
-            timeAgo: "5h"
-        }
-    ];
+    useEffect(() => {
+        const fetchUserPosts = async () => {
+            try {
+                setLoading(true);
+                const response = await api.get('/api/user/posts');
+                setPosts(response.data.posts);
+                setError(null);
+            } catch (err) {
+                console.error('Error fetching user posts:', err);
+                setError('Failed to load posts');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchUserPosts();
+    }, []);
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -58,9 +95,33 @@ export default function ProfilePage() {
 
                         {/* Posts Feed */}
                         <div className="space-y-6">
-                            {posts.map((post) => (
-                                <PostCard key={post.id} post={post} />
-                            ))}
+                            {loading ? (
+                                <div className="flex items-center justify-center py-12">
+                                    <div className="text-center">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
+                                        <p className="text-gray-600">Loading posts...</p>
+                                    </div>
+                                </div>
+                            ) : error ? (
+                                <div className="text-center py-12">
+                                    <p className="text-red-600 mb-4">{error}</p>
+                                    <button
+                                        onClick={() => window.location.reload()}
+                                        className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                                    >
+                                        Try Again
+                                    </button>
+                                </div>
+                            ) : posts.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <p className="text-gray-500 text-lg mb-2">No posts yet</p>
+                                    <p className="text-gray-400">Share your first bowling experience!</p>
+                                </div>
+                            ) : (
+                                posts.map((post) => (
+                                    <UserPostCard key={post.metadata.id} post={post} />
+                                ))
+                            )}
                         </div>
                     </div>
 
