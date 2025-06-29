@@ -25,7 +25,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
     const { user, signout } = useAuth();
 
     // Public routes
-    const publicRoutes = ['/signin', '/signup'];
+    const publicRoutes = ['/signin', '/signup', '/landingpage', '/landing'];
     const isPublicRoute = publicRoutes.includes(pathname);
 
     if (isPublicRoute) {
