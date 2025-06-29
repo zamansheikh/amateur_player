@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import { Link } from 'lucide-react';
+import Link from 'next/link';
 
 const About: React.FC = () => {
   return (
@@ -27,28 +27,34 @@ const About: React.FC = () => {
               and stay updated on the latest trends in the bowling world.
             </p>
             <Link
-              to="/"
-              className="border border-gray-300 transition hover:scale-105 duration-500 px-6 py-2 sm:px-10 sm:py-3 rounded-md text-sm font-medium"
+              href="/"
+              className="inline-block border border-gray-300 transition hover:scale-105 duration-500 px-6 py-2 sm:px-10 sm:py-3 rounded-md text-sm font-medium hover:bg-gray-50"
             >
               Explore Premium
             </Link>
           </div>
 
-          <div className="rounded-xl shadow-lg overflow-hidden bg-green-100 p-8 flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-6xl mb-4">🎳</div>
-              <p className="text-gray-700 font-medium">Bowling Excellence</p>
-            </div>
+          <div className="rounded-xl shadow-lg overflow-hidden">
+            <Image
+              src="/assets/images/frame-1.png"
+              alt="Bowling Excellence"
+              width={500}
+              height={400}
+              className="w-full h-auto object-cover"
+            />
           </div>
         </div>
 
         {/* Section 2 */}
         <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-10 mt-20">
-          <div className="rounded-xl shadow-lg overflow-hidden bg-green-100 p-8 flex items-center justify-center order-1 md:order-none">
-            <div className="text-center">
-              <div className="text-6xl mb-4">⚡</div>
-              <p className="text-gray-700 font-medium">Strike Analytics</p>
-            </div>
+          <div className="rounded-xl shadow-lg overflow-hidden order-1 md:order-none">
+            <Image
+              src="/assets/images/frame-2.png"
+              alt="Strike Analytics"
+              width={500}
+              height={400}
+              className="w-full h-auto object-cover"
+            />
           </div>
 
           <div className="space-y-6">
@@ -70,8 +76,8 @@ const About: React.FC = () => {
               and stay updated on the latest trends in the bowling world.
             </p>
             <Link
-              to="/"
-              className="border border-gray-300 transition hover:scale-105 duration-500 px-6 py-2 sm:px-10 sm:py-3 rounded-md text-sm font-medium"
+              href="/"
+              className="inline-block border border-gray-300 transition hover:scale-105 duration-500 px-6 py-2 sm:px-10 sm:py-3 rounded-md text-sm font-medium hover:bg-gray-50"
             >
               Explore Premium
             </Link>
