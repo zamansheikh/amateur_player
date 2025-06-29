@@ -1,6 +1,5 @@
 // Main Landing component
 export { default as Landing } from './page';
-export { LandingConfigProvider, useLandingConfig } from './LandingConfigProvider';
 
 // Individual components
 export { default as About } from './components/About';
