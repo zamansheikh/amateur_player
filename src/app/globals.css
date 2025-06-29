@@ -57,3 +57,32 @@ body {
     display: none;
     /* Safari and Chrome */
 }
+
+/* Landing page animations */
+@keyframes scrollX {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+@keyframes scrollXReverse {
+    0% {
+        transform: translateX(-50%);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+.animate-scrollX {
+    animation: scrollX 30s linear infinite;
+}
+
+.animate-scrollXReverse {
+    animation: scrollXReverse 30s linear infinite;
+}
