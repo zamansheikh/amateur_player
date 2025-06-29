@@ -1,10 +1,47 @@
-import React from 'react';
+import React, { useState } from 'react';
+import Image from 'next/image';
 import SectionTitle from './SectionTitle';
+
+const PartnerCard: React.FC<{ image: string; name: string; index: number }> = ({ image, name, index }) => {
+  const [imageError, setImageError] = useState(false);
+
+  return (
+    <div className="h-32 w-32 sm:h-36 sm:w-36 md:h-40 md:w-40 flex justify-center items-center rounded-xl shadow-md border border-[#E2F0CF] bg-white">
+      {!imageError ? (
+        <Image
+          src={image}
+          alt={`${name} logo`}
+          width={80}
+          height={80}
+          className="object-contain"
+          onError={() => setImageError(true)}
+        />
+      ) : (
+        <div className="text-center">
+          <div className="text-3xl mb-2">🤝</div>
+          <div className="text-xs font-medium text-gray-700 px-2">{name}</div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const Partner: React.FC = () => {
   const partners = [
     'Strike Systems', 'Pin Analytics', 'Bowl Tech', 'Frame Pro',
     'Gutter Solutions', 'Spare AI', 'Perfect Game', 'Lane Masters',
+  ];
+
+  // Company images from assets folder
+  const partnerImages = [
+    '/assets/company/company-1.png',
+    '/assets/company/company-2.png',
+    '/assets/company/company-3.png',
+    '/assets/company/company-4.png',
+    '/assets/company/company-5.png',
+    '/assets/company/company-6.png',
+    '/assets/company/company-7.png',
+    '/assets/company/oscar-health.png',
   ];
 
   return (
@@ -25,18 +62,13 @@ const Partner: React.FC = () => {
         <div className="flex w-max animate-scrollX gap-5">
           {[...Array(2)].map((_, i) => (
             <div key={i} className="flex gap-5">
-              {partners.map((partner, idx) => (
-                <div
+              {partnerImages.map((image, idx) => (
+                <PartnerCard
                   key={`${i}-${idx}`}
-                  className="h-32 w-32 sm:h-36 sm:w-36 md:h-40 md:w-40 flex justify-center items-center rounded-xl shadow-md border border-[#E2F0CF] bg-[#f9fdf5]"
-                >
-                  <div className="text-center">
-                    <div className="text-3xl mb-2">🤝</div>
-                    <div className="text-xs font-medium text-gray-700 px-2">
-                      {partner}
-                    </div>
-                  </div>
-                </div>
+                  image={image}
+                  name={partners[idx] || `Partner ${idx + 1}`}
+                  index={idx}
+                />
               ))}
             </div>
           ))}
