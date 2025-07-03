@@ -3,6 +3,7 @@
 import { Heart, MessageSquare, Share, Send } from 'lucide-react';
 import { useState } from 'react';
 import { api } from '@/lib/api';
+import UserProfileModal from './UserProfileModal';
 
 interface FeedPost {
     metadata: {
@@ -76,11 +77,20 @@ export default function FeedPostCard({ post, onPostUpdate, onPostChange }: FeedP
     const [isReplying, setIsReplying] = useState(false);
     const [isFollowing, setIsFollowing] = useState(false);
     const [localPost, setLocalPost] = useState(post);
+    const [showUserModal, setShowUserModal] = useState(false);
 
     // Initialize following state
     useState(() => {
         setIsFollowing(post.author.is_following);
     });
+
+    const handleUserClick = () => {
+        setShowUserModal(true);
+    };
+
+    const handleCloseUserModal = () => {
+        setShowUserModal(false);
+    };
 
     const handleLike = async () => {
         if (isLiking) return;
@@ -242,7 +252,10 @@ export default function FeedPostCard({ post, onPostUpdate, onPostChange }: FeedP
             {/* Post Header */}
             <div className="p-6 pb-4">
                 <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
+                    <div 
+                        className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+                        onClick={handleUserClick}
+                    >
                         <img
                             src={post.author.profile_pic_url}
                             alt={post.author.name}
@@ -440,6 +453,13 @@ export default function FeedPostCard({ post, onPostUpdate, onPostChange }: FeedP
                     </div>
                 )}
             </div>
+
+            {/* User Profile Modal */}
+            <UserProfileModal
+                isOpen={showUserModal}
+                onClose={handleCloseUserModal}
+                userId={post.author.user_id}
+            />
         </div>
     );
 }

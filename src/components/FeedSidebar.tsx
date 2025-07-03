@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Search, User, TrendingUp, Hash } from 'lucide-react';
 import { api } from '@/lib/api';
+import UserProfileModal from './UserProfileModal';
 
 interface SuggestedUser {
     user_id: number;
@@ -23,6 +24,8 @@ export default function FeedSidebar() {
     const [suggestedUsers, setSuggestedUsers] = useState<SuggestedUser[]>([]);
     const [trendingTopics, setTrendingTopics] = useState<TrendingTopic[]>([]);
     const [followingUsers, setFollowingUsers] = useState<Set<number>>(new Set());
+    const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+    const [showUserModal, setShowUserModal] = useState(false);
 
     // Mock data - replace with real API calls
     useEffect(() => {
@@ -112,6 +115,16 @@ export default function FeedSidebar() {
         }
     };
 
+    const handleUserClick = (userId: number) => {
+        setSelectedUserId(userId);
+        setShowUserModal(true);
+    };
+
+    const handleCloseUserModal = () => {
+        setShowUserModal(false);
+        setSelectedUserId(null);
+    };
+
     return (
         <div className="w-80 space-y-6">
             {/* Search Bar */}
@@ -134,7 +147,10 @@ export default function FeedSidebar() {
                 <div className="space-y-3">
                     {suggestedUsers.slice(0, 5).map((user) => (
                         <div key={user.user_id} className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
+                            <div 
+                                className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors flex-1"
+                                onClick={() => handleUserClick(user.user_id)}
+                            >
                                 <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
                                     <img
                                         src={user.profile_pic_url}
@@ -164,7 +180,10 @@ export default function FeedSidebar() {
                                 </div>
                             </div>
                             <button
-                                onClick={() => handleFollow(user.user_id)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleFollow(user.user_id);
+                                }}
                                 disabled={followingUsers.has(user.user_id)}
                                 className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${
                                     followingUsers.has(user.user_id)
@@ -200,6 +219,15 @@ export default function FeedSidebar() {
                     Show more
                 </button>
             </div>
+
+            {/* User Profile Modal */}
+            {selectedUserId && (
+                <UserProfileModal
+                    isOpen={showUserModal}
+                    onClose={handleCloseUserModal}
+                    userId={selectedUserId}
+                />
+            )}
         </div>
     );
 }
