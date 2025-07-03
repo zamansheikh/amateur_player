@@ -72,9 +72,9 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }: Crea
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="bg-white w-[488px] h-[562px] rounded-[20px] shadow-2xl overflow-hidden flex flex-col">
                 {/* Modal Header */}
-                <div className="flex items-center justify-between p-4 border-b border-gray-100">
+                <div className="h-[56px] flex items-center justify-between px-4 border-b border-gray-200">
                     <h2 className="text-xl font-semibold text-gray-900">Create Post</h2>
                     <button
                         onClick={handleClose}
@@ -92,7 +92,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }: Crea
                 )}
 
                 {/* Modal Content */}
-                <div className="p-4">
+                <div className="flex-1 p-4 flex flex-col">
                     {/* User Info */}
                     <div className="flex items-center gap-3 mb-4">
                         <img
@@ -111,14 +111,13 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }: Crea
                     </div>
 
                     {/* Post Content */}
-                    <form onSubmit={handleSubmit}>
-                        <div className="mb-4">
+                    <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
+                        <div className="flex-1 mb-4">
                             <textarea
                                 value={postText}
                                 onChange={(e) => setPostText(e.target.value)}
                                 placeholder="Hello, friends! 🎳 With the sun shining bright and temperatures rising, there's no better way to beat the heat than with a refreshing dip in the pool! 🏊‍♂️ ☀️ Dive into Hello, friends! 🎳 With the sun shining bright and..."
-                                className="w-full min-h-[120px] p-3 text-gray-800 placeholder-gray-400 border-0 resize-none focus:outline-none text-base"
-                                rows={6}
+                                className="w-full h-full p-3 text-gray-800 placeholder-gray-400 border-0 resize-none focus:outline-none text-base"
                                 disabled={isPosting}
                             />
                         </div>
@@ -143,7 +142,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }: Crea
                         {/* Add your Post Section */}
                         <div className="border-t border-gray-100 pt-4 mb-4">
                             <h4 className="text-sm font-medium text-gray-900 mb-3">Add your Post</h4>
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-2 gap-2">
                                 <button
                                     type="button"
                                     className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
@@ -192,7 +191,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }: Crea
                         <button
                             type="submit"
                             disabled={!postText.trim() || isPosting}
-                            className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-lg transition-colors"
+                            className="w-full h-12 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-full transition-colors"
+                            style={{ backgroundColor: '#8BC342' }}
                         >
                             {isPosting ? 'Posting...' : 'Post'}
                         </button>
