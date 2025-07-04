@@ -75,40 +75,48 @@ export default function PlayerCard({ player }: PlayerCardProps) {
                 </div>
 
                 {/* Profile Info */}
-                <div className="px-4 pb-4 pt-2">
-                    <div className="flex items-start gap-3 -mt-6">
+                <div className="px-3 pb-4 pt-2">
+                    {/* Profile Picture and Name Section */}
+                    <div className="flex items-start gap-2 -mt-6 mb-3">
                         {/* Profile Picture */}
                         <div className="relative flex-shrink-0">
                             <img
                                 src={player?.profile_picture_url || "/playercard1.png"}
                                 alt={player?.name}
-                                className="w-14 h-14 rounded-lg border-2 border-white object-cover shadow-md"
+                                className="w-11 h-11 rounded-lg border-2 border-white object-cover shadow-md"
                             />
                         </div>
 
-                        <div className="flex-1 min-w-0 pt-1">
+                        <div className="flex-1">
                             {/* Name and Badge Row */}
-                            <div className="flex items-center gap-2 mb-1">
-                                <h1 className="text-base font-bold text-gray-900 truncate">
+                            <div>
+                                {/* add some space */
+
+                                <div className="h-8"></div>
+
+                                }
+                            </div>
+                            <div className="flex items-start gap-2 mb-1">
+                                <h1 className="text-sm font-bold text-gray-900 leading-tight flex-1 break-words">
                                     {player?.name}
                                 </h1>
                                 {player?.is_pro && (
-                                    <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                                         <span className="text-white text-xs">✓</span>
                                     </div>
                                 )}
                             </div>
-                            <p className="text-gray-600 text-xs mb-2">
+                            <p className="text-gray-600 text-xs">
                                 {player?.is_pro ? "Pro Player" : "Amateur Player"}
                             </p>
                         </div>
                     </div>
 
                     {/* Level, XP, EXP Icons Row */}
-                    <div className="flex items-center justify-center gap-3 mb-3 mt-1">
+                    <div className="flex items-center justify-center gap-4 mb-4">
                         {/* Level */}
                         <div className="flex flex-col items-center">
-                            <div className="relative w-9 h-9">
+                            <div className="relative w-8 h-8">
                                 <img
                                     src="/icons/level.svg"
                                     alt="Level"
@@ -120,14 +128,14 @@ export default function PlayerCard({ player }: PlayerCardProps) {
                                     </span>
                                 </div>
                             </div>
-                            <span className="text-gray-500 text-xs mt-0.5">
+                            <span className="text-gray-500 text-xs mt-1">
                                 Level
                             </span>
                         </div>
 
                         {/* XP */}
                         <div className="flex flex-col items-center">
-                            <div className="relative w-9 h-9">
+                            <div className="relative w-8 h-8">
                                 <img
                                     src="/icons/xp.svg"
                                     alt="XP"
@@ -139,14 +147,14 @@ export default function PlayerCard({ player }: PlayerCardProps) {
                                     </span>
                                 </div>
                             </div>
-                            <span className="text-gray-500 text-xs mt-0.5">
+                            <span className="text-gray-500 text-xs mt-1">
                                 XP
                             </span>
                         </div>
 
                         {/* EXP */}
                         <div className="flex flex-col items-center">
-                            <div className="relative w-9 h-9">
+                            <div className="relative w-8 h-8">
                                 <img
                                     src="/icons/exp.svg"
                                     alt="EXP"
@@ -158,14 +166,14 @@ export default function PlayerCard({ player }: PlayerCardProps) {
                                     </span>
                                 </div>
                             </div>
-                            <span className="text-gray-500 text-xs mt-0.5">
+                            <span className="text-gray-500 text-xs mt-1">
                                 EXP
                             </span>
                         </div>
                     </div>
 
                     {/* Stats Row */}
-                    <div className="flex items-center justify-between text-center px-2">
+                    <div className="flex items-center justify-between text-center">
                         <div className="flex-1">
                             <div className="text-sm font-bold text-gray-900">
                                 {player?.follower_count?.toLocaleString() || "0"}
