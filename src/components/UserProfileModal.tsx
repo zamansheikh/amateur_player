@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
-import UserPostCard from "./UserPostCard";
 
 interface UserProfile {
   id: number;
@@ -318,7 +317,7 @@ export default function UserProfileModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white w-[95vw] max-w-4xl h-[90vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+      <div className="bg-white w-[95vw] max-w-6xl h-[90vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
         {/* Modal Header with Close Button */}
         <div className="absolute top-4 right-4 z-10">
           <button
@@ -570,15 +569,57 @@ export default function UserProfileModal({
                         </p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         {posts.map((post) => (
-                            <UserPostCard
-                                key={post.metadata.id}
-                                post={post}
-                                
-                                // onPostUpdate={fetchUserPosts}
-                                // onPostChange={handlePostChange}
-                            />
+                            <div key={post.metadata.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                                {/* Compact Post Header */}
+                                <div className="p-3">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <img
+                                                src={post.author.profile_pic_url}
+                                                alt={post.author.name}
+                                                className="w-6 h-6 rounded-full object-cover"
+                                            />
+                                            <span className="text-sm font-medium text-gray-900">{post.author.name}</span>
+                                        </div>
+                                        <span className="text-xs text-gray-500">{post.metadata.created}</span>
+                                    </div>
+                                    
+                                    {/* Caption */}
+                                    <p className="text-sm text-gray-800 mb-2 line-clamp-2">{post.caption}</p>
+                                    
+                                    {/* Post Image */}
+                                    {post.images && post.images.length > 0 && (
+                                        <div className="mb-2 rounded-lg overflow-hidden">
+                                            <img
+                                                src={post.images[0]}
+                                                alt="Post"
+                                                className="w-full h-24 object-cover"
+                                            />
+                                        </div>
+                                    )}
+                                    
+                                    {/* Compact Actions */}
+                                    <div className="flex items-center justify-between text-gray-500 text-xs">
+                                        <button
+                                            onClick={() => handleLike(post.metadata.id)}
+                                            className="flex items-center gap-1 hover:text-red-500 transition-colors"
+                                        >
+                                            <Heart className="w-3 h-3" />
+                                            <span>{post.metadata.total_likes}</span>
+                                        </button>
+                                        <button className="flex items-center gap-1 hover:text-blue-500 transition-colors">
+                                            <MessageCircle className="w-3 h-3" />
+                                            <span>{post.metadata.total_comments}</span>
+                                        </button>
+                                        <button className="flex items-center gap-1 hover:text-green-500 transition-colors">
+                                            <Share className="w-3 h-3" />
+                                            <span>Share</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         ))}
                     </div>
                 )}
