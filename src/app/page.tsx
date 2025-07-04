@@ -193,7 +193,7 @@ export default function HomePage() {
                             }}
                         >
                             {proPlayers.map((player) => (
-                                <div key={player.user_id} className="flex-shrink-0 w-80">
+                                <div key={player.user_id} className="flex-shrink-0 w-72">
                                     <PlayerCard player={player} />
                                 </div>
                             ))}
