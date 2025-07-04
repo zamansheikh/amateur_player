@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
+import UserPostCard from "./UserPostCard";
 
 interface UserProfile {
     user_id: number;
@@ -113,9 +114,6 @@ export default function UserProfileModal({
   const { user: currentUser } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [posts, setPosts] = useState<UserPost[]>([]);
-  const [activeTab, setActiveTab] = useState<"Posts" | "Video" | "News">(
-    "Posts"
-  );
   const [loading, setLoading] = useState(true);
   const [postsLoading, setPostsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -147,86 +145,7 @@ export default function UserProfileModal({
 
       // Replace with your actual API endpoint
       const response = await api.get(`/api/user/${userId}/posts`);
-      const dummyPosts: UserPost[] = [
-        {
-          metadata: {
-            id: 1,
-            uid: "post-1",
-            post_privacy: "public",
-            total_likes: 120,
-            total_comments: 5,
-            created_at: "2023-10-01T12:00:00Z",
-            updated_at: "2023-10-01T12:00:00Z",
-            created: "1 Oct 2023",
-            last_update: "1 Oct 2023",
-            has_text: true,
-            has_image: true,
-            has_video: false,
-            has_poll: false,
-            has_event: false,
-          },
-          author: {
-            user_id: userId,
-            name: "Jennifer",
-            profile_pic_url: "/playercard1.png",
-          },
-          likes: [
-            {
-              total: 120,
-              likers: [
-                {
-                  user_id: 2,
-                  name: "Alex",
-                  profile_pic_url: "/avatar2.png",
-                },
-                {
-                  user_id: 3,
-                  name: "Sam",
-                  profile_pic_url: "/avatar3.png",
-                },
-              ],
-            },
-          ],
-          comments: [
-            {
-              total: 5,
-              comment_list: [
-                {
-                  comment_id: 1,
-                  user: {
-                    user_id: 4,
-                    name: "Chris",
-                    profile_pic_url: "/avatar4.png",
-                  },
-                  text: "Great post!",
-                  pics: [],
-                  replies: [],
-                },
-                {
-                  comment_id: 2,
-                  user: {
-                    user_id: 5,
-                    name: "Taylor",
-                    profile_pic_url: "/avatar5.png",
-                  },
-                  text: "Congrats!",
-                  pics: [],
-                  replies: [],
-                },
-              ],
-            },
-          ],
-          caption: "Had an amazing game today! 🎳",
-          images: ["/post-image1.jpg"],
-          videos: [],
-          poll: null,
-          event: null,
-          tags: ["bowling", "game", "fun"],
-        },
-      ];
-      setPosts(dummyPosts);
-
-      // setPosts(response.data);
+      setPosts(response.data);
     } catch (err) {
       console.error("Error fetching posts:", err);
     } finally {
@@ -271,29 +190,6 @@ export default function UserProfileModal({
   const handleGetInTouch = () => {
     // Navigate to messages or open chat
     console.log("Get in touch with user:", userId);
-  };
-
-  // Like post
-  const handleLike = async (postId: number) => {
-    try {
-      await api.post(`/api/posts/${postId}/like`);
-      // Update local state
-      setPosts((prevPosts) =>
-        prevPosts.map((post) =>
-          post.metadata.id === postId
-            ? {
-                ...post,
-                metadata: {
-                  ...post.metadata,
-                  total_likes: post.metadata.total_likes + 1,
-                },
-              }
-            : post
-        )
-      );
-    } catch (err) {
-      console.error("Error liking post:", err);
-    }
   };
 
   useEffect(() => {
@@ -510,106 +406,54 @@ export default function UserProfileModal({
                 </div>
               </div>
 
-              {/* Tabs */}
+              {/* Posts Section Header */}
               <div className="border-b border-gray-200 bg-white sticky top-0 z-10">
-                <div className="flex px-6">
-                  {(["Posts", "Video", "News"] as const).map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={`px-4 py-3 text-sm font-medium transition-colors ${
-                        activeTab === tab
-                          ? "text-green-600 border-b-2 border-green-600"
-                          : "text-gray-500 hover:text-gray-700"
-                      }`}
-                    >
-                      {tab}
-                    </button>
-                  ))}
+                <div className="px-6 py-4">
+                  <h3 className="text-lg font-semibold text-gray-900">Posts</h3>
                 </div>
               </div>
 
               {/* Posts Content */}
-              <div className="p-6 bg-gray-50">
-                {postsLoading ? (
+              <div className="flex-1 flex-row bg-gray-50">
+                <div className="max-w-2xl mx-auto px-6 py-6">
+                  {postsLoading ? (
                     <div className="flex items-center justify-center py-12">
-                        <div className="text-center">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
-                            <p className="text-gray-600">Loading posts...</p>
-                        </div>
+                      <div className="text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
+                        <p className="text-gray-600">Loading posts...</p>
+                      </div>
                     </div>
-                ) : error ? (
+                  ) : error ? (
                     <div className="text-center py-12">
-                        <p className="text-red-600 mb-4">{error}</p>
-                        <button
-                            onClick={() => window.location.reload()}
-                            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-                        >
-                            Try Again
-                        </button>
+                      <p className="text-red-600 mb-4">{error}</p>
+                      <button
+                        onClick={() => window.location.reload()}
+                        className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                      >
+                        Try Again
+                      </button>
                     </div>
-                ) : posts.length === 0 ? (
+                  ) : posts.length === 0 ? (
                     <div className="text-center py-12">
-                        <p className="text-gray-500 text-lg mb-2">No posts yet</p>
-                        <p className="text-gray-400">
-                            Share your first bowling experience!
-                        </p>
+                      <p className="text-gray-500 text-lg mb-2">No posts yet</p>
+                      <p className="text-gray-400">
+                        Share your first bowling experience!
+                      </p>
                     </div>
-                ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        {posts.map((post) => (
-                            <div key={post.metadata.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                                {/* Compact Post Header */}
-                                <div className="p-3">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <div className="flex items-center gap-2">
-                                            <img
-                                                src={post.author.profile_pic_url}
-                                                alt={post.author.name}
-                                                className="w-6 h-6 rounded-full object-cover"
-                                            />
-                                            <span className="text-sm font-medium text-gray-900">{post.author.name}</span>
-                                        </div>
-                                        <span className="text-xs text-gray-500">{post.metadata.created}</span>
-                                    </div>
-                                    
-                                    {/* Caption */}
-                                    <p className="text-sm text-gray-800 mb-2 line-clamp-2">{post.caption}</p>
-                                    
-                                    {/* Post Image */}
-                                    {post.images && post.images.length > 0 && (
-                                        <div className="mb-2 rounded-lg overflow-hidden">
-                                            <img
-                                                src={post.images[0]}
-                                                alt="Post"
-                                                className="w-full h-24 object-cover"
-                                            />
-                                        </div>
-                                    )}
-                                    
-                                    {/* Compact Actions */}
-                                    <div className="flex items-center justify-between text-gray-500 text-xs">
-                                        <button
-                                            onClick={() => handleLike(post.metadata.id)}
-                                            className="flex items-center gap-1 hover:text-red-500 transition-colors"
-                                        >
-                                            <Heart className="w-3 h-3" />
-                                            <span>{post.metadata.total_likes}</span>
-                                        </button>
-                                        <button className="flex items-center gap-1 hover:text-blue-500 transition-colors">
-                                            <MessageCircle className="w-3 h-3" />
-                                            <span>{post.metadata.total_comments}</span>
-                                        </button>
-                                        <button className="flex items-center gap-1 hover:text-green-500 transition-colors">
-                                            <Share className="w-3 h-3" />
-                                            <span>Share</span>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+                  ) : (
+                    <div className="space-y-6">
+                      {posts.map((post) => (
+                        <UserPostCard
+                          key={post.metadata.id}
+                          post={post}
+                          onPostUpdate={fetchPosts}
+                          onPostChange={() => {}}
+                        />
+                      ))}
                     </div>
-                )}
+                  )}
+                </div>
+               
               </div>
             </>
           )}
