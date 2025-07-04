@@ -11,7 +11,7 @@ interface UserProfile {
     username: string;
     email: string;
     profile_picture_url: string;
-    cover_image_url?: string;
+    cover_video_url?: string;
     bio?: string;
     role: string;
     stats: {
@@ -106,9 +106,32 @@ export default function UserProfileModal({ isOpen, onClose, userId }: UserProfil
             setError(null);
             
             // Replace with your actual API endpoint
-            const response = await api.get(`/api/user/${userId}/profile`);
-            setProfile(response.data);
-            setIsFollowing(response.data.is_following);
+            // const response = await api.get(`/api/user/${userId}/profile`);
+            const dummpyProfile: UserProfile ={
+                id: userId,
+                name: "Jennifer",
+                username: "jennifer123",
+                email: "abc@gmail.com",
+                profile_picture_url: "/playercard1.png",
+                cover_video_url: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                role: "Pro Player",
+                stats: {
+                    followers: 2985,
+                    following: 50,
+                    likes: 182501,
+                    level: 20,
+                    xp: 2240,
+                    posts: 56,
+                    views: 8500,
+                    thanks: 105,
+                    insightful: 435
+                },
+                is_following: false,
+                is_verified: true
+            }
+            // setProfile(response.data);
+            setProfile(dummpyProfile);
+            setIsFollowing(dummpyProfile.is_following);
         } catch (err) {
             console.error('Error fetching profile:', err);
             setError('Failed to load profile');
@@ -123,8 +146,91 @@ export default function UserProfileModal({ isOpen, onClose, userId }: UserProfil
             setPostsLoading(true);
             
             // Replace with your actual API endpoint
-            const response = await api.get(`/api/user/${userId}/posts`);
-            setPosts(response.data);
+            // const response = await api.get(`/api/user/${userId}/posts`);
+            const dummyPosts: UserPost[] = [
+                {
+                    metadata: {
+                        id: 1,
+                        uid: "post-1",
+                        post_privacy: "public",
+                        total_likes: 120,
+                        total_comments: 5,
+                        created_at: "2023-10-01T12:00:00Z",
+                        updated_at: "2023-10-01T12:00:00Z",
+                        created: "1 Oct 2023",
+                        last_update: "1 Oct 2023",
+                        has_text: true,
+                        has_image: true,
+                        has_video: false,
+                        has_poll: false,
+                        has_event: false
+                    },
+                    author: {
+                        user_id: userId,
+                        name: "Jennifer",
+                        profile_pic_url: "/playercard1.png",
+                        is_following: false,
+                        viewer_is_author: false
+                    },
+                    likes: [
+                        {
+                            total: 120,
+                            likers: [
+                                {
+                                    user_id: 2,
+                                    name: "Alex",
+                                    profile_pic_url: "/avatar2.png"
+                                },
+                                {
+                                    user_id: 3,
+                                    name: "Sam",
+                                    profile_pic_url: "/avatar3.png"
+                                }
+                            ]
+                        }
+                    ],
+                    comments: [
+                        {
+                            total: 5,
+                            comment_list: [
+                                {
+                                    comment_id: 1,
+                                    user: {
+                                        user_id: 4,
+                                        name: "Chris",
+                                        profile_pic_url: "/avatar4.png"
+                                    },
+                                    text: "Great post!",
+                                    pics: [],
+                                    replies: []
+                                },
+                                {
+                                    comment_id: 2,
+                                    user: {
+                                        user_id: 5,
+                                        name: "Taylor",
+                                        profile_pic_url: "/avatar5.png"
+                                    },
+                                    text: "Congrats!",
+                                    pics: [],
+                                    replies: []
+                                }
+                            ]
+                        }
+                    ],
+                    caption: "Had an amazing game today! 🎳",
+                    images: ["/post-image1.jpg"],
+                    videos: [],
+                    poll: null,
+                    event: null,
+                    tags: ["bowling", "game", "fun"]
+                }
+            ];
+            setPosts(dummyPosts);
+
+
+
+            // setPosts(response.data);
         } catch (err) {
             console.error('Error fetching posts:', err);
         } finally {
@@ -241,9 +347,9 @@ export default function UserProfileModal({ isOpen, onClose, userId }: UserProfil
                         <div className="relative">
                             {/* Cover Image */}
                             <div className="h-48 bg-gradient-to-r from-green-400 to-blue-500 relative">
-                                {profile?.cover_image_url ? (
+                                {profile?.cover_video_url ? (
                                     <img
-                                        src={profile.cover_image_url}
+                                        src={profile.cover_video_url}
                                         alt="Cover"
                                         className="w-full h-full object-cover"
                                     />
