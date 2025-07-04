@@ -414,46 +414,74 @@ export default function UserProfileModal({
               </div>
 
               {/* Posts Content */}
-              <div className="flex-1 flex-row bg-gray-50">
-                <div className="max-w-2xl mx-auto px-6 py-6">
-                  {postsLoading ? (
-                    <div className="flex items-center justify-center py-12">
-                      <div className="text-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
-                        <p className="text-gray-600">Loading posts...</p>
+              <div className="flex-1 bg-gray-50">
+                <div className="flex gap-6 px-6 py-6">
+                  {/* Posts Column */}
+                  <div className="flex-1 max-w-2xl">
+                    {postsLoading ? (
+                      <div className="flex items-center justify-center py-12">
+                        <div className="text-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
+                          <p className="text-gray-600">Loading posts...</p>
+                        </div>
+                      </div>
+                    ) : error ? (
+                      <div className="text-center py-12">
+                        <p className="text-red-600 mb-4">{error}</p>
+                        <button
+                          onClick={() => window.location.reload()}
+                          className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                        >
+                          Try Again
+                        </button>
+                      </div>
+                    ) : posts.length === 0 ? (
+                      <div className="text-center py-12">
+                        <p className="text-gray-500 text-lg mb-2">No posts yet</p>
+                        <p className="text-gray-400">
+                          Share your first bowling experience!
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-6">
+                        {posts.map((post) => (
+                          <UserPostCard
+                            key={post.metadata.id}
+                            post={post}
+                            onPostUpdate={fetchPosts}
+                            onPostChange={() => {}}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Right Sidebar */}
+                  <div className="w-80 space-y-4">
+                    {/* Dummy Section 1 */} 
+                    <div className="bg-white rounded-lg p-4 shadow-sm">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Engagement</h3>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Likes:</span>
+                          <span className="font-medium">{profile?.engagement?.likes ?? "0"}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Comments:</span>
+                          <span className="font-medium">{profile?.engagement?.comments?? "0"}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Shares:</span>
+                          <span className="font-medium">{profile?.engagement?.shares ?? "0"}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Views:</span>
+                          <span className="font-medium">{profile?.engagement?.views ?? "0"}</span>
+                        </div>
                       </div>
                     </div>
-                  ) : error ? (
-                    <div className="text-center py-12">
-                      <p className="text-red-600 mb-4">{error}</p>
-                      <button
-                        onClick={() => window.location.reload()}
-                        className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-                      >
-                        Try Again
-                      </button>
-                    </div>
-                  ) : posts.length === 0 ? (
-                    <div className="text-center py-12">
-                      <p className="text-gray-500 text-lg mb-2">No posts yet</p>
-                      <p className="text-gray-400">
-                        Share your first bowling experience!
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-6">
-                      {posts.map((post) => (
-                        <UserPostCard
-                          key={post.metadata.id}
-                          post={post}
-                          onPostUpdate={fetchPosts}
-                          onPostChange={() => {}}
-                        />
-                      ))}
-                    </div>
-                  )}
+                  </div>
                 </div>
-               
               </div>
             </>
           )}
