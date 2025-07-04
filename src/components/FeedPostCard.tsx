@@ -228,7 +228,7 @@ export default function FeedPostCard({ post, onPostUpdate, onPostChange }: FeedP
 
         let renderedText = text;
         tags.forEach(tag => {
-            const hashtag = `#${tag}`;
+            const hashtag = `${tag}`;
             renderedText = renderedText.replace(
                 new RegExp(`\\b${tag}\\b`, 'gi'),
                 hashtag
