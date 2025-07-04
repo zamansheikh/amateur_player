@@ -131,9 +131,9 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
                             {/* User Profile */}
                             <Link
                                 href="/profile"
-                                className="block border-t border-gray-800 hover:bg-white hover:bg-opacity-10 transition-colors"
+                                className="block border-t border-gray-800 transition-colors"
                             >
-                                <div className="flex items-center gap-3 p-3 rounded-lg">
+                                <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-white hover:bg-opacity-10 hover:rounded-lg">
                                     {user?.profile_picture_url ? (
                                         <Image
                                             src={user.profile_picture_url}
@@ -151,7 +151,6 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
                                     )}
                                     <div className="flex-1">
                                         <p className="text-sm font-medium text-white">{user?.name}</p>
-                                        <p className="text-xs text-gray-300">{user?.email}</p>
                                         <span className="text-xs text-gray-400 hover:text-white">
                                             View Profile
                                         </span>
