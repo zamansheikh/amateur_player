@@ -129,34 +129,36 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
                             </nav>
 
                             {/* User Profile */}
-                            <Link
-                                href="/profile"
-                                className="block border-t border-gray-800 transition-colors"
-                            >
-                                <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-white hover:bg-opacity-10 hover:rounded-lg">
-                                    {user?.profile_picture_url ? (
-                                        <Image
-                                            src={user.profile_picture_url}
-                                            alt={user?.name || "Profile"}
-                                            width={32}
-                                            height={32}
-                                            className="w-8 h-8 rounded-full object-cover"
-                                        />
-                                    ) : (
-                                        <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
-                                            <span className="font-medium text-sm" style={{ color: '#111B05' }}>
-                                                {user?.name ? user.name.split(' ').map((n: string) => n[0]).join('') : 'U'}
+                            <div className="px-4 py-4 border-t border-gray-800">
+                                <Link
+                                    href="/profile"
+                                    className="block transition-colors"
+                                >
+                                    <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition-colors">
+                                        {user?.profile_picture_url ? (
+                                            <Image
+                                                src={user.profile_picture_url}
+                                                alt={user?.name || "Profile"}
+                                                width={32}
+                                                height={32}
+                                                className="w-8 h-8 rounded-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center">
+                                                <span className="font-medium text-sm" style={{ color: '#111B05' }}>
+                                                    {user?.name ? user.name.split(' ').map((n: string) => n[0]).join('') : 'U'}
+                                                </span>
+                                            </div>
+                                        )}
+                                        <div className="flex-1">
+                                            <p className="text-sm font-medium text-white">{user?.name}</p>
+                                            <span className="text-xs text-gray-400 hover:text-white">
+                                                View Profile
                                             </span>
                                         </div>
-                                    )}
-                                    <div className="flex-1">
-                                        <p className="text-sm font-medium text-white">{user?.name}</p>
-                                        <span className="text-xs text-gray-400 hover:text-white">
-                                            View Profile
-                                        </span>
                                     </div>
-                                </div>
-                            </Link>
+                                </Link>
+                            </div>
 
                             {/* Logout Button */}
                             <div className="px-4 pb-4">
