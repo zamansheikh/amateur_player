@@ -145,7 +145,7 @@ export default function FeedPage() {
             <div className="max-w-6xl mx-auto px-6 py-6">
                 <div className="flex gap-8">
                     {/* Main Content */}
-                    <div className="flex-1 max-w-2xl">
+                    <div className="flex-1 max-w-4xl">
                         {/* Create Post Section */}
                         <CreatePost onPostCreated={fetchFeed} />
 

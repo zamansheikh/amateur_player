@@ -13,24 +13,34 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface UserProfile {
-  id: number;
-  name: string;
-  username: string;
-  email: string;
-  profile_picture_url: string;
-  cover_video_url?: string;
-  bio?: string;
-  role: string;
-  stats: {
-    followers: number;
-    following: number;
-    likes: number;
-    level: number;
+    user_id: number;
+    username: string;
+    name: string;
+    first_name: string;
+    last_name: string;
+    profile_picture_url: string;
+    intro_video_url: string;
     xp: number;
-    exp: number;
-  };
-  is_following: boolean;
-  is_verified: boolean;
+    email: string;
+    level: number;
+    card_theme: string;
+    is_pro: boolean;
+    follower_count: number;
+    stats: {
+        id: number;
+        user_id: number;
+        average_score: number;
+        high_game: number;
+        high_series: number;
+        experience: number;
+    };
+    engagement: {
+        likes: number;
+        comments: number;
+        shares: number;
+        views: number;
+    };
+    is_followed: boolean;
 }
 
 interface UserPost {
@@ -118,30 +128,10 @@ export default function UserProfileModal({
       setError(null);
 
       // Replace with your actual API endpoint
-      // const response = await api.get(`/api/user/${userId}/profile`);
-      const dummpyProfile: UserProfile = {
-        id: userId,
-        name: "Jennifer",
-        username: "jennifer123",
-        email: "abc@gmail.com",
-        profile_picture_url: "/playercard1.png",
-        cover_video_url:
-          "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-        role: "Pro Player",
-        stats: {
-          followers: 2985,
-          following: 50,
-          likes: 182501,
-          level: 20,
-          xp: 2240,
-          exp: 8,
-        },
-        is_following: false,
-        is_verified: true,
-      };
-      // setProfile(response.data);
-      setProfile(dummpyProfile);
-      setIsFollowing(dummpyProfile.is_following);
+      const response = await api.get(`/api/user/${userId}/profile`);
+      console.log("Profile response:", response.data);
+      setProfile(response.data);
+      setIsFollowing(response.data?.is_followed || false);
     } catch (err) {
       console.error("Error fetching profile:", err);
       setError("Failed to load profile");
@@ -156,7 +146,7 @@ export default function UserProfileModal({
       setPostsLoading(true);
 
       // Replace with your actual API endpoint
-      // const response = await api.get(`/api/user/${userId}/posts`);
+      const response = await api.get(`/api/user/${userId}/posts`);
       const dummyPosts: UserPost[] = [
         {
           metadata: {
@@ -255,8 +245,8 @@ export default function UserProfileModal({
             ...profile,
             stats: {
               ...profile.stats,
-              followers: profile.stats.followers - 1,
             },
+            follower_count: profile.follower_count - 1,
           });
         }
       } else {
@@ -267,8 +257,8 @@ export default function UserProfileModal({
             ...profile,
             stats: {
               ...profile.stats,
-              followers: profile.stats.followers + 1,
             },
+            follower_count: profile.follower_count + 1,
           });
         }
       }
@@ -354,8 +344,8 @@ export default function UserProfileModal({
               {/* Profile Header */}
               <div className="relative">
                 {/* Cover Video */}
-                <div className="h-48 relative overflow-hidden">
-                  {profile?.cover_video_url ? (
+                <div className="h-64 relative overflow-hidden">
+                  {profile?.intro_video_url ? (
                     <video
                       autoPlay
                       loop
@@ -363,7 +353,7 @@ export default function UserProfileModal({
                       playsInline
                       className="w-full h-full object-cover"
                     >
-                      <source src={profile.cover_video_url} type="video/mp4" />
+                      <source src={profile?.intro_video_url} type="video/mp4" />
                       <div className="w-full h-full bg-gradient-to-r from-green-400 to-blue-500"></div>
                     </video>
                   ) : (
@@ -395,14 +385,14 @@ export default function UserProfileModal({
                             <h1 className="text-2xl font-bold text-gray-900">
                               {profile?.name}
                             </h1>
-                            {profile?.is_verified && (
+                            {profile?.is_pro && (
                               <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
                                 <span className="text-white text-xs">✓</span>
                               </div>
                             )}
                           </div>
                           <p className="text-gray-600 mb-4">
-                            {profile?.role || "Pro Player"}
+                            {profile?.is_pro ? "Pro Player" : "Amateur Player"}
                           </p>
                         </div>
 
@@ -418,7 +408,7 @@ export default function UserProfileModal({
                               />
                               <div className="absolute inset-0 flex items-center justify-center">
                                 <span className="text-white font-bold text-xs">
-                                  {profile?.stats.level || 8}
+                                  {profile?.level || 8}
                                 </span>
                               </div>
                             </div>
@@ -437,7 +427,7 @@ export default function UserProfileModal({
                               />
                               <div className="absolute inset-0 flex items-center justify-center">
                                 <span className="text-white font-bold text-xs">
-                                  {profile?.stats.xp || 8}
+                                  {profile?.xp || 8}
                                 </span>
                               </div>
                             </div>
@@ -456,7 +446,7 @@ export default function UserProfileModal({
                               />
                               <div className="absolute inset-0 flex items-center justify-center">
                                 <span className="text-white font-bold text-xs">
-                                  {profile?.stats.exp || 8}
+                                  {profile?.stats.experience || 8}
                                 </span>
                               </div>
                             </div>
@@ -493,28 +483,25 @@ export default function UserProfileModal({
                         <div className="flex items-center gap-6">
                           <div className="text-center">
                             <div className="text-xl font-bold text-gray-900">
-                              {profile?.stats.followers?.toLocaleString() ||
-                                "2,985"}
+                              {profile?.follower_count?.toLocaleString() || "0"}
                             </div>
                             <div className="text-xs text-gray-600">
-                              Follower
+                              Followers
                             </div>
                           </div>
                           <div className="text-center">
                             <div className="text-xl font-bold text-gray-900">
-                              {profile?.stats.following?.toLocaleString() ||
-                                "50"}
+                              {profile?.stats.high_game?.toLocaleString() || "0"}
                             </div>
                             <div className="text-xs text-gray-600">
-                              Following
+                              High Game
                             </div>
                           </div>
                           <div className="text-center">
                             <div className="text-xl font-bold text-gray-900">
-                              {profile?.stats.likes?.toLocaleString() ||
-                                "1,82,501"}
+                              {profile?.stats.high_series?.toLocaleString() || "0"}
                             </div>
-                            <div className="text-xs text-gray-600">Like</div>
+                            <div className="text-xs text-gray-600">High Series</div>
                           </div>
                         </div>
                       </div>
