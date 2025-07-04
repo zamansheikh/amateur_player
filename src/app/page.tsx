@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Star } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
-import ProPlayerModal from '@/components/ProPlayerModal';
+import PlayerCard from '@/components/PlayerCard';
 
 interface ProPlayer {
     user_id: number;
@@ -13,19 +13,27 @@ interface ProPlayer {
     first_name: string;
     last_name: string;
     profile_picture_url: string;
+    intro_video_url: string;
     xp: number;
+    email: string;
     level: number;
     card_theme: string;
     is_pro: boolean;
     follower_count: number;
-    stats?: {
+    stats: {
         id: number;
         user_id: number;
         average_score: number;
         high_game: number;
         high_series: number;
         experience: number;
-    } | null;
+    };
+    engagement: {
+        likes: number;
+        comments: number;
+        shares: number;
+        views: number;
+    };
     is_followed: boolean;
 }
 
@@ -33,8 +41,6 @@ export default function HomePage() {
     const [proPlayers, setProPlayers] = useState<ProPlayer[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [selectedPlayer, setSelectedPlayer] = useState<ProPlayer | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchProPlayers = async () => {
@@ -115,113 +121,6 @@ export default function HomePage() {
         };
     }, [proPlayers]);
 
-    // Handle opening player modal
-    const handlePlayerClick = (player: ProPlayer) => {
-        setSelectedPlayer(player);
-        setIsModalOpen(true);
-    };
-
-    // Handle closing modal
-    const handleCloseModal = () => {
-        setIsModalOpen(false);
-        setSelectedPlayer(null);
-    };
-
-    // Handle follow status update
-    const handleFollowUpdate = (userId: number, isFollowed: boolean) => {
-        setProPlayers(players =>
-            players.map(player =>
-                player.user_id === userId
-                    ? { ...player, is_followed: isFollowed, follower_count: isFollowed ? player.follower_count + 1 : player.follower_count - 1 }
-                    : player
-            )
-        );
-    };
-
-    const PlayerCard = ({ player, onClick }: { player: ProPlayer, onClick: () => void }) => {
-        // Use card_theme from API or fallback to gradient
-        const getCardStyle = () => {
-            if (player.card_theme && player.card_theme.startsWith('#')) {
-                // Hex color theme
-                return {
-                    background: `linear-gradient(135deg, ${player.card_theme}, ${player.card_theme}dd)`
-                };
-            } else if (player.card_theme === 'orange') {
-                return {
-                    background: 'linear-gradient(135deg, #ea580c, #dc2626)'
-                };
-            } else {
-                // Default green gradient
-                return {
-                    background: 'linear-gradient(135deg, #16a34a, #15803d)'
-                };
-            }
-        };
-
-        // Generate initials from name
-        const getInitials = (name: string) => {
-            if (!name) return player.username?.slice(0, 2).toUpperCase() || 'P';
-            return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-        };
-
-        return (
-            <div
-                className="text-white p-4 rounded-xl shadow-lg cursor-pointer hover:scale-105 transition-transform duration-200"
-                style={getCardStyle()}
-                onClick={onClick}
-            >
-                <div className="text-center">
-                    {player.profile_picture_url ? (
-                        <img
-                            src={player.profile_picture_url}
-                            alt={player.name || player.username}
-                            className="w-12 h-12 rounded-full mx-auto mb-3 object-cover border-2 border-white border-opacity-50"
-                        />
-                    ) : (
-                        <div className="w-12 h-12 bg-white bg-opacity-20 rounded-full mx-auto flex items-center justify-center font-bold mb-3 text-lg">
-                            {getInitials(player.name)}
-                        </div>
-                    )}
-
-                    <h3 className="font-bold text-lg mb-1">
-                        {player.name || player.username}
-                    </h3>
-                    <p className="text-white text-opacity-80 text-sm mb-3">
-                        @{player.username}
-                    </p>
-
-                    <div className="flex justify-between items-center mb-2">
-                        <div>
-                            <p className="text-white text-opacity-70 text-xs">Level</p>
-                            <p className="font-bold text-xl">
-                                {player.level}
-                            </p>
-                        </div>
-                        <div>
-                            <p className="text-white text-opacity-70 text-xs">XP</p>
-                            <p className="font-bold text-xl">
-                                {player.xp.toLocaleString()}
-                            </p>
-                        </div>
-                    </div>
-
-                    {player.stats?.average_score && player.stats.average_score > 0 && (
-                        <div className="mb-2">
-                            <p className="text-white text-opacity-70 text-xs">Avg Score</p>
-                            <p className="font-bold text-base">
-                                {Math.round(player.stats.average_score)}
-                            </p>
-                        </div>
-                    )}
-
-                    <div className="bg-white bg-opacity-20 rounded-full px-3 py-1 text-sm font-medium">
-                        Pro Player
-                    </div>
-                </div>
-            </div>
-        );
-    };
-
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -294,11 +193,8 @@ export default function HomePage() {
                             }}
                         >
                             {proPlayers.map((player) => (
-                                <div key={player.user_id} className="flex-shrink-0 w-56">
-                                    <PlayerCard
-                                        player={player}
-                                        onClick={() => handlePlayerClick(player)}
-                                    />
+                                <div key={player.user_id} className="flex-shrink-0 w-80">
+                                    <PlayerCard player={player} />
                                 </div>
                             ))}
                         </div>
@@ -340,16 +236,6 @@ export default function HomePage() {
                     </div>
                 </div>
             </div>
-
-            {/* Pro Player Modal */}
-            {selectedPlayer && (
-                <ProPlayerModal
-                    player={selectedPlayer}
-                    isOpen={isModalOpen}
-                    onClose={handleCloseModal}
-                    onFollowUpdate={handleFollowUpdate}
-                />
-            )}
         </div>
     );
 }
