@@ -24,7 +24,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
     const { user, signout } = useAuth();
 
     // Public routes that don't require authentication
-    const publicRoutes = ['/signin', '/signup', '/landing', '/landing/page'];
+    const publicRoutes = ['/signin', '/signup', '/landing', '/landing/page', '/'];
     const isPublicRoute = publicRoutes.includes(pathname);
 
     // Landing page route - show only the landing page without navigation
