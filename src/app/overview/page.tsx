@@ -118,40 +118,6 @@ const mockMessages: Message[] = [
 function Metrics({ playerId, dashboardData, user }: { playerId: string; dashboardData: DashboardData | null; user: any }) {
     return (
         <div className="space-y-6">
-            {/* Weighted Index */}
-            <div className="bg-white rounded-lg shadow-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-800">Weighted Index</h3>
-                    <button className="text-green-600 hover:text-green-800 text-sm font-medium">View Details</button>
-                </div>
-                <div className="text-center mb-6">
-                    <div className="text-4xl font-bold text-green-600 mb-2">
-                        {dashboardData ? `${Math.round(dashboardData.weighted_index)}%` : '20%'}
-                    </div>
-                    <p className="text-sm text-gray-600">Current ranking position</p>
-                </div>
-                <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Free Users (30%)</span>
-                        <span className="text-sm font-medium text-gray-900">
-                            {dashboardData ? dashboardData.free_users : 0}
-                        </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Premium Users (40%)</span>
-                        <span className="text-sm font-medium text-gray-900">
-                            {dashboardData ? dashboardData.premium_user_count : 0}
-                        </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Engagement (30%)</span>
-                        <span className="text-sm font-medium text-gray-900">
-                            {dashboardData ? dashboardData.likes + dashboardData.comments : 19}
-                        </span>
-                    </div>
-                </div>
-            </div>
-
             {/* Fan Base */}
             <div className="bg-white rounded-lg shadow-lg p-6">
                 <div className="flex items-center gap-2 mb-4">
