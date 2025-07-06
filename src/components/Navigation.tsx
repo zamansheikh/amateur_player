@@ -11,12 +11,11 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 const navigation = [
     { name: 'Pro Players', href: '/', icon: Home },
     { name: 'Feed', href: '/feed', icon: Rss },
-    // Future pages - to be implemented
-    // { name: 'Overview', href: '/overview', icon: BarChart3 },
-    // { name: 'Messages', href: '/messages', icon: MessageCircle },
-    // { name: 'My Teams', href: '/teams', icon: Settings },
-    // { name: 'Analytics', href: '/analytics', icon: BarChart3 },
-    // { name: 'Tournaments', href: '/tournaments', icon: Settings },
+    { name: 'Overview', href: '/overview', icon: BarChart3 },
+    { name: 'Messages', href: '/messages', icon: MessageCircle },
+    { name: 'My Teams', href: '/teams', icon: Settings },
+    { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+    { name: 'Tournaments', href: '/tournaments', icon: Settings },
 ];
 
 export default function Navigation({ children }: { children: React.ReactNode }) {
