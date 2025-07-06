@@ -11,8 +11,8 @@ export default function RootPage() {
     useEffect(() => {
         if (!isLoading) {
             if (user?.authenticated) {
-                // Redirect authenticated users to the feed (home)
-                router.replace('/feed');
+                // Redirect authenticated users to the home page
+                router.replace('/home');
             } else {
                 // Redirect non-authenticated users to the landing page
                 router.replace('/landing');
