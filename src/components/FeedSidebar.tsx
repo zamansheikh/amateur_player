@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Search, User, TrendingUp, Hash } from 'lucide-react';
 import { api } from '@/lib/api';
-import UserProfileModal from './UserProfileModal';
 
 interface SuggestedUser {
     user_id: number;
@@ -24,8 +24,7 @@ export default function FeedSidebar() {
     const [suggestedUsers, setSuggestedUsers] = useState<SuggestedUser[]>([]);
     const [trendingTopics, setTrendingTopics] = useState<TrendingTopic[]>([]);
     const [followingUsers, setFollowingUsers] = useState<Set<number>>(new Set());
-    const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
-    const [showUserModal, setShowUserModal] = useState(false);
+    const router = useRouter();
 
     // Mock data - replace with real API calls
     useEffect(() => {
@@ -116,13 +115,7 @@ export default function FeedSidebar() {
     };
 
     const handleUserClick = (userId: number) => {
-        setSelectedUserId(userId);
-        setShowUserModal(true);
-    };
-
-    const handleCloseUserModal = () => {
-        setShowUserModal(false);
-        setSelectedUserId(null);
+        router.push(`/player/${userId}`);
     };
 
     return (
@@ -220,14 +213,6 @@ export default function FeedSidebar() {
                 </button>
             </div>
 
-            {/* User Profile Modal */}
-            {selectedUserId && (
-                <UserProfileModal
-                    isOpen={showUserModal}
-                    onClose={handleCloseUserModal}
-                    userId={selectedUserId}
-                />
-            )}
         </div>
     );
 }

@@ -2,8 +2,8 @@
 
 import { Heart, MessageSquare, Share, Send } from 'lucide-react';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
-import UserProfileModal from './UserProfileModal';
 
 interface FeedPost {
     metadata: {
@@ -77,7 +77,7 @@ export default function FeedPostCard({ post, onPostUpdate, onPostChange }: FeedP
     const [isReplying, setIsReplying] = useState(false);
     const [isFollowing, setIsFollowing] = useState(false);
     const [localPost, setLocalPost] = useState(post);
-    const [showUserModal, setShowUserModal] = useState(false);
+    const router = useRouter();
 
     // Initialize following state
     useState(() => {
@@ -85,11 +85,7 @@ export default function FeedPostCard({ post, onPostUpdate, onPostChange }: FeedP
     });
 
     const handleUserClick = () => {
-        setShowUserModal(true);
-    };
-
-    const handleCloseUserModal = () => {
-        setShowUserModal(false);
+        router.push(`/player/${post.author.user_id}`);
     };
 
     const handleLike = async () => {
@@ -453,13 +449,6 @@ export default function FeedPostCard({ post, onPostUpdate, onPostChange }: FeedP
                     </div>
                 )}
             </div>
-
-            {/* User Profile Modal */}
-            <UserProfileModal
-                isOpen={showUserModal}
-                onClose={handleCloseUserModal}
-                userId={post.author.user_id}
-            />
         </div>
     );
 }
