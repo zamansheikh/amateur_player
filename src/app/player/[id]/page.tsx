@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Trophy, Star, Users, TrendingUp, ArrowLeft, Heart, MessageCircle, Share, Eye, Play } from 'lucide-react';
 import { api } from '@/lib/api';
-import PlayerPostCard from '@/components/PlayerPostCard';
+import FeedPostCard from '@/components/FeedPostCard';
 
 interface ProPlayer {
     user_id: number;
@@ -37,7 +37,7 @@ interface ProPlayer {
     is_followed: boolean;
 }
 
-interface UserPost {
+interface FeedPost {
     metadata: {
         id: number;
         uid: string;
@@ -58,39 +58,37 @@ interface UserPost {
         user_id: number;
         name: string;
         profile_pic_url: string;
+        is_following: boolean;
+        viewer_is_author: boolean;
     };
-    likes: [
-        {
-            total: number;
-            likers: Array<{
+    likes: [{
+        total: number;
+        likers: Array<{
+            user_id: number;
+            name: string;
+            profile_pic_url: string;
+        }>;
+    }];
+    comments: [{
+        total: number;
+        comment_list: Array<{
+            comment_id: number;
+            user: {
                 user_id: number;
                 name: string;
                 profile_pic_url: string;
-            }>;
-        }
-    ];
-    comments: [
-        {
-            total: number;
-            users: Array<{
-                user_id: number;
-                name: string;
-                profile_pic_url: string;
-                comment: string;
-            }>;
-        }
-    ];
-    text?: {
-        content: string;
-    };
-    image?: {
-        url: string;
-        caption: string;
-    };
-    video?: {
-        url: string;
-        caption: string;
-    };
+            };
+            text: string;
+            pics: any[];
+            replies: any[];
+        }>;
+    }];
+    caption: string;
+    images: any[];
+    videos: any[];
+    poll: any;
+    event: any;
+    tags: string[];
 }
 
 export default function PlayerProfilePage() {
@@ -99,7 +97,7 @@ export default function PlayerProfilePage() {
     const playerId = params.id as string;
     
     const [player, setPlayer] = useState<ProPlayer | null>(null);
-    const [posts, setPosts] = useState<UserPost[]>([]);
+    const [posts, setPosts] = useState<FeedPost[]>([]);
     const [isFollowing, setIsFollowing] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [postsLoading, setPostsLoading] = useState(false);
@@ -441,7 +439,7 @@ export default function PlayerProfilePage() {
                     ) : (
                       <div className="space-y-6">
                         {posts.map((post) => (
-                          <PlayerPostCard
+                          <FeedPostCard
                             key={post.metadata.id}
                             post={post}
                           />
