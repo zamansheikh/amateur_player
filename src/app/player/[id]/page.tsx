@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Trophy, Star, Users, TrendingUp, ArrowLeft } from 'lucide-react';
+import { Trophy, Star, Users, TrendingUp, ArrowLeft, Heart, MessageCircle, Share, Eye } from 'lucide-react';
 import { api } from '@/lib/api';
+import PlayerPostCard from '@/components/PlayerPostCard';
 
 interface ProPlayer {
     user_id: number;
@@ -36,37 +37,112 @@ interface ProPlayer {
     is_followed: boolean;
 }
 
+interface UserPost {
+    metadata: {
+        id: number;
+        uid: string;
+        post_privacy: string;
+        total_likes: number;
+        total_comments: number;
+        created_at: string;
+        updated_at: string;
+        created: string;
+        last_update: string;
+        has_text: boolean;
+        has_image: boolean;
+        has_video: boolean;
+        has_poll: boolean;
+        has_event: boolean;
+    };
+    author: {
+        user_id: number;
+        name: string;
+        profile_pic_url: string;
+    };
+    likes: [
+        {
+            total: number;
+            likers: Array<{
+                user_id: number;
+                name: string;
+                profile_pic_url: string;
+            }>;
+        }
+    ];
+    comments: [
+        {
+            total: number;
+            users: Array<{
+                user_id: number;
+                name: string;
+                profile_pic_url: string;
+                comment: string;
+            }>;
+        }
+    ];
+    text?: {
+        content: string;
+    };
+    image?: {
+        url: string;
+        caption: string;
+    };
+    video?: {
+        url: string;
+        caption: string;
+    };
+}
+
 export default function PlayerProfilePage() {
     const params = useParams();
     const router = useRouter();
     const playerId = params.id as string;
     
     const [player, setPlayer] = useState<ProPlayer | null>(null);
+    const [posts, setPosts] = useState<UserPost[]>([]);
     const [isFollowing, setIsFollowing] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [postsLoading, setPostsLoading] = useState(false);
     const [followerCount, setFollowerCount] = useState(0);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const fetchPlayer = async () => {
-            try {
-                setIsLoading(true);
-                const response = await api.get(`/api/user/profile/${playerId}`);
-                const playerData = response.data;
-                setPlayer(playerData);
-                setIsFollowing(playerData.is_followed);
-                setFollowerCount(playerData.follower_count);
-                setError(null);
-            } catch (err) {
-                console.error('Error fetching player:', err);
-                setError('Failed to load player profile');
-            } finally {
-                setIsLoading(false);
-            }
-        };
+    // Fetch user profile
+    const fetchProfile = async () => {
+        try {
+            setIsLoading(true);
+            setError(null);
 
+            const response = await api.get(`/api/user/${playerId}/profile`);
+            console.log("Profile response:", response.data);
+            setPlayer(response.data);
+            setIsFollowing(response.data?.is_followed || false);
+            setFollowerCount(response.data?.follower_count || 0);
+        } catch (err) {
+            console.error('Error fetching player:', err);
+            setError('Failed to load player profile');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Fetch user posts
+    const fetchPosts = async () => {
+        try {
+            setPostsLoading(true);
+
+            const response = await api.get(`/api/user/${playerId}/posts`);
+            setPosts(response.data);
+        } catch (err) {
+            console.error("Error fetching posts:", err);
+        } finally {
+            setPostsLoading(false);
+        }
+    };
+
+    useEffect(() => {
         if (playerId) {
-            fetchPlayer();
+            fetchProfile();
+            fetchPosts();
         }
     }, [playerId]);
 
@@ -74,17 +150,16 @@ export default function PlayerProfilePage() {
         if (!player) return;
         
         try {
-            setIsLoading(true);
-            await api.post('/api/user/follow', {
-                user_id: player.user_id
-            });
+            if (isFollowing) {
+                await api.delete(`/api/user/${playerId}/follow`);
+            } else {
+                await api.post(`/api/user/${playerId}/follow`);
+            }
 
             setIsFollowing(!isFollowing);
             setFollowerCount(prev => isFollowing ? prev - 1 : prev + 1);
         } catch (error) {
             console.error('Error following user:', error);
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -315,6 +390,34 @@ export default function PlayerProfilePage() {
                                         <div className="text-gray-600">Views</div>
                                     </div>
                                 </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Posts Section */}
+                <div className="mt-8 bg-white rounded-xl shadow-lg">
+                    <div className="p-6 border-b border-gray-200">
+                        <h3 className="text-xl font-bold text-gray-900">Recent Posts</h3>
+                    </div>
+                    <div className="p-6">
+                        {postsLoading ? (
+                            <div className="text-center py-8">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
+                                <p className="text-gray-600">Loading posts...</p>
+                            </div>
+                        ) : posts.length === 0 ? (
+                            <div className="text-center py-8">
+                                <p className="text-gray-500 text-lg mb-2">No posts yet</p>
+                                <p className="text-gray-400">This user hasn't shared any posts</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-6">
+                                {posts.map((post, index) => (
+                                    <div key={post.metadata.id || index} className="border-b border-gray-100 last:border-b-0 pb-6 last:pb-0">
+                                        <PlayerPostCard post={post} />
+                                    </div>
+                                ))}
                             </div>
                         )}
                     </div>
