@@ -61,7 +61,7 @@ const Organization: React.FC = () => {
   ];
 
   return (
-    <div className="bg-[#F4F9ED] px-4 sm:px-6 md:px-10 lg:px-20 py-16">
+    <div id="features" className="bg-[#F4F9ED] px-4 sm:px-6 md:px-10 lg:px-20 py-16">
       <SectionTitle subTitle="Trusted by bowling centers and organizations worldwide" />
 
       {/* Top Logos */}

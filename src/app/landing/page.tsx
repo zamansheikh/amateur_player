@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import Image from 'next/image';
+import LandingNavigation from './components/LandingNavigation';
 import Hero from './components/Hero';
 import Organization from './components/Organization';
 import About from './components/About';
@@ -12,6 +13,7 @@ import Contact from './components/Contact';
 export default function LandingPage() {
     return (
         <div>
+            <LandingNavigation />
             <Hero />
             <Organization />
             <About />
