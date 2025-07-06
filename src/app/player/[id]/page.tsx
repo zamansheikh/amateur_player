@@ -148,14 +148,15 @@ export default function PlayerProfilePage() {
         if (!player) return;
         
         try {
-            if (isFollowing) {
-                await api.delete(`/api/user/${playerId}/follow`);
-            } else {
-                await api.post(`/api/user/${playerId}/follow`);
-            }
+            const response = await api.post('/api/user/follow', {
+                user_id: player.user_id
+            });
 
-            setIsFollowing(!isFollowing);
-            setFollowerCount(prev => isFollowing ? prev - 1 : prev + 1);
+            // Check if the API call was successful (status code 200)
+            if (response.status === 200) {
+                setIsFollowing(!isFollowing);
+                setFollowerCount(prev => isFollowing ? prev - 1 : prev + 1);
+            }
         } catch (error) {
             console.error('Error following user:', error);
         }
