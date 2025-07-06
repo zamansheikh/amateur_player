@@ -32,11 +32,11 @@ const mockTournaments: Tournament[] = [
         title: "City Championship",
         location: "Downtown Lanes, New York, NY",
         date: "May 15, 2025",
-        price: 85,
-        type: "Singles",
+        price: 45,
+        type: "Doubles",
         registrationDeadline: "Register by May 10, 2025",
         status: "premium",
-        category: "Singles"
+        category: "Doubles"
     },
     {
         id: 3,
@@ -44,20 +44,42 @@ const mockTournaments: Tournament[] = [
         location: "Downtown Lanes, New York, NY",
         date: "May 15, 2025",
         price: 85,
-        type: "Singles",
+        type: "Team",
         registrationDeadline: "Register by May 10, 2025",
         status: "cancelled",
-        category: "Singles"
+        category: "Team"
     },
     {
         id: 4,
         title: "City Championship",
         location: "Downtown Lanes, New York, NY",
         date: "May 15, 2025",
-        price: 85,
+        price: 30,
         type: "Singles",
         registrationDeadline: "Register by May 10, 2025",
         status: "cancelled",
+        category: "Singles"
+    },
+    {
+        id: 5,
+        title: "Pro-Am Tournament",
+        location: "Elite Bowling Center, NY",
+        date: "June 20, 2025",
+        price: 150,
+        type: "Pro-Am",
+        registrationDeadline: "Register by June 15, 2025",
+        status: "active",
+        category: "Singles"
+    },
+    {
+        id: 6,
+        title: "Senior League Championship",
+        location: "Community Lanes, NY",
+        date: "July 5, 2025",
+        price: 25,
+        type: "Senior",
+        registrationDeadline: "Register by July 1, 2025",
+        status: "active",
         category: "Singles"
     }
 ];
@@ -77,6 +99,7 @@ export default function TournamentsPage() {
         uploadDate: [],
         duration: '2-60+ min'
     });
+    const [durationValue, setDurationValue] = useState(30);
 
     const tabs = ['All Tournament', 'Registered', 'Cancelled'];
 
@@ -90,6 +113,46 @@ export default function TournamentsPage() {
                 : [...(prev[category] as string[]), value]
         }));
     };
+
+    const resetFilters = () => {
+        setSelectedFilters({
+            contentType: [],
+            accessLevel: [],
+            uploadDate: [],
+            duration: '2-60+ min'
+        });
+        setDurationValue(30);
+    };
+
+    // Filter tournaments based on active tab and selected filters
+    const getFilteredTournaments = () => {
+        let filtered = [...mockTournaments];
+
+        // Filter by tab
+        if (activeTab === 'Registered') {
+            // For demo purposes, showing premium tournaments as "registered"
+            filtered = filtered.filter(tournament => tournament.status === 'premium');
+        } else if (activeTab === 'Cancelled') {
+            filtered = filtered.filter(tournament => tournament.status === 'cancelled');
+        }
+        // 'All Tournament' shows all tournaments
+
+        // Filter by content type
+        if (selectedFilters.contentType.length > 0) {
+            filtered = filtered.filter(tournament => 
+                selectedFilters.contentType.includes(tournament.category)
+            );
+        }
+
+        // Filter by access level (price)
+        if (selectedFilters.accessLevel.includes('Under $50')) {
+            filtered = filtered.filter(tournament => tournament.price < 50);
+        }
+
+        return filtered;
+    };
+
+    const filteredTournaments = getFilteredTournaments();
 
     const renderTournamentCard = (tournament: Tournament) => (
         <div key={tournament.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
@@ -210,6 +273,7 @@ export default function TournamentsPage() {
                                         <label key={type} className="flex items-center gap-2">
                                             <input
                                                 type="checkbox"
+                                                checked={selectedFilters.contentType.includes(type)}
                                                 className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
                                                 onChange={() => toggleFilter('contentType', type)}
                                             />
@@ -227,6 +291,7 @@ export default function TournamentsPage() {
                                         <label key={level} className="flex items-center gap-2">
                                             <input
                                                 type="checkbox"
+                                                checked={selectedFilters.accessLevel.includes(level)}
                                                 className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
                                                 onChange={() => toggleFilter('accessLevel', level)}
                                             />
@@ -244,11 +309,12 @@ export default function TournamentsPage() {
                                         type="range"
                                         min="2"
                                         max="60"
-                                        value="30"
+                                        value={durationValue}
+                                        onChange={(e) => setDurationValue(Number(e.target.value))}
                                         className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                                     />
                                     <div className="flex justify-between text-xs text-gray-500 mt-1">
-                                        <span>2-60+ min</span>
+                                        <span>{durationValue}-60+ min</span>
                                     </div>
                                 </div>
                             </div>
@@ -261,6 +327,7 @@ export default function TournamentsPage() {
                                         <label key={date} className="flex items-center gap-2">
                                             <input
                                                 type="checkbox"
+                                                checked={selectedFilters.uploadDate.includes(date)}
                                                 className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
                                                 onChange={() => toggleFilter('uploadDate', date)}
                                             />
@@ -272,10 +339,16 @@ export default function TournamentsPage() {
 
                             {/* Action Buttons */}
                             <div className="space-y-3">
-                                <button className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors">
+                                <button 
+                                    onClick={() => {/* Apply filters is already applied automatically */}}
+                                    className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors"
+                                >
                                     Apply Filters
                                 </button>
-                                <button className="w-full border border-gray-300 text-gray-700 hover:bg-gray-50 py-2 px-4 rounded-lg transition-colors">
+                                <button 
+                                    onClick={resetFilters}
+                                    className="w-full border border-gray-300 text-gray-700 hover:bg-gray-50 py-2 px-4 rounded-lg transition-colors"
+                                >
                                     Reset
                                 </button>
                             </div>
@@ -285,7 +358,14 @@ export default function TournamentsPage() {
                     {/* Tournament Cards */}
                     <div className="flex-1">
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                            {mockTournaments.map((tournament) => renderTournamentCard(tournament))}
+                            {filteredTournaments.length > 0 ? (
+                                filteredTournaments.map((tournament) => renderTournamentCard(tournament))
+                            ) : (
+                                <div className="col-span-full text-center py-12">
+                                    <div className="text-gray-500 text-lg mb-2">No tournaments found</div>
+                                    <p className="text-gray-400">Try adjusting your filters or check back later for new tournaments.</p>
+                                </div>
+                            )}
                         </div>
 
                         {/* Load More Button */}
