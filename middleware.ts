@@ -4,7 +4,7 @@ export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Public routes that don't require authentication
-    const publicRoutes = ['/signin', '/signup'];
+    const publicRoutes = ['/signin', '/signup', '/landing', '/'];
 
     // Check if the current path is a public route
     const isPublicRoute = publicRoutes.includes(pathname);
@@ -14,8 +14,8 @@ export function middleware(request: NextRequest) {
         request.headers.get('authorization')?.replace('Bearer ', '');
 
     // If it's a public route and user is authenticated, redirect to home
-    if (isPublicRoute && token) {
-        return NextResponse.redirect(new URL('/', request.url));
+    if (isPublicRoute && token && pathname !== '/') {
+        return NextResponse.redirect(new URL('/home', request.url));
     }
 
     // If it's a protected route and user is not authenticated, redirect to signin
