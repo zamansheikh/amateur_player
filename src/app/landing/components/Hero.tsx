@@ -22,7 +22,7 @@ const Hero: React.FC = () => {
 
         <div className="flex justify-center md:justify-start">
           <Link
-            href="/"
+            href="/signin"
             className="inline-block bg-[#8BC342] transition hover:scale-105 hover:bg-[#6fa332] duration-300 text-white px-6 sm:px-8 py-3 rounded-md text-sm sm:text-base font-medium"
           >
             Get Started

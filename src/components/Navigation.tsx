@@ -4,17 +4,17 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { Home, BarChart3, MessageCircle, Settings, Bell, Menu, X, LogOut, Rss } from 'lucide-react';
+import { Home, BarChart3, MessageCircle, Settings, Bell, Menu, X, LogOut, Users, Trophy, Target } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 const navigation = [
-    { name: 'Pro Players', href: '/', icon: Home },
-    { name: 'Feed', href: '/feed', icon: Rss },
+    { name: 'Home', href: '/feed', icon: Home },
+    { name: 'Pro Players', href: '/pro-players', icon: Trophy },
     { name: 'Overview', href: '/overview', icon: BarChart3 },
     { name: 'Messages', href: '/messages', icon: MessageCircle },
-    { name: 'My Teams', href: '/teams', icon: Settings },
-    { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+    { name: 'My Teams', href: '/teams', icon: Users },
+    { name: 'Analytics', href: '/analytics', icon: Target },
     { name: 'Tournaments', href: '/tournaments', icon: Settings },
 ];
 
@@ -23,10 +23,16 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const { user, signout } = useAuth();
 
-    // Public routes
-    const publicRoutes = ['/signin', '/signup', '/landingpage', '/landing'];
+    // Public routes that don't require authentication
+    const publicRoutes = ['/signin', '/signup', '/landing', '/landing/page'];
     const isPublicRoute = publicRoutes.includes(pathname);
 
+    // Landing page route - show only the landing page without navigation
+    if (pathname === '/landing' || pathname === '/landing/page') {
+        return <>{children}</>;
+    }
+
+    // Authentication pages - show without navigation
     if (isPublicRoute) {
         return <>{children}</>;
     }
