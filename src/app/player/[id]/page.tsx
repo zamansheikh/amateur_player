@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Trophy, Star, Users, TrendingUp, ArrowLeft, Heart, MessageCircle, Share, Eye, Play } from 'lucide-react';
+import { ArrowLeft, Play } from 'lucide-react';
 import { api } from '@/lib/api';
-import FeedPostCard from '@/components/FeedPostCard';
+import UserPostCard from '@/components/UserPostCard';
 
 interface ProPlayer {
     user_id: number;
@@ -439,7 +439,7 @@ export default function PlayerProfilePage() {
                     ) : (
                       <div className="space-y-6">
                         {posts.map((post) => (
-                          <FeedPostCard
+                          <UserPostCard
                             key={post.metadata.id}
                             post={post}
                           />
