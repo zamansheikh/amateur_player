@@ -48,7 +48,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
                             <div className="flex items-center justify-between px-4 py-4 border-b border-gray-700">
                                 <div className="flex items-center gap-3">
                                     <Image
-                                        src="/logo/logo.png"
+                                        src="/logo/logo_for_dark.png"
                                         alt="Bowlers Network Logo"
                                         width={32}
                                         height={32}
@@ -94,7 +94,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
                             {/* Logo */}
                             <div className="flex items-center gap-3 px-6 py-6 border-b border-gray-800">
                                 <Image
-                                    src="/logo/logo.png"
+                                    src="/logo/logo_for_dark.png"
                                     alt="Bowlers Network Logo"
                                     width={40}
                                     height={40}
