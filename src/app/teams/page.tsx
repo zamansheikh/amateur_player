@@ -56,6 +56,7 @@ export default function TeamsPage() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isTeamManageModalOpen, setIsTeamManageModalOpen] = useState(false);
     const [selectedTeamForManage, setSelectedTeamForManage] = useState<Team | null>(null);
+    const [activeTab, setActiveTab] = useState<'teams' | 'pending' | 'sent'>('teams');
     const [teamName, setTeamName] = useState('');
     const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -290,224 +291,261 @@ export default function TeamsPage() {
                 </div>
             </div>
 
-            {/* Invitation Management Section - Always visible */}
+            {/* Tabbed Interface */}
             <div className="mb-8">
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    {/* Tab Headers */}
                     <div className="bg-gradient-to-r from-green-600 to-green-700 px-6 py-4">
-                        <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                            <MessageCircle className="w-5 h-5" />
-                            Invitation Management
-                        </h2>
-                        <p className="text-green-100 text-sm mt-1">
-                            Manage your team invitations - received and sent
-                        </p>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                                    <MessageCircle className="w-5 h-5" />
+                                    Team Management
+                                </h2>
+                                <p className="text-green-100 text-sm mt-1">
+                                    Manage your teams and invitations
+                                </p>
+                            </div>
+                            {activeTab === 'teams' && (
+                                <button
+                                    onClick={() => setIsCreateModalOpen(true)}
+                                    className="bg-white text-green-600 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors hover:bg-green-50"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    Create Team
+                                </button>
+                            )}
+                        </div>
                     </div>
 
-                    <div className="p-6">
-                        {/* Received Invitations */}
-                        {invitations.received.length > 0 ? (
-                            <div className="mb-6">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                                    <h3 className="text-md font-semibold text-gray-900">
-                                        Pending Invitations ({invitations.received.length})
-                                    </h3>
-                                </div>
-                                <div className="space-y-3">
-                                    {invitations.received.map((invitation) => (
-                                        <div key={invitation.invitation_id} className="bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-4 hover:bg-yellow-100 transition-colors">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-yellow-300">
-                                                        {invitation.team.logo_url ? (
-                                                            <img src={invitation.team.logo_url} alt={invitation.team.name} className="w-full h-full object-cover" />
-                                                        ) : (
-                                                            <div className="w-full h-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center">
-                                                                <span className="text-white text-lg font-bold">
-                                                                    {invitation.team.name.charAt(0).toUpperCase()}
-                                                                </span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-sm font-medium text-gray-900">
-                                                            <span className="text-yellow-700 font-semibold">{invitation.team.created_by.name}</span> invited you to join
-                                                        </p>
-                                                        <p className="text-lg font-bold text-gray-800">{invitation.team.name}</p>
-                                                        <p className="text-xs text-gray-500 flex items-center gap-1">
-                                                            <span>📅</span>
-                                                            Invited on {new Date(invitation.team.created_at).toLocaleDateString()}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <button
-                                                        onClick={() => handleAcceptInvitation(invitation.invitation_id)}
-                                                        className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 shadow-sm"
-                                                    >
-                                                        <span>✓</span>
-                                                        Accept
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleRejectInvitation(invitation.invitation_id)}
-                                                        className="px-4 py-2 bg-red-100 text-red-700 text-sm font-medium rounded-lg hover:bg-red-200 transition-colors flex items-center gap-2"
-                                                    >
-                                                        <span>✕</span>
-                                                        Decline
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                                    <h3 className="text-md font-semibold text-gray-700">Pending Invitations (0)</h3>
-                                </div>
-                                <p className="text-sm text-gray-500">No pending invitations to display</p>
-                            </div>
-                        )}
+                    {/* Tab Navigation */}
+                    <div className="border-b border-gray-200">
+                        <nav className="flex space-x-8 px-6" aria-label="Tabs">
+                            <button
+                                onClick={() => setActiveTab('teams')}
+                                className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors ${
+                                    activeTab === 'teams'
+                                        ? 'border-green-500 text-green-600'
+                                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                                }`}
+                            >
+                                Teams ({teams.length})
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('pending')}
+                                className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors ${
+                                    activeTab === 'pending'
+                                        ? 'border-green-500 text-green-600'
+                                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                                }`}
+                            >
+                                Pending ({invitations.received.length})
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('sent')}
+                                className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors ${
+                                    activeTab === 'sent'
+                                        ? 'border-green-500 text-green-600'
+                                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                                }`}
+                            >
+                                Sent ({invitations.sent.length})
+                            </button>
+                        </nav>
+                    </div>
 
-                        {/* Sent Invitations */}
-                        {invitations.sent.length > 0 ? (
+                    {/* Tab Content */}
+                    <div className="p-6">
+                        {/* Teams Tab */}
+                        {activeTab === 'teams' && (
                             <div>
-                                <div className="flex items-center gap-2 mb-4">
-                                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                    <h3 className="text-md font-semibold text-gray-900">
-                                        Sent Invitations ({invitations.sent.length})
-                                    </h3>
-                                </div>
-                                <div className="space-y-3">
-                                    {invitations.sent.map((invitation) => (
-                                        <div key={invitation.invitation_id} className="bg-blue-50 border-l-4 border-blue-400 rounded-lg p-4 hover:bg-blue-100 transition-colors">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-blue-300">
-                                                        {invitation.invited_user.profile_picture_url ? (
-                                                            <img src={invitation.invited_user.profile_picture_url} alt={invitation.invited_user.name} className="w-full h-full object-cover" />
-                                                        ) : (
-                                                            <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center">
-                                                                <span className="text-white text-lg font-bold">
-                                                                    {invitation.invited_user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                                                                </span>
+                                {loading ? (
+                                    <div className="flex items-center justify-center py-12">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                                    </div>
+                                ) : teams.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {teams.map((team) => (
+                                            <div key={team.team_id} className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-12 h-12 rounded-full overflow-hidden">
+                                                            {team.logo_url ? (
+                                                                <img src={team.logo_url} alt={team.name} className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                                                                    <span className="text-gray-500 text-lg">👥</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="text-lg font-semibold text-gray-900">{team.name}</h3>
+                                                            <div className="flex items-center gap-4 text-sm text-gray-500">
+                                                                <span className="text-blue-600">{team.member_count || 0} Members</span>
+                                                                <span>Created {team.created_at}</span>
                                                             </div>
-                                                        )}
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-sm text-gray-600">You invited</p>
-                                                        <p className="text-lg font-bold text-gray-800">{invitation.invited_user.name}</p>
-                                                        <p className="text-sm text-blue-700 font-medium">
-                                                            to join <span className="font-bold">{invitation.team.name}</span>
-                                                        </p>
-                                                        <div className="flex items-center gap-2 mt-1">
-                                                            <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
-                                                            <p className="text-xs text-gray-500">Waiting for response</p>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <div className="text-right">
-                                                    <button
-                                                        onClick={() => handleWithdrawInvitation(invitation.invitation_id)}
-                                                        className="px-4 py-2 bg-red-100 text-red-700 text-sm font-medium rounded-lg hover:bg-red-200 transition-colors flex items-center gap-2 mb-2"
-                                                    >
-                                                        <span>↶</span>
-                                                        Withdraw
-                                                    </button>
+                                                    <div className="flex items-center gap-2">
+                                                        <button 
+                                                            onClick={() => handleManageTeam(team)}
+                                                            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+                                                        >
+                                                            <span>⚙️</span>
+                                                            Manage
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => handleDeleteTeam(team.team_id)}
+                                                            className="w-10 h-10 bg-gray-100 hover:bg-red-100 rounded-full flex items-center justify-center transition-colors group"
+                                                        >
+                                                            <span className="text-gray-600 group-hover:text-red-600 text-lg">🗑️</span>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-12">
+                                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <span className="text-gray-400 text-2xl">👥</span>
                                         </div>
-                                    ))}
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                                    <h3 className="text-md font-semibold text-gray-700">Sent Invitations (0)</h3>
-                                </div>
-                                <p className="text-sm text-gray-500">No sent invitations to display</p>
+                                        <p className="text-gray-500 font-medium">No teams yet</p>
+                                        <p className="text-gray-400 text-sm mb-4">Create your first team to get started!</p>
+                                        <button
+                                            onClick={() => setIsCreateModalOpen(true)}
+                                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors mx-auto"
+                                        >
+                                            <Plus className="w-4 h-4" />
+                                            Create Team
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         )}
 
-                        {/* Overall No Invitations Message */}
-                        {invitations.received.length === 0 && invitations.sent.length === 0 && (
-                            <div className="text-center py-8 border-t border-gray-200 mt-4">
-                                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <MessageCircle className="w-8 h-8 text-gray-400" />
-                                </div>
-                                <p className="text-gray-500 font-medium">No invitations yet</p>
-                                <p className="text-gray-400 text-sm">Create a team and start inviting members to see invitations here!</p>
+                        {/* Pending Invitations Tab */}
+                        {activeTab === 'pending' && (
+                            <div>
+                                {invitations.received.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {invitations.received.map((invitation) => (
+                                            <div key={invitation.invitation_id} className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 hover:bg-yellow-100 transition-colors">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-yellow-300">
+                                                            {invitation.team.logo_url ? (
+                                                                <img src={invitation.team.logo_url} alt={invitation.team.name} className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <div className="w-full h-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center">
+                                                                    <span className="text-white text-lg font-bold">
+                                                                        {invitation.team.name.charAt(0).toUpperCase()}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm font-medium text-gray-900">
+                                                                <span className="text-yellow-700 font-semibold">{invitation.team.created_by.name}</span> invited you to join
+                                                            </p>
+                                                            <p className="text-lg font-bold text-gray-800">{invitation.team.name}</p>
+                                                            <p className="text-xs text-gray-500 flex items-center gap-1">
+                                                                <span>📅</span>
+                                                                Invited on {new Date(invitation.team.created_at).toLocaleDateString()}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            onClick={() => handleAcceptInvitation(invitation.invitation_id)}
+                                                            className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 shadow-sm"
+                                                        >
+                                                            <span>✓</span>
+                                                            Accept
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleRejectInvitation(invitation.invitation_id)}
+                                                            className="px-4 py-2 bg-red-100 text-red-700 text-sm font-medium rounded-lg hover:bg-red-200 transition-colors flex items-center gap-2"
+                                                        >
+                                                            <span>✕</span>
+                                                            Decline
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-12">
+                                        <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <span className="text-yellow-500 text-2xl">📨</span>
+                                        </div>
+                                        <p className="text-gray-500 font-medium">No pending invitations</p>
+                                        <p className="text-gray-400 text-sm">You'll see team invitations here when someone invites you!</p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Sent Invitations Tab */}
+                        {activeTab === 'sent' && (
+                            <div>
+                                {invitations.sent.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {invitations.sent.map((invitation) => (
+                                            <div key={invitation.invitation_id} className="bg-blue-50 border border-blue-200 rounded-lg p-4 hover:bg-blue-100 transition-colors">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-blue-300">
+                                                            {invitation.invited_user.profile_picture_url ? (
+                                                                <img src={invitation.invited_user.profile_picture_url} alt={invitation.invited_user.name} className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center">
+                                                                    <span className="text-white text-lg font-bold">
+                                                                        {invitation.invited_user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div>
+                                                            <p className="text-sm text-gray-600">You invited</p>
+                                                            <p className="text-lg font-bold text-gray-800">{invitation.invited_user.name}</p>
+                                                            <p className="text-sm text-blue-700 font-medium">
+                                                                to join <span className="font-bold">{invitation.team.name}</span>
+                                                            </p>
+                                                            <div className="flex items-center gap-2 mt-1">
+                                                                <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
+                                                                <p className="text-xs text-gray-500">Waiting for response</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <button
+                                                            onClick={() => handleWithdrawInvitation(invitation.invitation_id)}
+                                                            className="px-4 py-2 bg-red-100 text-red-700 text-sm font-medium rounded-lg hover:bg-red-200 transition-colors flex items-center gap-2 mb-2"
+                                                        >
+                                                            <span>↶</span>
+                                                            Withdraw
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-12">
+                                        <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <span className="text-blue-500 text-2xl">📤</span>
+                                        </div>
+                                        <p className="text-gray-500 font-medium">No sent invitations</p>
+                                        <p className="text-gray-400 text-sm">Invitations you send to team members will appear here!</p>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
                 </div>
             </div>
-
-            {/* Teams Count and Create Button */}
-            <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-gray-900">
-                    {loading ? 'Loading...' : `${teams.length} Teams`}
-                </h2>
-                <button
-                    onClick={() => setIsCreateModalOpen(true)}
-                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-                >
-                    <Plus className="w-4 h-4" />
-                    Create new Team
-                </button>
-            </div>
-
-            {/* Teams List */}
-            {loading ? (
-                <div className="flex items-center justify-center py-12">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-                </div>
-            ) : (
-                <div className="space-y-4">
-                    {teams.map((team) => (
-                        <div key={team.team_id} className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-full overflow-hidden">
-                                        {team.logo_url ? (
-                                            <img src={team.logo_url} alt={team.name} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                                                <span className="text-gray-500 text-lg">👥</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-gray-900">{team.name}</h3>
-                                        <div className="flex items-center gap-4 text-sm text-gray-500">
-                                            <span className="text-blue-600">{team.member_count || 0} Members</span>
-                                            <span>Created {team.created_at}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <button 
-                                        onClick={() => handleManageTeam(team)}
-                                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
-                                    >
-                                        <span>⚙️</span>
-                                        Manage
-                                    </button>
-                                    <button 
-                                        onClick={() => handleDeleteTeam(team.team_id)}
-                                        className="w-10 h-10 bg-gray-100 hover:bg-red-100 rounded-full flex items-center justify-center transition-colors group"
-                                    >
-                                        <span className="text-gray-600 group-hover:text-red-600 text-lg">🗑️</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
 
 
 
