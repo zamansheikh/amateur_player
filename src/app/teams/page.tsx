@@ -55,7 +55,9 @@ interface InvitationsResponse {
 export default function TeamsPage() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isTeamManageModalOpen, setIsTeamManageModalOpen] = useState(false);
+    const [isTeamDetailsModalOpen, setIsTeamDetailsModalOpen] = useState(false);
     const [selectedTeamForManage, setSelectedTeamForManage] = useState<Team | null>(null);
+    const [selectedTeamForDetails, setSelectedTeamForDetails] = useState<Team | null>(null);
     const [activeTab, setActiveTab] = useState<'teams' | 'pending' | 'sent'>('teams');
     const [teamName, setTeamName] = useState('');
     const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
@@ -267,6 +269,11 @@ export default function TeamsPage() {
         }
     };
 
+    const handleViewTeamDetails = (team: Team) => {
+        setSelectedTeamForDetails(team);
+        setIsTeamDetailsModalOpen(true);
+    };
+
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
             {/* Header */}
@@ -368,7 +375,10 @@ export default function TeamsPage() {
                                         {teams.map((team) => (
                                             <div key={team.team_id} className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
                                                 <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-4">
+                                                    <div 
+                                                        className="flex items-center gap-4 flex-1 cursor-pointer"
+                                                        onClick={() => handleViewTeamDetails(team)}
+                                                    >
                                                         <div className="w-12 h-12 rounded-full overflow-hidden">
                                                             {team.logo_url ? (
                                                                 <img src={team.logo_url} alt={team.name} className="w-full h-full object-cover" />
@@ -379,7 +389,7 @@ export default function TeamsPage() {
                                                             )}
                                                         </div>
                                                         <div>
-                                                            <h3 className="text-lg font-semibold text-gray-900">{team.name}</h3>
+                                                            <h3 className="text-lg font-semibold text-gray-900 hover:text-green-600 transition-colors">{team.name}</h3>
                                                             <div className="flex items-center gap-4 text-sm text-gray-500">
                                                                 <span className="text-blue-600">{team.member_count || 0} Members</span>
                                                                 <span>Created {team.created_at}</span>
@@ -388,14 +398,20 @@ export default function TeamsPage() {
                                                     </div>
                                                     <div className="flex items-center gap-2">
                                                         <button 
-                                                            onClick={() => handleManageTeam(team)}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleManageTeam(team);
+                                                            }}
                                                             className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
                                                         >
                                                             <span>⚙️</span>
                                                             Manage
                                                         </button>
                                                         <button 
-                                                            onClick={() => handleDeleteTeam(team.team_id)}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDeleteTeam(team.team_id);
+                                                            }}
                                                             className="w-10 h-10 bg-gray-100 hover:bg-red-100 rounded-full flex items-center justify-center transition-colors group"
                                                         >
                                                             <span className="text-gray-600 group-hover:text-red-600 text-lg">🗑️</span>
@@ -805,6 +821,157 @@ export default function TeamsPage() {
                                     setSearchQuery('');
                                 }}
                                 className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Team Details Modal */}
+            {isTeamDetailsModalOpen && selectedTeamForDetails && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-2xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center gap-4">
+                                <div className="w-16 h-16 rounded-full overflow-hidden">
+                                    {selectedTeamForDetails.logo_url ? (
+                                        <img src={selectedTeamForDetails.logo_url} alt={selectedTeamForDetails.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
+                                            <span className="text-white text-2xl font-bold">
+                                                {selectedTeamForDetails.name.charAt(0).toUpperCase()}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                                <div>
+                                    <h2 className="text-2xl font-bold text-gray-900">{selectedTeamForDetails.name}</h2>
+                                    <p className="text-gray-600">Team Information</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => {
+                                    setIsTeamDetailsModalOpen(false);
+                                    setSelectedTeamForDetails(null);
+                                }}
+                                className="w-8 h-8 bg-red-100 hover:bg-red-200 rounded-full flex items-center justify-center transition-colors"
+                            >
+                                <X className="w-4 h-4 text-red-600" />
+                            </button>
+                        </div>
+
+                        {/* Team Stats */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                            <div className="bg-blue-50 rounded-lg p-4 text-center">
+                                <div className="text-2xl font-bold text-blue-600">{selectedTeamForDetails.member_count || 0}</div>
+                                <div className="text-sm text-blue-800">Members</div>
+                            </div>
+                            <div className="bg-green-50 rounded-lg p-4 text-center">
+                                <div className="text-2xl font-bold text-green-600">{selectedTeamForDetails.team_id}</div>
+                                <div className="text-sm text-green-800">Team ID</div>
+                            </div>
+                            <div className="bg-purple-50 rounded-lg p-4 text-center">
+                                <div className="text-2xl font-bold text-purple-600">
+                                    {new Date(selectedTeamForDetails.created_at).toLocaleDateString('en-US', { day: 'numeric' })}
+                                </div>
+                                <div className="text-sm text-purple-800">
+                                    {new Date(selectedTeamForDetails.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                                </div>
+                            </div>
+                            <div className="bg-orange-50 rounded-lg p-4 text-center">
+                                <div className="text-2xl font-bold text-orange-600">Active</div>
+                                <div className="text-sm text-orange-800">Status</div>
+                            </div>
+                        </div>
+
+                        {/* Team Creator */}
+                        <div className="mb-6">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-3">Team Creator</h3>
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-full overflow-hidden">
+                                        {selectedTeamForDetails.created_by.profile_picture_url ? (
+                                            <img src={selectedTeamForDetails.created_by.profile_picture_url} alt={selectedTeamForDetails.created_by.name} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
+                                                <span className="text-white text-lg font-bold">
+                                                    {selectedTeamForDetails.created_by.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <p className="font-semibold text-gray-900">{selectedTeamForDetails.created_by.name}</p>
+                                        <p className="text-sm text-gray-600">@{selectedTeamForDetails.created_by.username}</p>
+                                        <p className="text-sm text-gray-500">{selectedTeamForDetails.created_by.email}</p>
+                                    </div>
+                                    <div className="ml-auto">
+                                        <span className="px-3 py-1 bg-green-600 text-white text-sm rounded-full">Creator</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Team Members */}
+                        <div className="mb-6">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-3">Team Members</h3>
+                            <div className="space-y-3">
+                                {teamMembers[selectedTeamForDetails.team_id]?.length > 0 ? (
+                                    teamMembers[selectedTeamForDetails.team_id].map((member) => (
+                                        <div key={member.member_id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                            <div className="w-10 h-10 rounded-full overflow-hidden">
+                                                {member.member.profile_picture_url ? (
+                                                    <img src={member.member.profile_picture_url} alt={member.member.name} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                                                        <span className="text-gray-500 text-sm">👤</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="font-medium text-gray-900">{member.member.name}</p>
+                                                <p className="text-sm text-gray-600">@{member.member.username}</p>
+                                                <p className="text-sm text-gray-500">{member.member.email}</p>
+                                            </div>
+                                            {member.is_creator && (
+                                                <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Creator</span>
+                                            )}
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="text-center py-8">
+                                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <span className="text-gray-400 text-2xl">👥</span>
+                                        </div>
+                                        <p className="text-gray-500">No members found</p>
+                                        <p className="text-gray-400 text-sm">Invite members to see them here!</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => {
+                                    setIsTeamDetailsModalOpen(false);
+                                    setSelectedTeamForDetails(null);
+                                    handleManageTeam(selectedTeamForDetails);
+                                }}
+                                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                            >
+                                <span>⚙️</span>
+                                Manage Team
+                            </button>
+                            <button
+                                onClick={() => {
+                                    setIsTeamDetailsModalOpen(false);
+                                    setSelectedTeamForDetails(null);
+                                }}
+                                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
                             >
                                 Close
                             </button>
