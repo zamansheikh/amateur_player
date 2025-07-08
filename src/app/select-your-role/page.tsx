@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 
 // Define the role interface
 interface Role {
@@ -64,9 +65,13 @@ export default function SelectYourRole() {
         {/* Header */}
         <div className="flex flex-col items-center justify-center mb-12">
           <Link href="/" className="mb-8">
-            <div className="w-16 h-16 bg-green-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">B</span>
-            </div>
+            <Image
+              src="/logo/logo.png"
+              alt="Logo"
+              width={80}
+              height={80}
+              className="w-20 h-20"
+            />
           </Link>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Select Your Role
@@ -152,7 +157,20 @@ export default function SelectYourRole() {
           <button
             onClick={handleContinue}
             disabled={!selectedRole}
-            className="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105 shadow-lg"
+            className="text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105 shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed"
+            style={{
+              backgroundColor: !selectedRole ? '#d1d5db' : '#8BC342',
+            }}
+            onMouseEnter={(e) => {
+              if (!e.currentTarget.disabled) {
+                e.currentTarget.style.backgroundColor = '#7aa838';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!e.currentTarget.disabled) {
+                e.currentTarget.style.backgroundColor = '#8BC342';
+              }
+            }}
           >
             Continue
           </button>

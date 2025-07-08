@@ -4,7 +4,7 @@ export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Public routes that don't require authentication
-    const publicRoutes = ['/signin', '/signup', '/landing', '/'];
+    const publicRoutes = ['/signin','/select-your-role', '/signup', '/landing', '/'];
 
     // Check if the current path is a public route
     const isPublicRoute = publicRoutes.includes(pathname);
