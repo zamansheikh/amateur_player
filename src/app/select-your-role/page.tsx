@@ -15,7 +15,7 @@ interface Role {
 }
 
 export default function SelectYourRole() {
-  const [selectedRole, setSelectedRole] = useState<string>('manufacturer');
+  const [selectedRole, setSelectedRole] = useState<string>('amateur');
   const router = useRouter();
 
   const roles: Role[] = [
@@ -55,7 +55,21 @@ export default function SelectYourRole() {
 
   const handleContinue = () => {
     if (selectedRole) {
-      router.push(`/signup?role=${selectedRole}`);
+        if (selectedRole === 'amateur') {
+            router.push(`/signin?role=${selectedRole}`);
+        } else if (selectedRole === 'pro-player') {
+            // Redirect to another website in the same tab
+            window.location.href = 'https://bowlersnet.vercel.app/signin';
+        }
+            
+        else if (selectedRole === 'bowling-center') {
+            //Show a message that this role is not available yet
+            alert('This role is not available yet. Please select another role.');
+        }
+        else if (selectedRole === 'manufacturer') {
+            //Show a message that this role is not available yet
+            alert('This role is not available yet. Please select another role.');
+        }
     }
   };
 

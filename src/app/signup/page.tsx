@@ -67,7 +67,7 @@ export default function SignUpPage() {
                             height={48}
                             className="rounded-lg"
                         />
-                        <span className="text-2xl font-bold text-gray-900">Bowlers Networkr</span>
+                        <span className="text-2xl font-bold text-gray-900">Bowlers Network</span>
                     </div>
                     <h2 className="text-3xl font-bold text-gray-900">Create your account</h2>
                     <p className="mt-2 text-sm text-gray-600">
@@ -184,10 +184,32 @@ export default function SignUpPage() {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            style={{
+                                backgroundColor: isLoading ? '#d1d5db' : '#8BC342',
+                            }}
+                            onMouseEnter={(e) => {
+                                if (!e.currentTarget.disabled) {
+                                    e.currentTarget.style.backgroundColor = '#7aa838';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (!e.currentTarget.disabled) {
+                                    e.currentTarget.style.backgroundColor = '#8BC342';
+                                }
+                            }}
                         >
                             {isLoading ? 'Creating account...' : 'Create account'}
                         </button>
+                    </div>
+
+                    <div className="text-center">
+                        <p className="text-sm text-gray-600">
+                            Already have an account?{' '}
+                            <Link href="/signin" className="font-medium text-green-600 hover:text-green-500">
+                                Sign in here
+                            </Link>
+                        </p>
                     </div>
 
                     <div className="text-center">

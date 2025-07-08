@@ -82,7 +82,7 @@ const LandingNavigation = () => {
                     {/* Sign In Button */}
                     <div className="flex items-center">
                         <Link
-                            href="/signin"
+                            href="/select-your-role"
                             className="bg-[#8BC342] hover:bg-[#6fa332] text-white px-6 py-2 rounded-lg font-medium transition-colors"
                         >
                             Sign In
@@ -92,7 +92,7 @@ const LandingNavigation = () => {
                     {/* Mobile menu button (optional for future) */}
                     <div className="md:hidden">
                         <Link
-                            href="/signin"
+                            href="/select-your-role"
                             className="bg-[#8BC342] hover:bg-[#6fa332] text-white px-4 py-2 rounded-lg font-medium transition-colors text-sm"
                         >
                             Sign In
