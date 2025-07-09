@@ -1,14 +1,23 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import "./BowlingCarousel.css";
+import PlayerCard from "./PlayerCard";
 
-// Interface for carousel image data
-interface CarouselImage {
+// Interface for carousel player data
+interface CarouselPlayer {
   id: number;
-  image: string;
-  title: string;
+  name: string;
+  level: number;
+  imagePath: string;
+  stats: {
+    average: number;
+    highGame: number;
+    hightSeries: number;
+    experience: number;
+    Xp: number;
+    follower: number;
+  };
 }
 
 // Interface for animation classes state
@@ -25,33 +34,69 @@ interface VisibleIndices {
   nextIndex: number;
 }
 
-// Props interface for ImageCard component
-interface ImageCardProps {
-  image: CarouselImage;
+// Props interface for PlayerCard component
+interface PlayerCardProps {
+  player: CarouselPlayer;
   isCurrent?: boolean;
 }
 
 // Player card data
-const carouselImages: CarouselImage[] = [
+const carouselPlayers: CarouselPlayer[] = [
   {
     id: 1,
-    image: "/playercard1.png",
-    title: "Player 1",
+    name: "Alex Panda",
+    level: 8,
+    imagePath: "/images/player1.png",
+    stats: {
+      average: 15,
+      highGame: 200,
+      hightSeries: 600,
+      experience: 1200,
+      Xp: 3000,
+      follower: 150
+    }
   },
   {
     id: 2,
-    image: "/playercard2.png",
-    title: "Player 2",
+    name: "Sarah Johnson",
+    level: 12,
+    imagePath: "/images/player1.png",
+    stats: {
+      average: 18,
+      highGame: 250,
+      hightSeries: 680,
+      experience: 1800,
+      Xp: 4200,
+      follower: 220
+    }
   },
   {
     id: 3,
-    image: "/playercard3.png",
-    title: "Player 3",
+    name: "Mike Chen",
+    level: 6,
+    imagePath: "/images/player1.png",
+    stats: {
+      average: 12,
+      highGame: 180,
+      hightSeries: 520,
+      experience: 800,
+      Xp: 2100,
+      follower: 98
+    }
   },
   {
     id: 4,
-    image: "/playercard4.png",
-    title: "Player 4",
+    name: "Emma Wilson",
+    level: 15,
+    imagePath: "/images/player1.png",
+    stats: {
+      average: 22,
+      highGame: 280,
+      hightSeries: 750,
+      experience: 2500,
+      Xp: 5800,
+      follower: 340
+    }
   },
 ];
 
@@ -94,9 +139,9 @@ const BowlingCarousel: React.FC = () => {
 
     setTimeout(() => {
       if (direction === 'next') {
-        setCurrentIndex((prevIndex) => (prevIndex + 1) % carouselImages.length);
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % carouselPlayers.length);
       } else {
-        setCurrentIndex((prevIndex) => (prevIndex - 1 + carouselImages.length) % carouselImages.length);
+        setCurrentIndex((prevIndex) => (prevIndex - 1 + carouselPlayers.length) % carouselPlayers.length);
       }
 
       setTimeout(() => {
@@ -114,7 +159,7 @@ const BowlingCarousel: React.FC = () => {
   };
 
   const getVisibleIndices = (): VisibleIndices => {
-    const totalCards = carouselImages.length;
+    const totalCards = carouselPlayers.length;
     const prevIndex = (currentIndex - 1 + totalCards) % totalCards;
     const nextIndex = (currentIndex + 1) % totalCards;
     return { prevIndex, currentIndex, nextIndex };
@@ -123,23 +168,50 @@ const BowlingCarousel: React.FC = () => {
   const { prevIndex, nextIndex } = getVisibleIndices();
 
   return (
-    <div className="carousel-container w-full max-w-[100%] sm:max-w-[500px] px-2 sm:px-0">
+    <div className="carousel-container w-full max-w-[100%] sm:max-w-[600px] px-2 sm:px-0">
       <div className="carousel-wrapper">
         <div className={`carousel-card carousel-card-prev ${animationClasses.prev}`}>
-          <ImageCard image={carouselImages[prevIndex]} />
+          <PlayerCard 
+            key={`prev-${prevIndex}`}
+            name={carouselPlayers[prevIndex].name}
+            level={carouselPlayers[prevIndex].level}
+            imagePath={carouselPlayers[prevIndex].imagePath}
+            stats={carouselPlayers[prevIndex].stats}
+            width={280}
+            height={420}
+            backgroundColor="transparent"
+          />
         </div>
 
         <div className={`carousel-card carousel-card-current ${animationClasses.current}`}>
-          <ImageCard image={carouselImages[currentIndex]} isCurrent={true} />
+          <PlayerCard 
+            key={`current-${currentIndex}`}
+            name={carouselPlayers[currentIndex].name}
+            level={carouselPlayers[currentIndex].level}
+            imagePath={carouselPlayers[currentIndex].imagePath}
+            stats={carouselPlayers[currentIndex].stats}
+            width={300}
+            height={450}
+            backgroundColor="white"
+          />
         </div>
 
         <div className={`carousel-card carousel-card-next ${animationClasses.next}`}>
-          <ImageCard image={carouselImages[nextIndex]} />
+          <PlayerCard 
+            key={`next-${nextIndex}`}
+            name={carouselPlayers[nextIndex].name}
+            level={carouselPlayers[nextIndex].level}
+            imagePath={carouselPlayers[nextIndex].imagePath}
+            stats={carouselPlayers[nextIndex].stats}
+            width={280}
+            height={420}
+            backgroundColor="transparent"
+          />
         </div>
       </div>
 
       <div className="carousel-indicators">
-        {carouselImages.map((_, index) => (
+        {carouselPlayers.map((_, index) => (
           <button
             key={index}
             onClick={() => goToSlide(index)}
@@ -149,21 +221,6 @@ const BowlingCarousel: React.FC = () => {
           />
         ))}
       </div>
-    </div>
-  );
-};
-
-const ImageCard: React.FC<ImageCardProps> = ({ image, isCurrent = false }) => {
-  return (
-    <div className={`player-card ${isCurrent ? "current" : ""}`}>
-      <Image
-        src={image.image || "/placeholder.svg"}
-        alt={image.title}
-        width={300}
-        height={400}
-        className="player-image"
-        priority={isCurrent}
-      />
     </div>
   );
 };
