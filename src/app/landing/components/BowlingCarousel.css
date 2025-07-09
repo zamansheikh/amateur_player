@@ -17,116 +17,51 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  perspective: 1000px;
   overflow: visible;
 }
 
 .carousel-card {
   position: absolute;
-  transition: all 1.2s cubic-bezier(0.23, 1, 0.32, 1);
-  transform-style: preserve-3d;
+  transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform, opacity;
   backface-visibility: hidden;
-  /* Ensure content is properly clipped and rendered */
   overflow: visible;
 }
 
-/* Previous card - left side, behind, overlapping */
+.carousel-card.animating {
+  pointer-events: none;
+}
+
+/* Previous card - left side */
 .carousel-card-prev {
-  transform: translateX(-150px) translateZ(-30px) scale(0.85);
+  transform: translateX(-180px) scale(0.9);
   z-index: 1;
   opacity: 0.7;
-  /* Ensure content scales properly */
-  transform-origin: center center;
 }
 
-/* Current card - center, in front */
+/* Current card - center, slightly larger */
 .carousel-card-current {
-  transform: translateX(0) translateZ(10px) scale(1.0);
+  transform: translateX(0) scale(1.1);
   z-index: 3;
   opacity: 1;
-  transform-origin: center center;
 }
 
-/* Next card - right side, behind, overlapping */
+/* Next card - right side */
 .carousel-card-next {
-  transform: translateX(150px) translateZ(-30px) scale(0.85);
-  z-index: 2;
+  transform: translateX(180px) scale(0.9);
+  z-index: 1;
   opacity: 0.7;
-  transform-origin: center center;
 }
 
-/* Sliding animation classes */
-.carousel-card.sliding-left {
-  animation: slideLeft 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-}
-
-.carousel-card.sliding-right {
-  animation: slideRight 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-}
-
-/* Keyframe animations for sliding */
-@keyframes slideLeft {
-  0% {
-    transform: translateX(150px) translateZ(-30px) scale(0.85);
-    z-index: 2;
-    opacity: 0.7;
-  }
-  50% {
-    transform: translateX(0) translateZ(15px) scale(0.95);
-    z-index: 4;
-    opacity: 0.9;
-  }
-  100% {
-    transform: translateX(-150px) translateZ(-30px) scale(0.85);
-    z-index: 1;
-    opacity: 0.7;
-  }
-}
-
-@keyframes slideRight {
-  0% {
-    transform: translateX(-150px) translateZ(-30px) scale(0.85);
-    z-index: 1;
-    opacity: 0.7;
-  }
-  50% {
-    transform: translateX(0) translateZ(15px) scale(0.95);
-    z-index: 4;
-    opacity: 0.9;
-  }
-  100% {
-    transform: translateX(150px) translateZ(-30px) scale(0.85);
-    z-index: 2;
-    opacity: 0.7;
-  }
-}
-
-/* Center card focus animation */
-@keyframes focusCenter {
-  0% {
-    transform: translateX(0) translateZ(10px) scale(0.95);
-    opacity: 0.9;
-  }
-  100% {
-    transform: translateX(0) translateZ(10px) scale(1.0);
-    opacity: 1;
-  }
-}
-
-.carousel-card.focusing {
-  animation: focusCenter 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-}
-
-/* Card moving from center to side animations */
+/* Animations for sliding */
 @keyframes moveToLeft {
   0% {
-    transform: translateX(0) translateZ(10px) scale(1.0);
+    transform: translateX(0) scale(1.1);
     z-index: 3;
     opacity: 1;
   }
   100% {
-    transform: translateX(-150px) translateZ(-30px) scale(0.85);
+    transform: translateX(-180px) scale(0.9);
     z-index: 1;
     opacity: 0.7;
   }
@@ -134,34 +69,25 @@
 
 @keyframes moveToRight {
   0% {
-    transform: translateX(0) translateZ(10px) scale(1.0);
+    transform: translateX(0) scale(1.1);
     z-index: 3;
     opacity: 1;
   }
   100% {
-    transform: translateX(150px) translateZ(-30px) scale(0.85);
-    z-index: 2;
+    transform: translateX(180px) scale(0.9);
+    z-index: 1;
     opacity: 0.7;
   }
 }
 
-.carousel-card.moving-to-left {
-  animation: moveToLeft 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-}
-
-.carousel-card.moving-to-right {
-  animation: moveToRight 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-}
-
-/* Side cards moving to center */
 @keyframes leftToCenter {
   0% {
-    transform: translateX(-150px) translateZ(-30px) scale(0.85);
+    transform: translateX(-180px) scale(0.9);
     z-index: 1;
     opacity: 0.7;
   }
   100% {
-    transform: translateX(0) translateZ(10px) scale(1.0);
+    transform: translateX(0) scale(1.1);
     z-index: 3;
     opacity: 1;
   }
@@ -169,28 +95,36 @@
 
 @keyframes rightToCenter {
   0% {
-    transform: translateX(150px) translateZ(-30px) scale(0.85);
-    z-index: 2;
+    transform: translateX(180px) scale(0.9);
+    z-index: 1;
     opacity: 0.7;
   }
   100% {
-    transform: translateX(0) translateZ(10px) scale(1.0);
+    transform: translateX(0) scale(1.1);
     z-index: 3;
     opacity: 1;
   }
 }
 
+.carousel-card.moving-to-left {
+  animation: moveToLeft 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.carousel-card.moving-to-right {
+  animation: moveToRight 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
 .carousel-card.left-to-center {
-  animation: leftToCenter 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  animation: leftToCenter 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 .carousel-card.right-to-center {
-  animation: rightToCenter 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  animation: rightToCenter 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 .player-card {
-  width: 300px;
-  height: 400px;
+  width: 363px;
+  height: 544px;
   transition: all 0.3s ease;
   filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.2));
   border-radius: 8px;
@@ -228,62 +162,142 @@
 /* Responsive design */
 @media (max-width: 768px) {
   .carousel-card-prev {
-    transform: translateX(-150px) translateZ(-30px) scale(0.75);
+    transform: translateX(-150px) scale(0.85);
   }
 
   .carousel-card-current {
-    transform: translateX(0) translateZ(0) scale(1.1);
+    transform: translateX(0) scale(1.05);
   }
 
   .carousel-card-next {
-    transform: translateX(150px) translateZ(-30px) scale(0.75);
+    transform: translateX(150px) scale(0.85);
+  }
+
+  @keyframes moveToLeft {
+    0% {
+      transform: translateX(0) scale(1.05);
+      z-index: 3;
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(-150px) scale(0.85);
+      z-index: 1;
+      opacity: 0.7;
+    }
+  }
+
+  @keyframes moveToRight {
+    0% {
+      transform: translateX(0) scale(1.05);
+      z-index: 3;
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(150px) scale(0.85);
+      z-index: 1;
+      opacity: 0.7;
+    }
+  }
+
+  @keyframes leftToCenter {
+    0% {
+      transform: translateX(-150px) scale(0.85);
+      z-index: 1;
+      opacity: 0.7;
+    }
+    100% {
+      transform: translateX(0) scale(1.05);
+      z-index: 3;
+      opacity: 1;
+    }
+  }
+
+  @keyframes rightToCenter {
+    0% {
+      transform: translateX(150px) scale(0.85);
+      z-index: 1;
+      opacity: 0.7;
+    }
+    100% {
+      transform: translateX(0) scale(1.05);
+      z-index: 3;
+      opacity: 1;
+    }
   }
 
   .player-card {
-    width: 250px;
-    height: 350px;
-  }
-
-  @keyframes slideLeft {
-    0% { transform: translateX(150px) translateZ(-30px) scale(0.75); }
-    50% { transform: translateX(0) translateZ(15px) scale(0.95); }
-    100% { transform: translateX(-150px) translateZ(-30px) scale(0.75); }
-  }
-
-  @keyframes slideRight {
-    0% { transform: translateX(-150px) translateZ(-30px) scale(0.75); }
-    50% { transform: translateX(0) translateZ(15px) scale(0.95); }
-    100% { transform: translateX(150px) translateZ(-30px) scale(0.75); }
+    width: 300px;
+    height: 450px;
   }
 }
 
 @media (max-width: 480px) {
   .carousel-card-prev {
-    transform: translateX(-120px) translateZ(-20px) scale(0.7);
+    transform: translateX(-120px) scale(0.8);
   }
 
   .carousel-card-current {
-    transform: translateX(0) translateZ(0) scale(1.05);
+    transform: translateX(0) scale(1);
   }
 
   .carousel-card-next {
-    transform: translateX(120px) translateZ(-20px) scale(0.7);
+    transform: translateX(120px) scale(0.8);
+  }
+
+  @keyframes moveToLeft {
+    0% {
+      transform: translateX(0) scale(1);
+      z-index: 3;
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(-120px) scale(0.8);
+      z-index: 1;
+      opacity: 0.7;
+    }
+  }
+
+  @keyframes moveToRight {
+    0% {
+      transform: translateX(0) scale(1);
+      z-index: 3;
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(120px) scale(0.8);
+      z-index:3;
+      opacity: 0.7;
+    }
+  }
+
+  @keyframes leftToCenter {
+    0% {
+      transform: translateX(-120px) scale(0.8);
+      z-index: 1;
+      opacity: 0.7;
+    }
+    100% {
+      transform: translateX(0) scale(1);
+      z-index: 3;
+      opacity: 1;
+    }
+  }
+
+  @keyframes rightToCenter {
+    0% {
+      transform: translateX(120px) scale(0.8);
+      z-index: 1;
+      opacity: 0.7;
+    }
+    100% {
+      transform: translateX(0) scale(1);
+      z-index: 3;
+      opacity: 1;
+    }
   }
 
   .player-card {
-    width: 200px;
-    height: 300px;
-  }
-
-  @keyframes slideLeft {
-    0% { transform: translateX(120px) translateZ(-20px) scale(0.7); }
-    50% { transform: translateX(0) translateZ(10px) scale(0.9); }
-    100% { transform: translateX(-120px) translateZ(-20px) scale(0.7); }
-  }
-
-  @keyframes slideRight {
-    0% { transform: translateX(-120px) translateZ(-20px) scale(0.7); }
-    50% { transform: translateX(0) translateZ(10px) scale(0.9); }
-    100% { transform: translateX(120px) translateZ(-20px) scale(0.7); }
+    width: 250px;
+    height: 375px;
   }
 }

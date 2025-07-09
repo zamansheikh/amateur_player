@@ -27,19 +27,6 @@ interface AnimationClasses {
   next: string;
 }
 
-// Interface for visible indices
-interface VisibleIndices {
-  prevIndex: number;
-  currentIndex: number;
-  nextIndex: number;
-}
-
-// Props interface for PlayerCard component
-interface PlayerCardProps {
-  player: CarouselPlayer;
-  isCurrent?: boolean;
-}
-
 // Player card data
 const carouselPlayers: CarouselPlayer[] = [
   {
@@ -53,8 +40,8 @@ const carouselPlayers: CarouselPlayer[] = [
       hightSeries: 600,
       experience: 1200,
       Xp: 3000,
-      follower: 150
-    }
+      follower: 150,
+    },
   },
   {
     id: 2,
@@ -67,8 +54,8 @@ const carouselPlayers: CarouselPlayer[] = [
       hightSeries: 680,
       experience: 1800,
       Xp: 4200,
-      follower: 220
-    }
+      follower: 220,
+    },
   },
   {
     id: 3,
@@ -81,8 +68,8 @@ const carouselPlayers: CarouselPlayer[] = [
       hightSeries: 520,
       experience: 800,
       Xp: 2100,
-      follower: 98
-    }
+      follower: 98,
+    },
   },
   {
     id: 4,
@@ -95,8 +82,22 @@ const carouselPlayers: CarouselPlayer[] = [
       hightSeries: 750,
       experience: 2500,
       Xp: 5800,
-      follower: 340
-    }
+      follower: 340,
+    },
+  },
+  {
+    id: 5,
+    name: "Zaman Sheikh",
+    level: 99,
+    imagePath: "/images/player1.png",
+    stats: {
+      average: 22,
+      highGame: 280,
+      hightSeries: 750,
+      experience: 2500,
+      Xp: 5800,
+      follower: 340,
+    },
   },
 ];
 
@@ -104,112 +105,127 @@ const BowlingCarousel: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
   const [animationClasses, setAnimationClasses] = useState<AnimationClasses>({
-    prev: '',
-    current: '',
-    next: ''
+    prev: "",
+    current: "",
+    next: "",
+  });
+
+  // Create stable player data for each position
+  const [stablePlayerData, setStablePlayerData] = useState<{
+    prev: CarouselPlayer;
+    current: CarouselPlayer;
+    next: CarouselPlayer;
+  }>(() => {
+    const initialPrevIndex = (0 - 1 + carouselPlayers.length) % carouselPlayers.length;
+    const initialNextIndex = (0 + 1) % carouselPlayers.length;
+    return {
+      prev: carouselPlayers[initialPrevIndex],
+      current: carouselPlayers[0],
+      next: carouselPlayers[initialNextIndex],
+    };
   });
 
   // Auto-slide functionality - slides every 2.5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       if (!isAnimating) {
-        handleSlideChange('next');
+        handleSlideChange("next");
       }
     }, 2500);
 
     return () => clearInterval(interval);
   }, [isAnimating]);
 
-  const handleSlideChange = (direction: 'next' | 'prev'): void => {
+  const handleSlideChange = (direction: "next" | "prev"): void => {
+    if (isAnimating) return;
     setIsAnimating(true);
 
-    if (direction === 'next') {
+    // Calculate new indices and update stable player data immediately
+    let newCurrentIndex: number;
+    if (direction === "next") {
+      newCurrentIndex = (currentIndex + 1) % carouselPlayers.length;
+    } else {
+      newCurrentIndex = (currentIndex - 1 + carouselPlayers.length) % carouselPlayers.length;
+    }
+
+    const newPrevIndex = (newCurrentIndex - 1 + carouselPlayers.length) % carouselPlayers.length;
+    const newNextIndex = (newCurrentIndex + 1) % carouselPlayers.length;
+
+    setStablePlayerData({
+      prev: carouselPlayers[newPrevIndex],
+      current: carouselPlayers[newCurrentIndex],
+      next: carouselPlayers[newNextIndex],
+    });
+
+    // Set animation classes
+    if (direction === "next") {
       setAnimationClasses({
-        prev: 'moving-to-left',
-        current: 'moving-to-right',
-        next: 'left-to-center'
+        prev: "moving-to-left",
+        current: "moving-to-right",
+        next: "left-to-center",
       });
     } else {
       setAnimationClasses({
-        prev: 'right-to-center',
-        current: 'moving-to-left',
-        next: 'moving-to-right'
+        prev: "right-to-center",
+        current: "moving-to-left",
+        next: "moving-to-right",
       });
     }
 
+    // Update currentIndex and reset animation classes after animation
     setTimeout(() => {
-      if (direction === 'next') {
-        setCurrentIndex((prevIndex) => (prevIndex + 1) % carouselPlayers.length);
-      } else {
-        setCurrentIndex((prevIndex) => (prevIndex - 1 + carouselPlayers.length) % carouselPlayers.length);
-      }
-
-      setTimeout(() => {
-        setAnimationClasses({ prev: '', current: '', next: '' });
-        setIsAnimating(false);
-      }, 1200);
-    }, 50);
+      setCurrentIndex(newCurrentIndex);
+      setAnimationClasses({ prev: "", current: "", next: "" });
+      setIsAnimating(false);
+    }, 1200); // Match animation duration
   };
 
   const goToSlide = (index: number): void => {
     if (isAnimating || index === currentIndex) return;
-
-    const direction: 'next' | 'prev' = index > currentIndex ? 'next' : 'prev';
+    const direction: "next" | "prev" = index > currentIndex ? "next" : "prev";
     handleSlideChange(direction);
   };
-
-  const getVisibleIndices = (): VisibleIndices => {
-    const totalCards = carouselPlayers.length;
-    const prevIndex = (currentIndex - 1 + totalCards) % totalCards;
-    const nextIndex = (currentIndex + 1) % totalCards;
-    return { prevIndex, currentIndex, nextIndex };
-  };
-
-  const { prevIndex, nextIndex } = getVisibleIndices();
 
   return (
     <div className="carousel-container w-full max-w-[100%] sm:max-w-[650px] px-2 sm:px-0">
       <div className="carousel-wrapper">
-        <div className={`carousel-card carousel-card-prev ${animationClasses.prev}`}>
-          <PlayerCard 
-            key={`prev-${prevIndex}`}
-            name={carouselPlayers[prevIndex].name}
-            level={carouselPlayers[prevIndex].level}
-            imagePath={carouselPlayers[prevIndex].imagePath}
-            stats={carouselPlayers[prevIndex].stats}
-            width={320}
-            height={480}
+        <div className={`carousel-card carousel-card-prev ${animationClasses.prev} ${isAnimating ? "animating" : ""}`}>
+          <PlayerCard
+            key={`prev-${stablePlayerData.prev.id}`}
+            name={stablePlayerData.prev.name}
+            level={stablePlayerData.prev.level}
+            imagePath={stablePlayerData.prev.imagePath}
+            stats={stablePlayerData.prev.stats}
+            width={363}
+            height={544}
             backgroundColor="rgba(255, 255, 255, 0.9)"
           />
         </div>
-
-        <div className={`carousel-card carousel-card-current ${animationClasses.current}`}>
-          <PlayerCard 
-            key={`current-${currentIndex}`}
-            name={carouselPlayers[currentIndex].name}
-            level={carouselPlayers[currentIndex].level}
-            imagePath={carouselPlayers[currentIndex].imagePath}
-            stats={carouselPlayers[currentIndex].stats}
-            width={350}
-            height={520}
+        <div className={`carousel-card carousel-card-current ${animationClasses.current} ${isAnimating ? "animating" : ""}`}>
+          <PlayerCard
+            key={`current-${stablePlayerData.current.id}`}
+            name={stablePlayerData.current.name}
+            level={stablePlayerData.current.level}
+            imagePath={stablePlayerData.current.imagePath}
+            stats={stablePlayerData.current.stats}
+            width={363}
+            height={544}
             backgroundColor="white"
           />
         </div>
-
-        <div className={`carousel-card carousel-card-next ${animationClasses.next}`}>
-          <PlayerCard 
-            key={`next-${nextIndex}`}
-            name={carouselPlayers[nextIndex].name}
-            level={carouselPlayers[nextIndex].level}
-            imagePath={carouselPlayers[nextIndex].imagePath}
-            stats={carouselPlayers[nextIndex].stats}
-            width={320}
-            height={480}
+        <div className={`carousel-card carousel-card-next ${animationClasses.next} ${isAnimating ? "animating" : ""}`}>
+          <PlayerCard
+            key={`next-${stablePlayerData.next.id}`}
+            name={stablePlayerData.next.name}
+            level={stablePlayerData.next.level}
+            imagePath={stablePlayerData.next.imagePath}
+            stats={stablePlayerData.next.stats}
+            width={363}
+            height={544}
             backgroundColor="rgba(255, 255, 255, 0.9)"
           />
         </div>
       </div>
-
       <div className="carousel-indicators">
         {carouselPlayers.map((_, index) => (
           <button
