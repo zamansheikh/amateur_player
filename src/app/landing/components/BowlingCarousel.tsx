@@ -168,7 +168,7 @@ const BowlingCarousel: React.FC = () => {
   const { prevIndex, nextIndex } = getVisibleIndices();
 
   return (
-    <div className="carousel-container w-full max-w-[100%] sm:max-w-[600px] px-2 sm:px-0">
+    <div className="carousel-container w-full max-w-[100%] sm:max-w-[650px] px-2 sm:px-0">
       <div className="carousel-wrapper">
         <div className={`carousel-card carousel-card-prev ${animationClasses.prev}`}>
           <PlayerCard 
@@ -177,8 +177,8 @@ const BowlingCarousel: React.FC = () => {
             level={carouselPlayers[prevIndex].level}
             imagePath={carouselPlayers[prevIndex].imagePath}
             stats={carouselPlayers[prevIndex].stats}
-            width={280}
-            height={420}
+            width={320}
+            height={480}
             backgroundColor="rgba(255, 255, 255, 0.9)"
           />
         </div>
@@ -190,8 +190,8 @@ const BowlingCarousel: React.FC = () => {
             level={carouselPlayers[currentIndex].level}
             imagePath={carouselPlayers[currentIndex].imagePath}
             stats={carouselPlayers[currentIndex].stats}
-            width={300}
-            height={450}
+            width={350}
+            height={520}
             backgroundColor="white"
           />
         </div>
@@ -203,8 +203,8 @@ const BowlingCarousel: React.FC = () => {
             level={carouselPlayers[nextIndex].level}
             imagePath={carouselPlayers[nextIndex].imagePath}
             stats={carouselPlayers[nextIndex].stats}
-            width={280}
-            height={420}
+            width={320}
+            height={480}
             backgroundColor="rgba(255, 255, 255, 0.9)"
           />
         </div>

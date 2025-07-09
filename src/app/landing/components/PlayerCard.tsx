@@ -248,11 +248,11 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                     alt={name}
                     style={{
                         position: "absolute",
-                        top: 50,
+                        top: 60,
                         left: "50%",
                         transform: "translateX(-50%)",
-                        width: 300,
-                        height: 200,
+                        width: 280,
+                        height: 180,
                         objectFit: "cover",
                         borderRadius: 12,
                         zIndex: 3,
@@ -264,14 +264,14 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                 <div
                     style={{
                         position: "absolute",
-                        top: 240,
+                        top: 250,
                         left: 10,
                         width: "95%",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
                         background: isTransparent || isRgbaColor ? "rgba(255, 255, 255, 0.95)" : effectiveBackgroundColor,
-                        padding: "16px 24px 10px 24px",
+                        padding: "16px 24px 12px 24px",
                         fontWeight: 700,
                         fontSize: 22,
                         color: textColor,
@@ -304,12 +304,12 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                 <div
                     style={{
                         position: "absolute",
-                        top: 300,
+                        top: 320,
                         left: 0,
                         width: "100%",
                         display: "flex",
                         justifyContent: "space-between",
-                        padding: "16px 24px",
+                        padding: "20px 24px",
                         fontSize: 18,
                         color: textColor,
                         fontWeight: 500,
@@ -321,25 +321,25 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                             flex: 1,
                             display: "flex",
                             flexDirection: "column",
-                            gap: 16,
+                            gap: 18,
                             paddingLeft: 32,
                             alignItems: "flex-end",
                         }}
                     >
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                            <span style={{ fontSize: 22, minWidth: 50, textAlign: "right" }}>{stats.average}</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <span style={{ fontSize: 24, minWidth: 55, textAlign: "right", fontWeight: 600 }}>{stats.average}</span>
                             <span style={{ color: textColor, fontSize: 16, opacity: 0.7 , minWidth: 35, textAlign: "right" }}>
                                 AVG
                             </span>
                         </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                            <span style={{ fontSize: 22, minWidth: 50, textAlign: "right" }}>{stats.highGame}</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <span style={{ fontSize: 24, minWidth: 55, textAlign: "right", fontWeight: 600 }}>{stats.highGame}</span>
                             <span style={{ color: textColor, fontSize: 16, opacity: 0.7 ,  minWidth: 35, textAlign: "right"}}>
                                 HG
                             </span>
                         </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                            <span style={{ fontSize: 22, minWidth: 50, textAlign: "right" }}>{stats.hightSeries}</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <span style={{ fontSize: 24, minWidth: 55, textAlign: "right", fontWeight: 600 }}>{stats.hightSeries}</span>
                             <span style={{ color: textColor, fontSize: 16, opacity: 0.7,  minWidth: 35, textAlign: "right" }}>
                                 HS
                             </span>
@@ -348,7 +348,12 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
 
                     {/* Vertical Divider */}
                     <div
-                        style={{ width: 1, background: textColor === 'white' ? 'rgba(255, 255, 255, 0.3)' : 'rgba(30, 45, 94, 0.13)', margin: "0 12px" }}
+                        style={{ 
+                            width: 2, 
+                            background: textColor === 'white' ? 'rgba(255, 255, 255, 0.5)' : 'rgba(30, 45, 94, 0.3)', 
+                            margin: "0 16px",
+                            borderRadius: "1px"
+                        }}
                     />
 
                     <div
@@ -356,28 +361,28 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                             flex: 1,
                             display: "flex",
                             flexDirection: "column",
-                            gap: 16,
+                            gap: 18,
                             paddingRight: 32,
                             alignItems: "flex-start",
                         }}
                     >
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                             <span style={{ color: textColor, fontSize: 16, opacity: 0.7, minWidth: 35 }}>
                                 EXP
                             </span>
-                            <span style={{ fontSize: 22, minWidth: 50, textAlign: "left" }}>{stats.experience}</span>
+                            <span style={{ fontSize: 24, minWidth: 55, textAlign: "left", fontWeight: 600 }}>{stats.experience}</span>
                         </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                             <span style={{ color: textColor, fontSize: 16, opacity: 0.7, minWidth: 35 }}>
                                 XP
                             </span>
-                            <span style={{ fontSize: 22, minWidth: 50, textAlign: "left" }}>{stats.Xp}</span>
+                            <span style={{ fontSize: 24, minWidth: 55, textAlign: "left", fontWeight: 600 }}>{stats.Xp}</span>
                         </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                             <span style={{ color: textColor, fontSize: 16, opacity: 0.7, minWidth: 35 }}>
                                 FOL
                             </span>
-                            <span style={{ fontSize: 22, minWidth: 50, textAlign: "left" }}>{stats.follower}</span>
+                            <span style={{ fontSize: 24, minWidth: 55, textAlign: "left", fontWeight: 600 }}>{stats.follower}</span>
                         </div>
                     </div>
                 </div>
