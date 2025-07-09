@@ -116,6 +116,19 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
 }) => {
     const [textColor, setTextColor] = useState<string>('black');
     
+    // Calculate scaling factor based on card size
+    const scaleX = width / CARD_WIDTH;
+    const scaleY = height / CARD_HEIGHT;
+    const averageScale = (scaleX + scaleY) / 2;
+    
+    // Scaled dimensions and positions
+    const scaledImageWidth = 280 * scaleX;
+    const scaledImageHeight = 180 * scaleY;
+    const scaledFontSize = Math.max(16, 22 * averageScale);
+    const scaledStatsFontSize = Math.max(18, 24 * averageScale);
+    const scaledLevelFontSize = Math.max(40, 56 * averageScale);
+    const scaledPadding = Math.max(16, 24 * averageScale);
+
     // Determine the image source (URL takes priority over path)
     const imageSrc = imageUrl || imagePath || PLAYER_IMAGE;
     
@@ -226,14 +239,14 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
             >
                 {/* Level */}
                 <div
-                    style={{ position: "absolute", top: 80, left: 24, textAlign: "left" }}
+                    style={{ position: "absolute", top: 80 * scaleY, left: 24 * scaleX, textAlign: "left" }}
                 >
-                    <div style={{ fontSize: 20, fontWeight: 500, color: textColor }}>
+                    <div style={{ fontSize: 20 * averageScale, fontWeight: 500, color: textColor }}>
                         Level
                     </div>
                     <div
                         style={{
-                            fontSize: 56,
+                            fontSize: scaledLevelFontSize,
                             fontWeight: 700,
                             color: textColor,
                             lineHeight: 1,
@@ -248,13 +261,13 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                     alt={name}
                     style={{
                         position: "absolute",
-                        top: 60,
+                        top: 60 * scaleY,
                         left: "50%",
                         transform: "translateX(-50%)",
-                        width: 280,
-                        height: 180,
+                        width: scaledImageWidth,
+                        height: scaledImageHeight,
                         objectFit: "cover",
-                        borderRadius: 12,
+                        borderRadius: 12 * averageScale,
                         zIndex: 3,
                         // boxShadow: "0 4px 24px rgba(0,0,0,0.10)",
                         // background: "#fff",
@@ -264,16 +277,16 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                 <div
                     style={{
                         position: "absolute",
-                        top: 250,
-                        left: 10,
+                        top: 250 * scaleY,
+                        left: 10 * scaleX,
                         width: "95%",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
                         background: isTransparent || isRgbaColor ? "rgba(255, 255, 255, 0.95)" : effectiveBackgroundColor,
-                        padding: "16px 24px 12px 24px",
+                        padding: `${16 * averageScale}px ${scaledPadding}px ${12 * averageScale}px ${scaledPadding}px`,
                         fontWeight: 700,
-                        fontSize: 22,
+                        fontSize: scaledFontSize,
                         color: textColor,
                         borderRadius: 0,
                         borderBottom: textColor === 'white' ? '1.5px solid rgba(255, 255, 255, 0.2)' : '1.5px solid rgba(30, 45, 94, 0.13)',
@@ -288,13 +301,13 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                             color: textColor,
                             fontWeight: 500,
                             cursor: "pointer",
-                            fontSize: 16,
+                            fontSize: 16 * averageScale,
                             display: "flex",
                             alignItems: "center",
-                            gap: 4,
+                            gap: 4 * averageScale,
                         }}
                     >
-                        <span style={{ fontSize: 20, color: textColor, fontWeight: 700 }}>
+                        <span style={{ fontSize: 20 * averageScale, color: textColor, fontWeight: 700 }}>
                             +
                         </span>{" "}
                         Follow
@@ -304,13 +317,13 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                 <div
                     style={{
                         position: "absolute",
-                        top: 320,
+                        top: 320 * scaleY,
                         left: 0,
                         width: "100%",
                         display: "flex",
                         justifyContent: "space-between",
-                        padding: "20px 24px",
-                        fontSize: 18,
+                        padding: `${20 * averageScale}px ${scaledPadding}px`,
+                        fontSize: 18 * averageScale,
                         color: textColor,
                         fontWeight: 500,
                         boxSizing: "border-box",
@@ -321,26 +334,26 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                             flex: 1,
                             display: "flex",
                             flexDirection: "column",
-                            gap: 18,
-                            paddingLeft: 32,
+                            gap: 18 * averageScale,
+                            paddingLeft: 32 * scaleX,
                             alignItems: "flex-end",
                         }}
                     >
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <span style={{ fontSize: 24, minWidth: 55, textAlign: "right", fontWeight: 600 }}>{stats.average}</span>
-                            <span style={{ color: textColor, fontSize: 16, opacity: 0.7 , minWidth: 35, textAlign: "right" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 * averageScale }}>
+                            <span style={{ fontSize: scaledStatsFontSize, minWidth: 55 * scaleX, textAlign: "right", fontWeight: 600 }}>{stats.average}</span>
+                            <span style={{ color: textColor, fontSize: 16 * averageScale, opacity: 0.7 , minWidth: 35 * scaleX, textAlign: "right" }}>
                                 AVG
                             </span>
                         </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <span style={{ fontSize: 24, minWidth: 55, textAlign: "right", fontWeight: 600 }}>{stats.highGame}</span>
-                            <span style={{ color: textColor, fontSize: 16, opacity: 0.7 ,  minWidth: 35, textAlign: "right"}}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 * averageScale }}>
+                            <span style={{ fontSize: scaledStatsFontSize, minWidth: 55 * scaleX, textAlign: "right", fontWeight: 600 }}>{stats.highGame}</span>
+                            <span style={{ color: textColor, fontSize: 16 * averageScale, opacity: 0.7 ,  minWidth: 35 * scaleX, textAlign: "right"}}>
                                 HG
                             </span>
                         </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <span style={{ fontSize: 24, minWidth: 55, textAlign: "right", fontWeight: 600 }}>{stats.hightSeries}</span>
-                            <span style={{ color: textColor, fontSize: 16, opacity: 0.7,  minWidth: 35, textAlign: "right" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 * averageScale }}>
+                            <span style={{ fontSize: scaledStatsFontSize, minWidth: 55 * scaleX, textAlign: "right", fontWeight: 600 }}>{stats.hightSeries}</span>
+                            <span style={{ color: textColor, fontSize: 16 * averageScale, opacity: 0.7,  minWidth: 35 * scaleX, textAlign: "right" }}>
                                 HS
                             </span>
                         </div>
@@ -349,10 +362,18 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                     {/* Vertical Divider */}
                     <div
                         style={{ 
-                            width: 2, 
-                            background: textColor === 'white' ? 'rgba(255, 255, 255, 0.5)' : 'rgba(30, 45, 94, 0.3)', 
-                            margin: "0 16px",
-                            borderRadius: "1px"
+                            width: 3 * averageScale, 
+                            minWidth: 3 * averageScale,
+                            background: textColor === 'white' 
+                                ? 'linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.4))' 
+                                : 'linear-gradient(to bottom, rgba(30, 45, 94, 0.6), rgba(30, 45, 94, 0.2))', 
+                            margin: `0 ${20 * averageScale}px`,
+                            borderRadius: `${2 * averageScale}px`,
+                            boxShadow: textColor === 'white' 
+                                ? '0 0 4px rgba(255, 255, 255, 0.3)' 
+                                : '0 0 4px rgba(30, 45, 94, 0.2)',
+                            position: 'relative',
+                            zIndex: 5
                         }}
                     />
 
@@ -361,28 +382,28 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                             flex: 1,
                             display: "flex",
                             flexDirection: "column",
-                            gap: 18,
-                            paddingRight: 32,
+                            gap: 18 * averageScale,
+                            paddingRight: 32 * scaleX,
                             alignItems: "flex-start",
                         }}
                     >
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <span style={{ color: textColor, fontSize: 16, opacity: 0.7, minWidth: 35 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 * averageScale }}>
+                            <span style={{ color: textColor, fontSize: 16 * averageScale, opacity: 0.7, minWidth: 35 * scaleX }}>
                                 EXP
                             </span>
-                            <span style={{ fontSize: 24, minWidth: 55, textAlign: "left", fontWeight: 600 }}>{stats.experience}</span>
+                            <span style={{ fontSize: scaledStatsFontSize, minWidth: 55 * scaleX, textAlign: "left", fontWeight: 600 }}>{stats.experience}</span>
                         </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <span style={{ color: textColor, fontSize: 16, opacity: 0.7, minWidth: 35 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 * averageScale }}>
+                            <span style={{ color: textColor, fontSize: 16 * averageScale, opacity: 0.7, minWidth: 35 * scaleX }}>
                                 XP
                             </span>
-                            <span style={{ fontSize: 24, minWidth: 55, textAlign: "left", fontWeight: 600 }}>{stats.Xp}</span>
+                            <span style={{ fontSize: scaledStatsFontSize, minWidth: 55 * scaleX, textAlign: "left", fontWeight: 600 }}>{stats.Xp}</span>
                         </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <span style={{ color: textColor, fontSize: 16, opacity: 0.7, minWidth: 35 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8 * averageScale }}>
+                            <span style={{ color: textColor, fontSize: 16 * averageScale, opacity: 0.7, minWidth: 35 * scaleX }}>
                                 FOL
                             </span>
-                            <span style={{ fontSize: 24, minWidth: 55, textAlign: "left", fontWeight: 600 }}>{stats.follower}</span>
+                            <span style={{ fontSize: scaledStatsFontSize, minWidth: 55 * scaleX, textAlign: "left", fontWeight: 600 }}>{stats.follower}</span>
                         </div>
                     </div>
                 </div>

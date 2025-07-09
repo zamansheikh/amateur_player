@@ -27,6 +27,8 @@
   transform-style: preserve-3d;
   will-change: transform, opacity;
   backface-visibility: hidden;
+  /* Ensure content is properly clipped and rendered */
+  overflow: visible;
 }
 
 /* Previous card - left side, behind, overlapping */
@@ -34,6 +36,8 @@
   transform: translateX(-150px) translateZ(-30px) scale(0.85);
   z-index: 1;
   opacity: 0.7;
+  /* Ensure content scales properly */
+  transform-origin: center center;
 }
 
 /* Current card - center, in front */
@@ -41,6 +45,7 @@
   transform: translateX(0) translateZ(10px) scale(1.0);
   z-index: 3;
   opacity: 1;
+  transform-origin: center center;
 }
 
 /* Next card - right side, behind, overlapping */
@@ -48,6 +53,7 @@
   transform: translateX(150px) translateZ(-30px) scale(0.85);
   z-index: 2;
   opacity: 0.7;
+  transform-origin: center center;
 }
 
 /* Sliding animation classes */
