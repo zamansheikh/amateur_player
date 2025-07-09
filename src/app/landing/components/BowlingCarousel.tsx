@@ -13,7 +13,7 @@ interface CarouselPlayer {
   stats: {
     average: number;
     highGame: number;
-    hightSeries: number;
+    highSeries: number;
     experience: number;
     Xp: number;
     follower: number;
@@ -37,7 +37,7 @@ const carouselPlayers: CarouselPlayer[] = [
     stats: {
       average: 15,
       highGame: 200,
-      hightSeries: 600,
+      highSeries: 600,
       experience: 1200,
       Xp: 3000,
       follower: 150,
@@ -51,7 +51,7 @@ const carouselPlayers: CarouselPlayer[] = [
     stats: {
       average: 18,
       highGame: 250,
-      hightSeries: 680,
+      highSeries: 680,
       experience: 1800,
       Xp: 4200,
       follower: 220,
@@ -65,7 +65,7 @@ const carouselPlayers: CarouselPlayer[] = [
     stats: {
       average: 12,
       highGame: 180,
-      hightSeries: 520,
+      highSeries: 520,
       experience: 800,
       Xp: 2100,
       follower: 98,
@@ -79,7 +79,7 @@ const carouselPlayers: CarouselPlayer[] = [
     stats: {
       average: 22,
       highGame: 280,
-      hightSeries: 750,
+      highSeries: 750,
       experience: 2500,
       Xp: 5800,
       follower: 340,
@@ -93,7 +93,7 @@ const carouselPlayers: CarouselPlayer[] = [
     stats: {
       average: 22,
       highGame: 280,
-      hightSeries: 750,
+      highSeries: 750,
       experience: 2500,
       Xp: 5800,
       follower: 340,
@@ -141,41 +141,44 @@ const BowlingCarousel: React.FC = () => {
     setIsAnimating(true);
 
     // Calculate new indices
-    let newCurrentIndex: number;
-    if (direction === "next") {
-      newCurrentIndex = (currentIndex + 1) % carouselPlayers.length;
-    } else {
-      newCurrentIndex = (currentIndex - 1 + carouselPlayers.length) % carouselPlayers.length;
-    }
+    const newCurrentIndex = direction === "next"
+      ? (currentIndex + 1) % carouselPlayers.length
+      : (currentIndex - 1 + carouselPlayers.length) % carouselPlayers.length;
 
     const newPrevIndex = (newCurrentIndex - 1 + carouselPlayers.length) % carouselPlayers.length;
     const newNextIndex = (newCurrentIndex + 1) % carouselPlayers.length;
 
-    // Set animation classes but don't update data yet
-    if (direction === "next") {
-      setAnimationClasses({
-        prev: "moving-to-left",
-        current: "moving-to-right",
-        next: "left-to-center",
-      });
-    } else {
-      setAnimationClasses({
-        prev: "right-to-center",
-        current: "moving-to-left",
-        next: "moving-to-right",
-      });
-    }
+    // Log player data for debugging
+    console.log("Transition start:", {
+      prev: carouselPlayers[newPrevIndex].name,
+      current: carouselPlayers[newCurrentIndex].name,
+      next: carouselPlayers[newNextIndex].name,
+    });
 
-    // Update currentIndex, stable player data, and reset animation classes after animation completes
+    // Update stable player data immediately
+    setStablePlayerData({
+      prev: carouselPlayers[newPrevIndex],
+      current: carouselPlayers[newCurrentIndex],
+      next: carouselPlayers[newNextIndex],
+    });
+
+    // Set animation classes
+    setAnimationClasses({
+      prev: direction === "next" ? "moving-to-left" : "right-to-center",
+      current: direction === "next" ? "moving-to-right" : "moving-to-left",
+      next: direction === "next" ? "left-to-center" : "moving-to-right",
+    });
+
+    // Update currentIndex and reset animation classes after animation
     setTimeout(() => {
       setCurrentIndex(newCurrentIndex);
-      setStablePlayerData({
-        prev: carouselPlayers[newPrevIndex],
-        current: carouselPlayers[newCurrentIndex],
-        next: carouselPlayers[newNextIndex],
-      });
       setAnimationClasses({ prev: "", current: "", next: "" });
       setIsAnimating(false);
+      console.log("Transition end:", {
+        prev: carouselPlayers[(newCurrentIndex - 1 + carouselPlayers.length) % carouselPlayers.length].name,
+        current: carouselPlayers[newCurrentIndex].name,
+        next: carouselPlayers[(newCurrentIndex + 1) % carouselPlayers.length].name,
+      });
     }, 1200); // Match animation duration
   };
 

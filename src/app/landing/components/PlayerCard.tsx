@@ -87,7 +87,7 @@ interface PlayerCardProps {
     stats?: {
         average: number;
         highGame: number;
-        hightSeries: number;
+        highSeries: number;
         experience: number;
         Xp: number;
         follower: number;
@@ -106,7 +106,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
     stats = {
         average: 0,
         highGame: 0,
-        hightSeries: 0,
+        highSeries: 0,
         experience: 0,
         Xp: 0,
         follower: 0,
@@ -352,7 +352,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                             </span>
                         </div>
                         <div style={{ display: "flex", alignItems: "center", gap: 8 * averageScale }}>
-                            <span style={{ fontSize: scaledStatsFontSize, minWidth: 55 * scaleX, textAlign: "right", fontWeight: 600 }}>{stats.hightSeries}</span>
+                            <span style={{ fontSize: scaledStatsFontSize, minWidth: 55 * scaleX, textAlign: "right", fontWeight: 600 }}>{stats.highSeries}</span>
                             <span style={{ color: textColor, fontSize: 16 * averageScale, opacity: 0.7,  minWidth: 35 * scaleX, textAlign: "right" }}>
                                 HS
                             </span>
