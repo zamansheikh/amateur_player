@@ -110,20 +110,17 @@ const BowlingCarousel: React.FC = () => {
     next: "",
   });
 
-  // Create stable player data for each position
+  // Initialize player data for each position
   const [stablePlayerData, setStablePlayerData] = useState<{
     prev: CarouselPlayer;
     current: CarouselPlayer;
     next: CarouselPlayer;
-  }>(() => {
-    const initialPrevIndex = (0 - 1 + carouselPlayers.length) % carouselPlayers.length;
-    const initialNextIndex = (0 + 1) % carouselPlayers.length;
-    return {
-      prev: carouselPlayers[initialPrevIndex],
-      current: carouselPlayers[0],
-      next: carouselPlayers[initialNextIndex],
-    };
-  });
+  }>(carouselPlayers.reduce((acc, _, index) => {
+    acc.prev = carouselPlayers[(index - 1 + carouselPlayers.length) % carouselPlayers.length];
+    acc.current = carouselPlayers[index];
+    acc.next = carouselPlayers[(index + 1) % carouselPlayers.length];
+    return acc;
+  }, {} as any));
 
   // Auto-slide functionality - slides every 2.5 seconds
   useEffect(() => {
@@ -151,7 +148,14 @@ const BowlingCarousel: React.FC = () => {
     const newPrevIndex = (newCurrentIndex - 1 + carouselPlayers.length) % carouselPlayers.length;
     const newNextIndex = (newCurrentIndex + 1) % carouselPlayers.length;
 
-    // Set animation classes but don't update data yet
+    // Set stable player data immediately before applying animation classes
+    setStablePlayerData({
+      prev: carouselPlayers[newPrevIndex],
+      current: carouselPlayers[newCurrentIndex],
+      next: carouselPlayers[newNextIndex],
+    });
+
+    // Set animation classes based on direction
     if (direction === "next") {
       setAnimationClasses({
         prev: "moving-to-left",
@@ -166,16 +170,11 @@ const BowlingCarousel: React.FC = () => {
       });
     }
 
-    // Update currentIndex, stable player data, and reset animation classes after animation completes
+    // Reset animation classes after animation completes
     setTimeout(() => {
-      setCurrentIndex(newCurrentIndex);
-      setStablePlayerData({
-        prev: carouselPlayers[newPrevIndex],
-        current: carouselPlayers[newCurrentIndex],
-        next: carouselPlayers[newNextIndex],
-      });
       setAnimationClasses({ prev: "", current: "", next: "" });
       setIsAnimating(false);
+      setCurrentIndex(newCurrentIndex);
     }, 1200); // Match animation duration
   };
 
