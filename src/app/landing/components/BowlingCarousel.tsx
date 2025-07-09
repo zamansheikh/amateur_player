@@ -140,7 +140,7 @@ const BowlingCarousel: React.FC = () => {
     if (isAnimating) return;
     setIsAnimating(true);
 
-    // Calculate new indices and update stable player data immediately
+    // Calculate new indices
     let newCurrentIndex: number;
     if (direction === "next") {
       newCurrentIndex = (currentIndex + 1) % carouselPlayers.length;
@@ -151,13 +151,7 @@ const BowlingCarousel: React.FC = () => {
     const newPrevIndex = (newCurrentIndex - 1 + carouselPlayers.length) % carouselPlayers.length;
     const newNextIndex = (newCurrentIndex + 1) % carouselPlayers.length;
 
-    setStablePlayerData({
-      prev: carouselPlayers[newPrevIndex],
-      current: carouselPlayers[newCurrentIndex],
-      next: carouselPlayers[newNextIndex],
-    });
-
-    // Set animation classes
+    // Set animation classes but don't update data yet
     if (direction === "next") {
       setAnimationClasses({
         prev: "moving-to-left",
@@ -172,9 +166,14 @@ const BowlingCarousel: React.FC = () => {
       });
     }
 
-    // Update currentIndex and reset animation classes after animation
+    // Update currentIndex, stable player data, and reset animation classes after animation completes
     setTimeout(() => {
       setCurrentIndex(newCurrentIndex);
+      setStablePlayerData({
+        prev: carouselPlayers[newPrevIndex],
+        current: carouselPlayers[newCurrentIndex],
+        next: carouselPlayers[newNextIndex],
+      });
       setAnimationClasses({ prev: "", current: "", next: "" });
       setIsAnimating(false);
     }, 1200); // Match animation duration
