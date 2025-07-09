@@ -141,44 +141,41 @@ const BowlingCarousel: React.FC = () => {
     setIsAnimating(true);
 
     // Calculate new indices
-    const newCurrentIndex = direction === "next"
-      ? (currentIndex + 1) % carouselPlayers.length
-      : (currentIndex - 1 + carouselPlayers.length) % carouselPlayers.length;
+    let newCurrentIndex: number;
+    if (direction === "next") {
+      newCurrentIndex = (currentIndex + 1) % carouselPlayers.length;
+    } else {
+      newCurrentIndex = (currentIndex - 1 + carouselPlayers.length) % carouselPlayers.length;
+    }
 
     const newPrevIndex = (newCurrentIndex - 1 + carouselPlayers.length) % carouselPlayers.length;
     const newNextIndex = (newCurrentIndex + 1) % carouselPlayers.length;
 
-    // Log player data for debugging
-    console.log("Transition start:", {
-      prev: carouselPlayers[newPrevIndex].name,
-      current: carouselPlayers[newCurrentIndex].name,
-      next: carouselPlayers[newNextIndex].name,
-    });
+    // Set animation classes but don't update data yet
+    if (direction === "next") {
+      setAnimationClasses({
+        prev: "moving-to-left",
+        current: "moving-to-right",
+        next: "left-to-center",
+      });
+    } else {
+      setAnimationClasses({
+        prev: "right-to-center",
+        current: "moving-to-left",
+        next: "moving-to-right",
+      });
+    }
 
-    // Update stable player data immediately
-    setStablePlayerData({
-      prev: carouselPlayers[newPrevIndex],
-      current: carouselPlayers[newCurrentIndex],
-      next: carouselPlayers[newNextIndex],
-    });
-
-    // Set animation classes
-    setAnimationClasses({
-      prev: direction === "next" ? "moving-to-left" : "right-to-center",
-      current: direction === "next" ? "moving-to-right" : "moving-to-left",
-      next: direction === "next" ? "left-to-center" : "moving-to-right",
-    });
-
-    // Update currentIndex and reset animation classes after animation
+    // Update currentIndex, stable player data, and reset animation classes after animation completes
     setTimeout(() => {
       setCurrentIndex(newCurrentIndex);
+      setStablePlayerData({
+        prev: carouselPlayers[newPrevIndex],
+        current: carouselPlayers[newCurrentIndex],
+        next: carouselPlayers[newNextIndex],
+      });
       setAnimationClasses({ prev: "", current: "", next: "" });
       setIsAnimating(false);
-      console.log("Transition end:", {
-        prev: carouselPlayers[(newCurrentIndex - 1 + carouselPlayers.length) % carouselPlayers.length].name,
-        current: carouselPlayers[newCurrentIndex].name,
-        next: carouselPlayers[(newCurrentIndex + 1) % carouselPlayers.length].name,
-      });
     }, 1200); // Match animation duration
   };
 
