@@ -179,7 +179,7 @@ const BowlingCarousel: React.FC = () => {
             stats={carouselPlayers[prevIndex].stats}
             width={280}
             height={420}
-            backgroundColor="transparent"
+            backgroundColor="rgba(255, 255, 255, 0.9)"
           />
         </div>
 
@@ -205,7 +205,7 @@ const BowlingCarousel: React.FC = () => {
             stats={carouselPlayers[nextIndex].stats}
             width={280}
             height={420}
-            backgroundColor="transparent"
+            backgroundColor="rgba(255, 255, 255, 0.9)"
           />
         </div>
       </div>

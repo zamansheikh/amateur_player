@@ -57,13 +57,13 @@ const processColor = (color: string): RGB => {
     return hexToRgb(color);
   }
 
-  // If color is rgb(r, g, b)
-  const rgbMatch = color.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
-  if (rgbMatch) {
+  // If color is rgba(r, g, b, a) or rgb(r, g, b)
+  const rgbaMatch = color.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)$/);
+  if (rgbaMatch) {
     return {
-      r: parseInt(rgbMatch[1], 10),
-      g: parseInt(rgbMatch[2], 10),
-      b: parseInt(rgbMatch[3], 10),
+      r: parseInt(rgbaMatch[1], 10),
+      g: parseInt(rgbaMatch[2], 10),
+      b: parseInt(rgbaMatch[3], 10),
     };
   }
 
@@ -126,6 +126,19 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
             return;
         }
 
+        // Handle RGBA colors - extract RGB values for luminance calculation
+        if (backgroundColor.startsWith('rgba(')) {
+            const rgbaMatch = backgroundColor.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)$/);
+            if (rgbaMatch) {
+                const r = parseInt(rgbaMatch[1], 10);
+                const g = parseInt(rgbaMatch[2], 10);
+                const b = parseInt(rgbaMatch[3], 10);
+                const luminance = getLuminance(r, g, b);
+                setTextColor(luminance > 0.5 ? 'black' : 'white');
+                return;
+            }
+        }
+
         // Process the color input to RGB
         const { r, g, b } = processColor(backgroundColor);
 
@@ -140,6 +153,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
     // Determine the effective background color for rendering
     const effectiveBackgroundColor = backgroundColor === "transparent" ? "white" : backgroundColor;
     const isTransparent = backgroundColor === "transparent";
+    const isRgbaColor = backgroundColor.startsWith('rgba(');
     const shouldShowBackground = !isTransparent;
 
     // Determine if color is a Tailwind class or a raw color value
@@ -167,16 +181,16 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                 xmlns="http://www.w3.org/2000/svg"
                 style={{ position: "absolute", top: 0, left: 0, zIndex: 1 }}
             >
-                {/* Background layer - always visible */}
+                {/* Strong base background layer - always solid white */}
                 <path
                     d="M40.0537 60.1366C27.0067 69.0807 9.24832 73.9255 2 75.2298C3.4094 187.217 5.50336 417.453 2.60403 442.497C-0.295302 467.54 17.1007 477.155 26.1611 478.832L77.5034 495.043C141.289 508.46 174.148 531.938 182.604 542C198.067 516.957 282.47 492.435 322.738 483.304C353.181 478.385 361.597 461.13 362 453.118V75.2298C353.342 75.2298 328.054 68.5217 296.161 41.6894C264.268 14.8571 235.356 9.26708 224.886 9.82609C216.671 25.9255 200.523 21.0062 193.477 16.5342L182 2L168.107 16.5342C153.128 25.4783 140.926 15.7888 136.698 9.82609C96.2282 10.3851 56.3624 48.9565 40.0537 60.1366Z"
-                    fill={isTransparent ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)"}
+                    fill="white"
                     stroke="none"
                 />
-                {/* Main background */}
+                {/* Overlay background with specified color */}
                 <path
                     d="M40.0537 60.1366C27.0067 69.0807 9.24832 73.9255 2 75.2298C3.4094 187.217 5.50336 417.453 2.60403 442.497C-0.295302 467.54 17.1007 477.155 26.1611 478.832L77.5034 495.043C141.289 508.46 174.148 531.938 182.604 542C198.067 516.957 282.47 492.435 322.738 483.304C353.181 478.385 361.597 461.13 362 453.118V75.2298C353.342 75.2298 328.054 68.5217 296.161 41.6894C264.268 14.8571 235.356 9.26708 224.886 9.82609C216.671 25.9255 200.523 21.0062 193.477 16.5342L182 2L168.107 16.5342C153.128 25.4783 140.926 15.7888 136.698 9.82609C96.2282 10.3851 56.3624 48.9565 40.0537 60.1366Z"
-                    fill={effectiveBackgroundColor}
+                    fill={isTransparent ? "rgba(255, 255, 255, 0.8)" : (isRgbaColor ? backgroundColor : effectiveBackgroundColor)}
                     stroke={`url(#paint0_linear_${width}_${height})`}
                     strokeWidth="2"
                 />
@@ -256,7 +270,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
-                        background: isTransparent ? "rgba(255, 255, 255, 0.95)" : effectiveBackgroundColor,
+                        background: isTransparent || isRgbaColor ? "rgba(255, 255, 255, 0.95)" : effectiveBackgroundColor,
                         padding: "16px 24px 10px 24px",
                         fontWeight: 700,
                         fontSize: 22,
