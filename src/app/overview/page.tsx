@@ -191,14 +191,14 @@ function Metrics({ playerId, dashboardData, user }: { playerId: string; dashboar
             </div>
 
             {/* Conversion */}
-            <div className="bg-white rounded-lg shadow-lg p-6">
+            {/* <div className="bg-white rounded-lg shadow-lg p-6">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Conversion</h3>
                 <div className="text-center">
                     <div className="text-3xl font-bold text-green-600 mb-2">
                         {dashboardData ? `${(dashboardData.conversion_rate * 100).toFixed(1)}%` : '0.60%'}
                     </div>
                 </div>
-            </div>
+            </div> */}
         </div>
     );
 }
