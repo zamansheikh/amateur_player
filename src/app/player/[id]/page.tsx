@@ -287,8 +287,8 @@ export default function PlayerProfilePage() {
                           </p>
                         </div>
 
-                        {/* Level, XP, EXP Icons */}
-                        <div className="flex items-center gap-4 ml-auto">
+                        {/* Level, EXP Icons */}
+                        <div className="flex items-center gap-6 ml-auto">
                           {/* Level */}
                           <div className="flex flex-col items-center">
                             <div className="relative w-12 h-12">
@@ -308,8 +308,8 @@ export default function PlayerProfilePage() {
                             </span>
                           </div>
 
-                          {/* XP */}
-                          <div className="flex flex-col items-center">
+                          {/* XP - Hidden for now */}
+                          {/* <div className="flex flex-col items-center">
                             <div className="relative w-12 h-12">
                               <img
                                 src="/icons/xp.svg"
@@ -325,7 +325,7 @@ export default function PlayerProfilePage() {
                             <span className="text-gray-600 text-xs mt-1">
                               XP
                             </span>
-                          </div>
+                          </div> */}
 
                           {/* EXP */}
                           <div className="flex flex-col items-center">

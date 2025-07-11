@@ -105,8 +105,8 @@ export default function PlayerCard({ player }: PlayerCardProps) {
           </div>
         </div>
 
-        {/* Level, XP, EXP Icons Row */}
-        <div className="flex items-center justify-center gap-4 mb-4">
+        {/* Level, EXP Icons Row */}
+        <div className="flex items-center justify-center gap-6 mb-4">
           {/* Level */}
           <div className="flex flex-col items-center">
             <div className="relative w-8 h-8">
@@ -124,8 +124,8 @@ export default function PlayerCard({ player }: PlayerCardProps) {
             <span className="text-gray-500 text-xs mt-1">Level</span>
           </div>
 
-          {/* XP */}
-          <div className="flex flex-col items-center">
+          {/* XP - Hidden for now */}
+          {/* <div className="flex flex-col items-center">
             <div className="relative w-8 h-8">
               <img src="/icons/xp.svg" alt="XP" className="w-full h-full" />
               <div className="absolute inset-0 flex items-center justify-center">
@@ -137,7 +137,7 @@ export default function PlayerCard({ player }: PlayerCardProps) {
               </div>
             </div>
             <span className="text-gray-500 text-xs mt-1">XP</span>
-          </div>
+          </div> */}
 
           {/* EXP */}
           <div className="flex flex-col items-center">
