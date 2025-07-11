@@ -140,7 +140,7 @@ export default function PlayerCard({ player }: PlayerCardProps) {
           </div> */}
 
           {/* EXP */}
-          <div className="flex flex-col items-center">
+          {/* <div className="flex flex-col items-center">
             <div className="relative w-8 h-8">
               <img src="/icons/exp.svg" alt="EXP" className="w-full h-full" />
               <div className="absolute inset-0 flex items-center justify-center">
@@ -152,7 +152,7 @@ export default function PlayerCard({ player }: PlayerCardProps) {
               </div>
             </div>
             <span className="text-gray-500 text-xs mt-1">EXP</span>
-          </div>
+          </div> */}
         </div>
 
         {/* Stats Row */}
