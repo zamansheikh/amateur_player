@@ -130,8 +130,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
     };
 
+    // Function to refresh user data
+    const refreshUser = async (): Promise<void> => {
+        try {
+            const token = localStorage.getItem('access_token');
+            if (!token) return;
+
+            const profileResponse = await userApi.getProfile();
+            const userData: User = {
+                ...profileResponse,
+                authenticated: true,
+                access_token: token
+            };
+
+            localStorage.setItem('user', JSON.stringify(userData));
+            setUser(userData);
+        } catch (error) {
+            console.error('Error refreshing user data:', error);
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, isLoading, signin, signup, signout }}>
+        <AuthContext.Provider value={{ user, isLoading, signin, signup, signout, refreshUser }}>
             {children}
         </AuthContext.Provider>
     );

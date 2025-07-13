@@ -53,6 +53,7 @@ export interface AuthContextType {
         password: string;
     }) => Promise<boolean>;
     signout: () => void;
+    refreshUser: () => Promise<void>;
 }
 
 export interface MetricCardProps {

@@ -7,7 +7,7 @@ import { ArrowLeft, Camera, Upload } from 'lucide-react';
 import { api } from '@/lib/api';
 
 export default function EditProfilePage() {
-    const { user } = useAuth();
+    const { user, refreshUser } = useAuth();
     const router = useRouter();
     const fileInputRef = useRef<HTMLInputElement>(null);
     
@@ -75,12 +75,15 @@ export default function EditProfilePage() {
                 },
             });
 
-            if (response.data && response.data.profile_picture_url) {
+            if (response.data && response.data.image_public_url) {
                 setFormData(prev => ({
                     ...prev,
-                    profile_picture_url: response.data.profile_picture_url
+                    profile_picture_url: response.data.image_public_url
                 }));
                 setSuccess('Profile picture updated successfully!');
+                
+                // Refresh user data in AuthContext
+                await refreshUser();
             }
         } catch (error: any) {
             console.error('Error uploading image:', error);
@@ -97,14 +100,18 @@ export default function EditProfilePage() {
         setSuccess(null);
 
         try {
-            const response = await api.post('/api/user/profile', formData);
+            const response = await api.put('/api/user/profile', formData);
             
             if (response.status === 200) {
                 setSuccess('Profile updated successfully!');
-                // Optionally refresh user data in AuthContext
+                
+                // Refresh user data in AuthContext
+                await refreshUser();
+                
+                // Small delay to ensure UI updates, then redirect
                 setTimeout(() => {
                     router.push('/profile');
-                }, 1500);
+                }, 2000);
             }
         } catch (error: any) {
             console.error('Error updating profile:', error);
