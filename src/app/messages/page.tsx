@@ -158,11 +158,10 @@ export default function MessagesPage() {
       msg => msg.conversationId === conversation.id
     );
     setMessages(conversationMessages);
-    if (conversationMessages.length > 0) {
-      setSelectedMessage(conversationMessages[0]);
-    } else {
-      setSelectedMessage(null);
-    }
+    
+    // Clear selected message since we're viewing the conversation as a whole
+    setSelectedMessage(null);
+    
     // Mark conversation as read
     setConversations(prev => 
       prev.map(conv => 
@@ -291,17 +290,20 @@ export default function MessagesPage() {
 
             {/* Message Viewer */}
             <div className="flex-1 flex flex-col">
-              {selectedMessage ? (
+              {selectedConversation ? (
                 <>
                   <div className="p-4 border-b border-gray-200 bg-gray-50">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <img src={selectedMessage.userAvatar} className="w-10 h-10 rounded-full" alt="avatar" />
+                        <img src={selectedConversation.avatar} className="w-10 h-10 rounded-full" alt="avatar" />
                         <div>
-                          <h2 className="font-semibold text-gray-800">{selectedMessage.from}</h2>
+                          <h2 className="font-semibold text-gray-800">{selectedConversation.name}</h2>
                           <p className="text-sm text-gray-500 flex items-center gap-1">
                             <Clock className="w-3 h-3" />
-                            {format(parseISO(selectedMessage.timestamp), 'MMM dd, yyyy \'at\' h:mm a')}
+                            {selectedConversation.type === 'group' ? 
+                              `${selectedConversation.participants?.length || 0} members` :
+                              'Active now'
+                            }
                           </p>
                         </div>
                       </div>
@@ -311,38 +313,52 @@ export default function MessagesPage() {
                     </div>
                   </div>
 
-                  <div className="flex-1 p-4 overflow-y-auto space-y-6">
-                    <div className={`flex ${selectedMessage.itsMe ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`flex items-end gap-3 ${selectedMessage.itsMe ? 'flex-row-reverse' : ''}`}>
-                        <img src={selectedMessage.userAvatar} className="w-8 h-8 rounded-full" />
-                        <div className="max-w-xs bg-gray-100 p-3 rounded-lg">
-                          <p className="text-sm text-gray-800">{selectedMessage.content}</p>
-                          {/* MEDIA PREVIEW */}
-                          {selectedMessage.mediaType && selectedMessage.mediaUrls && (
-                            <div className="mt-2">
-                              {selectedMessage.mediaType === 'video' ? (
-                                <video controls className="rounded-lg max-w-full">
-                                  <source src={selectedMessage.mediaUrls[0]} type="video/mp4" />
-                                </video>
-                              ) : (
-                                <div className="grid grid-cols-2 gap-2">
-                                  {selectedMessage.mediaUrls?.slice(0, 4).map((url, idx) => (
-                                    <div key={idx} className="relative">
-                                      <img src={url} className="w-full h-24 object-cover rounded-md" />
-                                      {idx === 3 && selectedMessage.mediaUrls && selectedMessage.mediaUrls.length > 4 && (
-                                        <div className="absolute inset-0 bg-black bg-opacity-60 text-white flex items-center justify-center text-lg font-bold rounded-md">
-                                          +{selectedMessage.mediaUrls.length - 3}
-                                        </div>
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          )}
+                  <div className="flex-1 p-4 overflow-y-auto">
+                    {messages.length === 0 ? (
+                      <div className="flex-1 flex items-center justify-center">
+                        <div className="text-center">
+                          <MessageCircle className="w-16 h-16 mx-auto text-gray-300 mb-4" />
+                          <p className="text-gray-500">No messages yet</p>
+                          <p className="text-gray-400 text-sm">Start the conversation!</p>
                         </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="space-y-6">
+                        {messages.map((message) => (
+                          <div key={message.id} className={`flex ${message.itsMe ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`flex items-end gap-3 ${message.itsMe ? 'flex-row-reverse' : ''}`}>
+                              <img src={message.userAvatar} className="w-8 h-8 rounded-full" alt="avatar" />
+                              <div className="max-w-xs bg-gray-100 p-3 rounded-lg">
+                                <p className="text-sm text-gray-800">{message.content}</p>
+                                {/* MEDIA PREVIEW */}
+                                {message.mediaType && message.mediaUrls && (
+                                  <div className="mt-2">
+                                    {message.mediaType === 'video' ? (
+                                      <video controls className="rounded-lg max-w-full">
+                                        <source src={message.mediaUrls[0]} type="video/mp4" />
+                                      </video>
+                                    ) : (
+                                      <div className="grid grid-cols-2 gap-2">
+                                        {message.mediaUrls?.slice(0, 4).map((url, idx) => (
+                                          <div key={idx} className="relative">
+                                            <img src={url} className="w-full h-24 object-cover rounded-md" />
+                                            {idx === 3 && message.mediaUrls && message.mediaUrls.length > 4 && (
+                                              <div className="absolute inset-0 bg-black bg-opacity-60 text-white flex items-center justify-center text-lg font-bold rounded-md">
+                                                +{message.mediaUrls.length - 3}
+                                              </div>
+                                            )}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div className="p-4 border-t border-gray-200">
@@ -350,7 +366,7 @@ export default function MessagesPage() {
                       <textarea
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
-                        placeholder="Type your reply..."
+                        placeholder={`Type a message to ${selectedConversation.name}...`}
                         className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-green-500"
                         rows={1}
                       />
@@ -369,7 +385,7 @@ export default function MessagesPage() {
                 <div className="flex-1 flex items-center justify-center">
                   <div className="text-center">
                     <MessageCircle className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                    <p className="text-gray-500">Select a message to view</p>
+                    <p className="text-gray-500">Select a conversation to start messaging</p>
                   </div>
                 </div>
               )}
