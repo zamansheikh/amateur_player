@@ -251,21 +251,21 @@ export default function MessagesPage() {
                   </div>
 
                   <div className="p-4 border-t border-gray-200">
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 items-end">
                       <textarea
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
                         placeholder="Type your reply..."
                         className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-green-500"
-                        rows={3}
+                        rows={1}
                       />
                       <button
                         onClick={handleSendReply}
                         disabled={!replyText.trim()}
-                        className="px-3 py-1.5 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-md transition-colors text-sm"
+                        className="px-3 py-3 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors text-sm flex-shrink-0"
                         style={{ backgroundColor: !replyText.trim() ? '' : '#8BC342' }}
                       >
-                        <Send className="w-4 h-4" />
+                        <Send className="w-6 h-6" />
                       </button>
                     </div>
                   </div>
