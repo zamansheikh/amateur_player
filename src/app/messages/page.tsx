@@ -78,6 +78,34 @@ const mockMessages: Message[] = [
     userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=me',
     mediaType: 'video',
     mediaUrls: ['https://www.w3schools.com/html/mov_bbb.mp4']
+  },
+   {
+    id: '5',
+    conversationId: 'group1',
+    from: 'me',
+    content: 'Thanks! Try focusing on your release timing and follow-through.',
+    timestamp: '2024-01-17T17:00:00Z',
+    itsMe: true,
+    read: true,
+    userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=me',
+    mediaType: 'image',
+    mediaUrls: [
+      'https://via.placeholder.com/150',
+      'https://via.placeholder.com/150',
+      'https://via.placeholder.com/150',
+      'https://via.placeholder.com/150',
+      'https://via.placeholder.com/150',
+    ]
+  },
+   {
+    id: '6',
+    conversationId: 'group1',
+    from: 'coachsmith',
+    content: 'Would love to collaborate on a youth program!',
+    timestamp: '2024-01-15T14:20:00Z',
+    userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=coachsmith',
+    itsMe: false,
+    read: true
   }
 ];
 
