@@ -356,31 +356,39 @@ export default function MessagesPage() {
                           <div key={message.id} className={`flex ${message.itsMe ? 'justify-end' : 'justify-start'}`}>
                             <div className={`flex items-end gap-3 ${message.itsMe ? 'flex-row-reverse' : ''}`}>
                               <img src={message.userAvatar} className="w-8 h-8 rounded-full" alt="avatar" />
-                              <div className="max-w-xs bg-gray-100 p-3 rounded-lg">
-                                <p className="text-sm text-gray-800">{message.content}</p>
-                                {/* MEDIA PREVIEW */}
-                                {message.mediaType && message.mediaUrls && (
-                                  <div className="mt-2">
-                                    {message.mediaType === 'video' ? (
-                                      <video controls className="rounded-lg max-w-full">
-                                        <source src={message.mediaUrls[0]} type="video/mp4" />
-                                      </video>
-                                    ) : (
-                                      <div className="grid grid-cols-2 gap-2">
-                                        {message.mediaUrls?.slice(0, 4).map((url, idx) => (
-                                          <div key={idx} className="relative">
-                                            <img src={url} className="w-full h-24 object-cover rounded-md" />
-                                            {idx === 3 && message.mediaUrls && message.mediaUrls.length > 4 && (
-                                              <div className="absolute inset-0 bg-black bg-opacity-60 text-white flex items-center justify-center text-lg font-bold rounded-md">
-                                                +{message.mediaUrls.length - 3}
-                                              </div>
-                                            )}
-                                          </div>
-                                        ))}
-                                      </div>
-                                    )}
-                                  </div>
+                              <div className="max-w-xs">
+                                {/* Show username for group messages */}
+                                {selectedConversation?.type === 'group' && (
+                                  <p className="text-xs text-gray-500 mb-1">
+                                    {message.itsMe ? 'You' : message.from}
+                                  </p>
                                 )}
+                                <div className="bg-gray-100 p-3 rounded-lg">
+                                  <p className="text-sm text-gray-800">{message.content}</p>
+                                  {/* MEDIA PREVIEW */}
+                                  {message.mediaType && message.mediaUrls && (
+                                    <div className="mt-2">
+                                      {message.mediaType === 'video' ? (
+                                        <video controls className="rounded-lg max-w-full">
+                                          <source src={message.mediaUrls[0]} type="video/mp4" />
+                                        </video>
+                                      ) : (
+                                        <div className="grid grid-cols-2 gap-2">
+                                          {message.mediaUrls?.slice(0, 4).map((url, idx) => (
+                                            <div key={idx} className="relative">
+                                              <img src={url} className="w-full h-24 object-cover rounded-md" />
+                                              {idx === 3 && message.mediaUrls && message.mediaUrls.length > 4 && (
+                                                <div className="absolute inset-0 bg-black bg-opacity-60 text-white flex items-center justify-center text-lg font-bold rounded-md">
+                                                  +{message.mediaUrls.length - 3}
+                                                </div>
+                                              )}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </div>
