@@ -22,7 +22,7 @@ const mockMessages: Message[] = [
     from: 'fan123',
     content: 'Your technique is incredible! Any tips for a beginner?',
     timestamp: '2024-01-17T16:30:00Z',
-    userAvatar: 'https://thispersondoesnotexist.com/',
+    userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=fan123',
     itsMe: false,
     read: false
   },
@@ -33,7 +33,7 @@ const mockMessages: Message[] = [
     timestamp: '2024-01-17T17:00:00Z',
     itsMe: true,
     read: true,
-    userAvatar: 'https://thispersondoesnotexist.com/',
+    userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=me',
     mediaType: 'image',
     mediaUrls: [
       'https://via.placeholder.com/150',
@@ -48,7 +48,7 @@ const mockMessages: Message[] = [
     from: 'coachsmith',
     content: 'Would love to collaborate on a youth program!',
     timestamp: '2024-01-15T14:20:00Z',
-    userAvatar: 'https://thispersondoesnotexist.com/',
+    userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=coachsmith',
     itsMe: false,
     read: true
   },
@@ -59,7 +59,7 @@ const mockMessages: Message[] = [
     timestamp: '2024-01-15T14:45:00Z',
     itsMe: true,
     read: true,
-    userAvatar: 'https://thispersondoesnotexist.com/',
+    userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=me',
     mediaType: 'video',
     mediaUrls: ['https://www.w3schools.com/html/mov_bbb.mp4']
   }
@@ -230,11 +230,11 @@ export default function MessagesPage() {
                                   <source src={selectedMessage.mediaUrls[0]} type="video/mp4" />
                                 </video>
                               ) : (
-                                <div className="grid grid-cols-3 gap-2">
-                                  {selectedMessage.mediaUrls.slice(0, 4).map((url, idx) => (
+                                <div className="grid grid-cols-2 gap-2">
+                                  {selectedMessage.mediaUrls?.slice(0, 4).map((url, idx) => (
                                     <div key={idx} className="relative">
                                       <img src={url} className="w-full h-24 object-cover rounded-md" />
-                                      {idx === 3 && selectedMessage.mediaUrls.length > 4 && (
+                                      {idx === 3 && selectedMessage.mediaUrls && selectedMessage.mediaUrls.length > 4 && (
                                         <div className="absolute inset-0 bg-black bg-opacity-60 text-white flex items-center justify-center text-lg font-bold rounded-md">
                                           +{selectedMessage.mediaUrls.length - 3}
                                         </div>
