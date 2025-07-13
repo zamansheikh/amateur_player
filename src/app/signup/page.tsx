@@ -63,8 +63,15 @@ export default function SignUpPage() {
             setError('Passwords do not match');
             return false;
         }
-        if (password.length < 6) {
-            setError('Password must be at least 6 characters long');
+        if (password.length < 8) {
+            setError('Password must be at least 8 characters long');
+            return false;
+        }
+        // Check if password contains both letters and numbers
+        const hasLetter = /[a-zA-Z]/.test(password);
+        const hasNumber = /\d/.test(password);
+        if (!hasLetter || !hasNumber) {
+            setError('Password must contain both letters and numbers');
             return false;
         }
         setError('');
@@ -226,7 +233,7 @@ export default function SignUpPage() {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                                    placeholder="Create a password (min. 6 characters)"
+                                    placeholder="Create a password (min. 8 characters, letters & numbers)"
                                 />
                             </div>
                             <div>
