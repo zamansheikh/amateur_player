@@ -4,8 +4,20 @@ import { useState, useEffect } from 'react';
 import { MessageCircle, Send, Search, MoreHorizontal, CheckCircle, Clock } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 
+interface Conversation {
+  id: string;
+  name: string;
+  type: 'individual' | 'group';
+  avatar: string;
+  lastMessage: string;
+  lastMessageTime: string;
+  unreadCount: number;
+  participants?: string[];
+}
+
 interface Message {
   id: string;
+  conversationId: string;
   from: string;
   userAvatar?: string;
   itsMe: boolean;
@@ -19,6 +31,7 @@ interface Message {
 const mockMessages: Message[] = [
   {
     id: '1',
+    conversationId: 'conv1',
     from: 'fan123',
     content: 'Your technique is incredible! Any tips for a beginner?',
     timestamp: '2024-01-17T16:30:00Z',
@@ -28,6 +41,7 @@ const mockMessages: Message[] = [
   },
   {
     id: '2',
+    conversationId: 'conv1',
     from: 'me',
     content: 'Thanks! Try focusing on your release timing and follow-through.',
     timestamp: '2024-01-17T17:00:00Z',
@@ -45,6 +59,7 @@ const mockMessages: Message[] = [
   },
   {
     id: '3',
+    conversationId: 'conv2',
     from: 'coachsmith',
     content: 'Would love to collaborate on a youth program!',
     timestamp: '2024-01-15T14:20:00Z',
@@ -54,6 +69,7 @@ const mockMessages: Message[] = [
   },
   {
     id: '4',
+    conversationId: 'conv2',
     from: 'me',
     content: 'Sure, I’ll send you a clip.',
     timestamp: '2024-01-15T14:45:00Z',
@@ -65,32 +81,97 @@ const mockMessages: Message[] = [
   }
 ];
 
+const mockConversations: Conversation[] = [
+  {
+    id: 'conv1',
+    name: 'Fan 123',
+    type: 'individual',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=fan123',
+    lastMessage: 'Thanks! Try focusing on your release timing and follow-through.',
+    lastMessageTime: '2024-01-17T17:00:00Z',
+    unreadCount: 0
+  },
+  {
+    id: 'conv2',
+    name: 'Coach Smith',
+    type: 'individual',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=coachsmith',
+    lastMessage: 'Sure, I’ll send you a clip.',
+    lastMessageTime: '2024-01-15T14:45:00Z',
+    unreadCount: 0
+  },
+  {
+    id: 'group1',
+    name: 'Training Group',
+    type: 'group',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=group1',
+    lastMessage: 'Don’t forget about the training tomorrow at 10 AM!',
+    lastMessageTime: '2024-01-14T09:00:00Z',
+    unreadCount: 3,
+    participants: ['me', 'fan123', 'coachsmith']
+  }
+];
+
 export default function MessagesPage() {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [replyText, setReplyText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'unread' | 'read'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'individual' | 'group'>('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setMessages(mockMessages);
-    if (mockMessages.length > 0) {
-      setSelectedMessage(mockMessages[0]);
+    setConversations(mockConversations);
+    if (mockConversations.length > 0) {
+      setSelectedConversation(mockConversations[0]);
+      // Load messages for the first conversation
+      const conversationMessages = mockMessages.filter(
+        msg => msg.conversationId === mockConversations[0].id
+      );
+      setMessages(conversationMessages);
+      if (conversationMessages.length > 0) {
+        setSelectedMessage(conversationMessages[0]);
+      }
     }
     setLoading(false);
   }, []);
 
-  const filteredMessages = messages.filter((message) => {
+  // Filter conversations instead of messages
+  const filteredConversations = conversations.filter((conversation) => {
     const matchesSearch =
-      message.from.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      message.content.toLowerCase().includes(searchQuery.toLowerCase());
+      conversation.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      conversation.lastMessage.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter =
       filterType === 'all' ||
-      (filterType === 'unread' && !message.read) ||
-      (filterType === 'read' && message.read);
+      (filterType === 'individual' && conversation.type === 'individual') ||
+      (filterType === 'group' && conversation.type === 'group');
     return matchesSearch && matchesFilter;
   });
+
+  const handleSelectConversation = (conversation: Conversation) => {
+    setSelectedConversation(conversation);
+    // Load messages for selected conversation
+    const conversationMessages = mockMessages.filter(
+      msg => msg.conversationId === conversation.id
+    );
+    setMessages(conversationMessages);
+    if (conversationMessages.length > 0) {
+      setSelectedMessage(conversationMessages[0]);
+    } else {
+      setSelectedMessage(null);
+    }
+    // Mark conversation as read
+    setConversations(prev => 
+      prev.map(conv => 
+        conv.id === conversation.id 
+          ? { ...conv, unreadCount: 0 }
+          : conv
+      )
+    );
+  };
 
   const handleSendReply = () => {
     if (!replyText.trim() || !selectedMessage) return;
@@ -125,7 +206,7 @@ export default function MessagesPage() {
                     Messages
                   </h1>
                   <div className="text-sm text-gray-500">
-                    {messages.filter((m) => !m.read).length} unread
+                    {conversations.reduce((total, conv) => total + conv.unreadCount, 0)} unread
                   </div>
                 </div>
 
@@ -141,7 +222,7 @@ export default function MessagesPage() {
                 </div>
 
                 <div className="flex gap-2">
-                  {(['all', 'unread', 'read'] as const).map((filter) => (
+                  {(['all', 'individual', 'group'] as const).map((filter) => (
                     <button
                       key={filter}
                       onClick={() => setFilterType(filter)}
@@ -157,40 +238,54 @@ export default function MessagesPage() {
               </div>
 
               <div className="flex-1 overflow-y-auto">
-                {filteredMessages.map((message) => (
-                  <div
-                    key={message.id}
-                    onClick={() => handleSelectMessage(message)}
-                    className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                      selectedMessage?.id === message.id ? 'bg-green-50 border-r-2' : ''
-                    }`}
-                    style={selectedMessage?.id === message.id ? { borderRightColor: '#8BC342' } : {}}
-                  >
-                    <div className="flex items-start gap-3">
-                      <img
-                        src={message.userAvatar}
-                        className="w-10 h-10 rounded-full object-cover"
-                        alt="avatar"
-                      />
-                      <div className="flex-1">
-                        <div className="flex justify-between items-center mb-1">
-                          <h3 className="font-medium text-gray-800">{message.from}</h3>
-                          <div className="flex items-center gap-1">
-                            {!message.read ? (
-                              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: '#8BC342' }}></div>
-                            ) : (
-                              <CheckCircle className="w-3 h-3 text-gray-400" />
-                            )}
-                            <span className="text-xs text-gray-500">
-                              {format(parseISO(message.timestamp), 'MMM dd')}
-                            </span>
+                {filteredConversations.length === 0 ? (
+                  <div className="text-center py-8">
+                    <MessageCircle className="w-12 h-12 mx-auto text-gray-300 mb-2" />
+                    <p className="text-gray-500 text-sm">No conversations found</p>
+                  </div>
+                ) : (
+                  filteredConversations.map((conversation) => (
+                    <div
+                      key={conversation.id}
+                      onClick={() => handleSelectConversation(conversation)}
+                      className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
+                        selectedConversation?.id === conversation.id ? 'bg-green-50 border-r-2' : ''
+                      }`}
+                      style={selectedConversation?.id === conversation.id ? { borderRightColor: '#8BC342' } : {}}
+                    >
+                      <div className="flex items-start gap-3">
+                        <img
+                          src={conversation.avatar}
+                          className="w-10 h-10 rounded-full object-cover"
+                          alt="avatar"
+                        />
+                        <div className="flex-1">
+                          <div className="flex justify-between items-center mb-1">
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-medium text-gray-800">{conversation.name}</h3>
+                              {conversation.type === 'group' && (
+                                <span className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-600 rounded">
+                                  Group
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              {conversation.unreadCount > 0 && (
+                                <span className="text-xs px-1.5 py-0.5 rounded-full text-white" style={{ backgroundColor: '#8BC342' }}>
+                                  {conversation.unreadCount}
+                                </span>
+                              )}
+                              <span className="text-xs text-gray-500">
+                                {format(parseISO(conversation.lastMessageTime), 'MMM dd')}
+                              </span>
+                            </div>
                           </div>
+                          <p className="text-sm text-gray-600 truncate">{conversation.lastMessage}</p>
                         </div>
-                        <p className="text-sm text-gray-600 truncate">{message.content}</p>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
 
