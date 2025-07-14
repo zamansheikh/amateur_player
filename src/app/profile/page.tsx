@@ -208,7 +208,7 @@ export default function ProfilePage() {
                                     <img
                                         src={user?.profile_picture_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Jennifer"}
                                         alt="Profile"
-                                        className="w-20 h-20 rounded-full mx-auto mb-4"
+                                        className="w-20 h-20 rounded-full mx-auto mb-4 object-cover"
                                     />
                                 </div>
                                 <h2 className="text-xl font-bold text-gray-900">{user?.name || "User Name"}</h2>
