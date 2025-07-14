@@ -1,10 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+
+interface Brand {
+    brand_id: number;
+    brandType: string;
+    name: string;
+    formal_name: string;
+    logo_url: string;
+}
+
+interface BrandsResponse {
+    Shoes: Brand[];
+    Apparels: Brand[];
+    Balls: Brand[];
+    Accessories: Brand[];
+}
 
 export default function SignUpPage() {
     const [currentStep, setCurrentStep] = useState(1);
@@ -24,32 +39,48 @@ export default function SignUpPage() {
     
     // Step 3: Favorite Brands
     const [selectedBrands, setSelectedBrands] = useState({
-        ballBrands: [] as string[],
-        shoes: [] as string[],
-        grips: [] as string[],
-        apparel: [] as string[]
+        balls: [] as number[],
+        shoes: [] as number[],
+        accessories: [] as number[],
+        apparels: [] as number[]
     });
     
+    const [brands, setBrands] = useState<BrandsResponse | null>(null);
+    const [brandsLoading, setBrandsLoading] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
     const { signup } = useAuth();
     const router = useRouter();
 
-    // Brand categories
-    const brandCategories = {
-        ballBrands: ['Brunswick', 'Hammer', 'Ebonite', 'Track', 'Radical', 'Columbia 300', 'DV8', 'Storm', 'Roto Grip', '900 Global', 'Motiv'],
-        shoes: ['3G', 'Dexter', 'Brunswick', 'KR Strikeforce', 'Hammer', 'Linds', 'Storm'],
-        grips: ['Turbo Grips', 'Vise Inserts', 'JoPo Grips'],
-        apparel: ['I AM Bowling', 'Logo Infusion', 'Coolwick', 'Apparel EFX', 'Bowlifi', 'Zealo Gear']
-    };
+    // Fetch brands data
+    useEffect(() => {
+        const fetchBrands = async () => {
+            setBrandsLoading(true);
+            try {
+                const response = await fetch('https://test.bowlersnetwork.com/api/brands');
+                if (response.ok) {
+                    const data = await response.json();
+                    setBrands(data);
+                }
+            } catch (error) {
+                console.error('Failed to fetch brands:', error);
+            } finally {
+                setBrandsLoading(false);
+            }
+        };
 
-    const handleBrandToggle = (category: keyof typeof selectedBrands, brand: string) => {
+        if (currentStep === 3) {
+            fetchBrands();
+        }
+    }, [currentStep]);
+
+    const handleBrandToggle = (category: keyof typeof selectedBrands, brandId: number) => {
         setSelectedBrands(prev => ({
             ...prev,
-            [category]: prev[category].includes(brand)
-                ? prev[category].filter(b => b !== brand)
-                : [...prev[category], brand]
+            [category]: prev[category].includes(brandId)
+                ? prev[category].filter(id => id !== brandId)
+                : [...prev[category], brandId]
         }));
     };
 
@@ -313,77 +344,125 @@ export default function SignUpPage() {
                             <h3 className="text-lg font-medium text-gray-900 text-center">Choose Your Favorite Brands</h3>
                             <p className="text-sm text-gray-600 text-center">Select brands you're interested in (optional)</p>
                             
-                            {/* Ball Brands */}
-                            <div>
-                                <h4 className="text-md font-medium text-gray-800 mb-3">Ball Brands</h4>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {brandCategories.ballBrands.map((brand) => (
-                                        <label key={brand} className="flex items-center space-x-2 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedBrands.ballBrands.includes(brand)}
-                                                onChange={() => handleBrandToggle('ballBrands', brand)}
-                                                className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                                            />
-                                            <span className="text-sm text-gray-700">{brand}</span>
-                                        </label>
-                                    ))}
+                            {brandsLoading ? (
+                                <div className="flex justify-center py-8">
+                                    <div className="text-gray-500">Loading brands...</div>
                                 </div>
-                            </div>
+                            ) : brands ? (
+                                <>
+                                    {/* Ball Brands */}
+                                    {brands.Balls && brands.Balls.length > 0 && (
+                                        <div>
+                                            <h4 className="text-md font-medium text-gray-800 mb-3">Ball Brands</h4>
+                                            <div className="grid grid-cols-1 gap-3">
+                                                {brands.Balls.map((brand) => (
+                                                    <label key={brand.brand_id} className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg border hover:bg-gray-50 transition-colors">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedBrands.balls.includes(brand.brand_id)}
+                                                            onChange={() => handleBrandToggle('balls', brand.brand_id)}
+                                                            className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                                                        />
+                                                        <Image
+                                                            src={brand.logo_url}
+                                                            alt={`${brand.formal_name} logo`}
+                                                            width={32}
+                                                            height={32}
+                                                            className="object-contain"
+                                                        />
+                                                        <span className="text-sm text-gray-700 flex-1">{brand.formal_name}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
 
-                            {/* Shoes */}
-                            <div>
-                                <h4 className="text-md font-medium text-gray-800 mb-3">Shoes</h4>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {brandCategories.shoes.map((brand) => (
-                                        <label key={brand} className="flex items-center space-x-2 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedBrands.shoes.includes(brand)}
-                                                onChange={() => handleBrandToggle('shoes', brand)}
-                                                className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                                            />
-                                            <span className="text-sm text-gray-700">{brand}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
+                                    {/* Shoes */}
+                                    {brands.Shoes && brands.Shoes.length > 0 && (
+                                        <div>
+                                            <h4 className="text-md font-medium text-gray-800 mb-3">Shoes</h4>
+                                            <div className="grid grid-cols-1 gap-3">
+                                                {brands.Shoes.map((brand) => (
+                                                    <label key={brand.brand_id} className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg border hover:bg-gray-50 transition-colors">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedBrands.shoes.includes(brand.brand_id)}
+                                                            onChange={() => handleBrandToggle('shoes', brand.brand_id)}
+                                                            className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                                                        />
+                                                        <Image
+                                                            src={brand.logo_url}
+                                                            alt={`${brand.formal_name} logo`}
+                                                            width={32}
+                                                            height={32}
+                                                            className="object-contain"
+                                                        />
+                                                        <span className="text-sm text-gray-700 flex-1">{brand.formal_name}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
 
-                            {/* Grips/Accessories */}
-                            <div>
-                                <h4 className="text-md font-medium text-gray-800 mb-3">Grips/Accessories</h4>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {brandCategories.grips.map((brand) => (
-                                        <label key={brand} className="flex items-center space-x-2 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedBrands.grips.includes(brand)}
-                                                onChange={() => handleBrandToggle('grips', brand)}
-                                                className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                                            />
-                                            <span className="text-sm text-gray-700">{brand}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                            </div>
+                                    {/* Accessories */}
+                                    {brands.Accessories && brands.Accessories.length > 0 && (
+                                        <div>
+                                            <h4 className="text-md font-medium text-gray-800 mb-3">Accessories</h4>
+                                            <div className="grid grid-cols-1 gap-3">
+                                                {brands.Accessories.map((brand) => (
+                                                    <label key={brand.brand_id} className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg border hover:bg-gray-50 transition-colors">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedBrands.accessories.includes(brand.brand_id)}
+                                                            onChange={() => handleBrandToggle('accessories', brand.brand_id)}
+                                                            className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                                                        />
+                                                        <Image
+                                                            src={brand.logo_url}
+                                                            alt={`${brand.formal_name} logo`}
+                                                            width={32}
+                                                            height={32}
+                                                            className="object-contain"
+                                                        />
+                                                        <span className="text-sm text-gray-700 flex-1">{brand.formal_name}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
 
-                            {/* Apparel */}
-                            <div>
-                                <h4 className="text-md font-medium text-gray-800 mb-3">Apparel</h4>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {brandCategories.apparel.map((brand) => (
-                                        <label key={brand} className="flex items-center space-x-2 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedBrands.apparel.includes(brand)}
-                                                onChange={() => handleBrandToggle('apparel', brand)}
-                                                className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                                            />
-                                            <span className="text-sm text-gray-700">{brand}</span>
-                                        </label>
-                                    ))}
+                                    {/* Apparel */}
+                                    {brands.Apparels && brands.Apparels.length > 0 && (
+                                        <div>
+                                            <h4 className="text-md font-medium text-gray-800 mb-3">Apparel</h4>
+                                            <div className="grid grid-cols-1 gap-3">
+                                                {brands.Apparels.map((brand) => (
+                                                    <label key={brand.brand_id} className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg border hover:bg-gray-50 transition-colors">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedBrands.apparels.includes(brand.brand_id)}
+                                                            onChange={() => handleBrandToggle('apparels', brand.brand_id)}
+                                                            className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                                                        />
+                                                        <Image
+                                                            src={brand.logo_url}
+                                                            alt={`${brand.formal_name} logo`}
+                                                            width={32}
+                                                            height={32}
+                                                            className="object-contain"
+                                                        />
+                                                        <span className="text-sm text-gray-700 flex-1">{brand.formal_name}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <div className="text-center py-8">
+                                    <div className="text-gray-500">Failed to load brands. Please try again.</div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     )}
 

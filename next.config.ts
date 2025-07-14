@@ -5,27 +5,11 @@ const nextConfig: NextConfig = {
         remotePatterns: [
             {
                 protocol: 'https',
-                hostname: 'api.dicebear.com',
-                port: '',
-                pathname: '/**',
+                hostname: '**',
             },
             {
-                protocol: 'https',
-                hostname: 'images.unsplash.com',
-                port: '',
-                pathname: '/**',
-            },
-            {
-                protocol: 'https',
-                hostname: 'test.bowlersnetwork.com',
-                port: '',
-                pathname: '/**',
-            },
-            {
-                protocol: 'https',
-                hostname: 'pub-2def41345f13434aa37c16ee78e1fbcc.r2.dev',
-                port: '',
-                pathname: '/**',
+                protocol: 'http',
+                hostname: '**',
             },
         ],
         dangerouslyAllowSVG: true,
