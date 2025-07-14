@@ -21,13 +21,17 @@ export default function SignInPage() {
         setIsLoading(true);
 
         try {
+            console.log('Attempting to sign in...');
             const success = await signin(username, password);
+            console.log('Sign in result:', success);
             if (success) {
+                console.log('Sign in successful, redirecting to /');
                 router.push('/');
             } else {
                 setError('Invalid credentials. Please try again.');
             }
         } catch (err) {
+            console.error('Sign in error:', err);
             setError('An error occurred. Please try again.');
         } finally {
             setIsLoading(false);

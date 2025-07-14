@@ -224,12 +224,12 @@ export default function ProfilePage() {
                             {/* Level and EXP */}
                             <div className="grid grid-cols-2 gap-4 mb-6">
                                 <div className="bg-blue-50 rounded-lg p-4 text-center">
-                                    <div className="text-2xl font-bold text-blue-600">{user?.level || 20}</div>
+                                    <div className="text-2xl font-bold text-blue-600">{user?.level !== undefined ? user.level : 'N/A'}</div>
                                     <div className="text-sm text-gray-600">Level</div>
                                 </div>
                                 <div className="bg-green-50 rounded-lg p-4 text-center">
-                                    <div className="text-2xl font-bold text-green-600">{user?.stats?.experience || 2881}</div>
-                                    <div className="text-sm text-gray-600">EXP</div>
+                                    <div className="text-2xl font-bold text-green-600">{user?.xp !== undefined ? user.xp : 'N/A'}</div>
+                                    <div className="text-sm text-gray-600">XP</div>
                                 </div>
                             </div>
 
@@ -314,19 +314,19 @@ export default function ProfilePage() {
                                     <div className="space-y-3">
                                         <div className="flex justify-between items-center">
                                             <span className="text-gray-600">Avg. Score:</span>
-                                            <span className="font-medium">{user?.stats?.average_score ? Math.round(user.stats.average_score) : '237'}</span>
+                                            <span className="font-medium">{user?.stats?.average_score !== undefined ? Math.round(user.stats.average_score) : 'N/A'}</span>
                                         </div>
                                         <div className="flex justify-between items-center">
                                             <span className="text-gray-600">High Game:</span>
-                                            <span className="font-medium">{user?.stats?.high_game || '300'}</span>
+                                            <span className="font-medium">{user?.stats?.high_game !== undefined ? user.stats.high_game : 'N/A'}</span>
                                         </div>
                                         <div className="flex justify-between items-center">
                                             <span className="text-gray-600">High Series:</span>
-                                            <span className="font-medium">{user?.stats?.high_series || '854'}</span>
+                                            <span className="font-medium">{user?.stats?.high_series !== undefined ? user.stats.high_series : 'N/A'}</span>
                                         </div>
                                         <div className="flex justify-between items-center">
                                             <span className="text-gray-600">Experience (yrs):</span>
-                                            <span className="font-medium">{user?.stats?.experience || '32'}</span>
+                                            <span className="font-medium">{user?.stats?.experience !== undefined ? user.stats.experience : 'N/A'}</span>
                                         </div>
                                     </div>
                                 )}
