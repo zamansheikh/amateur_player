@@ -18,7 +18,6 @@ export default function SignUpPage() {
     const [confirmPassword, setConfirmPassword] = useState('');
     
     // Step 2: Address Info
-    const [address, setAddress] = useState('');
     const [zipCode, setZipCode] = useState('');
     const [city, setCity] = useState('');
     const [state, setState] = useState('');
@@ -79,8 +78,8 @@ export default function SignUpPage() {
     };
 
     const validateStep2 = () => {
-        if (!address || !zipCode || !city || !state) {
-            setError('Please fill in all address fields');
+        if (!zipCode || !city || !state) {
+            setError('Please fill in all location fields');
             return false;
         }
         setError('');
@@ -257,22 +256,7 @@ export default function SignUpPage() {
                     {/* Step 2: Address Information */}
                     {currentStep === 2 && (
                         <div className="space-y-4">
-                            <h3 className="text-lg font-medium text-gray-900 text-center">Address Information</h3>
-                            <div>
-                                <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-                                    Street Address
-                                </label>
-                                <input
-                                    id="address"
-                                    name="address"
-                                    type="text"
-                                    required
-                                    value={address}
-                                    onChange={(e) => setAddress(e.target.value)}
-                                    className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                                    placeholder="123 Main Street"
-                                />
-                            </div>
+                            <h3 className="text-lg font-medium text-gray-900 text-center">Location Information</h3>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label htmlFor="city" className="block text-sm font-medium text-gray-700">
