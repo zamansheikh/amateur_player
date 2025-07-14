@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Edit, Users, Eye } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { api } from '@/lib/api';
 import UserPostCard from '@/components/UserPostCard';
 import CreatePost from '@/components/CreatePost';
@@ -61,7 +62,7 @@ interface UserPost {
 }
 
 export default function ProfilePage() {
-    const { user } = useAuth();
+    const { user, refreshUser } = useAuth();
     const router = useRouter();
     const [posts, setPosts] = useState<UserPost[]>([]);
     const [loading, setLoading] = useState(true);
@@ -117,6 +118,9 @@ export default function ProfilePage() {
             console.log('Updating stats with payload:', payload);
 
             await api.post('api/user/stats/game-stats', payload);
+
+            // Refresh user data to get updated stats
+            await refreshUser();
 
             // Update user context or refetch user data
             // You might want to refresh the user data here
@@ -324,6 +328,45 @@ export default function ProfilePage() {
                                             <span className="text-gray-600">Experience (yrs):</span>
                                             <span className="font-medium">{user?.stats?.experience || '32'}</span>
                                         </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Favorite Brands */}
+                            <div className="mb-6">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Favorite Brands</h3>
+                                {user?.favorite_brands && user.favorite_brands.length > 0 ? (
+                                    <div className="space-y-3">
+                                        {/* Group brands by type */}
+                                        {['Balls', 'Shoes', 'Accessories', 'Apparels'].map((brandType) => {
+                                            const brandsOfType = user.favorite_brands?.filter(brand => brand.brandType === brandType) || [];
+                                            if (brandsOfType.length === 0) return null;
+                                            
+                                            return (
+                                                <div key={brandType}>
+                                                    <h4 className="text-sm font-medium text-gray-700 mb-2">{brandType}</h4>
+                                                    <div className="grid grid-cols-1 gap-2">
+                                                        {brandsOfType.map((brand) => (
+                                                            <div key={brand.brand_id} className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
+                                                                <Image
+                                                                    src={brand.logo_url}
+                                                                    alt={`${brand.formal_name} logo`}
+                                                                    width={32}
+                                                                    height={32}
+                                                                    className="object-contain"
+                                                                />
+                                                                <span className="text-sm text-gray-700 flex-1">{brand.formal_name}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-6 bg-gray-50 rounded-lg">
+                                        <p className="text-gray-500 text-sm">No favorite brands selected</p>
+                                        <p className="text-gray-400 text-xs mt-1">Update your preferences in settings</p>
                                     </div>
                                 )}
                             </div>

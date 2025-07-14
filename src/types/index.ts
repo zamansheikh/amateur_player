@@ -5,6 +5,7 @@ export interface User {
     first_name: string;
     last_name: string;
     profile_picture_url: string;
+    intro_video_url?: string;
     xp: number;
     email: string;
     level: number;
@@ -14,6 +15,15 @@ export interface User {
     authenticated: boolean;
     access_token?: string;
     stats: UserStats;
+    favorite_brands?: FavoriteBrand[];
+}
+
+export interface FavoriteBrand {
+    brand_id: number;
+    brandType: string;
+    name: string;
+    formal_name: string;
+    logo_url: string;
 }
 
 export interface UserStats {
