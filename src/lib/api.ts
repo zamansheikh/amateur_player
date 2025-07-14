@@ -49,11 +49,14 @@ export const authApi = {
     },
 
     signup: async (userData: {
-        username: string;
-        first_name: string;
-        last_name: string;
-        email: string;
-        password: string;
+        basicInfo: {
+            username: string;
+            first_name: string;
+            last_name: string;
+            email: string;
+            password: string;
+        };
+        brandIDs: number[];
     }) => {
         const response = await api.post('/api/create-user', userData);
         return response.data;

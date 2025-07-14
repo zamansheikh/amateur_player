@@ -46,11 +46,14 @@ export interface AuthContextType {
     isLoading: boolean;
     signin: (username: string, password: string) => Promise<boolean>;
     signup: (userData: {
-        username: string;
-        first_name: string;
-        last_name: string;
-        email: string;
-        password: string;
+        basicInfo: {
+            username: string;
+            first_name: string;
+            last_name: string;
+            email: string;
+            password: string;
+        };
+        brandIDs: number[];
     }) => Promise<boolean>;
     signout: () => void;
     refreshUser: () => Promise<void>;

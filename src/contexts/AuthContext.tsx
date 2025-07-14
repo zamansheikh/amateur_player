@@ -92,21 +92,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const signup = async (userData: {
-        username: string;
-        first_name: string;
-        last_name: string;
-        email: string;
-        password: string;
+        basicInfo: {
+            username: string;
+            first_name: string;
+            last_name: string;
+            email: string;
+            password: string;
+        };
+        brandIDs: number[];
     }): Promise<boolean> => {
         try {
             setIsLoading(true);
 
-            // Call signup API
+            // Call signup API with the new structure
             const signupResponse = await authApi.signup(userData);
 
             if (signupResponse && signupResponse.message) {
-                // Auto-login after successful signup
-                return await signin(userData.username, userData.password);
+                // Auto-login after successful signup using basic info
+                return await signin(userData.basicInfo.username, userData.basicInfo.password);
             }
 
             return false;

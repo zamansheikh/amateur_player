@@ -136,14 +136,27 @@ export default function SignUpPage() {
         setIsLoading(true);
 
         try {
-            // Only send basic info to signup API as requested
-            const success = await signup({
-                username,
-                first_name: firstName,
-                last_name: lastName,
-                email,
-                password
-            });
+            // Collect all selected brand IDs from all categories
+            const allSelectedBrandIds = [
+                ...selectedBrands.balls,
+                ...selectedBrands.shoes,
+                ...selectedBrands.accessories,
+                ...selectedBrands.apparels
+            ];
+
+            // Prepare the new API body structure
+            const signupData = {
+                basicInfo: {
+                    username,
+                    first_name: firstName,
+                    last_name: lastName,
+                    email,
+                    password
+                },
+                brandIDs: allSelectedBrandIds
+            };
+
+            const success = await signup(signupData);
             if (success) {
                 router.push('/');
             } else {
