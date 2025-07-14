@@ -489,8 +489,8 @@ export default function PlayerProfilePage() {
                       </div>
                     </div>
 
-                    {/* Sponsors Section */}
-                    {player?.sponsors && player.sponsors.length > 0 && (
+                    {/* Sponsors Section - Only for Pro Players */}
+                    {player?.is_pro && player?.sponsors && player.sponsors.length > 0 && (
                       <div className="bg-white rounded-lg p-4 shadow-sm">
                         <h3 className="text-lg font-semibold text-gray-900 mb-3">Sponsors</h3>
                         <div className="space-y-3">
@@ -513,8 +513,8 @@ export default function PlayerProfilePage() {
                       </div>
                     )}
 
-                    {/* Favorite Brands Section */}
-                    {player?.favorite_brands && player.favorite_brands.length > 0 && (
+                    {/* Favorite Brands Section - Only for Non-Pro Players */}
+                    {!player?.is_pro && player?.favorite_brands && player.favorite_brands.length > 0 && (
                       <div className="bg-white rounded-lg p-4 shadow-sm">
                         <h3 className="text-lg font-semibold text-gray-900 mb-3">Favorite Brands</h3>
                         <div className="space-y-3">

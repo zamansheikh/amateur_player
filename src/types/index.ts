@@ -16,6 +16,7 @@ export interface User {
     access_token?: string;
     stats: UserStats;
     favorite_brands?: FavoriteBrand[];
+    sponsors?: Sponsor[];
 }
 
 export interface FavoriteBrand {
@@ -86,4 +87,12 @@ export interface LoginResponse {
 
 export interface SignupResponse {
     message: string;
+}
+
+export interface Sponsor {
+    brand_id: number;
+    brandType: string;
+    name: string;
+    formal_name: string;
+    logo_url: string;
 }

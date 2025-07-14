@@ -332,10 +332,27 @@ export default function ProfilePage() {
                                 )}
                             </div>
 
-                            {/* Favorite Brands */}
+                            {/* Favorite Brands - Only for Non-Pro Players */}
                             <div className="mb-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Favorite Brands</h3>
-                                {user?.favorite_brands && user.favorite_brands.length > 0 ? (
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                                    {user?.is_pro ? "Sponsors" : "Favorite Brands"}
+                                </h3>
+                                {user?.is_pro && user?.sponsors && user.sponsors.length > 0 ? (
+                                    <div className="space-y-3">
+                                        {user.sponsors.map((sponsor) => (
+                                            <div key={sponsor.brand_id} className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
+                                                <Image
+                                                    src={sponsor.logo_url}
+                                                    alt={`${sponsor.formal_name} logo`}
+                                                    width={32}
+                                                    height={32}
+                                                    className="object-contain"
+                                                />
+                                                <span className="text-sm text-gray-700 flex-1">{sponsor.formal_name}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : !user?.is_pro && user?.favorite_brands && user.favorite_brands.length > 0 ? (
                                     <div className="space-y-3">
                                         {/* Group brands by type */}
                                         {['Balls', 'Shoes', 'Accessories', 'Apparels'].map((brandType) => {
@@ -365,8 +382,12 @@ export default function ProfilePage() {
                                     </div>
                                 ) : (
                                     <div className="text-center py-6 bg-gray-50 rounded-lg">
-                                        <p className="text-gray-500 text-sm">No favorite brands selected</p>
-                                        <p className="text-gray-400 text-xs mt-1">Update your preferences in settings</p>
+                                        <p className="text-gray-500 text-sm">
+                                            {user?.is_pro ? "No sponsors yet" : "No favorite brands selected"}
+                                        </p>
+                                        <p className="text-gray-400 text-xs mt-1">
+                                            {user?.is_pro ? "Add sponsors to your profile" : "Update your preferences in settings"}
+                                        </p>
                                     </div>
                                 )}
                             </div>

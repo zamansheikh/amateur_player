@@ -192,10 +192,11 @@ export default function PlayerCard({ player }: PlayerCardProps) {
           </div>
         </div>
 
-        {/* Sponsors Section */}
-        {player?.sponsors && player.sponsors.length > 0 && (
+        {/* Sponsors Section - Only for Pro Players */}
+        {player?.is_pro && player?.sponsors && player.sponsors.length > 0 && (
           <div>
-            <div className="text-xs text-gray-500 mb-2 text-center">Sponsored by</div>
+            <div className="border-t border-gray-200 mb-3"></div>
+            <div className="text-xs text-gray-500 mb-2 text-center">Sponsors</div>
             <div className="flex flex-wrap gap-2 justify-center">
               {player.sponsors.slice(0, 4).map((sponsor) => (
                 <div
@@ -215,6 +216,35 @@ export default function PlayerCard({ player }: PlayerCardProps) {
               {player.sponsors.length > 4 && (
                 <div className="flex items-center justify-center bg-gray-100 rounded-full p-2 w-10 h-10">
                   <span className="text-xs text-gray-600 font-medium">+{player.sponsors.length - 4}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Favorite Brands Section - Only for Non-Pro Players */}
+        {!player?.is_pro && player?.favorite_brands && player.favorite_brands.length > 0 && (
+          <div>
+            <div className="text-xs text-gray-500 mb-2 text-center">Favorite Brands</div>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {player.favorite_brands.slice(0, 4).map((brand) => (
+                <div
+                  key={brand.brand_id}
+                  className="flex items-center justify-center bg-gray-50 rounded-full p-2"
+                  title={brand.formal_name}
+                >
+                  <Image
+                    src={brand.logo_url}
+                    alt={brand.formal_name}
+                    width={32}
+                    height={32}
+                    className="object-contain"
+                  />
+                </div>
+              ))}
+              {player.favorite_brands.length > 4 && (
+                <div className="flex items-center justify-center bg-gray-100 rounded-full p-2 w-10 h-10">
+                  <span className="text-xs text-gray-600 font-medium">+{player.favorite_brands.length - 4}</span>
                 </div>
               )}
             </div>
