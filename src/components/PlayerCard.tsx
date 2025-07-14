@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Play } from "lucide-react";
 
 interface PlayerProfile {
@@ -18,6 +19,13 @@ interface PlayerProfile {
   card_theme: string;
   is_pro: boolean;
   follower_count: number;
+  sponsors?: {
+    brand_id: number;
+    brandType: string;
+    name: string;
+    formal_name: string;
+    logo_url: string;
+  }[];
   stats: {
     id: number;
     user_id: number;
@@ -26,13 +34,20 @@ interface PlayerProfile {
     high_series: number;
     experience: number;
   };
-  engagement: {
+  engagement?: {
     likes: number;
     comments: number;
     shares: number;
     views: number;
   };
   is_followed: boolean;
+  favorite_brands?: {
+    brand_id: number;
+    brandType: string;
+    name: string;
+    formal_name: string;
+    logo_url: string;
+  }[];
 }
 
 interface PlayerCardProps {
@@ -156,7 +171,7 @@ export default function PlayerCard({ player }: PlayerCardProps) {
         </div>
 
         {/* Stats Row */}
-        <div className="flex items-center justify-between text-center">
+        <div className="flex items-center justify-between text-center mb-3">
           <div className="flex-1">
             <div className="text-sm font-bold text-gray-900">
               {player?.follower_count?.toLocaleString() || "0"}
@@ -176,6 +191,38 @@ export default function PlayerCard({ player }: PlayerCardProps) {
             <div className="text-xs text-gray-600">High Series</div>
           </div>
         </div>
+
+        {/* Sponsors Section */}
+        {player?.sponsors && player.sponsors.length > 0 && (
+          <div>
+            <div className="text-xs text-gray-500 mb-2 text-center">Sponsored by</div>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {player.sponsors.slice(0, 3).map((sponsor) => (
+                <div
+                  key={sponsor.brand_id}
+                  className="flex items-center gap-1 bg-gray-50 rounded-full px-2 py-1"
+                  title={sponsor.formal_name}
+                >
+                  <Image
+                    src={sponsor.logo_url}
+                    alt={sponsor.formal_name}
+                    width={16}
+                    height={16}
+                    className="object-contain"
+                  />
+                  <span className="text-xs text-gray-700 truncate max-w-16">
+                    {sponsor.name}
+                  </span>
+                </div>
+              ))}
+              {player.sponsors.length > 3 && (
+                <div className="flex items-center justify-center bg-gray-100 rounded-full px-2 py-1">
+                  <span className="text-xs text-gray-600">+{player.sponsors.length - 3}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

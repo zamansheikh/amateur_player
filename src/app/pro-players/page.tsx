@@ -20,6 +20,13 @@ interface ProPlayer {
     card_theme: string;
     is_pro: boolean;
     follower_count: number;
+    sponsors: {
+        brand_id: number;
+        brandType: string;
+        name: string;
+        formal_name: string;
+        logo_url: string;
+    }[];
     stats: {
         id: number;
         user_id: number;
@@ -35,6 +42,13 @@ interface ProPlayer {
         views: number;
     };
     is_followed: boolean;
+    favorite_brands: {
+        brand_id: number;
+        brandType: string;
+        name: string;
+        formal_name: string;
+        logo_url: string;
+    }[];
 }
 
 export default function ProPlayersPage() {
