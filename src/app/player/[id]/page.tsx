@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import Image from 'next/image';
 import { ArrowLeft, Play } from 'lucide-react';
 import { api } from '@/lib/api';
 import UserPostCard from '@/components/UserPostCard';
@@ -20,6 +21,13 @@ interface ProPlayer {
     card_theme: string;
     is_pro: boolean;
     follower_count: number;
+    sponsors?: {
+        brand_id: number;
+        brandType: string;
+        name: string;
+        formal_name: string;
+        logo_url: string;
+    }[];
     stats?: {
         id: number;
         user_id: number;
@@ -35,6 +43,13 @@ interface ProPlayer {
         views: number;
     };
     is_followed: boolean;
+    favorite_brands?: {
+        brand_id: number;
+        brandType: string;
+        name: string;
+        formal_name: string;
+        logo_url: string;
+    }[];
 }
 
 interface FeedPost {
@@ -451,7 +466,7 @@ export default function PlayerProfilePage() {
 
                   {/* Right Sidebar */}
                   <div className="w-80 space-y-4">
-                    {/* Dummy Section 1 */} 
+                    {/* Engagement Section */} 
                     <div className="bg-white rounded-lg p-4 shadow-sm">
                       <h3 className="text-lg font-semibold text-gray-900 mb-3">Engagement</h3>
                       <div className="space-y-2">
@@ -473,6 +488,64 @@ export default function PlayerProfilePage() {
                         </div>
                       </div>
                     </div>
+
+                    {/* Sponsors Section */}
+                    {player?.sponsors && player.sponsors.length > 0 && (
+                      <div className="bg-white rounded-lg p-4 shadow-sm">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3">Sponsors</h3>
+                        <div className="space-y-3">
+                          {player.sponsors.map((sponsor) => (
+                            <div key={sponsor.brand_id} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                              <Image
+                                src={sponsor.logo_url}
+                                alt={sponsor.formal_name}
+                                width={40}
+                                height={40}
+                                className="object-contain rounded-md"
+                              />
+                              <div className="flex-1">
+                                <div className="font-medium text-gray-900 text-sm">{sponsor.formal_name}</div>
+                                <div className="text-xs text-gray-500">{sponsor.brandType}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Favorite Brands Section */}
+                    {player?.favorite_brands && player.favorite_brands.length > 0 && (
+                      <div className="bg-white rounded-lg p-4 shadow-sm">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3">Favorite Brands</h3>
+                        <div className="space-y-3">
+                          {/* Group brands by type */}
+                          {['Balls', 'Shoes', 'Accessories', 'Apparels', 'Business'].map((brandType) => {
+                            const brandsOfType = player.favorite_brands?.filter(brand => brand.brandType === brandType) || [];
+                            if (brandsOfType.length === 0) return null;
+                            
+                            return (
+                              <div key={brandType}>
+                                <h4 className="text-sm font-medium text-gray-700 mb-2">{brandType}</h4>
+                                <div className="space-y-2">
+                                  {brandsOfType.map((brand) => (
+                                    <div key={brand.brand_id} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                                      <Image
+                                        src={brand.logo_url}
+                                        alt={brand.formal_name}
+                                        width={32}
+                                        height={32}
+                                        className="object-contain rounded-md"
+                                      />
+                                      <span className="text-sm text-gray-700 flex-1">{brand.formal_name}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
