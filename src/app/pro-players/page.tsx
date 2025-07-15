@@ -74,66 +74,7 @@ export default function ProPlayersPage() {
         fetchProPlayers();
     }, []);
 
-    // Auto-scroll functionality
-    useEffect(() => {
-        if (proPlayers.length === 0) return;
-
-        const scrollContainer = document.getElementById('pro-players-scroll');
-        if (!scrollContainer) return;
-
-        let scrollDirection = 1; // 1 for right, -1 for left
-        const scrollSpeed = 1; // pixels per interval
-        const scrollInterval = 50; // milliseconds
-
-        const autoScroll = setInterval(() => {
-            const { scrollLeft, scrollWidth, clientWidth } = scrollContainer;
-
-            // Check if we've reached the end
-            if (scrollLeft + clientWidth >= scrollWidth - 10) {
-                scrollDirection = -1; // Start scrolling left
-            } else if (scrollLeft <= 10) {
-                scrollDirection = 1; // Start scrolling right
-            }
-
-            // Scroll in the current direction
-            scrollContainer.scrollLeft += scrollSpeed * scrollDirection;
-        }, scrollInterval);
-
-        // Pause auto-scroll on hover
-        const handleMouseEnter = () => clearInterval(autoScroll);
-        const handleMouseLeave = () => {
-            // Restart auto-scroll after mouse leaves
-            setTimeout(() => {
-                if (scrollContainer) {
-                    const newAutoScroll = setInterval(() => {
-                        const { scrollLeft, scrollWidth, clientWidth } = scrollContainer;
-
-                        if (scrollLeft + clientWidth >= scrollWidth - 10) {
-                            scrollDirection = -1;
-                        } else if (scrollLeft <= 10) {
-                            scrollDirection = 1;
-                        }
-
-                        scrollContainer.scrollLeft += scrollSpeed * scrollDirection;
-                    }, scrollInterval);
-
-                    // Store the new interval ID
-                    scrollContainer.dataset.autoScrollId = newAutoScroll.toString();
-                }
-            }, 1000); // Wait 1 second before restarting
-        };
-
-        scrollContainer.addEventListener('mouseenter', handleMouseEnter);
-        scrollContainer.addEventListener('mouseleave', handleMouseLeave);
-
-        return () => {
-            clearInterval(autoScroll);
-            if (scrollContainer) {
-                scrollContainer.removeEventListener('mouseenter', handleMouseEnter);
-                scrollContainer.removeEventListener('mouseleave', handleMouseLeave);
-            }
-        };
-    }, [proPlayers]);
+    // Removed auto-scroll functionality - using grid layout instead
 
     if (loading) {
         return (
@@ -163,105 +104,138 @@ export default function ProPlayersPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen bg-gray-50">
             {/* Header Section */}
-            <div className="bg-white border-b">
-                <div className="max-w-7xl mx-auto px-4 py-8">
+            <div className="bg-white shadow-sm">
+                <div className="max-w-7xl mx-auto px-4 py-12">
                     <div className="text-center">
-                        <h1 className="text-4xl font-bold text-gray-900 mb-2">
-                            <span style={{
-                                background: 'linear-gradient(to right, #8BC342, #6fa332)',
-                                WebkitBackgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent'
-                            }}>
-                                Bowlers Network
-                            </span>
-                        </h1>
-                        <p className="text-gray-600">
-                            Where amateurs meet the pros
+                        <div className="flex items-center justify-center gap-3 mb-4">
+                            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                <Star className="w-6 h-6 text-green-600" />
+                            </div>
+                            <h1 className="text-4xl font-bold text-gray-900">
+                                Professional Bowlers
+                            </h1>
+                        </div>
+                        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                            Connect with professional bowlers from around the community and learn from the best.
                         </p>
+                        <div className="mt-6 flex items-center justify-center gap-6 text-sm text-gray-500">
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                <span>{proPlayers.length} Pro Players</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                                <span>Verified Profiles</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Pro Players Section */}
+            {/* Pro Players Grid Section */}
             <div className="py-12">
                 <div className="max-w-7xl mx-auto px-4">
-                    <div className="text-center mb-8">
-                        <div className="flex items-center justify-center gap-2 mb-2">
-                            <Star className="w-6 h-6 text-green-600" />
-                            <h2 className="text-3xl font-bold text-gray-900">Professional Bowlers</h2>
-                        </div>
-                        <p className="text-gray-600">Connect with professional bowlers from around the community.</p>
+                    {/* Players Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {proPlayers.map((player) => (
+                            <div key={player.user_id} className="transform hover:scale-105 transition-transform duration-200">
+                                <PlayerCard player={player} />
+                            </div>
+                        ))}
                     </div>
 
-                    {/* Horizontally scrollable container */}
-                    <div className="relative">
-                        <div
-                            id="pro-players-scroll"
-                            className="flex gap-6 overflow-x-auto pb-6 px-4 scrollbar-hide"
-                            style={{
-                                scrollbarWidth: 'none',
-                                msOverflowStyle: 'none',
-                                scrollBehavior: 'smooth'
-                            }}
-                        >
-                            {proPlayers.map((player) => (
-                                <div key={player.user_id} className="flex-shrink-0 w-72">
-                                    <PlayerCard player={player} />
-                                </div>
-                            ))}
+                    {/* Show message if no players */}
+                    {proPlayers.length === 0 && (
+                        <div className="text-center py-16">
+                            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Star className="w-12 h-12 text-gray-400" />
+                            </div>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-2">No Pro Players Found</h3>
+                            <p className="text-gray-500">Check back later for professional bowlers to connect with.</p>
                         </div>
-
-                        {/* Gradient fade effects on sides */}
-                        <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-gray-100 to-transparent pointer-events-none"></div>
-                        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-gray-100 to-transparent pointer-events-none"></div>
-                    </div>
+                    )}
                 </div>
             </div>
 
             {/* CTA Section */}
-            <div className="py-16 bg-white">
-                <div className="max-w-4xl mx-auto text-center px-4">
-                    <h2 className="text-4xl font-bold text-gray-900 mb-6">
-                        Welcome to Bowlers Network – Where Amateurs Meet the Pros
-                    </h2>
-
-                    <div className="text-left max-w-3xl mx-auto space-y-4 text-lg text-gray-700 mb-8">
-                        <p className="text-center">
-                            <strong>Step into the lane and level up your game! 🎳</strong>
-                        </p>
-
-                        <p>
-                            Bowlers Network is the ultimate hub for amateur bowlers to connect with professional players, track their journey, and showcase their skills.
-                        </p>
-
-                        <p>
-                            Every player gets their own trading card – a dynamic profile that highlights your XP, rank, and achievements. Watch your progress in real time with a personalized dashboard, designed to show your growth, milestones, and how you stack up in the community.
-                        </p>
-
-                        <p>
-                            Whether you're looking to improve your technique, find local leagues, or just connect with fellow bowling enthusiasts, Bowlers Network brings the community together.
-                        </p>
-
-                        <p className="text-center">
-                            <strong>Ready to roll? Your lane awaits! 🎯</strong>
+            <div className="py-24 bg-white relative overflow-hidden">
+                {/* Background Pattern */}
+                <div className="absolute inset-0 bg-gradient-to-br from-green-50 via-white to-green-50"></div>
+                <div className="absolute top-0 left-0 w-full h-full opacity-5">
+                    <div className="absolute top-10 left-10 w-20 h-20 bg-green-400 rounded-full"></div>
+                    <div className="absolute top-32 right-20 w-16 h-16 bg-green-500 rounded-full"></div>
+                    <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-green-600 rounded-full"></div>
+                    <div className="absolute bottom-32 right-1/3 w-24 h-24 bg-green-400 rounded-full"></div>
+                </div>
+                
+                <div className="relative max-w-6xl mx-auto px-4">
+                    {/* Main Heading */}
+                    <div className="text-center mb-16">
+                        <h2 className="text-5xl font-bold text-gray-900 mb-4">
+                            Welcome to{' '}
+                            <span className="bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent">
+                                Bowlers Network
+                            </span>
+                        </h2>
+                        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                            Where amateurs meet the pros and level up their game
                         </p>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link
-                            href="/home"
-                            className="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
-                        >
-                            Explore the Feed
-                        </Link>
-                        <Link
-                            href="/overview"
-                            className="border border-green-600 text-green-600 px-8 py-3 rounded-lg hover:bg-green-50 transition-colors font-medium"
-                        >
-                            View Dashboard
-                        </Link>
+                    {/* Features Grid */}
+                    <div className="grid md:grid-cols-3 gap-8 mb-16">
+                        <div className="text-center p-8 bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+                            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <span className="text-2xl">🎳</span>
+                            </div>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-3">Connect & Learn</h3>
+                            <p className="text-gray-600">
+                                Connect with professional bowlers and learn from the best in the community.
+                            </p>
+                        </div>
+
+                        <div className="text-center p-8 bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+                            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <span className="text-2xl">📊</span>
+                            </div>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-3">Track Progress</h3>
+                            <p className="text-gray-600">
+                                Monitor your progress with personalized dashboards and dynamic player cards.
+                            </p>
+                        </div>
+
+                        <div className="text-center p-8 bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+                            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <span className="text-2xl">🏆</span>
+                            </div>
+                            <h3 className="text-xl font-semibold text-gray-900 mb-3">Showcase Skills</h3>
+                            <p className="text-gray-600">
+                                Show off your achievements and compete with fellow bowling enthusiasts.
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Call to Action */}
+                    <div className="text-center">
+                        <p className="text-lg text-gray-700 mb-8">
+                            Ready to take your bowling game to the next level?
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <Link
+                                href="/home"
+                                className="bg-green-600 text-white px-8 py-4 rounded-lg hover:bg-green-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                            >
+                                🎯 Explore the Feed
+                            </Link>
+                            <Link
+                                href="/overview"
+                                className="border-2 border-green-600 text-green-600 px-8 py-4 rounded-lg hover:bg-green-600 hover:text-white transition-all duration-300 font-semibold"
+                            >
+                                📈 View Dashboard
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </div>
