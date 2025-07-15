@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { Home, BarChart3, MessageCircle, Settings, Bell, Menu, X, LogOut, Users, Trophy, Target } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import GlobalHeader from '@/components/GlobalHeader';
 
 const navigation = [
     { name: 'Home', href: '/home', icon: Home },
@@ -197,6 +198,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
                     </div>
 
                     <main className="flex-1 overflow-y-auto">
+                        <GlobalHeader />
                         {children}
                     </main>
                 </div>
