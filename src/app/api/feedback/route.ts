@@ -5,68 +5,74 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         
         // Validate required fields
-        if (!body.title || !body.description || !body.type) {
+        if (!body.feedback_type_id || !body.title || !body.details) {
             return NextResponse.json(
-                { error: 'Title, description, and type are required' },
+                { error: 'Feedback type, title, and details are required' },
                 { status: 400 }
             );
         }
 
-        // Log the feedback for now (you can replace this with actual database storage)
-        console.log('Feedback received:', {
-            title: body.title,
-            description: body.description,
-            type: body.type,
-            user_id: body.user_id,
-            user_name: body.user_name,
-            user_email: body.user_email,
-            timestamp: new Date().toISOString()
-        });
-
-        // Here you would typically:
-        // 1. Save to database
-        // 2. Send email notification
-        // 3. Create ticket in issue tracking system
-        // 4. etc.
-
-        // For now, we'll simulate a successful response
-        // You can replace this with actual API call to your backend
+        // Get the authorization header
+        const authHeader = request.headers.get('authorization');
         
-        // Example: Forward to external API
-        /*
-        const response = await fetch('https://your-api-endpoint.com/feedback', {
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return NextResponse.json(
+                { error: 'Authorization token required' },
+                { status: 401 }
+            );
+        }
+
+        // Forward to external API
+        const response = await fetch('https://test.bowlersnetwork.com/api/feedbacks', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': authHeader,
             },
             body: JSON.stringify({
+                feedback_type_id: body.feedback_type_id,
                 title: body.title,
-                description: body.description,
-                type: body.type,
-                user_id: body.user_id,
-                user_name: body.user_name,
-                user_email: body.user_email,
-                timestamp: new Date().toISOString()
+                details: body.details
             }),
         });
 
-        if (!response.ok) {
-            throw new Error('Failed to submit feedback');
-        }
+        const data = await response.json();
 
-        const result = await response.json();
-        */
-
-        return NextResponse.json(
-            { 
-                message: 'Feedback submitted successfully',
-                id: Date.now(), // Temporary ID
-                status: 'received'
-            },
-            { status: 201 }
-        );
+        return NextResponse.json(data, { status: response.status });
     } catch (error) {
         console.error('Error processing feedback:', error);
+        return NextResponse.json(
+            { error: 'Internal server error' },
+            { status: 500 }
+        );
+    }
+}
+
+export async function GET(request: NextRequest) {
+    try {
+        // Get the authorization header
+        const authHeader = request.headers.get('authorization');
+        
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return NextResponse.json(
+                { error: 'Authorization token required' },
+                { status: 401 }
+            );
+        }
+
+        // Forward to external API
+        const response = await fetch('https://test.bowlersnetwork.com/api/feedbacks', {
+            method: 'GET',
+            headers: {
+                'Authorization': authHeader,
+            },
+        });
+
+        const data = await response.json();
+
+        return NextResponse.json(data, { status: response.status });
+    } catch (error) {
+        console.error('Error fetching feedback:', error);
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }
