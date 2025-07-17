@@ -375,7 +375,7 @@ export default function FeedbackPage() {
                                                             </div>
                                                             <p className="text-gray-600 text-sm mb-2">{feedback.details}</p>
                                                             <p className="text-xs text-gray-500">
-                                                                Submitted on {feedback.posted_at}
+                                                                Submitted on {feedback.posted_at} by {feedback.posted_by.name || feedback.posted_by.username}
                                                             </p>
                                                         </div>
                                                     ))

@@ -108,8 +108,8 @@ export default function GlobalHeader() {
                                     <Image
                                         src={sponsor.logo_url}
                                         alt={sponsor.formal_name}
-                                        width={32}
-                                        height={32}
+                                        width={42}
+                                        height={42}
                                         className="object-contain"
                                     />
                                 </div>
