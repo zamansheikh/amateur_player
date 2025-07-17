@@ -33,11 +33,11 @@ export default function GlobalHeader() {
                 if (data.Shoes && Array.isArray(data.Shoes)) {
                     // Combine all brand types from the response
                     brandData = [
-                        ...(data.Shoes || []),
-                        ...(data.Apparels || []),
-                        ...(data.Balls || []),
-                        ...(data.Accessories || []),
-                        ...(data['BEK en CUE'] || [])
+                        // ...(data.Shoes || []),
+                        // ...(data.Apparels || []),
+                        // ...(data.Balls || []),
+                        // ...(data.Accessories || []),
+                        ...(data['Business Sponsors'] || [])
                     ];
                 } else if (data.data && Array.isArray(data.data)) {
                     brandData = data.data;
@@ -54,7 +54,8 @@ export default function GlobalHeader() {
                 
                 // Ensure brandData is an array and slice it
                 if (Array.isArray(brandData)) {
-                    const sponsorData = brandData.slice(0, 8);
+                    // const sponsorData = brandData.slice(0, 10);
+                    const sponsorData = brandData;
                     console.log('Setting sponsors:', sponsorData); // Debug log
                     setSponsors(sponsorData); // Show max 8 sponsors
                 } else {
@@ -95,7 +96,7 @@ export default function GlobalHeader() {
         <div className="bg-white border-b border-gray-200 py-4">
             <div className="max-w-7xl mx-auto px-4">
                 <div className="flex items-center justify-center">
-                    <div className="text-xs text-gray-500 mr-6">Sponsors</div>
+                    <div className="text-xs text-gray-500 mr-6">Business Sponsors</div>
                     <div className="flex items-center justify-center space-x-3">
                         {sponsors.length > 0 ? (
                             sponsors.map((sponsor, index) => (
@@ -107,8 +108,8 @@ export default function GlobalHeader() {
                                     <Image
                                         src={sponsor.logo_url}
                                         alt={sponsor.formal_name}
-                                        width={28}
-                                        height={28}
+                                        width={32}
+                                        height={32}
                                         className="object-contain"
                                     />
                                 </div>
