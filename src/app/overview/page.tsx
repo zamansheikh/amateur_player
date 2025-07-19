@@ -19,6 +19,7 @@ import {
   Info,
   BarChart2,
 } from "lucide-react";
+import PerformanceTrends from "./components/PerformanceTrends";
 
 interface DashboardData {
   user_id: number;
@@ -288,15 +289,14 @@ export default function OverviewPage() {
         style={{ background: "linear-gradient(to right, #8BC342, #6fa332)" }}
       >
         <div className="flex items-center gap-4">
-          
-            <Image
-              src={player.avatar || "/default-avatar.png"}
-              alt={player.name}
-              width={48}
-              height={48}
-              className="rounded-full"
-            />
-          
+          <Image
+            src={player.avatar || "/default-avatar.png"}
+            alt={player.name}
+            width={48}
+            height={48}
+            className="rounded-full"
+          />
+
           <div>
             <h1 className="text-2xl font-bold">Overview</h1>
             <p className="text-green-100">
@@ -356,78 +356,78 @@ export default function OverviewPage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Top Metrics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-  {/* Likes Card */}
-  <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-    <div className="flex items-start justify-between mb-4">
-      <div>
-        <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
-          <Heart className="w-4 h-4" />
-          Likes
-        </div>
-        <div className="text-3xl font-bold text-gray-900 mb-1">
-          {dashboardData?.likes || 0}
-        </div>
-        <div className="text-sm text-green-500">
-          +{Math.round((dashboardData?.likes || 0) * 0.1)} this week
-        </div>
-      </div>
-    </div>
-  </div>
+          {/* Likes Card */}
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+                  <Heart className="w-4 h-4" />
+                  Likes
+                </div>
+                <div className="text-3xl font-bold text-gray-900 mb-1">
+                  {dashboardData?.likes || 0}
+                </div>
+                <div className="text-sm text-green-500">
+                  +{Math.round((dashboardData?.likes || 0) * 0.1)} this week
+                </div>
+              </div>
+            </div>
+          </div>
 
-  {/* Shares Card */}
-  <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-    <div className="flex items-start justify-between mb-4">
-      <div>
-        <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
-          <Share className="w-4 h-4" />
-          Shares
-        </div>
-        <div className="text-3xl font-bold text-gray-900 mb-1">
-          {dashboardData?.shares || 0}
-        </div>
-        <div className="text-sm text-green-500">
-          +{Math.round((dashboardData?.shares || 0) * 0.05)} this week
-        </div>
-      </div>
-    </div>
-  </div>
+          {/* Shares Card */}
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+                  <Share className="w-4 h-4" />
+                  Shares
+                </div>
+                <div className="text-3xl font-bold text-gray-900 mb-1">
+                  {dashboardData?.shares || 0}
+                </div>
+                <div className="text-sm text-green-500">
+                  +{Math.round((dashboardData?.shares || 0) * 0.05)} this week
+                </div>
+              </div>
+            </div>
+          </div>
 
-  {/* Comments Card */}
-  <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-    <div className="flex items-start justify-between mb-4">
-      <div>
-        <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
-          <MessageCircle className="w-4 h-4" />
-          Comments
-        </div>
-        <div className="text-3xl font-bold text-gray-900 mb-1">
-          {dashboardData?.comments || 0}
-        </div>
-        <div className="text-sm text-green-500">
-          +{Math.round((dashboardData?.comments || 0) * 0.08)} this week
-        </div>
-      </div>
-    </div>
-  </div>
+          {/* Comments Card */}
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+                  <MessageCircle className="w-4 h-4" />
+                  Comments
+                </div>
+                <div className="text-3xl font-bold text-gray-900 mb-1">
+                  {dashboardData?.comments || 0}
+                </div>
+                <div className="text-sm text-green-500">
+                  +{Math.round((dashboardData?.comments || 0) * 0.08)} this week
+                </div>
+              </div>
+            </div>
+          </div>
 
-  {/* Total Followers Card */}
-  <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-    <div className="flex items-start justify-between mb-4">
-      <div>
-        <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
-          <Users className="w-4 h-4" />
-          Total Followers
+          {/* Total Followers Card */}
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+                  <Users className="w-4 h-4" />
+                  Total Followers
+                </div>
+                <div className="text-3xl font-bold text-gray-900 mb-1">
+                  {dashboardData?.follower_count || user?.follower_count || 0}
+                </div>
+                <div className="text-sm text-green-500">
+                  +24 new followers this week
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="text-3xl font-bold text-gray-900 mb-1">
-          {dashboardData?.follower_count || user?.follower_count || 0}
-        </div>
-        <div className="text-sm text-green-500">
-          +24 new followers this week
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
         {/* Three Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
@@ -566,75 +566,8 @@ export default function OverviewPage() {
         </div>
 
         {/* Performance Trends Chart */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Performance Trends
-              </h3>
-              <select className="border border-gray-300 rounded-md px-3 py-1 text-sm bg-white">
-                <option>Monthly</option>
-                <option>Weekly</option>
-                <option>Yearly</option>
-              </select>
-            </div>
-          </div>
-          <div className="p-6">
-            {/* Simple Bar Chart Representation */}
-            <div className="flex items-end justify-between h-64 gap-4">
-              <div className="flex flex-col items-center flex-1">
-                <div
-                  className="w-full bg-green-500 rounded-t-md"
-                  style={{ height: "60%" }}
-                ></div>
-                <div className="text-xs text-gray-500 mt-2">Jan</div>
-              </div>
-              <div className="flex flex-col items-center flex-1">
-                <div
-                  className="w-full bg-green-500 rounded-t-md"
-                  style={{ height: "55%" }}
-                ></div>
-                <div className="text-xs text-gray-500 mt-2">Feb</div>
-              </div>
-              <div className="flex flex-col items-center flex-1">
-                <div
-                  className="w-full bg-green-500 rounded-t-md"
-                  style={{ height: "70%" }}
-                ></div>
-                <div className="text-xs text-gray-500 mt-2">Mar</div>
-              </div>
-              <div className="flex flex-col items-center flex-1">
-                <div
-                  className="w-full bg-green-500 rounded-t-md"
-                  style={{ height: "50%" }}
-                ></div>
-                <div className="text-xs text-gray-500 mt-2">Apr</div>
-              </div>
-              <div className="flex flex-col items-center flex-1">
-                <div
-                  className="w-full bg-green-500 rounded-t-md"
-                  style={{ height: "58%" }}
-                ></div>
-                <div className="text-xs text-gray-500 mt-2">May</div>
-              </div>
-              <div className="flex flex-col items-center flex-1">
-                <div
-                  className="w-full bg-green-500 rounded-t-md"
-                  style={{ height: "65%" }}
-                ></div>
-                <div className="text-xs text-gray-500 mt-2">Jun</div>
-              </div>
-            </div>
-
-            {/* Y-axis labels */}
-            <div className="flex justify-between text-xs text-gray-400 mt-4">
-              <span>150</span>
-              <span>175</span>
-              <span>200</span>
-              <span>225</span>
-              <span>250</span>
-            </div>
-          </div>
+        <div className="p-4">
+          <PerformanceTrends />
         </div>
       </div>
     </div>
