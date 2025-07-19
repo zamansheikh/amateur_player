@@ -158,37 +158,6 @@ const mockMessages: Message[] = [
   },
 ];
 
-// Metrics Component
-function Metrics({
-  playerId,
-  dashboardData,
-  user,
-}: {
-  playerId: string;
-  dashboardData: DashboardData | null;
-  user: any;
-}) {
-  return (
-    <div className="space-y-6">
-      {/* Fan Base */}
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Users className="w-5 h-5 text-gray-600" />
-          <h3 className="text-lg font-semibold text-gray-800">Followers</h3>
-        </div>
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div className="text-center p-4 bg-green-50 rounded-lg">
-            <div className="text-2xl font-bold text-green-600">
-              {dashboardData ? dashboardData.follower_count : 0}
-            </div>
-            <div className="text-sm text-gray-600">Total Fans</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function OverviewPage() {
   const { user } = useAuth();
   const [player, setPlayer] = useState<Player | null>(null);
@@ -289,14 +258,15 @@ export default function OverviewPage() {
         style={{ background: "linear-gradient(to right, #8BC342, #6fa332)" }}
       >
         <div className="flex items-center gap-4">
-          <Image
-            src={player.avatar || "/default-avatar.png"}
-            alt={player.name}
-            width={48}
-            height={48}
-            className="rounded-full"
-          />
-
+          <div className="w-12 h-12 rounded-full overflow-hidden bg-green-100 flex items-center justify-center">
+            <Image
+              src={player.avatar || "/default-avatar.png"}
+              alt={player.name}
+              width={48}
+              height={48}
+              className="w-12 h-12 object-cover rounded-full"
+            />
+          </div>
           <div>
             <h1 className="text-2xl font-bold">Overview</h1>
             <p className="text-green-100">
