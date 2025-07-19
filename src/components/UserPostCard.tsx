@@ -54,16 +54,16 @@ interface UserPost {
     poll: any;
     event: any;
     tags: string[];
+    is_liked_by_me: boolean;
 }
 
 interface UserPostCardProps {
     post: UserPost;
     onPostUpdate?: () => void;
-    onPostChange?: (updatedPost: UserPost) => void; // Add optimistic update support
+    onPostChange?: (updatedPost: UserPost) => void;
 }
 
 export default function UserPostCard({ post, onPostUpdate, onPostChange }: UserPostCardProps) {
-    const [isLiked, setIsLiked] = useState(false);
     const [localLikes, setLocalLikes] = useState(post.metadata.total_likes);
     const [comment, setComment] = useState('');
     const [showCommentInput, setShowCommentInput] = useState(false);
@@ -79,15 +79,31 @@ export default function UserPostCard({ post, onPostUpdate, onPostChange }: UserP
 
         try {
             setIsLiking(true);
+            // Optimistic update
+            const newLikedState = !localPost.is_liked_by_me;
+            const updatedPost: UserPost = {
+                ...localPost,
+                is_liked_by_me: newLikedState,
+                metadata: {
+                    ...localPost.metadata,
+                    total_likes: newLikedState ? localPost.metadata.total_likes + 1 : localPost.metadata.total_likes - 1
+                }
+            };
+            setLocalPost(updatedPost);
+            setLocalLikes(newLikedState ? localLikes + 1 : localLikes - 1);
+
+            // Call API
             await api.get(`/api/user/post/click-like/${localPost.metadata.id}`);
 
-            // Toggle like state
-            const newLikedState = !isLiked;
-            setIsLiked(newLikedState);
-            setLocalLikes(prev => newLikedState ? prev + 1 : prev - 1);
+            // Notify parent of the change
+            if (onPostChange) {
+                onPostChange(updatedPost);
+            }
         } catch (error) {
             console.error('Error liking post:', error);
-            // Could add toast notification here
+            // Revert optimistic update on error
+            setLocalPost(post);
+            setLocalLikes(post.metadata.total_likes);
         } finally {
             setIsLiking(false);
         }
@@ -129,13 +145,12 @@ export default function UserPostCard({ post, onPostUpdate, onPostChange }: UserP
             setComment('');
             setShowCommentInput(false);
 
-            // Notify parent of the change (no need to refetch all posts)
+            // Notify parent of the change
             if (onPostChange) {
                 onPostChange(updatedPost);
             }
         } catch (error) {
             console.error('Error adding comment:', error);
-            // Could add toast notification here
         } finally {
             setIsCommenting(false);
         }
@@ -178,13 +193,12 @@ export default function UserPostCard({ post, onPostUpdate, onPostChange }: UserP
             setReplyText('');
             setReplyToComment(null);
 
-            // Notify parent of the change (no need to refetch all posts)
+            // Notify parent of the change
             if (onPostChange) {
                 onPostChange(updatedPost);
             }
         } catch (error) {
             console.error('Error adding reply:', error);
-            // Could add toast notification here
         } finally {
             setIsReplying(false);
         }
@@ -196,7 +210,7 @@ export default function UserPostCard({ post, onPostUpdate, onPostChange }: UserP
 
         let renderedText = text;
         tags.forEach(tag => {
-            const hashtag = `#${tag}`;
+            const hashtag = `${tag}`;
             renderedText = renderedText.replace(
                 new RegExp(`\\b${tag}\\b`, 'gi'),
                 hashtag
@@ -259,12 +273,13 @@ export default function UserPostCard({ post, onPostUpdate, onPostChange }: UserP
                     <div className="flex items-center gap-6">
                         <button
                             onClick={handleLike}
-                            className={`flex items-center gap-2 transition-all duration-200 ${isLiked
+                            disabled={isLiking}
+                            className={`flex items-center gap-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${localPost.is_liked_by_me
                                 ? 'text-red-500 hover:text-red-600'
                                 : 'text-gray-600 hover:text-red-500'
                                 }`}
                         >
-                            <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`} />
+                            <Heart className={`w-5 h-5 ${localPost.is_liked_by_me ? 'fill-current' : ''}`} />
                             <span className="text-sm font-medium">{localLikes}</span>
                         </button>
                         <button

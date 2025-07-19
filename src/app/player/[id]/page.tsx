@@ -104,6 +104,7 @@ interface FeedPost {
     poll: any;
     event: any;
     tags: string[];
+    is_liked_by_me: boolean;
 }
 
 export default function PlayerProfilePage() {
