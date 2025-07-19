@@ -35,71 +35,68 @@ interface DashboardData {
 }
 
 interface Player {
-    id: string;
-    name: string;
-    username: string;
-    avatar: string;
-    coverImage: string;
-    bio: string;
-    stats: {
-        averageScore: number;
-        tournaments: number;
-        wins: number;
-        pbaRank: number;
-        average_score: number;
-        high_game: number;
-        high_series: number;
-        experience: number;
-        // Added missing UserStats fields
-        id?: number;
-        user_id?: number;
-    };
-    weightedIndex: {
-        percentage: number;
-        freeUsers: number;
-        premiumUsers: number;
-        engagement: number;
-    };
-    // Added missing User fields
-    user_id?: number;
-    first_name?: string;
-    last_name?: string;
-    profile_picture_url?: string;
-    intro_video_url?: string;
-    xp?: number;
-    email?: string;
-    level?: number;
-    card_theme?: string;
-    is_pro?: boolean;
-    follower_count?: number;
-    authenticated?: boolean;
-    access_token?: string;
-    favorite_brands?: FavoriteBrand[];
-    sponsors?: Sponsor[];
-}
-
-export interface FavoriteBrand {
-    brand_id: number;
-    brandType: string;
-    name: string;
-    formal_name: string;
-    logo_url: string;
-}
-
-export interface Sponsor {
-    // Define Sponsor fields as needed
-    sponsor_id: number;
-    name: string;
-    logo_url: string;
-}
-
-export interface UserStats {
-    id: number;
-    user_id: number;
+  id: string;
+  name: string;
+  username: string;
+  avatar: string;
+  coverImage: string;
+  bio: string;
+  stats: {
+    averageScore: number;
+    tournaments: number;
+    wins: number;
+    pbaRank: number;
     average_score: number;
     high_game: number;
     high_series: number;
     experience: number;
+    id?: number;
+    user_id?: number;
+  };
+  weightedIndex: {
+    percentage: number;
+    freeUsers: number;
+    premiumUsers: number;
+    engagement: number;
+  };
+  user_id?: number;
+  first_name?: string;
+  last_name?: string;
+  profile_picture_url?: string;
+  intro_video_url?: string;
+  xp?: number;
+  email?: string;
+  level?: number;
+  card_theme?: string;
+  is_pro?: boolean;
+  follower_count?: number;
+  authenticated?: boolean;
+  access_token?: string;
+  favorite_brands?: FavoriteBrand[];
+  sponsors?: Sponsor[];
+}
+
+export interface FavoriteBrand {
+  brand_id: number;
+  brandType: string;
+  name: string;
+  formal_name: string;
+  logo_url: string;
+}
+
+export interface Sponsor {
+  sponsor_id: number;
+  name: string;
+  logo_url: string;
+}
+
+export interface UserStats {
+  id: number;
+  user_id: number;
+  average_score: number;
+  high_game: number;
+  high_series: number;
+  experience: number;
 }
 
 interface Message {
@@ -307,36 +304,49 @@ export default function OverviewPage() {
           </div>
         </div>
       </div>
-      {/* Fav Brands Section */}
-      <div className="bg-white border-b border-gray-200 py-4">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-center">
-            <div className="text-xs text-gray-500 mr-6">
-               Favorite Brands
+      {/* Likes Section */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="bg-white border-b border-gray-200 max-w-7xl mx-auto px-10 py-6 rounded-lg">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Heart className="w-5 h-5 text-red-500" />
+              <h3 className="text-lg font-semibold text-gray-800">
+                Liked Brands
+              </h3>
             </div>
-            <div className="flex items-center justify-center space-x-3">
-              {user?.favorite_brands && user.favorite_brands.length > 0 ? (
-                user.favorite_brands.map((brand, index) => (
-                  <div
-                    key={brand.brand_id || index}
-                    className="flex items-center justify-center bg-gray-50 rounded-full p-2 hover:bg-gray-100 transition-colors duration-200"
-                    title={brand.formal_name}
-                  >
-                    <Image
-                      src={brand.logo_url}
-                      alt={brand.formal_name}
-                      width={42}
-                      height={42}
-                      className="object-contain"
-                    />
-                  </div>
-                ))
-              ) : (
-                <div className="text-xs text-gray-400">
-                  {user?.is_pro ? "No sponsors available" : "No favorite brands available"}
+            <a
+              href="/brands"
+              className="text-sm text-green-600 hover:text-green-700 font-medium"
+            >
+              View All Brands
+            </a>
+          </div>
+          <div className="flex flex-wrap gap-4 justify-center">
+            {user?.favorite_brands && user.favorite_brands.length > 0 ? (
+              user.favorite_brands.map((brand, index) => (
+                <div
+                  key={brand.brand_id || index}
+                  className="flex flex-col items-center bg-gray-50 rounded-lg p-4 w-28 hover:bg-gray-100 transition-colors duration-200 shadow-sm"
+                  title={brand.formal_name}
+                >
+                  <Image
+                    src={brand.logo_url}
+                    alt={brand.formal_name}
+                    width={48}
+                    height={48}
+                    className="object-contain mb-2"
+                  />
+
+                  <span className="text-xs text-gray-600 text-center truncate w-full">
+                    {brand.formal_name}
+                  </span>
                 </div>
-              )}
-            </div>
+              ))
+            ) : (
+              <div className="text-sm text-gray-500">
+                {user?.is_pro ? "No sponsors liked yet" : "No brands liked yet"}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -353,14 +363,19 @@ export default function OverviewPage() {
                   <Info className="w-4 h-4" />
                   XP Level
                 </div>
-                <div className="text-3xl font-bold text-gray-900 mb-1">Level {user?.level || 12}</div>
+                <div className="text-3xl font-bold text-gray-900 mb-1">
+                  Level {user?.level || 12}
+                </div>
                 <div className="text-sm text-gray-500 mb-3">
-                  {user?.xp || 2340} XP • {660 - (user?.xp || 2340 - 2340)} XP to level {(user?.level || 12) + 1}
+                  {user?.xp || 2340} XP • {660 - (user?.xp || 2340 - 2340)} XP
+                  to level {(user?.level || 12) + 1}
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className="bg-blue-500 h-2 rounded-full" 
-                    style={{ width: `${((user?.xp || 2340) % 660) / 660 * 100}%` }}
+                  <div
+                    className="bg-blue-500 h-2 rounded-full"
+                    style={{
+                      width: `${(((user?.xp || 2340) % 660) / 660) * 100}%`,
+                    }}
                   ></div>
                 </div>
               </div>
@@ -425,8 +440,12 @@ export default function OverviewPage() {
           {/* Latest Content */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="p-6 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">Latest Content</h3>
-              <p className="text-sm text-gray-500 mt-1">New videos from BEK TV+</p>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Latest Content
+              </h3>
+              <p className="text-sm text-gray-500 mt-1">
+                New videos from BEK TV+
+              </p>
             </div>
             <div className="p-6">
               <div className="relative mb-4">
@@ -451,7 +470,9 @@ export default function OverviewPage() {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="p-6 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">Messages</h3>
-              <p className="text-sm text-gray-500 mt-1">Recent messages from your network</p>
+              <p className="text-sm text-gray-500 mt-1">
+                Recent messages from your network
+              </p>
             </div>
             <div className="p-6 space-y-4">
               <div className="flex items-start gap-3">
@@ -459,8 +480,12 @@ export default function OverviewPage() {
                   <span className="text-xs font-medium text-gray-600">DL</span>
                 </div>
                 <div className="flex-1">
-                  <div className="font-medium text-gray-900 text-sm">Downtown Lanes</div>
-                  <p className="text-xs text-gray-500 mb-1">New tournament announced! Register by Friday.</p>
+                  <div className="font-medium text-gray-900 text-sm">
+                    Downtown Lanes
+                  </div>
+                  <p className="text-xs text-gray-500 mb-1">
+                    New tournament announced! Register by Friday.
+                  </p>
                   <p className="text-xs text-gray-400">1 day ago</p>
                 </div>
               </div>
@@ -470,8 +495,12 @@ export default function OverviewPage() {
                   <span className="text-xs font-medium text-gray-600">DL</span>
                 </div>
                 <div className="flex-1">
-                  <div className="font-medium text-gray-900 text-sm">Downtown Lanes</div>
-                  <p className="text-xs text-gray-500 mb-1">New tournament announced! Register by Friday.</p>
+                  <div className="font-medium text-gray-900 text-sm">
+                    Downtown Lanes
+                  </div>
+                  <p className="text-xs text-gray-500 mb-1">
+                    New tournament announced! Register by Friday.
+                  </p>
                   <p className="text-xs text-gray-400">1 day ago</p>
                 </div>
               </div>
@@ -485,38 +514,54 @@ export default function OverviewPage() {
           {/* Upcoming Tournaments */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200">
             <div className="p-6 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">Upcoming Tournaments</h3>
-              <p className="text-sm text-gray-500 mt-1">Tournaments you have registered for</p>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Upcoming Tournaments
+              </h3>
+              <p className="text-sm text-gray-500 mt-1">
+                Tournaments you have registered for
+              </p>
             </div>
             <div className="p-6 space-y-4">
               <div className="border border-gray-200 rounded-lg p-3">
                 <div className="flex items-center justify-between mb-2">
-                  <div className="font-medium text-gray-900 text-sm">City Championship</div>
+                  <div className="font-medium text-gray-900 text-sm">
+                    City Championship
+                  </div>
                   <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
                     Registered
                   </span>
                 </div>
-                <p className="text-xs text-gray-500">Downtown Lanes • May 15, 2025</p>
+                <p className="text-xs text-gray-500">
+                  Downtown Lanes • May 15, 2025
+                </p>
               </div>
 
               <div className="border border-gray-200 rounded-lg p-3">
                 <div className="flex items-center justify-between mb-2">
-                  <div className="font-medium text-gray-900 text-sm">Summer Classic</div>
+                  <div className="font-medium text-gray-900 text-sm">
+                    Summer Classic
+                  </div>
                   <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
                     Registered
                   </span>
                 </div>
-                <p className="text-xs text-gray-500">Sunset Bowling Center • June 10, 2025</p>
+                <p className="text-xs text-gray-500">
+                  Sunset Bowling Center • June 10, 2025
+                </p>
               </div>
 
               <div className="border border-gray-200 rounded-lg p-3">
                 <div className="flex items-center justify-between mb-2">
-                  <div className="font-medium text-gray-900 text-sm">Pro-Am Invitational</div>
+                  <div className="font-medium text-gray-900 text-sm">
+                    Pro-Am Invitational
+                  </div>
                   <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
                     Registered
                   </span>
                 </div>
-                <p className="text-xs text-gray-500">Elite Lanes • July 22, 2025</p>
+                <p className="text-xs text-gray-500">
+                  Elite Lanes • July 22, 2025
+                </p>
               </div>
 
               <button className="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors">
@@ -530,7 +575,9 @@ export default function OverviewPage() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           <div className="p-6 border-b border-gray-200">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Performance Trends</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Performance Trends
+              </h3>
               <select className="border border-gray-300 rounded-md px-3 py-1 text-sm bg-white">
                 <option>Monthly</option>
                 <option>Weekly</option>
@@ -542,31 +589,49 @@ export default function OverviewPage() {
             {/* Simple Bar Chart Representation */}
             <div className="flex items-end justify-between h-64 gap-4">
               <div className="flex flex-col items-center flex-1">
-                <div className="w-full bg-green-500 rounded-t-md" style={{ height: '60%' }}></div>
+                <div
+                  className="w-full bg-green-500 rounded-t-md"
+                  style={{ height: "60%" }}
+                ></div>
                 <div className="text-xs text-gray-500 mt-2">Jan</div>
               </div>
               <div className="flex flex-col items-center flex-1">
-                <div className="w-full bg-green-500 rounded-t-md" style={{ height: '55%' }}></div>
+                <div
+                  className="w-full bg-green-500 rounded-t-md"
+                  style={{ height: "55%" }}
+                ></div>
                 <div className="text-xs text-gray-500 mt-2">Feb</div>
               </div>
               <div className="flex flex-col items-center flex-1">
-                <div className="w-full bg-green-500 rounded-t-md" style={{ height: '70%' }}></div>
+                <div
+                  className="w-full bg-green-500 rounded-t-md"
+                  style={{ height: "70%" }}
+                ></div>
                 <div className="text-xs text-gray-500 mt-2">Mar</div>
               </div>
               <div className="flex flex-col items-center flex-1">
-                <div className="w-full bg-green-500 rounded-t-md" style={{ height: '50%' }}></div>
+                <div
+                  className="w-full bg-green-500 rounded-t-md"
+                  style={{ height: "50%" }}
+                ></div>
                 <div className="text-xs text-gray-500 mt-2">Apr</div>
               </div>
               <div className="flex flex-col items-center flex-1">
-                <div className="w-full bg-green-500 rounded-t-md" style={{ height: '58%' }}></div>
+                <div
+                  className="w-full bg-green-500 rounded-t-md"
+                  style={{ height: "58%" }}
+                ></div>
                 <div className="text-xs text-gray-500 mt-2">May</div>
               </div>
               <div className="flex flex-col items-center flex-1">
-                <div className="w-full bg-green-500 rounded-t-md" style={{ height: '65%' }}></div>
+                <div
+                  className="w-full bg-green-500 rounded-t-md"
+                  style={{ height: "65%" }}
+                ></div>
                 <div className="text-xs text-gray-500 mt-2">Jun</div>
               </div>
             </div>
-            
+
             {/* Y-axis labels */}
             <div className="flex justify-between text-xs text-gray-400 mt-4">
               <span>150</span>
