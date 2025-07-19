@@ -454,7 +454,10 @@ export default function OverviewPage() {
               <p className="text-sm text-gray-600 mb-4">
                 Learn from the pros how to perfect your hook technique
               </p>
-              <button className="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors">
+                  <button
+                className="w-full text-white py-2.5 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
+                style={{ background: "#8BC342" }}
+              >
                 View All Content <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -499,7 +502,10 @@ export default function OverviewPage() {
                 </div>
               </div>
 
-              <button className="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors">
+                 <button
+                className="w-full text-white py-2.5 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
+                style={{ background: "#8BC342" }}
+              >
                 View All Messages <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -521,7 +527,13 @@ export default function OverviewPage() {
                   <div className="font-medium text-gray-900 text-sm">
                     City Championship
                   </div>
-                  <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
+                   <span
+                    className="text-xs px-2 py-1 rounded-full font-medium"
+                    style={{
+                      background: "#8BC342",
+                      color: "#fff",
+                    }}
+                  >
                     Registered
                   </span>
                 </div>
@@ -535,7 +547,13 @@ export default function OverviewPage() {
                   <div className="font-medium text-gray-900 text-sm">
                     Summer Classic
                   </div>
-                  <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
+                  <span
+                    className="text-xs px-2 py-1 rounded-full font-medium"
+                    style={{
+                      background: "#8BC342",
+                      color: "#fff",
+                    }}
+                  >
                     Registered
                   </span>
                 </div>
@@ -549,7 +567,13 @@ export default function OverviewPage() {
                   <div className="font-medium text-gray-900 text-sm">
                     Pro-Am Invitational
                   </div>
-                  <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
+                   <span
+                    className="text-xs px-2 py-1 rounded-full font-medium"
+                    style={{
+                      background: "#8BC342",
+                      color: "#fff",
+                    }}
+                  >
                     Registered
                   </span>
                 </div>
@@ -558,7 +582,10 @@ export default function OverviewPage() {
                 </p>
               </div>
 
-              <button className="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors">
+              <button
+                className="w-full text-white py-2.5 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors"
+                style={{ background: "#8BC342" }}
+              >
                 View All Tournaments <ArrowRight className="w-4 h-4" />
               </button>
             </div>
