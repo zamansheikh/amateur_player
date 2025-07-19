@@ -13,6 +13,11 @@ import {
   Heart,
   Share,
   Eye,
+  Calendar,
+  Play,
+  ArrowRight,
+  Info,
+  BarChart2,
 } from "lucide-react";
 
 interface DashboardData {
@@ -336,146 +341,240 @@ export default function OverviewPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-6">
-        {/* Main Dashboard Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Performance Overview */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5" />
-                  Engagement Stats
-                </h2>
-                <button className="text-green-600 hover:text-green-800 text-sm font-medium">
-                  View Details
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <Heart className="w-6 h-6 text-green-500 mx-auto mb-2" />
-                  <p className="text-xl font-bold text-gray-900">
-                    {dashboardData ? dashboardData.likes.toLocaleString() : "4"}
-                  </p>
-                  <p className="text-sm text-gray-600">Likes</p>
+      {/* Main Dashboard Content */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Top Metrics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* XP Level Card */}
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+                  <Info className="w-4 h-4" />
+                  XP Level
                 </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <MessageCircle className="w-6 h-6 text-green-500 mx-auto mb-2" />
-                  <p className="text-xl font-bold text-gray-900">
-                    {dashboardData
-                      ? dashboardData.comments.toLocaleString()
-                      : "15"}
-                  </p>
-                  <p className="text-sm text-gray-600">Comments</p>
+                <div className="text-3xl font-bold text-gray-900 mb-1">Level {user?.level || 12}</div>
+                <div className="text-sm text-gray-500 mb-3">
+                  {user?.xp || 2340} XP • {660 - (user?.xp || 2340 - 2340)} XP to level {(user?.level || 12) + 1}
                 </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <Share className="w-6 h-6 text-green-500 mx-auto mb-2" />
-                  <p className="text-xl font-bold text-gray-900">
-                    {dashboardData
-                      ? dashboardData.shares.toLocaleString()
-                      : "0"}
-                  </p>
-                  <p className="text-sm text-gray-600">Shares</p>
-                </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <Eye className="w-6 h-6 text-green-500 mx-auto mb-2" />
-                  <p className="text-xl font-bold text-gray-900">
-                    {dashboardData ? dashboardData.views.toLocaleString() : "0"}
-                  </p>
-                  <p className="text-sm text-gray-600">Views</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Recent Messages */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-800">
-                  Recent Messages
-                </h3>
-                <button className="text-green-600 hover:text-green-800 text-sm font-medium">
-                  View All
-                </button>
-              </div>
-              <div className="space-y-3">
-                {messages.slice(0, 3).map((message) => (
-                  <div
-                    key={message.id}
-                    className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg"
-                  >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-green-500 to-green-600 flex items-center justify-center flex-shrink-0">
-                      <span className="text-white font-medium text-xs">
-                        {message.from.split("").slice(0, 1).join("")}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-gray-800 text-sm">
-                          {message.from}
-                        </p>
-                        <span className="text-xs text-gray-500">
-                          {new Date(message.timestamp).toLocaleDateString()}
-                        </span>
-                        {!message.read && (
-                          <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-600">{message.content}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Trending Insights */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5" />
-                  Trending Insights
-                </h3>
-              </div>
-              <div className="space-y-3">
-                <div className="p-3 bg-gradient-to-r from-green-50 to-green-100 border border-green-200 rounded-lg">
-                  <div className="flex items-start gap-3">
-                    <TrendingUp className="w-4 h-4 text-green-600 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-green-800 text-sm">
-                        Fan Engagement Up 23%
-                      </p>
-                      <p className="text-xs text-green-600">
-                        Your recent bowling tutorial got 2.3k views
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-3 bg-gradient-to-r from-green-50 to-green-100 border border-green-200 rounded-lg">
-                  <div className="flex items-start gap-3">
-                    <Trophy className="w-4 h-4 text-green-600 mt-0.5" />
-                    <div>
-                      <p className="font-medium text-green-800 text-sm">
-                        New Challenge Request
-                      </p>
-                      <p className="text-xs text-green-600">
-                        5 fans want a spare shooting challenge
-                      </p>
-                    </div>
-                  </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-blue-500 h-2 rounded-full" 
+                    style={{ width: `${((user?.xp || 2340) % 660) / 660 * 100}%` }}
+                  ></div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Right Column */}
-          <div className="space-y-6">
-            {/* Performance Metrics */}
-            <Metrics
-              playerId={player.id}
-              dashboardData={dashboardData}
-              user={user}
-            />
+          {/* Average Score Card */}
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+                  <BarChart2 className="w-4 h-4" />
+                  Average Score
+                </div>
+                <div className="text-3xl font-bold text-gray-900 mb-1">
+                  {user?.stats?.average_score || 187}
+                </div>
+                <div className="text-sm text-green-500">
+                  +12 from last month
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Followers Card */}
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+                  <Users className="w-4 h-4" />
+                  Followers
+                </div>
+                <div className="text-3xl font-bold text-gray-900 mb-1">
+                  {dashboardData?.follower_count || user?.follower_count || 187}
+                </div>
+                <div className="text-sm text-green-500">
+                  +24 new followers this week
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Tournaments Card */}
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+                  <Calendar className="w-4 h-4" />
+                  Tournaments
+                </div>
+                <div className="text-3xl font-bold text-gray-900 mb-1">3</div>
+                <div className="text-sm text-gray-500">
+                  Upcoming tournaments this month
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Three Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Latest Content */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Latest Content</h3>
+              <p className="text-sm text-gray-500 mt-1">New videos from BEK TV+</p>
+            </div>
+            <div className="p-6">
+              <div className="relative mb-4">
+                <div className="w-full h-32 bg-gradient-to-r from-blue-900 to-yellow-600 rounded-lg flex items-center justify-center relative overflow-hidden">
+                  <div className="absolute inset-0 bg-black bg-opacity-20"></div>
+                  <Play className="w-12 h-12 text-white z-10" />
+                  <div className="absolute bottom-2 left-2 text-white text-xs font-medium z-10">
+                    Storm
+                  </div>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">
+                Learn from the pros how to perfect your hook technique
+              </p>
+              <button className="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors">
+                View All Content <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Messages */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Messages</h3>
+              <p className="text-sm text-gray-500 mt-1">Recent messages from your network</p>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-xs font-medium text-gray-600">DL</span>
+                </div>
+                <div className="flex-1">
+                  <div className="font-medium text-gray-900 text-sm">Downtown Lanes</div>
+                  <p className="text-xs text-gray-500 mb-1">New tournament announced! Register by Friday.</p>
+                  <p className="text-xs text-gray-400">1 day ago</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-xs font-medium text-gray-600">DL</span>
+                </div>
+                <div className="flex-1">
+                  <div className="font-medium text-gray-900 text-sm">Downtown Lanes</div>
+                  <p className="text-xs text-gray-500 mb-1">New tournament announced! Register by Friday.</p>
+                  <p className="text-xs text-gray-400">1 day ago</p>
+                </div>
+              </div>
+
+              <button className="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors">
+                View All Messages <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Upcoming Tournaments */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="p-6 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Upcoming Tournaments</h3>
+              <p className="text-sm text-gray-500 mt-1">Tournaments you have registered for</p>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="border border-gray-200 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="font-medium text-gray-900 text-sm">City Championship</div>
+                  <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
+                    Registered
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500">Downtown Lanes • May 15, 2025</p>
+              </div>
+
+              <div className="border border-gray-200 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="font-medium text-gray-900 text-sm">Summer Classic</div>
+                  <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
+                    Registered
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500">Sunset Bowling Center • June 10, 2025</p>
+              </div>
+
+              <div className="border border-gray-200 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="font-medium text-gray-900 text-sm">Pro-Am Invitational</div>
+                  <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
+                    Registered
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500">Elite Lanes • July 22, 2025</p>
+              </div>
+
+              <button className="w-full bg-green-600 hover:bg-green-700 text-white py-2.5 px-4 rounded-lg font-medium flex items-center justify-center gap-2 transition-colors">
+                View All Tournaments <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Performance Trends Chart */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Performance Trends</h3>
+              <select className="border border-gray-300 rounded-md px-3 py-1 text-sm bg-white">
+                <option>Monthly</option>
+                <option>Weekly</option>
+                <option>Yearly</option>
+              </select>
+            </div>
+          </div>
+          <div className="p-6">
+            {/* Simple Bar Chart Representation */}
+            <div className="flex items-end justify-between h-64 gap-4">
+              <div className="flex flex-col items-center flex-1">
+                <div className="w-full bg-green-500 rounded-t-md" style={{ height: '60%' }}></div>
+                <div className="text-xs text-gray-500 mt-2">Jan</div>
+              </div>
+              <div className="flex flex-col items-center flex-1">
+                <div className="w-full bg-green-500 rounded-t-md" style={{ height: '55%' }}></div>
+                <div className="text-xs text-gray-500 mt-2">Feb</div>
+              </div>
+              <div className="flex flex-col items-center flex-1">
+                <div className="w-full bg-green-500 rounded-t-md" style={{ height: '70%' }}></div>
+                <div className="text-xs text-gray-500 mt-2">Mar</div>
+              </div>
+              <div className="flex flex-col items-center flex-1">
+                <div className="w-full bg-green-500 rounded-t-md" style={{ height: '50%' }}></div>
+                <div className="text-xs text-gray-500 mt-2">Apr</div>
+              </div>
+              <div className="flex flex-col items-center flex-1">
+                <div className="w-full bg-green-500 rounded-t-md" style={{ height: '58%' }}></div>
+                <div className="text-xs text-gray-500 mt-2">May</div>
+              </div>
+              <div className="flex flex-col items-center flex-1">
+                <div className="w-full bg-green-500 rounded-t-md" style={{ height: '65%' }}></div>
+                <div className="text-xs text-gray-500 mt-2">Jun</div>
+              </div>
+            </div>
+            
+            {/* Y-axis labels */}
+            <div className="flex justify-between text-xs text-gray-400 mt-4">
+              <span>150</span>
+              <span>175</span>
+              <span>200</span>
+              <span>225</span>
+              <span>250</span>
+            </div>
           </div>
         </div>
       </div>
