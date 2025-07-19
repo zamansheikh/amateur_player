@@ -288,14 +288,15 @@ export default function OverviewPage() {
         style={{ background: "linear-gradient(to right, #8BC342, #6fa332)" }}
       >
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-            <span className="text-white font-bold text-lg">
-              {player.name
-                .split(" ")
-                .map((n) => n[0])
-                .join("")}
-            </span>
-          </div>
+          
+            <Image
+              src={player.avatar || "/default-avatar.png"}
+              alt={player.name}
+              width={48}
+              height={48}
+              className="rounded-full"
+            />
+          
           <div>
             <h1 className="text-2xl font-bold">Overview</h1>
             <p className="text-green-100">
@@ -311,7 +312,7 @@ export default function OverviewPage() {
             <div className="flex items-center gap-2">
               <Heart className="w-5 h-5 text-red-500" />
               <h3 className="text-lg font-semibold text-gray-800">
-                Liked Brands
+                Favorite Brands
               </h3>
             </div>
             <a
@@ -355,85 +356,78 @@ export default function OverviewPage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Top Metrics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* XP Level Card */}
-          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
-                  <Info className="w-4 h-4" />
-                  XP Level
-                </div>
-                <div className="text-3xl font-bold text-gray-900 mb-1">
-                  Level {user?.level || 12}
-                </div>
-                <div className="text-sm text-gray-500 mb-3">
-                  {user?.xp || 2340} XP • {660 - (user?.xp || 2340 - 2340)} XP
-                  to level {(user?.level || 12) + 1}
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-blue-500 h-2 rounded-full"
-                    style={{
-                      width: `${(((user?.xp || 2340) % 660) / 660) * 100}%`,
-                    }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Average Score Card */}
-          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
-                  <BarChart2 className="w-4 h-4" />
-                  Average Score
-                </div>
-                <div className="text-3xl font-bold text-gray-900 mb-1">
-                  {user?.stats?.average_score || 187}
-                </div>
-                <div className="text-sm text-green-500">
-                  +12 from last month
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Followers Card */}
-          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
-                  <Users className="w-4 h-4" />
-                  Followers
-                </div>
-                <div className="text-3xl font-bold text-gray-900 mb-1">
-                  {dashboardData?.follower_count || user?.follower_count || 187}
-                </div>
-                <div className="text-sm text-green-500">
-                  +24 new followers this week
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Tournaments Card */}
-          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
-                  <Calendar className="w-4 h-4" />
-                  Tournaments
-                </div>
-                <div className="text-3xl font-bold text-gray-900 mb-1">3</div>
-                <div className="text-sm text-gray-500">
-                  Upcoming tournaments this month
-                </div>
-              </div>
-            </div>
-          </div>
+  {/* Likes Card */}
+  <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+    <div className="flex items-start justify-between mb-4">
+      <div>
+        <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+          <Heart className="w-4 h-4" />
+          Likes
         </div>
+        <div className="text-3xl font-bold text-gray-900 mb-1">
+          {dashboardData?.likes || 0}
+        </div>
+        <div className="text-sm text-green-500">
+          +{Math.round((dashboardData?.likes || 0) * 0.1)} this week
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* Shares Card */}
+  <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+    <div className="flex items-start justify-between mb-4">
+      <div>
+        <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+          <Share className="w-4 h-4" />
+          Shares
+        </div>
+        <div className="text-3xl font-bold text-gray-900 mb-1">
+          {dashboardData?.shares || 0}
+        </div>
+        <div className="text-sm text-green-500">
+          +{Math.round((dashboardData?.shares || 0) * 0.05)} this week
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* Comments Card */}
+  <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+    <div className="flex items-start justify-between mb-4">
+      <div>
+        <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+          <MessageCircle className="w-4 h-4" />
+          Comments
+        </div>
+        <div className="text-3xl font-bold text-gray-900 mb-1">
+          {dashboardData?.comments || 0}
+        </div>
+        <div className="text-sm text-green-500">
+          +{Math.round((dashboardData?.comments || 0) * 0.08)} this week
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* Total Followers Card */}
+  <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+    <div className="flex items-start justify-between mb-4">
+      <div>
+        <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+          <Users className="w-4 h-4" />
+          Total Followers
+        </div>
+        <div className="text-3xl font-bold text-gray-900 mb-1">
+          {dashboardData?.follower_count || user?.follower_count || 0}
+        </div>
+        <div className="text-sm text-green-500">
+          +24 new followers this week
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
         {/* Three Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
