@@ -5,19 +5,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import axios from "axios";
 import Image from "next/image";
 import {
-  BarChart3,
   MessageCircle,
   Trophy,
   Users,
   TrendingUp,
   Heart,
   Share,
-  Eye,
-  Calendar,
   Play,
   ArrowRight,
-  Info,
-  BarChart2,
 } from "lucide-react";
 import PerformanceTrends from "./components/PerformanceTrends";
 
@@ -325,7 +320,42 @@ export default function OverviewPage() {
       {/* Main Dashboard Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Top Metrics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-8">
+             {/* Xp Card */}
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+                  <Trophy className="w-4 h-4" />
+                  XP
+                </div>
+                <div className="text-3xl font-bold text-gray-900 mb-1">
+                  {player?.xp || 0}
+                </div>
+                <div className="text-sm text-green-500">
+                  +{Math.round((player?.xp || 0) * 0.05)} this week
+                </div>
+              </div>
+            </div>
+          </div>
+           {/* Level Card */}
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
+                  <TrendingUp className="w-4 h-4" />
+                  Level
+                </div>
+                <div className="text-3xl font-bold text-gray-900 mb-1">
+                  {player?.level || 0}
+                </div>
+                <div className="text-sm text-green-500">
+                  +{Math.round((player?.level || 0) * 0.05)} this week
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Likes Card */}
           <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
             <div className="flex items-start justify-between mb-4">
@@ -361,6 +391,7 @@ export default function OverviewPage() {
               </div>
             </div>
           </div>
+
 
           {/* Comments Card */}
           <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
