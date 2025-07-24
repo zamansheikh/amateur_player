@@ -23,19 +23,101 @@ const navigation = [
 export default function Navigation({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const { user, signout } = useAuth();
+    const { user, signout, isLoading } = useAuth();
 
     // Public routes that don't require authentication
     const publicRoutes = ['/signin', '/signup', '/landing', '/landing/page', '/', '/select-your-role'];
-    const isPublicRoute = publicRoutes.includes(pathname);
+    
+    // Check if it's a pro player public route
+    const isProPlayerRoute = pathname.startsWith('/pro/');
+    
+    // Combined public route check
+    const isPublicRoute = publicRoutes.includes(pathname) || isProPlayerRoute;
 
     // Landing page route - show only the landing page without navigation
     if (pathname === '/landing' || pathname === '/landing/page') {
         return <>{children}</>;
     }
 
+    // Pro player public routes - handle all cases for pro routes
+    if (isProPlayerRoute) {
+        if (isLoading) {
+            // Show loading state while auth is loading
+            return (
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                    <div className="text-xl text-green-600">Loading...</div>
+                </div>
+            );
+        } else if (!user || !user.authenticated) {
+            // Unauthenticated user - show simplified navigation
+            return (
+                <div className="flex h-screen bg-gray-100">
+                    {/* Simplified Desktop sidebar for public pro routes */}
+                    <div className="hidden lg:flex lg:flex-shrink-0">
+                        <div className="flex flex-col w-64">
+                            <div className="flex flex-col flex-grow border-r border-gray-800" style={{ backgroundColor: '#111B05' }}>
+                                {/* Logo */}
+                                <div className="flex items-center gap-3 px-6 py-6 border-b border-gray-800">
+                                    <Image
+                                        src="/logo/logo_for_dark.png"
+                                        alt="Bowlers Network Logo"
+                                        width={40}
+                                        height={40}
+                                        className="rounded"
+                                    />
+                                    <span className="text-xl font-bold text-white">Bowlersnetwork</span>
+                                </div>
+
+                                {/* Welcome Message */}
+                                <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
+                                    <div className="mb-6">
+                                        <h3 className="text-white text-lg font-semibold mb-2">Welcome to Bowlersnetwork</h3>
+                                        <p className="text-gray-300 text-sm">Login for full access to connect with players, view exclusive content, and join the community.</p>
+                                    </div>
+                                    
+                                    <Link
+                                        href="/signin"
+                                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors w-full text-center"
+                                    >
+                                        Login for Full Access
+                                    </Link>
+                                    
+                                    <Link
+                                        href="/signup"
+                                        className="text-green-400 hover:text-green-300 text-sm mt-3 transition-colors"
+                                    >
+                                        Don't have an account? Sign up
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Mobile header for public pro routes */}
+                    <div className="lg:hidden border-b border-gray-800 px-4 py-3 flex items-center justify-between" style={{ backgroundColor: '#111B05' }}>
+                        <span className="text-lg font-bold text-white">Bowlersnetwork</span>
+                        <Link
+                            href="/signin"
+                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                        >
+                            Login
+                        </Link>
+                    </div>
+
+                    {/* Main content */}
+                    <div className="flex flex-col flex-1 overflow-hidden bg-gray-50">
+                        <main className="flex-1 overflow-y-auto">
+                            {children}
+                        </main>
+                    </div>
+                </div>
+            );
+        }
+        // If authenticated user visits pro route, continue to full navigation (fall through)
+    }
+
     // Authentication pages - show without navigation
-    if (isPublicRoute) {
+    if (publicRoutes.includes(pathname)) {
         return <>{children}</>;
     }
 

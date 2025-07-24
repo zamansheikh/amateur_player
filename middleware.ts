@@ -5,16 +5,19 @@ export function middleware(request: NextRequest) {
 
     // Public routes that don't require authentication
     const publicRoutes = ['/signin','/select-your-role', '/signup', '/landing', '/'];
+    
+    // Pro player routes are also public (for viewing pro profiles without login)
+    const isProPlayerRoute = pathname.startsWith('/pro/');
 
     // Check if the current path is a public route
-    const isPublicRoute = publicRoutes.includes(pathname);
+    const isPublicRoute = publicRoutes.includes(pathname) || isProPlayerRoute;
 
     // Get the access token from cookies or headers
     const token = request.cookies.get('access_token')?.value ||
         request.headers.get('authorization')?.replace('Bearer ', '');
 
-    // If it's a public route and user is authenticated, redirect to home
-    if (isPublicRoute && token && pathname !== '/') {
+    // If it's a public route and user is authenticated, don't redirect (allow access)
+    if (publicRoutes.includes(pathname) && token && pathname !== '/') {
         return NextResponse.redirect(new URL('/home', request.url));
     }
 

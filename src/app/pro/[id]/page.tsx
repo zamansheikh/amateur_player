@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import { ArrowLeft, Play } from 'lucide-react';
 import { api } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import UserPostCard from '@/components/UserPostCard';
 
 interface ProPlayer {
@@ -117,6 +119,7 @@ interface FeedPost {
 export default function PlayerProfilePage() {
     const params = useParams();
     const router = useRouter();
+    const { user } = useAuth(); // Add auth context
     const playerId = params.id as string;
     
     const [player, setPlayer] = useState<ProPlayer | null>(null);
@@ -138,9 +141,17 @@ export default function PlayerProfilePage() {
             setPlayer(response.data);
             setIsFollowing(response.data?.is_followed || false);
             setFollowerCount(response.data?.follower_count || 0);
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error fetching player:', err);
-            setError('Failed to load player profile');
+            
+            // Handle 401 errors specifically for pro routes (when not authenticated)
+            if (err.response?.status === 401) {
+                // For pro routes, we still want to show profile data even if user is not authenticated
+                // The API should handle this, but for now we'll show a generic error
+                setError('This profile requires authentication to view full details');
+            } else {
+                setError('Failed to load player profile');
+            }
         } finally {
             setIsLoading(false);
         }
@@ -168,7 +179,11 @@ export default function PlayerProfilePage() {
     }, [playerId]);
 
     const handleFollow = async () => {
-        if (!player) return;
+        if (!player || !user) {
+            // Redirect to login if not authenticated
+            router.push('/signin');
+            return;
+        }
         
         try {
             const response = await api.post('/api/user/follow', {
@@ -187,6 +202,11 @@ export default function PlayerProfilePage() {
 
     // Get in touch (message user)
     const handleGetInTouch = () => {
+        if (!user) {
+            // Redirect to login if not authenticated
+            router.push('/signin');
+            return;
+        }
         // Navigate to messages or open chat
         console.log("Get in touch with user:", playerId);
     };
@@ -350,22 +370,41 @@ export default function PlayerProfilePage() {
                       <div className="flex items-center justify-between">
                         {/* Action Buttons */}
                         <div className="flex gap-3">
-                          <button
-                            onClick={handleFollow}
-                            className={`px-6 py-2 rounded-full font-medium transition-colors ${
-                              isFollowing
-                                ? "bg-green-100 text-green-700 hover:bg-green-200"
-                                : "bg-green-600 text-white hover:bg-green-700"
-                            }`}
-                          >
-                            {isFollowing ? "Following" : "Follow"}
-                          </button>
-                          <button
-                            onClick={handleGetInTouch}
-                            className="px-6 py-2 border border-gray-300 rounded-full text-gray-700 hover:bg-gray-50 transition-colors"
-                          >
-                            Get in Touch
-                          </button>
+                          {user ? (
+                            <button
+                              onClick={handleFollow}
+                              className={`px-6 py-2 rounded-full font-medium transition-colors ${
+                                isFollowing
+                                  ? "bg-green-100 text-green-700 hover:bg-green-200"
+                                  : "bg-green-600 text-white hover:bg-green-700"
+                              }`}
+                            >
+                              {isFollowing ? "Following" : "Follow"}
+                            </button>
+                          ) : (
+                            <Link
+                              href="/signin"
+                              className="bg-green-600 text-white hover:bg-green-700 px-6 py-2 rounded-full font-medium transition-colors"
+                            >
+                              Follow
+                            </Link>
+                          )}
+                          
+                          {user ? (
+                            <button
+                              onClick={handleGetInTouch}
+                              className="px-6 py-2 border border-gray-300 rounded-full text-gray-700 hover:bg-gray-50 transition-colors"
+                            >
+                              Get in Touch
+                            </button>
+                          ) : (
+                            <Link
+                              href="/signin"
+                              className="px-6 py-2 border border-gray-300 rounded-full text-gray-700 hover:bg-gray-50 transition-colors"
+                            >
+                              Get in Touch
+                            </Link>
+                          )}
                         </div>
 
                         {/* Stats */}

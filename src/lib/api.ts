@@ -29,9 +29,15 @@ api.interceptors.response.use(
     (error) => {
         if (error.response?.status === 401) {
             if (typeof window !== 'undefined') {
-                localStorage.removeItem('access_token');
-                localStorage.removeItem('user');
-                window.location.href = '/signin';
+                // Check if we're on a public pro route - don't redirect
+                const currentPath = window.location.pathname;
+                const isProRoute = currentPath.startsWith('/pro/');
+                
+                if (!isProRoute) {
+                    localStorage.removeItem('access_token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/signin';
+                }
             }
         }
         return Promise.reject(error);
