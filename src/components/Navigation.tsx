@@ -10,7 +10,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import GlobalHeader from '@/components/GlobalHeader';
 
 const navigation = [
-    { name: 'Home', href: '/home', icon: Home },
+    { name: 'Newsfeed', href: '/home', icon: Home },
     { name: 'Pro Players', href: '/pro-players', icon: Trophy },
     { name: 'Overview', href: '/overview', icon: BarChart3 },
     { name: 'Messages', href: '/messages', icon: MessageCircle },

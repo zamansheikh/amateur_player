@@ -47,7 +47,7 @@ export default function MediaGallery({ media, className = "" }: MediaGalleryProp
                 <div key={index} className={`relative ${className} cursor-pointer hover:opacity-95 transition-opacity`} onClick={() => openLightbox(index)}>
                     <video
                         src={mediaUrl}
-                        className="w-full h-full object-cover rounded-lg"
+                        className="w-full h-full object-cover rounded-lg border-2 border-green-200"
                         muted
                         preload="metadata"
                     />
@@ -64,7 +64,7 @@ export default function MediaGallery({ media, className = "" }: MediaGalleryProp
                     key={index}
                     src={mediaUrl}
                     alt={`Post content ${index + 1}`}
-                    className={`${className} object-cover rounded-lg cursor-pointer hover:opacity-95 transition-opacity`}
+                    className={`${className} object-cover rounded-lg border-2 border-green-200 cursor-pointer hover:opacity-95 transition-opacity`}
                     onClick={() => openLightbox(index)}
                 />
             );
@@ -116,7 +116,7 @@ export default function MediaGallery({ media, className = "" }: MediaGalleryProp
                     {renderMediaItem(media[3], 3, "w-full h-32")}
                     {remainingCount > 0 && (
                         <div 
-                            className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center rounded-lg cursor-pointer hover:bg-opacity-70 transition-opacity"
+                            className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center rounded-lg cursor-pointer hover:bg-opacity-70 transition-opacity border-2 border-green-200"
                             onClick={() => openLightbox(3)}
                         >
                             <span className="text-white text-xl font-semibold">
