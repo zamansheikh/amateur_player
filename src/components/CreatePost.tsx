@@ -1,7 +1,7 @@
 'use client';
 
 import { ImageIcon, Video, Link2, Globe, ChevronDown } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import CreatePostModal from './CreatePostModal';
 
@@ -12,6 +12,8 @@ interface CreatePostProps {
 export default function CreatePost({ onPostCreated }: CreatePostProps) {
     const { user } = useAuth();
     const [showModal, setShowModal] = useState(false);
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleCreatePostClick = () => {
         setShowModal(true);
@@ -19,6 +21,20 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
 
     const handleCloseModal = () => {
         setShowModal(false);
+        setSelectedFiles([]); // Clear files when modal is closed
+    };
+
+    const handlePhotoVideoClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (files && files.length > 0) {
+            setSelectedFiles(Array.from(files));
+            // Open modal when files are selected
+            setShowModal(true);
+        }
     };
 
     return (
@@ -38,7 +54,10 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                         <span className="font-medium">Create Post</span>
                     </button>
 
-                    <button className="flex items-center gap-3 text-gray-600 hover:text-red-600 transition-colors">
+                    <button 
+                        onClick={handlePhotoVideoClick}
+                        className="flex items-center gap-3 text-gray-600 hover:text-red-600 transition-colors"
+                    >
                         <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center">
                             <ImageIcon className="w-5 h-5 text-red-600" />
                         </div>
@@ -87,11 +106,22 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                 </div>
             </div>
 
+            {/* Hidden File Input */}
+            <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileSelect}
+                multiple
+                accept="image/*,video/*"
+                className="hidden"
+            />
+
             {/* Modal */}
             <CreatePostModal
                 isOpen={showModal}
                 onClose={handleCloseModal}
                 onPostCreated={onPostCreated}
+                initialFiles={selectedFiles}
             />
         </>
     );
