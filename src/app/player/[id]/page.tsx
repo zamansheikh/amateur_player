@@ -321,20 +321,21 @@ export default function PlayerProfilePage() {
                                   href={social.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors"
+                                  className="w-10 h-10 rounded-full flex items-center justify-center hover:shadow-lg transition-all"
                                   title={`Follow on ${social.social}`}
+                                  style={{ background: 'none' }}
                                 >
                                   <img
                                     src={social.logo}
                                     alt={social.social}
-                                    className="w-5 h-5 object-contain"
+                                    className="w-10 h-10 object-contain"
+                                    style={{ objectFit: 'contain' }}
                                     onError={(e) => {
-                                      // Fallback to text if image fails to load
                                       const target = e.target as HTMLImageElement;
                                       target.style.display = 'none';
                                       const parent = target.parentElement;
                                       if (parent) {
-                                        parent.innerHTML = `<span class="text-white text-xs font-bold">${social.social.charAt(0)}</span>`;
+                                        parent.innerHTML = `<span class='text-gray-700 text-xs font-bold'>${social.social.charAt(0)}</span>`;
                                       }
                                     }}
                                   />
