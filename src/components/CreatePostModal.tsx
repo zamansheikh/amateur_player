@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { X, Globe, ChevronDown, BarChart3, Image, Smile, Upload, Trash2, Plus } from 'lucide-react';
+import { X, Globe, ChevronDown, BarChart3, Image, Smile, Upload, Trash2, Plus, Video } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 
@@ -70,6 +70,16 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
         const hashtagsFromText = extractHashtags(postText);
         const allTags = [...hashtagsFromText, ...manualTags];
         return [...new Set(allTags)]; // Remove duplicates
+    };
+
+    // Helper function to check if a file is a video
+    const isVideo = (file: File): boolean => {
+        return file.type.startsWith('video/');
+    };
+
+    // Helper function to create preview URL for files
+    const getPreviewUrl = (file: File): string => {
+        return URL.createObjectURL(file);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -232,19 +242,38 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                         {selectedFiles.length > 0 && (
                             <div className="mb-4">
                                 <h5 className="text-sm font-medium text-gray-900 mb-2">Selected Media ({selectedFiles.length})</h5>
-                                <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+                                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
                                     {selectedFiles.map((file, index) => (
-                                        <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
-                                            <div className="flex-1">
-                                                <p className="text-xs text-gray-700 truncate">{file.name}</p>
-                                                <p className="text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                                        <div key={index} className="relative group">
+                                            {isVideo(file) ? (
+                                                <div className="relative">
+                                                    <video
+                                                        src={getPreviewUrl(file)}
+                                                        className="w-full h-20 object-cover rounded-lg"
+                                                        muted
+                                                        preload="metadata"
+                                                    />
+                                                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-lg">
+                                                        <Video className="w-6 h-6 text-white" />
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <img
+                                                    src={getPreviewUrl(file)}
+                                                    alt={file.name}
+                                                    className="w-full h-20 object-cover rounded-lg"
+                                                />
+                                            )}
+                                            <div className="absolute inset-x-0 bottom-0 bg-black bg-opacity-60 text-white p-2 rounded-b-lg">
+                                                <p className="text-xs truncate">{file.name}</p>
+                                                <p className="text-xs opacity-75">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
                                             </div>
                                             <button
                                                 type="button"
                                                 onClick={() => removeFile(index)}
-                                                className="text-red-500 hover:text-red-700"
+                                                className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                                             >
-                                                <Trash2 className="w-4 h-4" />
+                                                <X className="w-3 h-3" />
                                             </button>
                                         </div>
                                     ))}
