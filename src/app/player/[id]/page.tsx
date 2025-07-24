@@ -15,6 +15,7 @@ interface ProPlayer {
     last_name: string;
     profile_picture_url: string;
     intro_video_url: string;
+    cover_photo_url: string;
     xp: number;
     email: string;
     level: number;
@@ -27,6 +28,14 @@ interface ProPlayer {
         name: string;
         formal_name: string;
         logo_url: string;
+    }[];
+    socials?: {
+        pro_player_id: number;
+        social_link_id: number;
+        social_id: number;
+        social: string;
+        logo: string;
+        url: string;
     }[];
     stats?: {
         id: number;
@@ -301,65 +310,39 @@ export default function PlayerProfilePage() {
                           </p>
                         </div>
 
-                        {/* Level, EXP Icons */}
-                        <div className="flex items-center gap-6 ml-auto">
-                          {/* Level */}
-                          <div className="flex flex-col items-center">
-                            <div className="relative w-12 h-12">
-                              <img
-                                src="/icons/level.svg"
-                                alt="Level"
-                                className="w-full h-full"
-                              />
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="text-white font-bold text-xs">
-                                  {player?.level || 8}
-                                </span>
-                              </div>
+                        {/* Social Media Section - Only show if socials exist */}
+                        {player?.socials && player.socials.length > 0 && (
+                          <div className="flex flex-col items-center ml-auto">
+                            <p className="text-gray-600 text-sm mb-3">Follow me on</p>
+                            <div className="flex items-center gap-3">
+                              {player.socials.map((social) => (
+                                <a
+                                  key={social.social_link_id}
+                                  href={social.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors"
+                                  title={`Follow on ${social.social}`}
+                                >
+                                  <img
+                                    src={social.logo}
+                                    alt={social.social}
+                                    className="w-5 h-5 object-contain"
+                                    onError={(e) => {
+                                      // Fallback to text if image fails to load
+                                      const target = e.target as HTMLImageElement;
+                                      target.style.display = 'none';
+                                      const parent = target.parentElement;
+                                      if (parent) {
+                                        parent.innerHTML = `<span class="text-white text-xs font-bold">${social.social.charAt(0)}</span>`;
+                                      }
+                                    }}
+                                  />
+                                </a>
+                              ))}
                             </div>
-                            <span className="text-gray-600 text-xs mt-1">
-                              Level
-                            </span>
                           </div>
-
-                          {/* XP - Hidden for now */}
-                          {/* <div className="flex flex-col items-center">
-                            <div className="relative w-12 h-12">
-                              <img
-                                src="/icons/xp.svg"
-                                alt="XP"
-                                className="w-full h-full"
-                              />
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="text-white font-bold text-xs">
-                                  {player?.xp || 8}
-                                </span>
-                              </div>
-                            </div>
-                            <span className="text-gray-600 text-xs mt-1">
-                              XP
-                            </span>
-                          </div> */}
-
-                          {/* EXP */}
-                          <div className="flex flex-col items-center">
-                            <div className="relative w-12 h-12">
-                              <img
-                                src="/icons/exp.svg"
-                                alt="EXP"
-                                className="w-full h-full"
-                              />
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="text-white font-bold text-xs">
-                                  {player?.stats?.experience || 8}
-                                </span>
-                              </div>
-                            </div>
-                            <span className="text-gray-600 text-xs mt-1">
-                              EXP
-                            </span>
-                          </div>
-                        </div>
+                        )}
                       </div>
 
                       {/* Buttons and Stats Row */}
