@@ -58,7 +58,7 @@ export default function PlayerCard({ player }: PlayerCardProps) {
   const router = useRouter();
 
   const handleCardClick = () => {
-    router.push(`/player/${player.user_id}`);
+    router.push(`/pro/${player.username}`);
   };
 
   return (
