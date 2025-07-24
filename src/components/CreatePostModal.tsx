@@ -84,7 +84,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!postText.trim() || isPosting) return;
+        // Allow posting if there's either text content or media files
+        if ((!postText.trim() && selectedFiles.length === 0) || isPosting) return;
 
         try {
             setIsPosting(true);
@@ -92,8 +93,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
             // Create FormData
             const formData = new FormData();
             
-            // Add caption
-            formData.append('caption', postText.trim());
+            // Add caption (can be empty if there are media files)
+            formData.append('caption', postText.trim() || '');
             
             // Add all tags (from hashtags and manual tags)
             const allTags = getAllTags();
@@ -149,10 +150,16 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white w-[488px] h-[662px] rounded-[20px] shadow-2xl overflow-hidden flex flex-col">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div 
+                className={`bg-white rounded-[20px] shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ${
+                    selectedFiles.length > 0 
+                        ? 'w-full max-w-2xl max-h-[85vh]' 
+                        : 'w-[488px] max-h-[762px]'
+                }`}
+            >
                 {/* Modal Header */}
-                <div className="h-[56px] flex items-center justify-between px-4 border-b border-gray-200">
+                <div className="h-[56px] flex items-center justify-between px-4 border-b border-gray-200 flex-shrink-0">
                     <h2 className="text-xl font-semibold text-gray-900">Create Post</h2>
                     <button
                         onClick={handleClose}
@@ -164,15 +171,15 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
 
                 {/* Success Message */}
                 {showSuccess && (
-                    <div className="mx-4 mt-4 p-3 bg-green-100 border border-green-200 rounded-lg text-green-700 text-sm">
+                    <div className="mx-4 mt-4 p-3 bg-green-100 border border-green-200 rounded-lg text-green-700 text-sm flex-shrink-0">
                         ✓ Post created successfully!
                     </div>
                 )}
 
                 {/* Modal Content */}
-                <div className="flex-1 p-4 flex flex-col">
+                <div className="flex-1 p-4 flex flex-col overflow-hidden min-h-0">
                     {/* User Info */}
-                    <div className="flex items-center gap-3 mb-4">
+                    <div className="flex items-center gap-3 mb-4 flex-shrink-0">
                         <img
                             src={user?.profile_picture_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Bob"}
                             alt="Profile"
@@ -189,13 +196,16 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                     </div>
 
                     {/* Post Content */}
-                    <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
-                        <div className="flex-1 mb-4">
+                    <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden min-h-0">
+                        <div className="flex-shrink-0 mb-4" style={{ minHeight: '80px' }}>
                             <textarea
                                 value={postText}
                                 onChange={(e) => setPostText(e.target.value)}
-                                placeholder="Hello, friends! 🎳 With the sun shining bright and temperatures rising, there's no better way to beat the heat than with a refreshing dip in the pool! 🏊‍♂️ ☀️ Dive into Hello, friends! 🎳 With the sun shining bright and..."
-                                className="w-full h-full p-3 text-gray-800 placeholder-gray-400 border-0 resize-none focus:outline-none text-base"
+                                placeholder={selectedFiles.length > 0 
+                                    ? "Write a caption... (optional)" 
+                                    : "What's on your mind? Share your thoughts with the bowling community! 🎳"
+                                }
+                                className="w-full h-20 p-3 text-gray-800 placeholder-gray-400 border-0 resize-none focus:outline-none text-base"
                                 disabled={isPosting}
                             />
                         </div>
@@ -227,51 +237,56 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                         )}
 
                         {/* Manual Tag Input */}
-                        <div className="mb-4">
+                        <div className="mb-3 flex-shrink-0">
                             <input
                                 type="text"
                                 value={currentTag}
                                 onChange={(e) => setCurrentTag(e.target.value)}
                                 onKeyDown={addTag}
                                 placeholder="Add tags (press Enter to add)"
-                                className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                                className="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                             />
                         </div>
 
                         {/* Selected Files Preview */}
                         {selectedFiles.length > 0 && (
-                            <div className="mb-4">
-                                <h5 className="text-sm font-medium text-gray-900 mb-2">Selected Media ({selectedFiles.length})</h5>
-                                <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
+                            <div className="mb-4 flex-shrink-0">
+                                <h5 className="text-sm font-medium text-gray-900 mb-2">
+                                    Selected Media ({selectedFiles.length})
+                                </h5>
+                                <div className={`grid gap-2 ${
+                                    selectedFiles.length === 1 ? 'grid-cols-1' :
+                                    selectedFiles.length === 2 ? 'grid-cols-2' :
+                                    selectedFiles.length === 3 ? 'grid-cols-3' :
+                                    'grid-cols-4'
+                                } max-h-32 overflow-y-auto p-1`}>
                                     {selectedFiles.map((file, index) => (
-                                        <div key={index} className="relative group">
+                                        <div key={index} className="relative group" style={{ aspectRatio: '1/1', height: '120px' }}>
                                             {isVideo(file) ? (
-                                                <div className="relative">
+                                                <div className="relative w-full h-full">
                                                     <video
                                                         src={getPreviewUrl(file)}
-                                                        className="w-full h-20 object-cover rounded-lg"
+                                                        className="w-full h-full object-cover rounded-lg border-2 border-green-200"
                                                         muted
                                                         preload="metadata"
                                                     />
                                                     <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-lg">
-                                                        <Video className="w-6 h-6 text-white" />
+                                                        <div className="bg-white bg-opacity-90 rounded-full p-1">
+                                                            <Video className="w-3 h-3 text-gray-800" />
+                                                        </div>
                                                     </div>
                                                 </div>
                                             ) : (
                                                 <img
                                                     src={getPreviewUrl(file)}
-                                                    alt={file.name}
-                                                    className="w-full h-20 object-cover rounded-lg"
+                                                    alt="Preview"
+                                                    className="w-full h-full object-cover rounded-lg border-2 border-green-200"
                                                 />
                                             )}
-                                            <div className="absolute inset-x-0 bottom-0 bg-black bg-opacity-60 text-white p-2 rounded-b-lg">
-                                                <p className="text-xs truncate">{file.name}</p>
-                                                <p className="text-xs opacity-75">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                                            </div>
                                             <button
                                                 type="button"
                                                 onClick={() => removeFile(index)}
-                                                className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                                className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg z-10"
                                             >
                                                 <X className="w-3 h-3" />
                                             </button>
@@ -292,50 +307,50 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                         />
 
                         {/* Add your Post Section */}
-                        <div className="border-t border-gray-100 pt-4 mb-4">
-                            <h4 className="text-sm font-medium text-gray-900 mb-3">Add your Post</h4>
+                        <div className="border-t border-gray-100 pt-3 mb-3 flex-shrink-0">
+                            <h4 className="text-sm font-medium text-gray-900 mb-2">Add your Post</h4>
                             <div className="grid grid-cols-2 gap-2">
                                 <button
                                     type="button"
-                                    className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                                    className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                                 >
-                                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                                        <BarChart3 className="w-5 h-5 text-blue-600" />
+                                    <div className="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center">
+                                        <BarChart3 className="w-4 h-4 text-blue-600" />
                                     </div>
-                                    <span className="text-sm text-gray-700">Create Poll</span>
+                                    <span className="text-xs text-gray-700">Create Poll</span>
                                 </button>
 
                                 <button
                                     type="button"
-                                    className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                                    className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                                 >
-                                    <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                                        <div className="w-5 h-5 bg-green-600 rounded flex items-center justify-center">
-                                            <div className="w-3 h-3 bg-white rounded-sm"></div>
+                                    <div className="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center">
+                                        <div className="w-4 h-4 bg-green-600 rounded flex items-center justify-center">
+                                            <div className="w-2 h-2 bg-white rounded-sm"></div>
                                         </div>
                                     </div>
-                                    <span className="text-sm text-gray-700">Create Event</span>
+                                    <span className="text-xs text-gray-700">Create Event</span>
                                 </button>
 
                                 <button
                                     type="button"
                                     onClick={() => fileInputRef.current?.click()}
-                                    className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                                    className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                                 >
-                                    <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                        <Image className="w-5 h-5 text-purple-600" />
+                                    <div className="w-6 h-6 bg-purple-100 rounded-lg flex items-center justify-center">
+                                        <Image className="w-4 h-4 text-purple-600" />
                                     </div>
-                                    <span className="text-sm text-gray-700">Photo/ Video</span>
+                                    <span className="text-xs text-gray-700">Photo/ Video</span>
                                 </button>
 
                                 <button
                                     type="button"
-                                    className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                                    className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                                 >
-                                    <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
-                                        <span className="text-yellow-600 font-bold text-sm">GIF</span>
+                                    <div className="w-6 h-6 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                        <span className="text-yellow-600 font-bold text-xs">GIF</span>
                                     </div>
-                                    <span className="text-sm text-gray-700">Gif</span>
+                                    <span className="text-xs text-gray-700">Gif</span>
                                 </button>
                             </div>
                         </div>
@@ -343,8 +358,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                         {/* Post Button */}
                         <button
                             type="submit"
-                            disabled={!postText.trim() || isPosting}
-                            className="w-full h-12 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-full transition-colors"
+                            disabled={(!postText.trim() && selectedFiles.length === 0) || isPosting}
+                            className="w-full h-10 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-full transition-colors flex-shrink-0"
                             style={{ backgroundColor: '#8BC342' }}
                         >
                             {isPosting ? 'Posting...' : 'Post'}
