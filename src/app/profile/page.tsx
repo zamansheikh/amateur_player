@@ -21,8 +21,7 @@ interface UserPost {
         created: string;
         last_update: string;
         has_text: boolean;
-        has_image: boolean;
-        has_video: boolean;
+        has_media: boolean;
         has_poll: boolean;
         has_event: boolean;
     };
@@ -54,8 +53,7 @@ interface UserPost {
         }>;
     }];
     caption: string;
-    images: any[];
-    videos: any[];
+    media: string[];
     poll: any;
     event: any;
     tags: string[];

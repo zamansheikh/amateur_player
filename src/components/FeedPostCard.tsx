@@ -4,6 +4,7 @@ import { Heart, MessageSquare, Share, Send } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import MediaGallery from './MediaGallery';
 
 interface FeedPost {
     metadata: {
@@ -17,8 +18,7 @@ interface FeedPost {
         created: string;
         last_update: string;
         has_text: boolean;
-        has_image: boolean;
-        has_video: boolean;
+        has_media: boolean;
         has_poll: boolean;
         has_event: boolean;
     };
@@ -52,8 +52,7 @@ interface FeedPost {
         }>;
     }];
     caption: string;
-    images: any[];
-    videos: any[];
+    media: string[];
     poll: any;
     event: any;
     tags: string[];
@@ -228,13 +227,28 @@ export default function FeedPostCard({ post, onPostUpdate, onPostChange }: FeedP
         }
     };
 
+    // Function to parse caption (API returns it as string array format)
+    const parseCaption = (caption: string): string => {
+        try {
+            // Handle caption that comes as "['text content']" format
+            if (caption.startsWith('[') && caption.endsWith(']')) {
+                const parsed = JSON.parse(caption.replace(/'/g, '"'));
+                return Array.isArray(parsed) ? parsed[0] || '' : caption;
+            }
+            return caption;
+        } catch (error) {
+            return caption;
+        }
+    };
+
     // Function to render text with hashtags
     const renderTextWithTags = (text: string, tags: string[]) => {
-        if (tags.length === 0) return text;
+        const cleanText = parseCaption(text);
+        if (tags.length === 0) return cleanText;
 
-        let renderedText = text;
+        let renderedText = cleanText;
         tags.forEach(tag => {
-            const hashtag = `${tag}`;
+            const hashtag = `#${tag}`;
             renderedText = renderedText.replace(
                 new RegExp(`\\b${tag}\\b`, 'gi'),
                 hashtag
@@ -289,15 +303,9 @@ export default function FeedPostCard({ post, onPostUpdate, onPostChange }: FeedP
                     </p>
                 </div>
 
-                {/* Post Images */}
-                {post.images && post.images.length > 0 && (
-                    <div className="mb-4 -mx-2">
-                        <img
-                            src={post.images[0]}
-                            alt="Post content"
-                            className="w-full h-72 object-cover rounded-xl"
-                        />
-                    </div>
+                {/* Post Media Gallery */}
+                {post.media && post.media.length > 0 && (
+                    <MediaGallery media={post.media} />
                 )}
             </div>
 
