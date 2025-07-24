@@ -220,18 +220,24 @@ export default function UserPostCard({ post, onPostUpdate, onPostChange }: UserP
     // Function to render text with hashtags
     const renderTextWithTags = (text: string, tags: string[]) => {
         const cleanText = parseCaption(text);
-        if (tags.length === 0) return cleanText;
+        
+        // If no tags, just return the text split by hashtags for styling
+        if (tags.length === 0) {
+            return cleanText.split(/(#\w+)/g).map((part, index) => {
+                if (part.startsWith('#')) {
+                    return (
+                        <span key={index} className="text-green-600 font-medium">
+                            {part}
+                        </span>
+                    );
+                }
+                return part;
+            });
+        }
 
-        let renderedText = cleanText;
-        tags.forEach(tag => {
-            const hashtag = `#${tag}`;
-            renderedText = renderedText.replace(
-                new RegExp(`\\b${tag}\\b`, 'gi'),
-                hashtag
-            );
-        });
-
-        return renderedText.split(/(#\w+)/g).map((part, index) => {
+        // For texts with tags, we need to ensure hashtags are properly styled
+        // Split text by hashtags and style them
+        return cleanText.split(/(#\w+)/g).map((part, index) => {
             if (part.startsWith('#')) {
                 return (
                     <span key={index} className="text-green-600 font-medium">
