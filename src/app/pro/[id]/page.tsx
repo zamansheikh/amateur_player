@@ -467,6 +467,57 @@ export default function PlayerProfilePage() {
           </div>
         </div>
 
+        {/* Add Sponsors Section */}
+        {player?.is_pro && player?.sponsors && player.sponsors.length > 0 && (
+          <div className="bg-white rounded-lg p-4 shadow-sm mb-6">
+            {/* <h3 className="text-lg font-semibold text-gray-900 mb-3">
+              Sponsors
+            </h3> */}
+            <div className="flex items-center justify-center gap-6">
+              {player.sponsors.map((sponsor) => (
+                <Image
+                  key={sponsor.brand_id}
+                  src={sponsor.logo_url}
+                  alt={sponsor.formal_name}
+                  width={48}
+                  height={48}
+                  className="object-contain rounded-md"
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Add Favorite Brands Section */}
+        {!player?.is_pro &&
+          player?.favorite_brands &&
+          player.favorite_brands.length > 0 && (
+            <div className="bg-white rounded-lg p-4 shadow-sm mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                Favorite Brands
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                {player.favorite_brands.map((brand) => (
+                  <div
+                    key={brand.brand_id}
+                    className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg"
+                  >
+                    <Image
+                      src={brand.logo_url}
+                      alt={brand.formal_name}
+                      width={32}
+                      height={32}
+                      className="object-contain rounded-md"
+                    />
+                    <span className="text-sm text-gray-700 flex-1">
+                      {brand.formal_name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
         {/* Posts Section Header */}
         <div className="border-b border-gray-200 bg-white sticky top-0 z-10">
           <div className="px-6 py-4">
