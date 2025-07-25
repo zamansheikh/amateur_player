@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { X, Globe, ChevronDown, BarChart3, Image, Smile, Upload, Trash2, Plus, Video, CheckCircle } from 'lucide-react';
+import { X, Globe, ChevronDown, BarChart3, Image, Video, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 

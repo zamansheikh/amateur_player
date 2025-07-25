@@ -120,7 +120,7 @@ interface FeedPost {
   is_liked_by_me: boolean;
 }
 
-export default function ProPlayerProfilePage() {
+export default function PlayerProfilePage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth(); // Add auth context
@@ -140,7 +140,7 @@ export default function ProPlayerProfilePage() {
       setIsLoading(true);
       setError(null);
 
-      const response = await api.get(`/api/pro/profile/${playerId}`);
+      const response = await api.get(`/api/user/${playerId}/profile`);
       console.log("Profile response:", response.data);
       setPlayer(response.data);
       setIsFollowing(response.data?.is_followed || false);
