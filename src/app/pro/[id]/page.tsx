@@ -317,10 +317,17 @@ export default function PlayerProfilePage() {
             <div className="mb-6">
               <div className="flex items-center justify-between">
                 <div className="flex col-auto">
-                  <div className="w-40">
-                    {/* Empty Space for profile picture overflow */}
+                  <div className="w-40 ">
+                    {/* Profile Picture Overlay - positioned at bottom left of video */}
+                    <div className="relative -top-12">
+                      <img
+                        src={player?.profile_picture_url || "/playercard1.png"}
+                        alt={player?.name}
+                        className="w-40 h-40 rounded-2xl border-4 border-white object-cover shadow-xl"
+                      />
+                    </div>
                   </div>
-                  <div>
+                  <div className="pl-4">
                     <div className="flex items-center gap-3 mb-2">
                       <h1 className="text-3xl font-bold text-gray-900">
                         {player?.name}
@@ -438,16 +445,6 @@ export default function PlayerProfilePage() {
                   <div className="text-sm text-gray-600">High Series</div>
                 </div>
               </div>
-            </div>
-          </div>
-          {/* Profile Picture Overlay - positioned at bottom left of video */}
-          <div className="relative bottom-4 left-6">
-            <div className="relative">
-              <img
-                src={player?.profile_picture_url || "/playercard1.png"}
-                alt={player?.name}
-                className="w-40 h-40 rounded-2xl border-4 border-white object-cover shadow-xl"
-              />
             </div>
           </div>
         </div>
