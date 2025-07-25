@@ -1,7 +1,8 @@
 'use client';
 
-import { Heart, MessageSquare, Share, Send } from 'lucide-react';
+import { Heart, MessageSquare, Share } from 'lucide-react';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface PostCardProps {
     post: {
@@ -21,8 +22,7 @@ interface PostCardProps {
 export default function PostCard({ post }: PostCardProps) {
     const [isLiked, setIsLiked] = useState(false);
     const [localLikes, setLocalLikes] = useState(post.likes);
-    const [comment, setComment] = useState('');
-    const [showCommentInput, setShowCommentInput] = useState(false);
+    const router = useRouter();
 
     // Function to render text with bold/italic formatting
     const renderFormattedText = (text: string) => {
@@ -60,18 +60,8 @@ export default function PostCard({ post }: PostCardProps) {
         setIsLiked(!isLiked);
     };
 
-    const handleComment = () => {
-        setShowCommentInput(!showCommentInput);
-    };
-
-    const handleCommentSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (comment.trim()) {
-            // Handle comment submission here
-            console.log('Comment submitted:', comment);
-            setComment('');
-            setShowCommentInput(false);
-        }
+    const handlePostClick = () => {
+        router.push(`/post/${post.id}`);
     };
 
     return (
@@ -95,16 +85,16 @@ export default function PostCard({ post }: PostCardProps) {
                     </button>
                 </div>
 
-                {/* Post Content */}
-                <div className="mb-4">
+                {/* Post Content - Clickable */}
+                <div className="mb-4 cursor-pointer" onClick={handlePostClick}>
                     <p className="text-gray-800 leading-relaxed text-[15px] line-height-6">
                         {renderFormattedText(post.content)}
                     </p>
                 </div>
 
-                {/* Post Image */}
+                {/* Post Image - Clickable */}
                 {post.image && (
-                    <div className="mb-4 -mx-2">
+                    <div className="mb-4 -mx-2 cursor-pointer" onClick={handlePostClick}>
                         <img
                             src={post.image}
                             alt="Post content"
@@ -116,7 +106,7 @@ export default function PostCard({ post }: PostCardProps) {
 
             {/* Post Actions */}
             <div className="px-6 py-4 border-t border-gray-50 bg-gray-50/30">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between">
                     <div className="flex items-center gap-6">
                         <button
                             onClick={handleLike}
@@ -129,7 +119,7 @@ export default function PostCard({ post }: PostCardProps) {
                             <span className="text-sm font-medium">{localLikes}</span>
                         </button>
                         <button
-                            onClick={handleComment}
+                            onClick={handlePostClick}
                             className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors duration-200"
                         >
                             <MessageSquare className="w-5 h-5" />
@@ -141,33 +131,6 @@ export default function PostCard({ post }: PostCardProps) {
                         <span className="text-sm font-medium">Share</span>
                     </button>
                 </div>
-
-                {/* Comment Input */}
-                {showCommentInput && (
-                    <div className="border-t border-gray-100 pt-3 mt-3">
-                        <form onSubmit={handleCommentSubmit} className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center flex-shrink-0">
-                                <span className="text-white font-medium text-sm">U</span>
-                            </div>
-                            <div className="flex-1 relative">
-                                <input
-                                    type="text"
-                                    value={comment}
-                                    onChange={(e) => setComment(e.target.value)}
-                                    placeholder="Write a comment..."
-                                    className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent pr-12 shadow-sm"
-                                />
-                                <button
-                                    type="submit"
-                                    disabled={!comment.trim()}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-green-600 hover:text-green-700 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
-                                >
-                                    <Send className="w-4 h-4" />
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                )}
             </div>
         </div>
     );
