@@ -136,18 +136,20 @@ export default function PlayerProfilePage() {
             setIsLoading(true);
             setError(null);
 
-            const response = await api.get(`/api/user/${playerId}/profile`);
+            const response = await api.get(`/api/pro/profile/${playerId}`);
             console.log("Profile response:", response.data);
             setPlayer(response.data);
             setIsFollowing(response.data?.is_followed || false);
             setFollowerCount(response.data?.follower_count || 0);
+            if( response.data?.user_id) {
+              // Fetch posts only after profile is successfully loaded
+              await fetchPosts(response.data?.user_id);
+            }
         } catch (err: any) {
             console.error('Error fetching player:', err);
             
             // Handle 401 errors specifically for pro routes (when not authenticated)
             if (err.response?.status === 401) {
-                // For pro routes, we still want to show profile data even if user is not authenticated
-                // The API should handle this, but for now we'll show a generic error
                 setError('This profile requires authentication to view full details');
             } else {
                 setError('Failed to load player profile');
@@ -158,14 +160,16 @@ export default function PlayerProfilePage() {
     };
 
     // Fetch user posts
-    const fetchPosts = async () => {
+    const fetchPosts = async (userId: number | string) => {
         try {
             setPostsLoading(true);
 
-            const response = await api.get(`/api/user/${playerId}/posts`);
+            // Use the playerId instead of hardcoded 55
+            const response = await api.get(`/api/user/${userId}/posts`);
             setPosts(response.data);
         } catch (err) {
             console.error("Error fetching posts:", err);
+            // setError('Failed to load posts');
         } finally {
             setPostsLoading(false);
         }
@@ -174,7 +178,6 @@ export default function PlayerProfilePage() {
     useEffect(() => {
         if (playerId) {
             fetchProfile();
-            fetchPosts();
         }
     }, [playerId]);
 
