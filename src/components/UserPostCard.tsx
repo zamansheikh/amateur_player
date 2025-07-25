@@ -25,7 +25,7 @@ interface UserPost {
   author: {
     user_id: number;
     name: string;
-    profile_pic_url: string;
+    profile_picture_url: string;
   };
   likes: [
     {
@@ -171,7 +171,7 @@ export default function UserPostCard({
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <img
-              src={localPost.author.profile_pic_url}
+              src={localPost.author.profile_picture_url}
               alt={localPost.author.name}
               className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100"
             />

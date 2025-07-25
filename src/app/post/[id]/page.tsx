@@ -29,7 +29,7 @@ interface FeedPost {
     user_id: number;
     name: string;
     username: string;
-    profile_pic_url: string;
+    profile_picture_url: string;
     is_following: boolean;
     viewer_is_author: boolean;
   };

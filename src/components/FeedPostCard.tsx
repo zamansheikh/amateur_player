@@ -26,7 +26,7 @@ interface FeedPost {
     user_id: number;
     name: string;
     username: string;
-    profile_pic_url: string;
+    profile_picture_url: string;
     is_following: boolean;
     viewer_is_author: boolean;
   };
@@ -196,7 +196,7 @@ export default function FeedPostCard({
             onClick={handleUserClick}
           >
             <img
-              src={post.author.profile_pic_url}
+              src={post.author.profile_picture_url}
               alt={post.author.name}
               className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100"
             />
