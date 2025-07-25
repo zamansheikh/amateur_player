@@ -316,13 +316,13 @@ export default function PlayerProfilePage() {
                   <div className="flex items-end gap-4 -mt-16">
                     {/* Profile Picture */}
                     <div className="relative -top-10">
-                      <div className="w-38 h-38 min-w-[152px] min-h-[152px] max-w-[152px] max-h-[152px] rounded-2xl border-4 border-white overflow-hidden flex items-center justify-center bg-gray-100">
+                     <div className="w-[152px] h-[152px] rounded-2xl border-4 border-white overflow-hidden flex items-center justify-center bg-gray-100">
                         <Image
                           src={player?.profile_picture_url || "/playercard1.png"}
                           alt={player?.name}
                           width={152}
                           height={152}
-                          className="object-cover w-full h-full"
+                          className="w-full h-full object-cover"
                         />
                       </div>
 
