@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { X, Globe, ChevronDown, BarChart3, Image, Smile, Upload, Trash2, Plus, Video } from 'lucide-react';
+import { X, Globe, ChevronDown, BarChart3, Image, Smile, Upload, Trash2, Plus, Video, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 
@@ -20,6 +20,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
     const [selectedFiles, setSelectedFiles] = useState<File[]>(initialFiles);
     const [manualTags, setManualTags] = useState<string[]>([]);
     const [currentTag, setCurrentTag] = useState('');
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [postingStep, setPostingStep] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Update selected files when initial files change
@@ -89,6 +91,11 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
 
         try {
             setIsPosting(true);
+            setUploadProgress(0);
+            setPostingStep('Preparing your post...');
+            
+            // Simulate initial progress
+            setUploadProgress(10);
             
             // Create FormData
             const formData = new FormData();
@@ -102,17 +109,32 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                 formData.append('tags', tag);
             });
             
+            setPostingStep('Uploading media files...');
+            setUploadProgress(30);
+            
             // Add media files
             selectedFiles.forEach(file => {
                 formData.append('media', file);
             });
 
-            // Send FormData instead of JSON
+            setUploadProgress(60);
+            setPostingStep('Creating your post...');
+
+            // Send FormData with progress tracking
             await api.post('/api/user/posts', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
+                },
+                onUploadProgress: (progressEvent) => {
+                    if (progressEvent.total) {
+                        const progress = Math.round((progressEvent.loaded * 40) / progressEvent.total) + 60;
+                        setUploadProgress(Math.min(progress, 95));
+                    }
                 }
             });
+            
+            setUploadProgress(100);
+            setPostingStep('Post created successfully!');
             
             // Reset form
             setPostText('');
@@ -120,30 +142,38 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
             setManualTags([]);
             setCurrentTag('');
             setShowSuccess(true);
-            setTimeout(() => setShowSuccess(false), 3000);
             
             if (onPostCreated) {
                 onPostCreated();
             }
             
-            // Close modal after successful post
+            // Close modal after successful post with a short delay to show success
             setTimeout(() => {
-                onClose();
-            }, 1000);
+                handleClose();
+            }, 1500);
             
         } catch (error) {
             console.error('Error creating post:', error);
-        } finally {
-            setIsPosting(false);
+            setPostingStep('Failed to create post. Please try again.');
+            setUploadProgress(0);
+            
+            // Reset posting state after showing error
+            setTimeout(() => {
+                setIsPosting(false);
+                setPostingStep('');
+            }, 2000);
         }
     };
 
     const handleClose = () => {
+        if (isPosting) return; // Prevent closing while posting
         setPostText('');
         setSelectedFiles([]);
         setManualTags([]);
         setCurrentTag('');
         setShowSuccess(false);
+        setUploadProgress(0);
+        setPostingStep('');
         onClose();
     };
 
@@ -160,19 +190,51 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
             >
                 {/* Modal Header */}
                 <div className="h-[56px] flex items-center justify-between px-4 border-b border-gray-200 flex-shrink-0">
-                    <h2 className="text-xl font-semibold text-gray-900">Create Post</h2>
+                    <h2 className="text-xl font-semibold text-gray-900">
+                        {isPosting ? 'Creating Post...' : 'Create Post'}
+                    </h2>
                     <button
                         onClick={handleClose}
-                        className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
+                        disabled={isPosting}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                            isPosting 
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                                : 'hover:bg-gray-100 text-gray-600'
+                        }`}
                     >
-                        <X className="w-5 h-5 text-gray-600" />
+                        <X className="w-5 h-5" />
                     </button>
                 </div>
 
                 {/* Success Message */}
                 {showSuccess && (
-                    <div className="mx-4 mt-4 p-3 bg-green-100 border border-green-200 rounded-lg text-green-700 text-sm flex-shrink-0">
-                        ✓ Post created successfully!
+                    <div className="mx-4 mt-4 p-3 bg-green-100 border border-green-200 rounded-lg text-green-700 text-sm flex items-center gap-2 flex-shrink-0">
+                        <CheckCircle className="w-4 h-4" />
+                        Post created successfully!
+                    </div>
+                )}
+
+                {/* Progress Indicator */}
+                {isPosting && (
+                    <div className="mx-4 mt-4 flex-shrink-0">
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                                <span className="text-sm font-medium text-blue-900">{postingStep}</span>
+                            </div>
+                            
+                            {/* Progress Bar */}
+                            <div className="w-full bg-blue-100 rounded-full h-2 overflow-hidden">
+                                <div 
+                                    className="bg-blue-600 h-full rounded-full transition-all duration-300 ease-out"
+                                    style={{ width: `${uploadProgress}%` }}
+                                ></div>
+                            </div>
+                            <div className="flex justify-between text-xs text-blue-700 mt-1">
+                                <span>Uploading...</span>
+                                <span>{uploadProgress}%</span>
+                            </div>
+                        </div>
                     </div>
                 )}
 
@@ -205,7 +267,9 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                                     ? "Write a caption... (optional)" 
                                     : "What's on your mind? Share your thoughts with the bowling community! 🎳"
                                 }
-                                className="w-full h-20 p-3 text-gray-800 placeholder-gray-400 border-0 resize-none focus:outline-none text-base"
+                                className={`w-full h-20 p-3 text-gray-800 placeholder-gray-400 border-0 resize-none focus:outline-none text-base ${
+                                    isPosting ? 'bg-gray-50 cursor-not-allowed' : ''
+                                }`}
                                 disabled={isPosting}
                             />
                         </div>
@@ -244,7 +308,10 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                                 onChange={(e) => setCurrentTag(e.target.value)}
                                 onKeyDown={addTag}
                                 placeholder="Add tags (press Enter to add)"
-                                className="w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                                disabled={isPosting}
+                                className={`w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm ${
+                                    isPosting ? 'bg-gray-50 cursor-not-allowed' : ''
+                                }`}
                             />
                         </div>
 
@@ -307,12 +374,15 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                         />
 
                         {/* Add your Post Section */}
-                        <div className="border-t border-gray-100 pt-3 mb-3 flex-shrink-0">
+                        <div className={`border-t border-gray-100 pt-3 mb-3 flex-shrink-0 ${isPosting ? 'opacity-50' : ''}`}>
                             <h4 className="text-sm font-medium text-gray-900 mb-2">Add your Post</h4>
                             <div className="grid grid-cols-2 gap-2">
                                 <button
                                     type="button"
-                                    className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                                    disabled={isPosting}
+                                    className={`flex items-center gap-2 p-2 border border-gray-200 rounded-lg transition-colors ${
+                                        isPosting ? 'cursor-not-allowed' : 'hover:bg-gray-50'
+                                    }`}
                                 >
                                     <div className="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center">
                                         <BarChart3 className="w-4 h-4 text-blue-600" />
@@ -322,7 +392,10 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
 
                                 <button
                                     type="button"
-                                    className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                                    disabled={isPosting}
+                                    className={`flex items-center gap-2 p-2 border border-gray-200 rounded-lg transition-colors ${
+                                        isPosting ? 'cursor-not-allowed' : 'hover:bg-gray-50'
+                                    }`}
                                 >
                                     <div className="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center">
                                         <div className="w-4 h-4 bg-green-600 rounded flex items-center justify-center">
@@ -334,8 +407,11 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
 
                                 <button
                                     type="button"
-                                    onClick={() => fileInputRef.current?.click()}
-                                    className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                                    onClick={() => !isPosting && fileInputRef.current?.click()}
+                                    disabled={isPosting}
+                                    className={`flex items-center gap-2 p-2 border border-gray-200 rounded-lg transition-colors ${
+                                        isPosting ? 'cursor-not-allowed' : 'hover:bg-gray-50'
+                                    }`}
                                 >
                                     <div className="w-6 h-6 bg-purple-100 rounded-lg flex items-center justify-center">
                                         <Image className="w-4 h-4 text-purple-600" />
@@ -345,7 +421,10 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
 
                                 <button
                                     type="button"
-                                    className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                                    disabled={isPosting}
+                                    className={`flex items-center gap-2 p-2 border border-gray-200 rounded-lg transition-colors ${
+                                        isPosting ? 'cursor-not-allowed' : 'hover:bg-gray-50'
+                                    }`}
                                 >
                                     <div className="w-6 h-6 bg-yellow-100 rounded-lg flex items-center justify-center">
                                         <span className="text-yellow-600 font-bold text-xs">GIF</span>
@@ -359,10 +438,19 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                         <button
                             type="submit"
                             disabled={(!postText.trim() && selectedFiles.length === 0) || isPosting}
-                            className="w-full h-10 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-full transition-colors flex-shrink-0"
-                            style={{ backgroundColor: '#8BC342' }}
+                            className={`w-full h-10 font-medium rounded-full transition-all duration-200 flex items-center justify-center gap-2 flex-shrink-0 ${
+                                isPosting
+                                    ? 'bg-gray-400 cursor-not-allowed text-gray-600'
+                                    : (!postText.trim() && selectedFiles.length === 0)
+                                        ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+                                        : 'bg-green-500 hover:bg-green-600 text-white'
+                            }`}
+                            style={!isPosting && (postText.trim() || selectedFiles.length > 0) ? { backgroundColor: '#8BC342' } : {}}
                         >
-                            {isPosting ? 'Posting...' : 'Post'}
+                            {isPosting && (
+                                <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin"></div>
+                            )}
+                            {isPosting ? 'Creating Post...' : 'Post'}
                         </button>
                     </form>
                 </div>
