@@ -476,9 +476,9 @@ export default function PlayerProfilePage() {
 
         {/* Posts Content */}
         <div className="flex-1 bg-gray-50">
-          <div className="flex gap-6 px-6 py-6">
-            {/* Posts Column */}
-            <div className="flex-1 max-w-2xl">
+          <div className="py-3">
+            {/* Posts Grid - Full Width */}
+            <div className="w-full">
               {postsLoading ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="text-center">
@@ -504,50 +504,20 @@ export default function PlayerProfilePage() {
                   </p>
                 </div>
               ) : (
-                <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {posts.map((post) => (
                     <UserPostCard key={post.metadata.id} post={post} />
                   ))}
                 </div>
               )}
             </div>
+          </div>
+        </div>
 
-            {/* Right Sidebar */}
-            <div className="w-80 space-y-4">
-              {/* Engagement Section */}
-              <div className="bg-white rounded-lg p-4 shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                  Engagement
-                </h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Likes:</span>
-                    <span className="font-medium">
-                      {player?.engagement?.likes ?? "0"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Comments:</span>
-                    <span className="font-medium">
-                      {player?.engagement?.comments ?? "0"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Shares:</span>
-                    <span className="font-medium">
-                      {player?.engagement?.shares ?? "0"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Views:</span>
-                    <span className="font-medium">
-                      {player?.engagement?.views ?? "0"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Sponsors Section - Only for Pro Players */}
+        {/* Sidebar - Bottom Section */}
+        <div className="bg-gray-50 px-6 pb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
+            {/* Sponsors Section - Only for Pro Players */}
               {player?.is_pro &&
                 player?.sponsors &&
                 player.sponsors.length > 0 && (
@@ -635,7 +605,6 @@ export default function PlayerProfilePage() {
                     </div>
                   </div>
                 )}
-            </div>
           </div>
         </div>
       </div>
