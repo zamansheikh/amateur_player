@@ -275,7 +275,7 @@ export default function PlayerProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="max-w-4xl mx-auto px-6 py-6">
+      <div className="max-w-6xl mx-auto px-6 py-6">
         {/* Header with back button */}
         <div className="mb-6">
           <button
