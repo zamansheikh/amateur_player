@@ -290,26 +290,36 @@ export default function PlayerProfilePage() {
         {/* Profile Header */}
         <div className="relative">
           {/* Cover Video */}
-          <div className="h-64 relative overflow-hidden rounded-lg">
-            {player?.intro_video_url ? (
+            <div className="h-64 relative overflow-hidden rounded-lg">
+            {player?.is_pro && player?.intro_video_url ? (
               <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="w-full h-full object-cover"
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover"
               >
-                <source src={player?.intro_video_url} type="video/mp4" />
-                <div className="w-full h-full bg-gradient-to-r from-green-400 to-blue-500"></div>
+              <source src={player.intro_video_url} type="video/mp4" />
               </video>
+            ) : player?.cover_photo_url ? (
+              <Image
+              src={player.cover_photo_url}
+              alt="Cover Photo"
+              width={1200}
+              height={256}
+              className="w-full h-full object-cover"
+              priority
+              />
             ) : (
               <div className="w-full h-full bg-gradient-to-r from-green-400 to-blue-500"></div>
             )}
             <div className="absolute inset-0 bg-black bg-opacity-20"></div>
-            <button className="absolute bottom-4 right-4 w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all">
+            {player?.is_pro && player?.intro_video_url && (
+              <button className="absolute bottom-4 right-4 w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all">
               <Play className="w-6 h-6 text-white" />
-            </button>
-          </div>
+              </button>
+            )}
+            </div>
 
           {/* Profile Info */}
           <div className="px-6 pb-4 pt-8">
@@ -562,100 +572,6 @@ export default function PlayerProfilePage() {
                 </div>
               )}
             </div>
-          </div>
-        </div>
-
-        {/* Sidebar - Bottom Section */}
-        <div className="bg-gray-50 px-6 pb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl">
-            {/* Sponsors Section - Only for Pro Players */}
-              {player?.is_pro &&
-                player?.sponsors &&
-                player.sponsors.length > 0 && (
-                  <div className="bg-white rounded-lg p-4 shadow-sm">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                      Sponsors
-                    </h3>
-                    <div className="space-y-3">
-                      {player.sponsors.map((sponsor) => (
-                        <div
-                          key={sponsor.brand_id}
-                          className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg"
-                        >
-                          <Image
-                            src={sponsor.logo_url}
-                            alt={sponsor.formal_name}
-                            width={40}
-                            height={40}
-                            className="object-contain rounded-md"
-                          />
-                          <div className="flex-1">
-                            <div className="font-medium text-gray-900 text-sm">
-                              {sponsor.formal_name}
-                            </div>
-                            <div className="text-xs text-gray-500">
-                              {sponsor.brandType}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-              {/* Favorite Brands Section - Only for Non-Pro Players */}
-              {!player?.is_pro &&
-                player?.favorite_brands &&
-                player.favorite_brands.length > 0 && (
-                  <div className="bg-white rounded-lg p-4 shadow-sm">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                      Favorite Brands
-                    </h3>
-                    <div className="space-y-3">
-                      {/* Group brands by type */}
-                      {[
-                        "Balls",
-                        "Shoes",
-                        "Accessories",
-                        "Apparels",
-                        "Business",
-                      ].map((brandType) => {
-                        const brandsOfType =
-                          player.favorite_brands?.filter(
-                            (brand) => brand.brandType === brandType
-                          ) || [];
-                        if (brandsOfType.length === 0) return null;
-
-                        return (
-                          <div key={brandType}>
-                            <h4 className="text-sm font-medium text-gray-700 mb-2">
-                              {brandType}
-                            </h4>
-                            <div className="space-y-2">
-                              {brandsOfType.map((brand) => (
-                                <div
-                                  key={brand.brand_id}
-                                  className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg"
-                                >
-                                  <Image
-                                    src={brand.logo_url}
-                                    alt={brand.formal_name}
-                                    width={32}
-                                    height={32}
-                                    className="object-contain rounded-md"
-                                  />
-                                  <span className="text-sm text-gray-700 flex-1">
-                                    {brand.formal_name}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
           </div>
         </div>
       </div>
