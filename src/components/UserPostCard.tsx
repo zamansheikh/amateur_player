@@ -211,7 +211,7 @@ export default function UserPostCard({
               className={`transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
                 localPost.is_liked_by_me
                   ? "text-red-500 hover:text-red-600"
-                  : "text-gray-600 hover:text-red-500"
+                  : "text-green-400 hover:text-red-500"
               }`}
             >
               {localPost.is_liked_by_me ? (
@@ -232,7 +232,7 @@ export default function UserPostCard({
             </button>
             <button
               onClick={handlePostClick}
-              className="flex items-center gap-2 text-gray-600 hover:text-blue-500 transition-colors duration-200"
+              className="flex items-center gap-2 text-gray-600 hover:text-green-500 transition-colors duration-200"
             >
               <Image
                 src="/icons/comment_icon.svg"

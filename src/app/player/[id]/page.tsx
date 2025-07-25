@@ -23,6 +23,7 @@ interface ProPlayer {
   level: number;
   card_theme: string;
   is_pro: boolean;
+  is_me?: boolean;
   follower_count: number;
   sponsors?: {
     brand_id: number;
@@ -140,7 +141,7 @@ export default function PlayerProfilePage() {
       setIsLoading(true);
       setError(null);
 
-      const response = await api.get(`/api/user/${playerId}/profile`);
+      const response = await api.get(`/api/user/profile/${playerId}`);
       console.log("Profile response:", response.data);
       setPlayer(response.data);
       setIsFollowing(response.data?.is_followed || false);
@@ -205,6 +206,15 @@ export default function PlayerProfilePage() {
     } catch (error) {
       console.error("Error following user:", error);
     }
+  };
+
+  const handleEditProfile = () => {
+    // if (!user || !player) {
+    //   // Redirect to login if not authenticated
+    //   router.push("/signin");
+    //   return;
+    // }
+    // router.push(`/edit-profile/${player.user_id}`);
   };
 
   // Get in touch (message user)
@@ -397,24 +407,33 @@ export default function PlayerProfilePage() {
                 {/* Buttons and Stats Row */}
                 <div className="flex items-center justify-between">
                   {/* Action Buttons */}
-                  <div className="flex gap-3">
-                    <button
+                    <div className="flex gap-3">
+                    {player?.is_me ? (
+                      <button
+                      onClick={handleEditProfile}
+                      className="px-6 py-2 border border-gray-300 rounded-full text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                      Edit Profile
+                      </button>
+                    ) : (
+                      <button
                       onClick={handleFollow}
                       className={`px-6 py-2 rounded-full font-medium transition-colors ${
                         isFollowing
-                          ? "bg-green-100 text-green-700 hover:bg-green-200"
-                          : "bg-green-600 text-white hover:bg-green-700"
+                        ? "bg-green-100 text-green-700 hover:bg-green-200"
+                        : "bg-green-600 text-white hover:bg-green-700"
                       }`}
-                    >
+                      >
                       {isFollowing ? "Following" : "Follow"}
-                    </button>
+                      </button>
+                    )}
                     <button
                       onClick={handleGetInTouch}
                       className="px-6 py-2 border border-gray-300 rounded-full text-gray-700 hover:bg-gray-50 transition-colors"
                     >
                       Get in Touch
                     </button>
-                  </div>
+                    </div>
 
                   {/* Stats */}
                   <div className="flex items-center gap-6">
@@ -565,7 +584,7 @@ export default function PlayerProfilePage() {
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                   {posts.map((post) => (
                     <UserPostCard key={post.metadata.id} post={post} />
                   ))}
