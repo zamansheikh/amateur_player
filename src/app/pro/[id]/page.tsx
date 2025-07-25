@@ -316,12 +316,12 @@ export default function PlayerProfilePage() {
             <div className="flex items-end gap-4 -mt-16">
               {/* Profile Picture */}
               <div className="relative -top-10">
-                <div className="w-[152px] h-[152px] rounded-2xl border-4 border-white overflow-hidden flex items-center justify-center bg-gray-100">
+                <div className="w-[160px] h-[160px] rounded-2xl border-1 border-black overflow-hidden flex items-center justify-center bg-gray-100">
                   <Image
                     src={player?.profile_picture_url || "/playercard1.png"}
                     alt={player?.name}
-                    width={152}
-                    height={152}
+                    width={160}
+                    height={160}
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -412,7 +412,7 @@ export default function PlayerProfilePage() {
                       <div className="relative w-12 h-12">
                         <img
                           src="/icons/level.svg"
-                          alt="Level"
+                          alt="Follower Count"
                           className="w-full h-full"
                         />
                         <div className="absolute inset-0 flex items-center justify-center">
@@ -428,8 +428,8 @@ export default function PlayerProfilePage() {
                     <div className="flex flex-col items-center">
                       <div className="relative w-12 h-12">
                         <img
-                          src="/icons/level.svg"
-                          alt="Level"
+                          src="/icons/exp.svg"
+                          alt="High Game"
                           className="w-full h-full"
                         />
                         <div className="absolute inset-0 flex items-center justify-center">
@@ -445,8 +445,8 @@ export default function PlayerProfilePage() {
                     <div className="flex flex-col items-center">
                       <div className="relative w-12 h-12">
                         <img
-                          src="/icons/level.svg"
-                          alt="Level"
+                          src="/icons/xp.svg"
+                          alt="High Series"
                           className="w-full h-full"
                         />
                         <div className="absolute inset-0 flex items-center justify-center">
