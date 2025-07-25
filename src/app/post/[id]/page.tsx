@@ -7,6 +7,7 @@ import { ArrowLeft, Heart, MessageSquare, Share, Send } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import MediaGallery from "@/components/MediaGallery";
+import FeedPostCard from "@/components/FeedPostCard";
 
 interface FeedPost {
   metadata: {
@@ -243,7 +244,7 @@ export default function PostDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="max-w-2xl mx-auto px-6 py-6">
+      <div className="max-w-3xl mx-auto px-6 py-6">
         {/* Header with back button */}
         <div className="mb-6">
           <button
@@ -256,68 +257,7 @@ export default function PostDetailPage() {
         </div>
 
         {/* Post Card */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          {/* Post Header */}
-          <div className="p-6 pb-4">
-            <div className="flex items-center justify-between mb-4">
-              <div 
-                className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
-                onClick={() => handleUserClick(post.author.user_id)}
-              >
-                <img
-                  src={post.author.profile_pic_url}
-                  alt={post.author.name}
-                  className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100"
-                />
-                <div>
-                  <h3 className="font-semibold text-gray-900 text-base">{post.author.name}</h3>
-                  <p className="text-sm text-gray-500">{post.metadata.created}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Post Content */}
-            <div className="mb-4">
-              <p className="text-gray-800 leading-relaxed text-[15px]">
-                {renderTextWithTags(post.caption, post.tags)}
-              </p>
-            </div>
-
-            {/* Post Media Gallery */}
-            {post.media && post.media.length > 0 && (
-              <MediaGallery media={post.media} />
-            )}
-          </div>
-
-          {/* Post Actions */}
-          <div className="px-6 py-4 border-t border-gray-50 bg-gray-50/30">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <button
-                  onClick={handleLike}
-                  disabled={isLiking}
-                  className={`flex items-center gap-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${post.is_liked_by_me
-                    ? 'text-red-500 hover:text-red-600'
-                    : 'text-gray-600 hover:text-red-500'
-                    }`}
-                >
-                  <Heart className={`w-5 h-5 ${post.is_liked_by_me ? 'fill-current' : ''}`} />
-                  <span className="text-sm font-medium">{post.metadata.total_likes}</span>
-                </button>
-                <div className="flex items-center gap-2 text-gray-600">
-                  <MessageSquare className="w-5 h-5" />
-                  <span className="text-sm font-medium">
-                    {post.metadata.total_comments} Comment{post.metadata.total_comments !== 1 ? 's' : ''}
-                  </span>
-                </div>
-              </div>
-              <button className="flex items-center gap-2 text-gray-600 hover:text-green-500 transition-colors duration-200">
-                <Share className="w-5 h-5" />
-                <span className="text-sm font-medium">Share</span>
-              </button>
-            </div>
-          </div>
-        </div>
+        <FeedPostCard post={post} onPostUpdate={fetchPost} />
 
         {/* Comments Section */}
         <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
