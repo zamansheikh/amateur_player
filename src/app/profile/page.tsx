@@ -45,7 +45,7 @@ interface UserPost {
             user: {
                 user_id: number;
                 name: string;
-                profile_pic_url: string;
+                profile_picture_url: string;
             };
             text: string;
             pics: any[];

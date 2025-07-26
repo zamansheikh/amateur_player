@@ -48,7 +48,7 @@ interface FeedPost {
       user: {
         user_id: number;
         name: string;
-        profile_pic_url: string;
+        profile_picture_url: string;
       };
       text: string;
       pics: any[];
@@ -267,9 +267,16 @@ export default function PostDetailPage() {
 
             {/* Comment Input */}
             <form onSubmit={handleCommentSubmit} className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-full bg-green-600 flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 rounded-ful flex items-center justify-center flex-shrink-0">
                 <span className="text-white font-medium text-sm">
-                  {user?.name ? user.name.split(' ').map(n => n[0]).join('') : 'U'}
+                 <Image
+                    src={user?.profile_picture_url || "/default-avatar.png"}
+                    alt={user?.name || "User"}
+                    width={24}
+                    height={24}
+                    className="rounded-full object-cover"
+                    priority={false}
+                  />
                 </span>
               </div>
               <div className="flex-1 relative">
@@ -296,7 +303,7 @@ export default function PostDetailPage() {
                 <div key={comment.comment_id} className="space-y-3">
                   <div className="flex items-start gap-3">
                     <img
-                      src={comment.user.profile_pic_url}
+                      src={comment.user.profile_picture_url}
                       alt={comment.user.name}
                       className="w-8 h-8 rounded-full object-cover cursor-pointer"
                       onClick={() => handleUserClick(comment.user.user_id)}
@@ -328,7 +335,7 @@ export default function PostDetailPage() {
                       {comment.replies.map((reply: any, replyIndex: number) => (
                         <div key={replyIndex} className="flex items-start gap-3">
                           <img
-                            src={reply.user?.profile_pic_url || '/default-avatar.png'}
+                            src={reply.user?.profile_picture_url || '/default-avatar.png'}
                             alt={reply.user?.name || 'User'}
                             className="w-6 h-6 rounded-full object-cover cursor-pointer"
                             onClick={() => handleUserClick(reply.user?.user_id)}
@@ -350,7 +357,14 @@ export default function PostDetailPage() {
                       <form onSubmit={(e) => handleReplySubmit(e, comment.comment_id)} className="flex items-center gap-2">
                         <div className="w-6 h-6 rounded-full bg-green-600 flex items-center justify-center flex-shrink-0">
                           <span className="text-white font-medium text-xs">
-                            {user?.name ? user.name.split(' ').map(n => n[0]).join('') : 'U'}
+                            <Image
+                              src={user?.profile_picture_url || "/default-avatar.png"}
+                              alt={user?.name || "User"}
+                              width={24}
+                              height={24}
+                              className="rounded-full object-cover"
+                              priority={false}
+                            />
                           </span>
                         </div>
                         <div className="flex-1 relative">
