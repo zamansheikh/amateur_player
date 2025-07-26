@@ -556,7 +556,7 @@ export default function PlayerProfilePage() {
 
         {/* Posts Content */}
         <div className="flex-1 bg-gray-50">
-          <div className="py-3">
+          <div className="p-6">
             {/* Posts Grid - Full Width */}
             <div className="w-full">
               {postsLoading ? (
@@ -584,7 +584,7 @@ export default function PlayerProfilePage() {
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-[420px]">
                   {posts.map((post) => (
                     <UserPostCard key={post.metadata.id} post={post} />
                   ))}

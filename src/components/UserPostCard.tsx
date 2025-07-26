@@ -167,49 +167,60 @@ export default function UserPostCard({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-200">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-col h-[420px]">
       {/* Post Header */}
-      <div className="p-6 pb-4">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <img
-              src={localPost.author.profile_picture_url}
-              alt={localPost.author.name}
-              className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100"
-            />
-            <div>
-              <h3 className="font-semibold text-gray-900 text-base">
-                {localPost.author.name}
-              </h3>
-              <p className="text-sm text-gray-500">
-                {localPost.metadata.created}
-              </p>
-            </div>
+      <div className="p-4 pb-3 flex-shrink-0">
+        <div className="flex items-center gap-3 mb-3">
+          <img
+            src={localPost.author.profile_picture_url}
+            alt={localPost.author.name}
+            className="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100"
+          />
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-gray-900 text-sm truncate">
+              {localPost.author.name}
+            </h3>
+            <p className="text-xs text-gray-500 truncate">
+              {localPost.metadata.created}
+            </p>
           </div>
         </div>
 
         {/* Post Content - Clickable */}
-        <div className="mb-4 cursor-pointer" onClick={handlePostClick}>
-          <p className="text-gray-800 leading-relaxed text-[15px] line-height-6">
+        <div className="cursor-pointer" onClick={handlePostClick}>
+          <p className="text-gray-800 leading-relaxed text-sm line-clamp-2 mb-3">
             {renderTextWithTags(localPost.caption, localPost.tags)}
           </p>
         </div>
-
-        {/* Post Media Gallery - Clickable */}
-        {localPost.media && localPost.media.length > 0 && (
-          <div 
-            className={enableMediaLightbox ? "" : "cursor-pointer"} 
-            onClick={enableMediaLightbox ? undefined : handlePostClick}
-          >
-            <MediaGallery media={localPost.media} enableLightbox={enableMediaLightbox} />
-          </div>
-        )}
       </div>
 
+      {/* Post Media Gallery - Clickable */}
+      {localPost.media && localPost.media.length > 0 ? (
+        <div 
+          className={`flex-1 min-h-0 ${enableMediaLightbox ? "" : "cursor-pointer"}`} 
+          onClick={enableMediaLightbox ? undefined : handlePostClick}
+        >
+          <div className="h-[200px] overflow-hidden">
+            <MediaGallery media={localPost.media} enableLightbox={enableMediaLightbox} />
+          </div>
+        </div>
+      ) : (
+        <div className="flex-1 min-h-0 flex items-center justify-center bg-gray-50">
+          <div className="text-center text-gray-400">
+            <div className="w-12 h-12 mx-auto mb-2 opacity-20">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+              </svg>
+            </div>
+            <p className="text-xs font-medium">Text Post</p>
+          </div>
+        </div>
+      )}
+
       {/* Post Actions */}
-      <div className="px-6 py-4 border-t border-gray-50 bg-gray-50/30">
+      <div className="px-4 py-3 border-t border-gray-50 bg-gray-50/30 flex-shrink-0 mt-auto">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-3">
             <button
               onClick={handleLike}
               disabled={isLiking}
@@ -223,44 +234,46 @@ export default function UserPostCard({
                 <Image
                   src="/icons/like_icon.svg"
                   alt="Unlike"
-                  width={24}
-                  height={24}
+                  width={20}
+                  height={20}
                 />
               ) : (
                 <Image
                   src="/icons/not_like_icon.svg"
                   alt="Like"
-                  width={24}
-                  height={24}
+                  width={20}
+                  height={20}
                 />
               )}
             </button>
             <button
               onClick={handlePostClick}
-              className="flex items-center gap-2 text-gray-600 hover:text-green-500 transition-colors duration-200"
+              className="flex items-center gap-1 text-gray-600 hover:text-green-500 transition-colors duration-200"
             >
               <Image
                 src="/icons/comment_icon.svg"
                 alt="Comment"
-                width={24}
-                height={24}
+                width={20}
+                height={20}
               />
-              <span className="text-sm font-medium">{localLikes} Likes</span>
-              <span className="text-sm font-medium">
-                {post.metadata.total_comments} Comment
-                {post.metadata.total_comments !== 1 ? "s" : ""}
-              </span>
+            </button>
+            <button className="flex items-center gap-1 text-gray-600 hover:text-green-500 transition-colors duration-200">
+              <Image
+                src="/icons/share_icon.svg"
+                alt="Share"
+                width={20}
+                height={20}
+              />
             </button>
           </div>
-          <button className="flex items-center gap-2 text-gray-600 hover:text-green-500 transition-colors duration-200">
-            <Image
-              src="/icons/share_icon.svg"
-              alt="Share"
-              width={24}
-              height={24}
-            />
-            <span className="text-sm font-medium">Share</span>
-          </button>
+          <div className="flex items-center gap-2 text-xs text-gray-500">
+            <span>{localLikes} likes</span>
+            <span>•</span>
+            <span>
+              {post.metadata.total_comments} comment
+              {post.metadata.total_comments !== 1 ? "s" : ""}
+            </span>
+          </div>
         </div>
       </div>
     </div>
