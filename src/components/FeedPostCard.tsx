@@ -68,12 +68,14 @@ interface FeedPostCardProps {
   post: FeedPost;
   onPostUpdate?: () => void;
   onPostChange?: (updatedPost: FeedPost) => void;
+  enableMediaLightbox?: boolean; // New prop to control media lightbox
 }
 
 export default function FeedPostCard({
   post,
   onPostUpdate,
   onPostChange,
+  enableMediaLightbox = false, // Default to false for feeds
 }: FeedPostCardProps) {
   const [localLikes, setLocalLikes] = useState(post.metadata.total_likes);
   const [isLiking, setIsLiking] = useState(false);
@@ -230,8 +232,11 @@ export default function FeedPostCard({
 
         {/* Post Media Gallery - Clickable */}
         {post.media && post.media.length > 0 && (
-          <div onClick={handlePostClick} className="cursor-pointer">
-            <MediaGallery media={post.media} />
+          <div 
+            className={enableMediaLightbox ? "" : "cursor-pointer"} 
+            onClick={enableMediaLightbox ? undefined : handlePostClick}
+          >
+            <MediaGallery media={post.media} enableLightbox={enableMediaLightbox} />
           </div>
         )}
       </div>

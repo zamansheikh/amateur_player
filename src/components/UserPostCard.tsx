@@ -65,12 +65,14 @@ interface UserPostCardProps {
   post: UserPost;
   onPostUpdate?: () => void;
   onPostChange?: (updatedPost: UserPost) => void;
+  enableMediaLightbox?: boolean; // New prop to control media lightbox
 }
 
 export default function UserPostCard({
   post,
   onPostUpdate,
   onPostChange,
+  enableMediaLightbox = false,
 }: UserPostCardProps) {
   const [localLikes, setLocalLikes] = useState(post.metadata.total_likes);
   const [isLiking, setIsLiking] = useState(false);
@@ -195,8 +197,11 @@ export default function UserPostCard({
 
         {/* Post Media Gallery - Clickable */}
         {localPost.media && localPost.media.length > 0 && (
-          <div className="cursor-pointer" onClick={handlePostClick}>
-            <MediaGallery media={localPost.media} />
+          <div 
+            className={enableMediaLightbox ? "" : "cursor-pointer"} 
+            onClick={enableMediaLightbox ? undefined : handlePostClick}
+          >
+            <MediaGallery media={localPost.media} enableLightbox={enableMediaLightbox} />
           </div>
         )}
       </div>

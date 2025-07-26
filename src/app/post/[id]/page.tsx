@@ -258,7 +258,7 @@ export default function PostDetailPage() {
         </div>
 
         {/* Post Card */}
-        <FeedPostCard post={post} onPostUpdate={fetchPost} />
+        <FeedPostCard post={post} onPostUpdate={fetchPost} enableMediaLightbox={true} />
 
         {/* Comments Section */}
         <div className="mt-6 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">

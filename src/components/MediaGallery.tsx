@@ -6,9 +6,10 @@ import { Play, X, ChevronLeft, ChevronRight } from 'lucide-react';
 interface MediaGalleryProps {
     media: string[];
     className?: string;
+    enableLightbox?: boolean; // New prop to control lightbox functionality
 }
 
-export default function MediaGallery({ media, className = "" }: MediaGalleryProps) {
+export default function MediaGallery({ media, className = "", enableLightbox = true }: MediaGalleryProps) {
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
     const [touchStart, setTouchStart] = useState<number | null>(null);
@@ -26,6 +27,7 @@ export default function MediaGallery({ media, className = "" }: MediaGalleryProp
     };
 
     const openLightbox = (index: number) => {
+        if (!enableLightbox) return; // Don't open lightbox if disabled
         setCurrentMediaIndex(index);
         setLightboxOpen(true);
         document.body.style.overflow = 'hidden'; // Prevent background scroll
@@ -95,9 +97,17 @@ export default function MediaGallery({ media, className = "" }: MediaGalleryProp
 
     // Component to render a single media item
     const renderMediaItem = (mediaUrl: string, index: number, className: string) => {
+        const baseStyles = `relative ${className} transition-opacity`;
+        const clickableStyles = enableLightbox ? 'cursor-pointer hover:opacity-95' : '';
+        const combinedStyles = `${baseStyles} ${clickableStyles}`;
+
         if (isVideo(mediaUrl)) {
             return (
-                <div key={index} className={`relative ${className} cursor-pointer hover:opacity-95 transition-opacity`} onClick={() => openLightbox(index)}>
+                <div 
+                    key={index} 
+                    className={combinedStyles} 
+                    onClick={enableLightbox ? () => openLightbox(index) : undefined}
+                >
                     <video
                         src={mediaUrl}
                         className="w-full h-full object-cover rounded-lg border-2 border-green-200"
@@ -117,8 +127,8 @@ export default function MediaGallery({ media, className = "" }: MediaGalleryProp
                     key={index}
                     src={mediaUrl}
                     alt={`Post content ${index + 1}`}
-                    className={`${className} object-cover rounded-lg border-2 border-green-200 cursor-pointer hover:opacity-95 transition-opacity`}
-                    onClick={() => openLightbox(index)}
+                    className={`${className} object-cover rounded-lg border-2 border-green-200 transition-opacity ${clickableStyles}`}
+                    onClick={enableLightbox ? () => openLightbox(index) : undefined}
                 />
             );
         }
@@ -198,8 +208,8 @@ export default function MediaGallery({ media, className = "" }: MediaGalleryProp
                 {renderMediaGrid()}
             </div>
 
-            {/* Lightbox */}
-            {lightboxOpen && (
+            {/* Lightbox - Only render if enableLightbox is true */}
+            {enableLightbox && lightboxOpen && (
                 <div 
                     className="fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50"
                     onTouchStart={onTouchStart}
