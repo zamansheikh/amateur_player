@@ -15,7 +15,20 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
     const [touchStart, setTouchStart] = useState<number | null>(null);
     const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
-    if (!media || media.length === 0) return null;
+    if (!media || media.length === 0) {
+        return (
+            <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-md">
+                <div className="text-center text-gray-400">
+                    <div className="w-8 h-8 mx-auto mb-2 opacity-30">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                        </svg>
+                    </div>
+                    <p className="text-xs">No media</p>
+                </div>
+            </div>
+        );
+    }
 
     // Helper function to check if a media URL is a video
     const isVideo = (url: string): boolean => {
@@ -110,13 +123,13 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
                 >
                     <video
                         src={mediaUrl}
-                        className="w-full h-full object-cover rounded-lg border-2 border-green-200"
+                        className="w-full h-full object-cover rounded-md border border-green-200"
                         muted
                         preload="metadata"
                     />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-lg">
-                        <div className="w-12 h-12 bg-white bg-opacity-90 rounded-full flex items-center justify-center">
-                            <Play className="w-6 h-6 text-gray-800 ml-1" />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-md">
+                        <div className="w-10 h-10 bg-white bg-opacity-90 rounded-full flex items-center justify-center hover:bg-opacity-100 transition-opacity">
+                            <Play className="w-5 h-5 text-gray-800 ml-0.5" />
                         </div>
                     </div>
                 </div>
@@ -127,7 +140,7 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
                     key={index}
                     src={mediaUrl}
                     alt={`Post content ${index + 1}`}
-                    className={`${className} object-cover rounded-lg border-2 border-green-200 transition-opacity ${clickableStyles}`}
+                    className={`${className} object-cover rounded-md border border-green-200 transition-opacity ${clickableStyles}`}
                     onClick={enableLightbox ? () => openLightbox(index) : undefined}
                 />
             );
@@ -135,23 +148,23 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
     };
 
     const renderSingleMedia = () => (
-        <div className="relative w-full">
-            {renderMediaItem(media[0], 0, "w-full h-80")}
+        <div className="relative w-full h-full">
+            {renderMediaItem(media[0], 0, "w-full h-full")}
         </div>
     );
 
     const renderTwoMedia = () => (
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-1 h-full">
             {media.slice(0, 2).map((mediaUrl, index) => 
-                renderMediaItem(mediaUrl, index, "w-full h-64")
+                renderMediaItem(mediaUrl, index, "w-full h-full")
             )}
         </div>
     );
 
     const renderThreeMedia = () => (
-        <div className="grid grid-cols-2 gap-2 h-64">
+        <div className="grid grid-cols-2 gap-1 h-full">
             {renderMediaItem(media[0], 0, "w-full h-full")}
-            <div className="grid grid-rows-2 gap-2">
+            <div className="grid grid-rows-2 gap-1 h-full">
                 {media.slice(1, 3).map((mediaUrl, index) => 
                     renderMediaItem(mediaUrl, index + 1, "w-full h-full")
                 )}
@@ -160,9 +173,9 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
     );
 
     const renderFourMedia = () => (
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 grid-rows-2 gap-1 h-full">
             {media.slice(0, 4).map((mediaUrl, index) => 
-                renderMediaItem(mediaUrl, index, "w-full h-32")
+                renderMediaItem(mediaUrl, index, "w-full h-full")
             )}
         </div>
     );
@@ -171,18 +184,18 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
         const remainingCount = media.length - 4;
         
         return (
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 grid-rows-2 gap-1 h-full">
                 {media.slice(0, 3).map((mediaUrl, index) => 
-                    renderMediaItem(mediaUrl, index, "w-full h-32")
+                    renderMediaItem(mediaUrl, index, "w-full h-full")
                 )}
-                <div className="relative">
-                    {renderMediaItem(media[3], 3, "w-full h-32")}
+                <div className="relative w-full h-full">
+                    {renderMediaItem(media[3], 3, "w-full h-full")}
                     {remainingCount > 0 && (
                         <div 
-                            className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center rounded-lg cursor-pointer hover:bg-opacity-70 transition-opacity border-2 border-green-200"
+                            className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center rounded-md cursor-pointer hover:bg-opacity-70 transition-opacity border border-green-200"
                             onClick={() => openLightbox(3)}
                         >
-                            <span className="text-white text-xl font-semibold">
+                            <span className="text-white text-sm font-semibold">
                                 +{remainingCount}
                             </span>
                         </div>
@@ -204,7 +217,7 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
 
     return (
         <>
-            <div className={`mb-4 ${className}`}>
+            <div className={`w-full h-full ${className}`}>
                 {renderMediaGrid()}
             </div>
 
