@@ -7,15 +7,22 @@ interface MediaGalleryProps {
     media: string[];
     className?: string;
     enableLightbox?: boolean; // New prop to control lightbox functionality
+    maxHeight?: string; // New prop to control maximum height for feed posts
 }
 
-export default function MediaGallery({ media, className = "", enableLightbox = true }: MediaGalleryProps) {
+export default function MediaGallery({ media, className = "", enableLightbox = true, maxHeight }: MediaGalleryProps) {
     const [lightboxOpen, setLightboxOpen] = useState(false);
     const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
     const [touchStart, setTouchStart] = useState<number | null>(null);
     const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
+    // Determine if we're in a flexible height context (feed) or fixed height context (grid)
+    const isFlexibleHeight = !!maxHeight;
+
     if (!media || media.length === 0) {
+        if (isFlexibleHeight) {
+            return null; // Don't show placeholder in feed context
+        }
         return (
             <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-md">
                 <div className="text-center text-gray-400">
@@ -147,49 +154,68 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
         }
     };
 
-    const renderSingleMedia = () => (
-        <div className="relative w-full h-full">
-            {renderMediaItem(media[0], 0, "w-full h-full")}
-        </div>
-    );
+    const renderSingleMedia = () => {
+        if (isFlexibleHeight) {
+            return (
+                <div className="relative w-full max-h-[400px] overflow-hidden">
+                    {renderMediaItem(media[0], 0, "w-full h-auto max-h-[400px]")}
+                </div>
+            );
+        }
+        return (
+            <div className="relative w-full h-full">
+                {renderMediaItem(media[0], 0, "w-full h-full")}
+            </div>
+        );
+    };
 
-    const renderTwoMedia = () => (
-        <div className="grid grid-cols-2 gap-1 h-full">
-            {media.slice(0, 2).map((mediaUrl, index) => 
-                renderMediaItem(mediaUrl, index, "w-full h-full")
-            )}
-        </div>
-    );
-
-    const renderThreeMedia = () => (
-        <div className="grid grid-cols-2 gap-1 h-full">
-            {renderMediaItem(media[0], 0, "w-full h-full")}
-            <div className="grid grid-rows-2 gap-1 h-full">
-                {media.slice(1, 3).map((mediaUrl, index) => 
-                    renderMediaItem(mediaUrl, index + 1, "w-full h-full")
+    const renderTwoMedia = () => {
+        const heightClass = isFlexibleHeight ? "h-60" : "h-full";
+        return (
+            <div className={`grid grid-cols-2 gap-1 ${heightClass}`}>
+                {media.slice(0, 2).map((mediaUrl, index) => 
+                    renderMediaItem(mediaUrl, index, `w-full ${heightClass}`)
                 )}
             </div>
-        </div>
-    );
+        );
+    };
 
-    const renderFourMedia = () => (
-        <div className="grid grid-cols-2 grid-rows-2 gap-1 h-full">
-            {media.slice(0, 4).map((mediaUrl, index) => 
-                renderMediaItem(mediaUrl, index, "w-full h-full")
-            )}
-        </div>
-    );
+    const renderThreeMedia = () => {
+        const heightClass = isFlexibleHeight ? "h-60" : "h-full";
+        return (
+            <div className={`grid grid-cols-2 gap-1 ${heightClass}`}>
+                {renderMediaItem(media[0], 0, `w-full ${heightClass}`)}
+                <div className={`grid grid-rows-2 gap-1 ${heightClass}`}>
+                    {media.slice(1, 3).map((mediaUrl, index) => 
+                        renderMediaItem(mediaUrl, index + 1, `w-full ${heightClass}`)
+                    )}
+                </div>
+            </div>
+        );
+    };
+
+    const renderFourMedia = () => {
+        const heightClass = isFlexibleHeight ? "h-60" : "h-full";
+        return (
+            <div className={`grid grid-cols-2 grid-rows-2 gap-1 ${heightClass}`}>
+                {media.slice(0, 4).map((mediaUrl, index) => 
+                    renderMediaItem(mediaUrl, index, `w-full ${heightClass}`)
+                )}
+            </div>
+        );
+    };
 
     const renderFiveOrMoreMedia = () => {
         const remainingCount = media.length - 4;
+        const heightClass = isFlexibleHeight ? "h-60" : "h-full";
         
         return (
-            <div className="grid grid-cols-2 grid-rows-2 gap-1 h-full">
+            <div className={`grid grid-cols-2 grid-rows-2 gap-1 ${heightClass}`}>
                 {media.slice(0, 3).map((mediaUrl, index) => 
-                    renderMediaItem(mediaUrl, index, "w-full h-full")
+                    renderMediaItem(mediaUrl, index, `w-full ${heightClass}`)
                 )}
-                <div className="relative w-full h-full">
-                    {renderMediaItem(media[3], 3, "w-full h-full")}
+                <div className={`relative w-full ${heightClass}`}>
+                    {renderMediaItem(media[3], 3, `w-full ${heightClass}`)}
                     {remainingCount > 0 && (
                         <div 
                             className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center rounded-md cursor-pointer hover:bg-opacity-70 transition-opacity border border-green-200"
@@ -217,7 +243,7 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
 
     return (
         <>
-            <div className={`w-full h-full ${className}`}>
+            <div className={`w-full ${isFlexibleHeight ? '' : 'h-full'} ${className}`}>
                 {renderMediaGrid()}
             </div>
 

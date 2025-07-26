@@ -233,10 +233,14 @@ export default function FeedPostCard({
         {/* Post Media Gallery - Clickable */}
         {post.media && post.media.length > 0 && (
           <div 
-            className={enableMediaLightbox ? "" : "cursor-pointer"} 
+            className={`max-h-[400px] overflow-hidden ${enableMediaLightbox ? "" : "cursor-pointer"}`} 
             onClick={enableMediaLightbox ? undefined : handlePostClick}
           >
-            <MediaGallery media={post.media} enableLightbox={enableMediaLightbox} />
+            <MediaGallery 
+              media={post.media} 
+              enableLightbox={enableMediaLightbox} 
+              maxHeight="400px"
+            />
           </div>
         )}
       </div>
