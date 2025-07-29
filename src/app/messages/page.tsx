@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { MessageCircle, Send, Search, MoreHorizontal, CheckCircle, Clock } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { MessageCircle, Send, Search, MoreHorizontal, CheckCircle, Clock, Paperclip, X, Image, Video } from 'lucide-react';
 import { api } from '@/lib/api';
 
 interface Conversation {
@@ -67,6 +67,10 @@ export default function MessagesPage() {
   const [filterType, setFilterType] = useState<'all' | 'private' | 'group'>('all');
   const [loading, setLoading] = useState(true);
   const [messagesLoading, setMessagesLoading] = useState(false);
+  const [sendingMessage, setSendingMessage] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploadProgress, setUploadProgress] = useState<{[key: string]: number}>({});
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch chat rooms from API
   const fetchChatRooms = async () => {
@@ -151,11 +155,102 @@ export default function MessagesPage() {
     );
   };
 
-  const handleSendReply = () => {
-    if (!replyText.trim() || !selectedConversation) return;
-    // TODO: Implement send message API
-    alert('Sending message: ' + replyText);
-    setReplyText('');
+  // Handle file selection
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setSelectedFiles(prev => [...prev, ...files]);
+  };
+
+  // Remove selected file
+  const removeSelectedFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // Send message with media
+  const handleSendReply = async () => {
+    if ((!replyText.trim() && selectedFiles.length === 0) || !selectedConversation) return;
+    
+    try {
+      setSendingMessage(true);
+      
+      // Create FormData for the API call
+      const formData = new FormData();
+      formData.append('text', replyText);
+      
+      // Add files to FormData
+      selectedFiles.forEach((file, index) => {
+        formData.append('media', file);
+      });
+
+      // Track upload progress for each file
+      const progressTrackers: {[key: string]: number} = {};
+      selectedFiles.forEach((file, index) => {
+        progressTrackers[file.name] = 0;
+      });
+      setUploadProgress(progressTrackers);
+
+      // Send message to API
+      const response = await api.post(
+        `/api/chat/room/${selectedConversation.room_id}/messages`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          onUploadProgress: (progressEvent) => {
+            if (progressEvent.total) {
+              const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+              // Update progress for all files (simplified)
+              const updatedProgress: {[key: string]: number} = {};
+              selectedFiles.forEach(file => {
+                updatedProgress[file.name] = percentCompleted;
+              });
+              setUploadProgress(updatedProgress);
+            }
+          },
+        }
+      );
+
+      // Add the new message to the messages list
+      const newMessage: Message = response.data;
+      setMessages(prev => [...prev, newMessage]);
+
+      // Update the conversation's last message
+      setConversations(prev => 
+        prev.map(conv => 
+          conv.room_id === selectedConversation.room_id 
+            ? { 
+                ...conv, 
+                last_message: {
+                  sentByMe: newMessage.sentByMe,
+                  roomID: newMessage.roomID,
+                  sender: newMessage.sender,
+                  timeDetails: newMessage.timeDetails,
+                  message: {
+                    textContent: newMessage.message.text,
+                    text: newMessage.message.text
+                  },
+                  mediaContent: newMessage.message.media || []
+                }
+              }
+            : conv
+        )
+      );
+
+      // Clear form
+      setReplyText('');
+      setSelectedFiles([]);
+      setUploadProgress({});
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert('Failed to send message. Please try again.');
+    } finally {
+      setSendingMessage(false);
+    }
   };
 
   // Helper function to format time
@@ -365,23 +460,139 @@ export default function MessagesPage() {
                   </div>
 
                   <div className="p-4 border-t border-gray-200">
+                    {/* File Preview Section */}
+                    {selectedFiles.length > 0 && (
+                      <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-gray-700">
+                            {selectedFiles.length} file{selectedFiles.length > 1 ? 's' : ''} selected
+                          </span>
+                          <button
+                            onClick={() => {
+                              setSelectedFiles([]);
+                              setUploadProgress({});
+                              if (fileInputRef.current) fileInputRef.current.value = '';
+                            }}
+                            className="text-gray-500 hover:text-red-500"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto">
+                          {selectedFiles.map((file, index) => (
+                            <div key={index} className="relative bg-white p-2 rounded border">
+                              <div className="flex items-center gap-2">
+                                {file.type.startsWith('image/') ? (
+                                  <Image className="w-4 h-4 text-blue-500" />
+                                ) : file.type.startsWith('video/') ? (
+                                  <Video className="w-4 h-4 text-purple-500" />
+                                ) : (
+                                  <Paperclip className="w-4 h-4 text-gray-500" />
+                                )}
+                                <span className="text-xs text-gray-600 truncate flex-1">
+                                  {file.name}
+                                </span>
+                                <button
+                                  onClick={() => removeSelectedFile(index)}
+                                  className="text-red-400 hover:text-red-600"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </div>
+                              {/* Upload Progress */}
+                              {uploadProgress[file.name] > 0 && uploadProgress[file.name] < 100 && (
+                                <div className="mt-1">
+                                  <div className="w-full bg-gray-200 rounded-full h-1">
+                                    <div
+                                      className="h-1 rounded-full transition-all duration-300"
+                                      style={{
+                                        width: `${uploadProgress[file.name]}%`,
+                                        backgroundColor: '#8BC342'
+                                      }}
+                                    />
+                                  </div>
+                                  <span className="text-xs text-gray-500">{uploadProgress[file.name]}%</span>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Message Input */}
                     <div className="flex gap-3 items-end">
-                      <textarea
-                        value={replyText}
-                        onChange={(e) => setReplyText(e.target.value)}
-                        placeholder={`Type a message to ${selectedConversation.display_name}...`}
-                        className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-green-500"
-                        rows={1}
-                      />
+                      <div className="flex-1">
+                        <div className="flex items-end gap-2">
+                          {/* File Upload Button */}
+                          <div className="relative">
+                            <input
+                              ref={fileInputRef}
+                              type="file"
+                              multiple
+                              accept="image/*,video/*"
+                              onChange={handleFileSelect}
+                              className="hidden"
+                            />
+                            <button
+                              onClick={() => fileInputRef.current?.click()}
+                              disabled={sendingMessage}
+                              className="p-2 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50"
+                            >
+                              <Paperclip className="w-5 h-5" />
+                            </button>
+                          </div>
+
+                          {/* Text Input */}
+                          <textarea
+                            value={replyText}
+                            onChange={(e) => setReplyText(e.target.value)}
+                            placeholder={`Type a message to ${selectedConversation.display_name}...`}
+                            className="flex-1 p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
+                            rows={1}
+                            disabled={sendingMessage}
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSendReply();
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Send Button */}
                       <button
                         onClick={handleSendReply}
-                        disabled={!replyText.trim()}
-                        className="px-3 py-3 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors text-sm flex-shrink-0"
-                        style={{ backgroundColor: !replyText.trim() ? '' : '#8BC342' }}
+                        disabled={(!replyText.trim() && selectedFiles.length === 0) || sendingMessage}
+                        className="px-3 py-3 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors text-sm flex-shrink-0 flex items-center gap-2"
+                        style={{ 
+                          backgroundColor: ((!replyText.trim() && selectedFiles.length === 0) || sendingMessage) ? '' : '#8BC342' 
+                        }}
                       >
-                        <Send className="w-6 h-6" />
+                        {sendingMessage ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            <span className="text-xs">Sending...</span>
+                          </>
+                        ) : (
+                          <Send className="w-6 h-6" />
+                        )}
                       </button>
                     </div>
+
+                    {/* Sending Progress Indicator */}
+                    {sendingMessage && (
+                      <div className="mt-2 text-center">
+                        <div className="text-xs text-gray-500 flex items-center justify-center gap-2">
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-green-600"></div>
+                          {selectedFiles.length > 0 ? 
+                            `Uploading ${selectedFiles.length} file${selectedFiles.length > 1 ? 's' : ''}...` : 
+                            'Sending message...'
+                          }
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </>
               ) : (
