@@ -27,10 +27,9 @@ interface Conversation {
       timesince: string;
     };
     message: {
-      textContent?: string;
-      text?: string;
+      text: string;
+      media: string[];
     };
-    mediaContent: any[];
   } | null;
   unreadCount: number; // We'll calculate this locally for now
 }
@@ -126,8 +125,7 @@ export default function MessagesPage() {
 
   // Filter conversations
   const filteredConversations = conversations.filter((conversation) => {
-    const lastMessageText = conversation.last_message?.message?.textContent || 
-                           conversation.last_message?.message?.text || '';
+    const lastMessageText = conversation.last_message?.message?.text || '';
     
     const matchesSearch =
       conversation.display_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -227,10 +225,9 @@ export default function MessagesPage() {
                   sender: newMessage.sender,
                   timeDetails: newMessage.timeDetails,
                   message: {
-                    textContent: newMessage.message.text,
-                    text: newMessage.message.text
-                  },
-                  mediaContent: newMessage.message.media || []
+                    text: newMessage.message.text,
+                    media: newMessage.message.media || []
+                  }
                 }
               }
             : conv
@@ -354,8 +351,7 @@ export default function MessagesPage() {
                             </div>
                           </div>
                           <p className="text-sm text-gray-600 truncate">
-                            {conversation.last_message?.message?.textContent || 
-                             conversation.last_message?.message?.text || 
+                            {conversation.last_message?.message?.text || 
                              'No messages yet'}
                           </p>
                         </div>
