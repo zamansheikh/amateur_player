@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { MessageCircle, Send, Search, MoreHorizontal, CheckCircle, Clock, Paperclip, X, Image, Video } from 'lucide-react';
 import { api } from '@/lib/api';
 
@@ -58,6 +59,9 @@ interface Message {
 
 
 export default function MessagesPage() {
+  const searchParams = useSearchParams();
+  const targetRoomId = searchParams.get('room_id');
+  
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
@@ -93,7 +97,17 @@ export default function MessagesPage() {
       const allConversations = [...privateRooms, ...groupRooms];
       setConversations(allConversations);
       
-      // Auto-select first conversation if available
+      // Check if we need to select a specific conversation based on room_id query parameter
+      if (targetRoomId) {
+        const targetConversation = allConversations.find(conv => conv.room_id.toString() === targetRoomId);
+        if (targetConversation) {
+          setSelectedConversation(targetConversation);
+          await fetchMessages(targetConversation.room_id);
+          return; // Exit early, don't auto-select first conversation
+        }
+      }
+      
+      // Auto-select first conversation if available and no specific target
       if (allConversations.length > 0) {
         setSelectedConversation(allConversations[0]);
         await fetchMessages(allConversations[0].room_id);
@@ -121,7 +135,7 @@ export default function MessagesPage() {
 
   useEffect(() => {
     fetchChatRooms();
-  }, []);
+  }, [targetRoomId]); // Re-fetch when targetRoomId changes
 
   // Filter conversations
   const filteredConversations = conversations.filter((conversation) => {

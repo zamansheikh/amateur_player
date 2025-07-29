@@ -134,6 +134,7 @@ export default function ProPlayerProfilePage() {
   const [postsLoading, setPostsLoading] = useState(false);
   const [followerCount, setFollowerCount] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [isCreatingConversation, setIsCreatingConversation] = useState(false);
 
   // Fetch user profile
   const fetchProfile = async () => {
@@ -218,14 +219,40 @@ export default function ProPlayerProfilePage() {
   };
 
   // Get in touch (message user)
-  const handleGetInTouch = () => {
+  const handleGetInTouch = async () => {
     if (!user) {
       // Redirect to login if not authenticated
       router.push("/signin");
       return;
     }
-    // Navigate to messages or open chat
-    console.log("Get in touch with user:", playerId);
+    
+    if (!player?.username) {
+      console.error("Player username not available");
+      return;
+    }
+
+    try {
+      setIsCreatingConversation(true);
+      
+      // Call API to create or get existing conversation
+      const response = await api.post("/api/chat/rooms", {
+        other_username: player.username
+      });
+
+      const conversationData = response.data;
+      console.log("Conversation response:", conversationData);
+
+      // Navigate to messages page with the room_id as a query parameter
+      // This will help the messages page auto-select this conversation
+      router.push(`/messages?room_id=${conversationData.room_id}`);
+      
+    } catch (error) {
+      console.error("Error creating/getting conversation:", error);
+      // Still navigate to messages page as fallback
+      router.push("/messages");
+    } finally {
+      setIsCreatingConversation(false);
+    }
   };
 
   const getCardStyle = () => {
@@ -429,9 +456,19 @@ export default function ProPlayerProfilePage() {
                     )}
                     <button
                       onClick={handleGetInTouch}
-                      className="px-6 py-2 border border-gray-300 rounded-full text-gray-700 hover:bg-gray-50 transition-colors"
+                      disabled={isCreatingConversation}
+                      className={`px-6 py-2 border border-gray-300 rounded-full text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2 ${
+                        isCreatingConversation ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
                     >
-                      Get in Touch
+                      {isCreatingConversation ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-700"></div>
+                          <span>Opening...</span>
+                        </>
+                      ) : (
+                        'Get in Touch'
+                      )}
                     </button>
                     </div>
 
