@@ -2,198 +2,149 @@
 
 import { useState, useEffect } from 'react';
 import { MessageCircle, Send, Search, MoreHorizontal, CheckCircle, Clock } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { api } from '@/lib/api';
 
 interface Conversation {
-  id: string;
-  name: string;
-  type: 'individual' | 'group';
-  avatar: string;
-  lastMessage: string;
-  lastMessageTime: string;
-  unreadCount: number;
-  participants?: string[];
+  room_id: number;
+  name: string; // This is the room name/ID
+  display_name: string; // This is what we'll show to user
+  display_image_url: string;
+  type: 'private' | 'group';
+  last_message: {
+    sentByMe: boolean;
+    roomID: number;
+    sender: {
+      user_id: number;
+      username: string;
+      name: string;
+      first_name: string;
+      last_name: string;
+      email: string;
+      profile_picture_url: string;
+    };
+    timeDetails: {
+      sent_at: string;
+      timesince: string;
+    };
+    message: {
+      textContent?: string;
+      text?: string;
+    };
+    mediaContent: any[];
+  } | null;
+  unreadCount: number; // We'll calculate this locally for now
 }
 
 interface Message {
-  id: string;
-  conversationId: string;
-  from: string;
-  userAvatar?: string;
-  itsMe: boolean;
-  content: string;
-  timestamp: string;
-  read: boolean;
-  mediaType?: 'video' | 'image';
-  mediaUrls?: string[];
+  sentByMe: boolean;
+  roomID: number;
+  sender: {
+    user_id: number;
+    username: string;
+    name: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    profile_picture_url: string;
+  };
+  timeDetails: {
+    sent_at: string;
+    timesince: string;
+  };
+  message: {
+    text: string;
+    media: any[];
+  };
 }
 
-const mockMessages: Message[] = [
-  {
-    id: '1',
-    conversationId: 'conv1',
-    from: 'fan123',
-    content: 'Your technique is incredible! Any tips for a beginner?',
-    timestamp: '2024-01-17T16:30:00Z',
-    userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=fan123',
-    itsMe: false,
-    read: false
-  },
-  {
-    id: '2',
-    conversationId: 'conv1',
-    from: 'me',
-    content: 'Thanks! Try focusing on your release timing and follow-through.',
-    timestamp: '2024-01-17T17:00:00Z',
-    itsMe: true,
-    read: true,
-    userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=me',
-    mediaType: 'image',
-    mediaUrls: [
-      'https://via.placeholder.com/150',
-      'https://via.placeholder.com/150',
-      'https://via.placeholder.com/150',
-      'https://via.placeholder.com/150',
-      'https://via.placeholder.com/150',
-    ]
-  },
-  {
-    id: '3',
-    conversationId: 'conv2',
-    from: 'coachsmith',
-    content: 'Would love to collaborate on a youth program!',
-    timestamp: '2024-01-15T14:20:00Z',
-    userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=coachsmith',
-    itsMe: false,
-    read: true
-  },
-  {
-    id: '4',
-    conversationId: 'conv2',
-    from: 'me',
-    content: 'Sure, I’ll send you a clip.',
-    timestamp: '2024-01-15T14:45:00Z',
-    itsMe: true,
-    read: true,
-    userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=me',
-    mediaType: 'video',
-    mediaUrls: ['https://www.w3schools.com/html/mov_bbb.mp4']
-  },
-   {
-    id: '5',
-    conversationId: 'group1',
-    from: 'me',
-    content: 'Thanks! Try focusing on your release timing and follow-through.',
-    timestamp: '2024-01-17T17:00:00Z',
-    itsMe: true,
-    read: true,
-    userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=me',
-    mediaType: 'image',
-    mediaUrls: [
-      'https://via.placeholder.com/150',
-      'https://via.placeholder.com/150',
-      'https://via.placeholder.com/150',
-      'https://via.placeholder.com/150',
-      'https://via.placeholder.com/150',
-    ]
-  },
-   {
-    id: '6',
-    conversationId: 'group1',
-    from: 'coachsmith',
-    content: 'Would love to collaborate on a youth program!',
-    timestamp: '2024-01-15T14:20:00Z',
-    userAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=coachsmith',
-    itsMe: false,
-    read: true
-  }
-];
-
-const mockConversations: Conversation[] = [
-  {
-    id: 'conv1',
-    name: 'Fan 123',
-    type: 'individual',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=fan123',
-    lastMessage: 'Thanks! Try focusing on your release timing and follow-through.',
-    lastMessageTime: '2024-01-17T17:00:00Z',
-    unreadCount: 0
-  },
-  {
-    id: 'conv2',
-    name: 'Coach Smith',
-    type: 'individual',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=coachsmith',
-    lastMessage: 'Sure, I’ll send you a clip.',
-    lastMessageTime: '2024-01-15T14:45:00Z',
-    unreadCount: 0
-  },
-  {
-    id: 'group1',
-    name: 'Training Group',
-    type: 'group',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=group1',
-    lastMessage: 'Don’t forget about the training tomorrow at 10 AM!',
-    lastMessageTime: '2024-01-14T09:00:00Z',
-    unreadCount: 3,
-    participants: ['me', 'fan123', 'coachsmith']
-  }
-];
 
 export default function MessagesPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [replyText, setReplyText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'individual' | 'group'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'private' | 'group'>('all');
   const [loading, setLoading] = useState(true);
+  const [messagesLoading, setMessagesLoading] = useState(false);
+
+  // Fetch chat rooms from API
+  const fetchChatRooms = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/api/chat/rooms');
+      
+      // Combine private and group conversations
+      const privateRooms: Conversation[] = response.data.private.map((room: any) => ({
+        ...room,
+        type: 'private' as const,
+        unreadCount: 0 // We'll implement this later
+      }));
+      
+      const groupRooms: Conversation[] = response.data.group.map((room: any) => ({
+        ...room,
+        type: 'group' as const,
+        unreadCount: 0 // We'll implement this later
+      }));
+      
+      const allConversations = [...privateRooms, ...groupRooms];
+      setConversations(allConversations);
+      
+      // Auto-select first conversation if available
+      if (allConversations.length > 0) {
+        setSelectedConversation(allConversations[0]);
+        await fetchMessages(allConversations[0].room_id);
+      }
+    } catch (error) {
+      console.error('Error fetching chat rooms:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch messages for a specific room
+  const fetchMessages = async (roomId: number) => {
+    try {
+      setMessagesLoading(true);
+      const response = await api.get(`/api/chat/room/${roomId}/messages`);
+      setMessages(response.data);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      setMessages([]);
+    } finally {
+      setMessagesLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setMessages(mockMessages);
-    setConversations(mockConversations);
-    if (mockConversations.length > 0) {
-      setSelectedConversation(mockConversations[0]);
-      // Load messages for the first conversation
-      const conversationMessages = mockMessages.filter(
-        msg => msg.conversationId === mockConversations[0].id
-      );
-      setMessages(conversationMessages);
-      if (conversationMessages.length > 0) {
-        setSelectedMessage(conversationMessages[0]);
-      }
-    }
-    setLoading(false);
+    fetchChatRooms();
   }, []);
 
-  // Filter conversations instead of messages
+  // Filter conversations
   const filteredConversations = conversations.filter((conversation) => {
+    const lastMessageText = conversation.last_message?.message?.textContent || 
+                           conversation.last_message?.message?.text || '';
+    
     const matchesSearch =
-      conversation.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      conversation.lastMessage.toLowerCase().includes(searchQuery.toLowerCase());
+      conversation.display_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      lastMessageText.toLowerCase().includes(searchQuery.toLowerCase());
+    
     const matchesFilter =
       filterType === 'all' ||
-      (filterType === 'individual' && conversation.type === 'individual') ||
+      (filterType === 'private' && conversation.type === 'private') ||
       (filterType === 'group' && conversation.type === 'group');
+    
     return matchesSearch && matchesFilter;
   });
 
-  const handleSelectConversation = (conversation: Conversation) => {
+  const handleSelectConversation = async (conversation: Conversation) => {
     setSelectedConversation(conversation);
-    // Load messages for selected conversation
-    const conversationMessages = mockMessages.filter(
-      msg => msg.conversationId === conversation.id
-    );
-    setMessages(conversationMessages);
-    
-    // Clear selected message since we're viewing the conversation as a whole
-    setSelectedMessage(null);
+    await fetchMessages(conversation.room_id);
     
     // Mark conversation as read
     setConversations(prev => 
       prev.map(conv => 
-        conv.id === conversation.id 
+        conv.room_id === conversation.room_id 
           ? { ...conv, unreadCount: 0 }
           : conv
       )
@@ -201,20 +152,20 @@ export default function MessagesPage() {
   };
 
   const handleSendReply = () => {
-    if (!replyText.trim() || !selectedMessage) return;
+    if (!replyText.trim() || !selectedConversation) return;
+    // TODO: Implement send message API
     alert('Sending message: ' + replyText);
     setReplyText('');
   };
 
-  const markAsRead = (id: string) => {
-    setMessages((prev) =>
-      prev.map((msg) => (msg.id === id ? { ...msg, read: true } : msg))
-    );
-  };
-
-  const handleSelectMessage = (msg: Message) => {
-    setSelectedMessage(msg);
-    if (!msg.read) markAsRead(msg.id);
+  // Helper function to format time
+  const formatMessageTime = (timeString: string) => {
+    try {
+      // For now, we'll use the timesince field for display
+      return timeString;
+    } catch {
+      return 'Now';
+    }
   };
 
   if (loading) return <div className="p-10">Loading...</div>;
@@ -249,7 +200,7 @@ export default function MessagesPage() {
                 </div>
 
                 <div className="flex gap-2">
-                  {(['all', 'individual', 'group'] as const).map((filter) => (
+                  {(['all', 'private', 'group'] as const).map((filter) => (
                     <button
                       key={filter}
                       onClick={() => setFilterType(filter)}
@@ -273,23 +224,23 @@ export default function MessagesPage() {
                 ) : (
                   filteredConversations.map((conversation) => (
                     <div
-                      key={conversation.id}
+                      key={conversation.room_id}
                       onClick={() => handleSelectConversation(conversation)}
                       className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                        selectedConversation?.id === conversation.id ? 'bg-green-50 border-r-2' : ''
+                        selectedConversation?.room_id === conversation.room_id ? 'bg-green-50 border-r-2' : ''
                       }`}
-                      style={selectedConversation?.id === conversation.id ? { borderRightColor: '#8BC342' } : {}}
+                      style={selectedConversation?.room_id === conversation.room_id ? { borderRightColor: '#8BC342' } : {}}
                     >
                       <div className="flex items-start gap-3">
                         <img
-                          src={conversation.avatar}
+                          src={conversation.display_image_url}
                           className="w-10 h-10 rounded-full object-cover"
                           alt="avatar"
                         />
                         <div className="flex-1">
                           <div className="flex justify-between items-center mb-1">
                             <div className="flex items-center gap-2">
-                              <h3 className="font-medium text-gray-800">{conversation.name}</h3>
+                              <h3 className="font-medium text-gray-800">{conversation.display_name}</h3>
                               {conversation.type === 'group' && (
                                 <span className="text-xs px-1.5 py-0.5 bg-blue-100 text-blue-600 rounded">
                                   Group
@@ -303,11 +254,15 @@ export default function MessagesPage() {
                                 </span>
                               )}
                               <span className="text-xs text-gray-500">
-                                {format(parseISO(conversation.lastMessageTime), 'MMM dd')}
+                                {conversation.last_message?.timeDetails?.timesince || 'Now'}
                               </span>
                             </div>
                           </div>
-                          <p className="text-sm text-gray-600 truncate">{conversation.lastMessage}</p>
+                          <p className="text-sm text-gray-600 truncate">
+                            {conversation.last_message?.message?.textContent || 
+                             conversation.last_message?.message?.text || 
+                             'No messages yet'}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -323,14 +278,14 @@ export default function MessagesPage() {
                   <div className="p-4 border-b border-gray-200 bg-gray-50">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <img src={selectedConversation.avatar} className="w-10 h-10 rounded-full" alt="avatar" />
+                        <img src={selectedConversation.display_image_url} className="w-10 h-10 rounded-full" alt="avatar" />
                         <div>
-                          <h2 className="font-semibold text-gray-800">{selectedConversation.name}</h2>
+                          <h2 className="font-semibold text-gray-800">{selectedConversation.display_name}</h2>
                           <p className="text-sm text-gray-500 flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             {selectedConversation.type === 'group' ? 
-                              `${selectedConversation.participants?.length || 0} members` :
-                              'Active now'
+                              'Group conversation' :
+                              'Private conversation'
                             }
                           </p>
                         </div>
@@ -342,7 +297,14 @@ export default function MessagesPage() {
                   </div>
 
                   <div className="flex-1 p-4 overflow-y-auto">
-                    {messages.length === 0 ? (
+                    {messagesLoading ? (
+                      <div className="flex-1 flex items-center justify-center">
+                        <div className="text-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
+                          <p className="text-gray-600">Loading messages...</p>
+                        </div>
+                      </div>
+                    ) : messages.length === 0 ? (
                       <div className="flex-1 flex items-center justify-center">
                         <div className="text-center">
                           <MessageCircle className="w-16 h-16 mx-auto text-gray-300 mb-4" />
@@ -352,43 +314,48 @@ export default function MessagesPage() {
                       </div>
                     ) : (
                       <div className="space-y-6">
-                        {messages.map((message) => (
-                          <div key={message.id} className={`flex ${message.itsMe ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`flex items-end gap-3 ${message.itsMe ? 'flex-row-reverse' : ''}`}>
-                              <img src={message.userAvatar} className="w-8 h-8 rounded-full" alt="avatar" />
+                        {messages.map((message, index) => (
+                          <div key={index} className={`flex ${message.sentByMe ? 'justify-end' : 'justify-start'}`}>
+                            <div className={`flex items-end gap-3 ${message.sentByMe ? 'flex-row-reverse' : ''}`}>
+                              <img src={message.sender.profile_picture_url} className="w-8 h-8 rounded-full" alt="avatar" />
                               <div className="max-w-xs">
                                 {/* Show username for group messages */}
                                 {selectedConversation?.type === 'group' && (
                                   <p className="text-xs text-gray-500 mb-1">
-                                    {message.itsMe ? 'You' : message.from}
+                                    {message.sentByMe ? 'You' : message.sender.name}
                                   </p>
                                 )}
-                                <div className="bg-gray-100 p-3 rounded-lg">
-                                  <p className="text-sm text-gray-800">{message.content}</p>
+                                <div className={`p-3 rounded-lg ${
+                                  message.sentByMe ? 'bg-green-500 text-white' : 'bg-gray-100'
+                                }`}>
+                                  <p className="text-sm">{message.message.text}</p>
                                   {/* MEDIA PREVIEW */}
-                                  {message.mediaType && message.mediaUrls && (
+                                  {message.message.media && message.message.media.length > 0 && (
                                     <div className="mt-2">
-                                      {message.mediaType === 'video' ? (
-                                        <video controls className="rounded-lg max-w-full">
-                                          <source src={message.mediaUrls[0]} type="video/mp4" />
-                                        </video>
-                                      ) : (
-                                        <div className="grid grid-cols-2 gap-2">
-                                          {message.mediaUrls?.slice(0, 4).map((url, idx) => (
-                                            <div key={idx} className="relative">
-                                              <img src={url} className="w-full h-24 object-cover rounded-md" />
-                                              {idx === 3 && message.mediaUrls && message.mediaUrls.length > 4 && (
-                                                <div className="absolute inset-0 bg-black bg-opacity-60 text-white flex items-center justify-center text-lg font-bold rounded-md">
-                                                  +{message.mediaUrls.length - 3}
-                                                </div>
-                                              )}
-                                            </div>
-                                          ))}
-                                        </div>
-                                      )}
+                                      <div className="grid grid-cols-2 gap-2">
+                                        {message.message.media.slice(0, 4).map((media: any, idx: number) => (
+                                          <div key={idx} className="relative">
+                                            {media.type === 'video' ? (
+                                              <video controls className="w-full h-24 object-cover rounded-md">
+                                                <source src={media.url} type="video/mp4" />
+                                              </video>
+                                            ) : (
+                                              <img src={media.url} className="w-full h-24 object-cover rounded-md" alt="media" />
+                                            )}
+                                            {idx === 3 && message.message.media.length > 4 && (
+                                              <div className="absolute inset-0 bg-black bg-opacity-60 text-white flex items-center justify-center text-lg font-bold rounded-md">
+                                                +{message.message.media.length - 3}
+                                              </div>
+                                            )}
+                                          </div>
+                                        ))}
+                                      </div>
                                     </div>
                                   )}
                                 </div>
+                                <p className="text-xs text-gray-400 mt-1">
+                                  {message.timeDetails.timesince}
+                                </p>
                               </div>
                             </div>
                           </div>
@@ -402,7 +369,7 @@ export default function MessagesPage() {
                       <textarea
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
-                        placeholder={`Type a message to ${selectedConversation.name}...`}
+                        placeholder={`Type a message to ${selectedConversation.display_name}...`}
                         className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-green-500"
                         rows={1}
                       />
