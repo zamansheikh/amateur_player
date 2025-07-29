@@ -53,7 +53,7 @@ interface Message {
   };
   message: {
     text: string;
-    media: any[];
+    media: string[]; // Array of media URLs
   };
 }
 
@@ -428,22 +428,32 @@ export default function MessagesPage() {
                                   {message.message.media && message.message.media.length > 0 && (
                                     <div className="mt-2">
                                       <div className="grid grid-cols-2 gap-2">
-                                        {message.message.media.slice(0, 4).map((media: any, idx: number) => (
-                                          <div key={idx} className="relative">
-                                            {media.type === 'video' ? (
-                                              <video controls className="w-full h-24 object-cover rounded-md">
-                                                <source src={media.url} type="video/mp4" />
-                                              </video>
-                                            ) : (
-                                              <img src={media.url} className="w-full h-24 object-cover rounded-md" alt="media" />
-                                            )}
-                                            {idx === 3 && message.message.media.length > 4 && (
-                                              <div className="absolute inset-0 bg-black bg-opacity-60 text-white flex items-center justify-center text-lg font-bold rounded-md">
-                                                +{message.message.media.length - 3}
-                                              </div>
-                                            )}
-                                          </div>
-                                        ))}
+                                        {message.message.media.slice(0, 4).map((mediaUrl: string, idx: number) => {
+                                          // Determine if it's a video based on URL extension
+                                          const isVideo = /\.(mp4|webm|ogg|mov|avi)$/i.test(mediaUrl);
+                                          
+                                          return (
+                                            <div key={idx} className="relative">
+                                              {isVideo ? (
+                                                <video controls className="w-full h-24 object-cover rounded-md">
+                                                  <source src={mediaUrl} type="video/mp4" />
+                                                </video>
+                                              ) : (
+                                                <img 
+                                                  src={mediaUrl} 
+                                                  className="w-full h-24 object-cover rounded-md cursor-pointer hover:opacity-80 transition-opacity" 
+                                                  alt="media"
+                                                  onClick={() => window.open(mediaUrl, '_blank')}
+                                                />
+                                              )}
+                                              {idx === 3 && message.message.media.length > 4 && (
+                                                <div className="absolute inset-0 bg-black bg-opacity-60 text-white flex items-center justify-center text-lg font-bold rounded-md">
+                                                  +{message.message.media.length - 3}
+                                                </div>
+                                              )}
+                                            </div>
+                                          );
+                                        })}
                                       </div>
                                     </div>
                                   )}
