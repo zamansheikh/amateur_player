@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Plus, X, Search, MessageCircle, Upload } from 'lucide-react';
 import { api } from '@/lib/api';
 
@@ -14,14 +15,16 @@ interface Team {
         name: string;
         first_name: string;
         last_name: string;
+        email: string;
         profile_picture_url: string;
         intro_video_url: string;
+        cover_photo_url: string;
         xp: number;
-        email: string;
         level: number;
         card_theme: string;
     };
     created_at: string;
+    team_chat_room_id: number;
     member_count?: number;
 }
 
@@ -53,6 +56,7 @@ interface InvitationsResponse {
 }
 
 export default function TeamsPage() {
+    const router = useRouter();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isTeamManageModalOpen, setIsTeamManageModalOpen] = useState(false);
     const [isTeamDetailsModalOpen, setIsTeamDetailsModalOpen] = useState(false);
@@ -69,6 +73,13 @@ export default function TeamsPage() {
     const [availableMembers, setAvailableMembers] = useState<Member[]>([]);
     const [invitations, setInvitations] = useState<InvitationsResponse>({ received: [], sent: [] });
     const [teamMembers, setTeamMembers] = useState<{ [key: number]: TeamMember[] }>({});
+
+    // Handle team chat navigation
+    const handleTeamChat = (team: Team) => {
+        if (team.team_chat_room_id) {
+            router.push(`/messages?room=${team.team_chat_room_id}`);
+        }
+    };
 
     // Fetch teams data
     const fetchTeams = async () => {
@@ -397,6 +408,16 @@ export default function TeamsPage() {
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-2">
+                                                        <button 
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleTeamChat(team);
+                                                            }}
+                                                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+                                                        >
+                                                            <MessageCircle className="w-4 h-4" />
+                                                            Chat
+                                                        </button>
                                                         <button 
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
@@ -955,6 +976,19 @@ export default function TeamsPage() {
 
                         {/* Action Buttons */}
                         <div className="flex gap-3">
+                            <button
+                                onClick={() => {
+                                    setIsTeamDetailsModalOpen(false);
+                                    setSelectedTeamForDetails(null);
+                                    if (selectedTeamForDetails) {
+                                        handleTeamChat(selectedTeamForDetails);
+                                    }
+                                }}
+                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                            >
+                                <MessageCircle className="w-4 h-4" />
+                                Open Chat
+                            </button>
                             <button
                                 onClick={() => {
                                     setIsTeamDetailsModalOpen(false);
