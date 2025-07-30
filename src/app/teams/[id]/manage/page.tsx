@@ -137,7 +137,22 @@ export default function TeamManagePage() {
 
     const handleTeamChat = () => {
         if (team?.team_chat_room_id) {
-            router.push(`/messages?room=${team.team_chat_room_id}`);
+            router.push(`/messages?room_id=${team.team_chat_room_id}`);
+        }
+    };
+
+    const handleMemberChat = async (memberUsername: string) => {
+        try {
+            const response = await api.post('/api/chat/rooms', {
+                other_username: memberUsername
+            });
+
+            if (response.data && response.data.room_id) {
+                router.push(`/messages?room_id=${response.data.room_id}`);
+            }
+        } catch (error) {
+            console.error('Error creating conversation:', error);
+            alert('Failed to start conversation. Please try again.');
         }
     };
 
@@ -231,148 +246,97 @@ export default function TeamManagePage() {
             </div>
 
             <div className="max-w-7xl mx-auto px-6 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Team Info */}
-                    <div className="lg:col-span-1">
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Team Information</h3>
-                            
-                            {/* Team Stats */}
-                            <div className="space-y-4 mb-6">
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600">Team ID</span>
-                                    <span className="font-medium text-gray-900">{team.team_id}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600">Members</span>
-                                    <span className="font-medium text-gray-900">{team.members.member_count}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600">Created</span>
-                                    <span className="font-medium text-gray-900">{team.created_at}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600">Chat Room ID</span>
-                                    <span className="font-medium text-gray-900">{team.team_chat_room_id}</span>
-                                </div>
-                            </div>
-
-                            {/* Team Creator */}
-                            <div>
-                                <h4 className="text-md font-semibold text-gray-900 mb-3">Team Creator</h4>
-                                <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                                    <div className="w-10 h-10 rounded-full overflow-hidden">
-                                        {team.created_by.profile_picture_url ? (
-                                            <img src={team.created_by.profile_picture_url} alt={team.created_by.name} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
-                                                <span className="text-white font-bold">
-                                                    {team.created_by.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <p className="font-medium text-gray-900">{team.created_by.name}</p>
-                                        <p className="text-sm text-gray-600">@{team.created_by.username}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                {/* Members Management */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-lg font-semibold text-gray-900">Team Members</h3>
+                        <button
+                            onClick={() => setShowInviteSection(!showInviteSection)}
+                            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2 transition-colors"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Invite Members
+                        </button>
                     </div>
 
-                    {/* Members Management */}
-                    <div className="lg:col-span-2">
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-lg font-semibold text-gray-900">Team Members</h3>
-                                <button
-                                    onClick={() => setShowInviteSection(!showInviteSection)}
-                                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2 transition-colors"
-                                >
-                                    <Plus className="w-4 h-4" />
-                                    Invite Members
-                                </button>
+                    {/* Invite Section */}
+                    {showInviteSection && (
+                        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                            <h4 className="font-medium text-gray-900 mb-3">Invite New Members</h4>
+                            
+                            {/* Search */}
+                            <div className="relative mb-3">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="Search members to invite..."
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                />
                             </div>
 
-                            {/* Invite Section */}
-                            {showInviteSection && (
-                                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                                    <h4 className="font-medium text-gray-900 mb-3">Invite New Members</h4>
-                                    
-                                    {/* Search */}
-                                    <div className="relative mb-3">
-                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            {/* Available Members */}
+                            <div className="max-h-48 overflow-y-auto space-y-2 mb-4">
+                                {filteredMembers.map((member) => (
+                                    <div
+                                        key={member.user_id}
+                                        className="flex items-center justify-between p-3 bg-white rounded-lg hover:bg-gray-50 cursor-pointer"
+                                        onClick={() => handleMemberToggle(member.user_id)}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full overflow-hidden">
+                                                {member.profile_picture_url ? (
+                                                    <img src={member.profile_picture_url} alt={member.name} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                                                        <span className="text-gray-500 text-sm">👤</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-gray-900">{member.name}</p>
+                                                <p className="text-sm text-gray-600">@{member.username}</p>
+                                            </div>
+                                        </div>
                                         <input
-                                            type="text"
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            placeholder="Search members to invite..."
-                                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            type="checkbox"
+                                            checked={selectedMembers.includes(member.user_id)}
+                                            onChange={() => handleMemberToggle(member.user_id)}
+                                            className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
                                         />
                                     </div>
+                                ))}
+                                {filteredMembers.length === 0 && (
+                                    <p className="text-gray-500 text-center py-4">No available members to invite</p>
+                                )}
+                            </div>
 
-                                    {/* Available Members */}
-                                    <div className="max-h-48 overflow-y-auto space-y-2 mb-4">
-                                        {filteredMembers.map((member) => (
-                                            <div
-                                                key={member.user_id}
-                                                className="flex items-center justify-between p-3 bg-white rounded-lg hover:bg-gray-50 cursor-pointer"
-                                                onClick={() => handleMemberToggle(member.user_id)}
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-full overflow-hidden">
-                                                        {member.profile_picture_url ? (
-                                                            <img src={member.profile_picture_url} alt={member.name} className="w-full h-full object-cover" />
-                                                        ) : (
-                                                            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                                                                <span className="text-gray-500 text-sm">👤</span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-medium text-gray-900">{member.name}</p>
-                                                        <p className="text-sm text-gray-600">@{member.username}</p>
-                                                    </div>
-                                                </div>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedMembers.includes(member.user_id)}
-                                                    onChange={() => handleMemberToggle(member.user_id)}
-                                                    className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-                                                />
-                                            </div>
-                                        ))}
-                                        {filteredMembers.length === 0 && (
-                                            <p className="text-gray-500 text-center py-4">No available members to invite</p>
-                                        )}
-                                    </div>
+                            {/* Action Buttons */}
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={handleInviteMembers}
+                                    disabled={selectedMembers.length === 0 || isInviting}
+                                    className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg transition-colors"
+                                >
+                                    {isInviting ? 'Sending...' : `Send ${selectedMembers.length} Invitation${selectedMembers.length !== 1 ? 's' : ''}`}
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setShowInviteSection(false);
+                                        setSelectedMembers([]);
+                                        setSearchQuery('');
+                                    }}
+                                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
-                                    {/* Action Buttons */}
-                                    <div className="flex gap-3">
-                                        <button
-                                            onClick={handleInviteMembers}
-                                            disabled={selectedMembers.length === 0 || isInviting}
-                                            className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg transition-colors"
-                                        >
-                                            {isInviting ? 'Sending...' : `Send ${selectedMembers.length} Invitation${selectedMembers.length !== 1 ? 's' : ''}`}
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                setShowInviteSection(false);
-                                                setSelectedMembers([]);
-                                                setSearchQuery('');
-                                            }}
-                                            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-                                        >
-                                            Cancel
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Current Members */}
-                            <div className="space-y-3">
+                    {/* Current Members */}
+                    <div className="space-y-3">
                                 {team.members.members.map((member) => (
                                     <div key={member.member_id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
                                         <div className="w-12 h-12 rounded-full overflow-hidden">
@@ -388,16 +352,18 @@ export default function TeamManagePage() {
                                             <h4 className="font-semibold text-gray-900">{member.member.name}</h4>
                                             <p className="text-sm text-gray-600">@{member.member.username}</p>
                                             <p className="text-xs text-gray-500">{member.member.email}</p>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <span className="text-xs text-gray-500">Level {member.member.level}</span>
-                                                <span className="text-xs text-gray-500">•</span>
-                                                <span className="text-xs text-gray-500">{member.member.xp} XP</span>
-                                            </div>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             {member.is_creator && (
                                                 <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Creator</span>
                                             )}
+                                            <button
+                                                onClick={() => handleMemberChat(member.member.username)}
+                                                className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                                                title="Start conversation"
+                                            >
+                                                <MessageCircle className="w-4 h-4" />
+                                            </button>
                                             <div 
                                                 className="w-4 h-4 rounded-full border-2 border-gray-300"
                                                 style={{ backgroundColor: member.member.card_theme }}
@@ -406,8 +372,6 @@ export default function TeamManagePage() {
                                         </div>
                                     </div>
                                 ))}
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
