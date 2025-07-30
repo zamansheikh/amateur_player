@@ -537,11 +537,15 @@ export default function MessagesPage() {
                               </span>
                             </div>
                           </div>
-                          <p className="text-sm text-gray-600 truncate">
+                          <p className="text-sm text-gray-600 truncate overflow-hidden whitespace-nowrap">
                             {conversation.last_message ? (
                               <>
                                 {conversation.last_message.sentByMe && "You: "}
-                                {conversation.last_message.message?.text || 'No messages yet'}
+                                {conversation.last_message.message?.text
+                                  ? conversation.last_message.message.text.length > 35
+                                    ? conversation.last_message.message.text.slice(0, 35) + '…'
+                                    : conversation.last_message.message.text
+                                  : 'No messages yet'}
                               </>
                             ) : (
                               'No messages yet'
