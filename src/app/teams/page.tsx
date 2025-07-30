@@ -58,10 +58,6 @@ interface InvitationsResponse {
 export default function TeamsPage() {
     const router = useRouter();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [isTeamManageModalOpen, setIsTeamManageModalOpen] = useState(false);
-    const [isTeamDetailsModalOpen, setIsTeamDetailsModalOpen] = useState(false);
-    const [selectedTeamForManage, setSelectedTeamForManage] = useState<Team | null>(null);
-    const [selectedTeamForDetails, setSelectedTeamForDetails] = useState<Team | null>(null);
     const [activeTab, setActiveTab] = useState<'teams' | 'pending' | 'sent'>('teams');
     const [teamName, setTeamName] = useState('');
     const [selectedMembers, setSelectedMembers] = useState<number[]>([]);
@@ -72,7 +68,6 @@ export default function TeamsPage() {
     const [teams, setTeams] = useState<Team[]>([]);
     const [availableMembers, setAvailableMembers] = useState<Member[]>([]);
     const [invitations, setInvitations] = useState<InvitationsResponse>({ received: [], sent: [] });
-    const [teamMembers, setTeamMembers] = useState<{ [key: number]: TeamMember[] }>({});
 
     // Handle team chat navigation
     const handleTeamChat = (team: Team) => {
@@ -90,13 +85,9 @@ export default function TeamsPage() {
                 response.data.my_teams.map(async (team: Team) => {
                     try {
                         const membersResponse = await api.get(`/api/user/teams/${team.team_id}/members`);
-                        setTeamMembers(prev => ({
-                            ...prev,
-                            [team.team_id]: membersResponse.data.members
-                        }));
                         return {
                             ...team,
-                            member_count: membersResponse.data.member_count
+                            member_count: membersResponse.data.members.member_count
                         };
                     } catch (error) {
                         console.error(`Error fetching members for team ${team.team_id}:`, error);
@@ -242,47 +233,7 @@ export default function TeamsPage() {
     };
 
     const handleManageTeam = (team: Team) => {
-        setSelectedTeamForManage(team);
-        setIsTeamManageModalOpen(true);
-        setSelectedMembers([]);
-        setSearchQuery('');
-        setIsSelectingMembers(false);
-    };
-
-    const handleInviteMembersToTeam = async () => {
-        if (!selectedTeamForManage || selectedMembers.length === 0) return;
-
-        try {
-            setCreating(true);
-            await Promise.all(
-                selectedMembers.map(userId =>
-                    api.post('/api/user/teams/invite', {
-                        team_id: selectedTeamForManage.team_id,
-                        invited_user_id: userId
-                    })
-                )
-            );
-
-            // Refresh data
-            await fetchTeams();
-            await fetchInvitations();
-
-            // Reset form
-            setSelectedMembers([]);
-            setSearchQuery('');
-            setIsSelectingMembers(false);
-            alert(`Successfully sent ${selectedMembers.length} invitation(s)!`);
-        } catch (error) {
-            console.error('Error sending invitations:', error);
-            alert('Error sending invitations. Please try again.');
-        } finally {
-            setCreating(false);
-        }
-    };
-
-    const handleViewTeamDetails = (team: Team) => {
-        setSelectedTeamForDetails(team);
-        setIsTeamDetailsModalOpen(true);
+        router.push(`/teams/${team.team_id}/manage`);
     };
 
     return (
@@ -388,7 +339,7 @@ export default function TeamsPage() {
                                                 <div className="flex items-center justify-between">
                                                     <div 
                                                         className="flex items-center gap-4 flex-1 cursor-pointer"
-                                                        onClick={() => handleViewTeamDetails(team)}
+                                                        onClick={() => router.push(`/teams/${team.team_id}`)}
                                                     >
                                                         <div className="w-12 h-12 rounded-full overflow-hidden">
                                                             {team.logo_url ? (
@@ -707,312 +658,6 @@ export default function TeamsPage() {
                 </div>
             )}
 
-            {/* Team Management Modal */}
-            {isTeamManageModalOpen && selectedTeamForManage && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-2xl p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
-                        {/* Modal Header */}
-                        <div className="flex items-center justify-between mb-6">
-                            <div>
-                                <h2 className="text-xl font-bold text-gray-900">Manage Team</h2>
-                                <p className="text-gray-600">{selectedTeamForManage.name}</p>
-                            </div>
-                            <button
-                                onClick={() => {
-                                    setIsTeamManageModalOpen(false);
-                                    setSelectedTeamForManage(null);
-                                    setSelectedMembers([]);
-                                    setIsSelectingMembers(false);
-                                    setSearchQuery('');
-                                }}
-                                className="w-8 h-8 bg-red-100 hover:bg-red-200 rounded-full flex items-center justify-center transition-colors"
-                            >
-                                <X className="w-4 h-4 text-red-600" />
-                            </button>
-                        </div>
-
-                        {/* Current Members */}
-                        <div className="mb-6">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-3">Current Members</h3>
-                            <div className="space-y-2">
-                                {teamMembers[selectedTeamForManage.team_id]?.map((member) => (
-                                    <div key={member.member_id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                        <div className="w-10 h-10 rounded-full overflow-hidden">
-                                            {member.member.profile_picture_url ? (
-                                                <img src={member.member.profile_picture_url} alt={member.member.name} className="w-full h-full object-cover" />
-                                            ) : (
-                                                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                                                    <span className="text-gray-500 text-sm">👤</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="flex-1">
-                                            <p className="font-medium text-gray-900">{member.member.name}</p>
-                                            <p className="text-sm text-gray-500">{member.member.email}</p>
-                                        </div>
-                                        {member.is_creator && (
-                                            <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Creator</span>
-                                        )}
-                                    </div>
-                                )) || (
-                                    <p className="text-gray-500 text-center py-4">No members found</p>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Invite More Members */}
-                        <div className="mb-6">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-3">Invite More Members</h3>
-                            
-                            {!isSelectingMembers ? (
-                                <button
-                                    onClick={() => setIsSelectingMembers(true)}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-left text-gray-500 hover:bg-gray-50 transition-colors flex items-center justify-between"
-                                >
-                                    <span>Select bowlers to invite...</span>
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </button>
-                            ) : (
-                                <div className="border border-gray-300 rounded-lg p-3">
-                                    {/* Search */}
-                                    <div className="relative mb-3">
-                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                                        <input
-                                            type="text"
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            placeholder="search bowler..."
-                                            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                                        />
-                                    </div>
-
-                                    {/* Members List */}
-                                    <div className="max-h-48 overflow-y-auto space-y-2">
-                                        {filteredMembers.map((member) => (
-                                            <div
-                                                key={member.user_id}
-                                                className="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer"
-                                                onClick={() => handleMemberToggle(member.user_id)}
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-full overflow-hidden">
-                                                        {member.profile_picture_url ? (
-                                                            <img src={member.profile_picture_url} alt={member.name} className="w-full h-full object-cover" />
-                                                        ) : (
-                                                            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                                                                <span className="text-gray-500 text-sm">👤</span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-gray-900">{member.name}</p>
-                                                        <p className="text-xs text-gray-500">@{member.username}</p>
-                                                    </div>
-                                                </div>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedMembers.includes(member.user_id)}
-                                                    onChange={() => handleMemberToggle(member.user_id)}
-                                                    className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-                                                />
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="flex gap-3">
-                            <button
-                                onClick={handleInviteMembersToTeam}
-                                disabled={selectedMembers.length === 0 || creating}
-                                className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg transition-colors"
-                            >
-                                {creating ? 'Sending...' : `Send ${selectedMembers.length} Invitation${selectedMembers.length !== 1 ? 's' : ''}`}
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setIsTeamManageModalOpen(false);
-                                    setSelectedTeamForManage(null);
-                                    setSelectedMembers([]);
-                                    setIsSelectingMembers(false);
-                                    setSearchQuery('');
-                                }}
-                                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-                            >
-                                Close
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Team Details Modal */}
-            {isTeamDetailsModalOpen && selectedTeamForDetails && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-2xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-                        {/* Modal Header */}
-                        <div className="flex items-center justify-between mb-6">
-                            <div className="flex items-center gap-4">
-                                <div className="w-16 h-16 rounded-full overflow-hidden">
-                                    {selectedTeamForDetails.logo_url ? (
-                                        <img src={selectedTeamForDetails.logo_url} alt={selectedTeamForDetails.name} className="w-full h-full object-cover" />
-                                    ) : (
-                                        <div className="w-full h-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
-                                            <span className="text-white text-2xl font-bold">
-                                                {selectedTeamForDetails.name.charAt(0).toUpperCase()}
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
-                                <div>
-                                    <h2 className="text-2xl font-bold text-gray-900">{selectedTeamForDetails.name}</h2>
-                                    <p className="text-gray-600">Team Information</p>
-                                </div>
-                            </div>
-                            <button
-                                onClick={() => {
-                                    setIsTeamDetailsModalOpen(false);
-                                    setSelectedTeamForDetails(null);
-                                }}
-                                className="w-8 h-8 bg-red-100 hover:bg-red-200 rounded-full flex items-center justify-center transition-colors"
-                            >
-                                <X className="w-4 h-4 text-red-600" />
-                            </button>
-                        </div>
-
-                        {/* Team Stats */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                            <div className="bg-blue-50 rounded-lg p-4 text-center">
-                                <div className="text-2xl font-bold text-blue-600">{selectedTeamForDetails.member_count || 0}</div>
-                                <div className="text-sm text-blue-800">Members</div>
-                            </div>
-                            <div className="bg-green-50 rounded-lg p-4 text-center">
-                                <div className="text-2xl font-bold text-green-600">{selectedTeamForDetails.team_id}</div>
-                                <div className="text-sm text-green-800">Team ID</div>
-                            </div>
-                            <div className="bg-purple-50 rounded-lg p-4 text-center">
-                                <div className="text-2xl font-bold text-purple-600">
-                                    {new Date(selectedTeamForDetails.created_at).toLocaleDateString('en-US', { day: 'numeric' })}
-                                </div>
-                                <div className="text-sm text-purple-800">
-                                    {new Date(selectedTeamForDetails.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                                </div>
-                            </div>
-                            <div className="bg-orange-50 rounded-lg p-4 text-center">
-                                <div className="text-2xl font-bold text-orange-600">Active</div>
-                                <div className="text-sm text-orange-800">Status</div>
-                            </div>
-                        </div>
-
-                        {/* Team Creator */}
-                        <div className="mb-6">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-3">Team Creator</h3>
-                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-full overflow-hidden">
-                                        {selectedTeamForDetails.created_by.profile_picture_url ? (
-                                            <img src={selectedTeamForDetails.created_by.profile_picture_url} alt={selectedTeamForDetails.created_by.name} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
-                                                <span className="text-white text-lg font-bold">
-                                                    {selectedTeamForDetails.created_by.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <p className="font-semibold text-gray-900">{selectedTeamForDetails.created_by.name}</p>
-                                        <p className="text-sm text-gray-600">@{selectedTeamForDetails.created_by.username}</p>
-                                        <p className="text-sm text-gray-500">{selectedTeamForDetails.created_by.email}</p>
-                                    </div>
-                                    <div className="ml-auto">
-                                        <span className="px-3 py-1 bg-green-600 text-white text-sm rounded-full">Creator</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Team Members */}
-                        <div className="mb-6">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-3">Team Members</h3>
-                            <div className="space-y-3">
-                                {teamMembers[selectedTeamForDetails.team_id]?.length > 0 ? (
-                                    teamMembers[selectedTeamForDetails.team_id].map((member) => (
-                                        <div key={member.member_id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                            <div className="w-10 h-10 rounded-full overflow-hidden">
-                                                {member.member.profile_picture_url ? (
-                                                    <img src={member.member.profile_picture_url} alt={member.member.name} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                                                        <span className="text-gray-500 text-sm">👤</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="flex-1">
-                                                <p className="font-medium text-gray-900">{member.member.name}</p>
-                                                <p className="text-sm text-gray-600">@{member.member.username}</p>
-                                                <p className="text-sm text-gray-500">{member.member.email}</p>
-                                            </div>
-                                            {member.is_creator && (
-                                                <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Creator</span>
-                                            )}
-                                        </div>
-                                    ))
-                                ) : (
-                                    <div className="text-center py-8">
-                                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                            <span className="text-gray-400 text-2xl">👥</span>
-                                        </div>
-                                        <p className="text-gray-500">No members found</p>
-                                        <p className="text-gray-400 text-sm">Invite members to see them here!</p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="flex gap-3">
-                            <button
-                                onClick={() => {
-                                    setIsTeamDetailsModalOpen(false);
-                                    setSelectedTeamForDetails(null);
-                                    if (selectedTeamForDetails) {
-                                        handleTeamChat(selectedTeamForDetails);
-                                    }
-                                }}
-                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
-                            >
-                                <MessageCircle className="w-4 h-4" />
-                                Open Chat
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setIsTeamDetailsModalOpen(false);
-                                    setSelectedTeamForDetails(null);
-                                    handleManageTeam(selectedTeamForDetails);
-                                }}
-                                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
-                            >
-                                <span>⚙️</span>
-                                Manage Team
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setIsTeamDetailsModalOpen(false);
-                                    setSelectedTeamForDetails(null);
-                                }}
-                                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-                            >
-                                Close
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
