@@ -68,7 +68,22 @@ export default function TeamDetailsPage() {
 
     const handleTeamChat = () => {
         if (team?.team_chat_room_id) {
-            router.push(`/messages?room=${team.team_chat_room_id}`);
+            router.push(`/messages?room_id=${team.team_chat_room_id}`);
+        }
+    };
+
+    const handleMemberChat = async (memberUsername: string) => {
+        try {
+            const response = await api.post('/api/chat/rooms', {
+                other_username: memberUsername
+            });
+
+            if (response.data && response.data.room_id) {
+                router.push(`/messages?room_id=${response.data.room_id}`);
+            }
+        } catch (error) {
+            console.error('Error creating conversation:', error);
+            alert('Failed to start conversation. Please try again.');
         }
     };
 
@@ -152,58 +167,10 @@ export default function TeamDetailsPage() {
             </div>
 
             <div className="max-w-7xl mx-auto px-6 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Team Stats */}
-                    <div className="lg:col-span-1">
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Team Stats</h3>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="bg-blue-50 rounded-lg p-4 text-center">
-                                    <div className="text-2xl font-bold text-blue-600">{team.members.member_count}</div>
-                                    <div className="text-sm text-blue-800">Members</div>
-                                </div>
-                                <div className="bg-green-50 rounded-lg p-4 text-center">
-                                    <div className="text-2xl font-bold text-green-600">{team.team_id}</div>
-                                    <div className="text-sm text-green-800">Team ID</div>
-                                </div>
-                                <div className="bg-purple-50 rounded-lg p-4 text-center col-span-2">
-                                    <div className="text-lg font-bold text-purple-600">{team.created_at}</div>
-                                    <div className="text-sm text-purple-800">Created Date</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Team Creator */}
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Team Creator</h3>
-                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-full overflow-hidden">
-                                        {team.created_by.profile_picture_url ? (
-                                            <img src={team.created_by.profile_picture_url} alt={team.created_by.name} className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
-                                                <span className="text-white font-bold">
-                                                    {team.created_by.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <p className="font-semibold text-gray-900">{team.created_by.name}</p>
-                                        <p className="text-sm text-gray-600">@{team.created_by.username}</p>
-                                        <p className="text-xs text-gray-500">{team.created_by.email}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Team Members */}
-                    <div className="lg:col-span-2">
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-6">Team Members</h3>
-                            <div className="space-y-4">
+                {/* Team Members */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-6">Team Members</h3>
+                    <div className="space-y-4">
                                 {team.members.members.map((member) => (
                                     <div key={member.member_id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                                         <div className="w-12 h-12 rounded-full overflow-hidden">
@@ -219,16 +186,18 @@ export default function TeamDetailsPage() {
                                             <h4 className="font-semibold text-gray-900">{member.member.name}</h4>
                                             <p className="text-sm text-gray-600">@{member.member.username}</p>
                                             <p className="text-xs text-gray-500">{member.member.email}</p>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <span className="text-xs text-gray-500">Level {member.member.level}</span>
-                                                <span className="text-xs text-gray-500">•</span>
-                                                <span className="text-xs text-gray-500">{member.member.xp} XP</span>
-                                            </div>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             {member.is_creator && (
                                                 <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Creator</span>
                                             )}
+                                            <button
+                                                onClick={() => handleMemberChat(member.member.username)}
+                                                className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                                                title="Start conversation"
+                                            >
+                                                <MessageCircle className="w-4 h-4" />
+                                            </button>
                                             <div 
                                                 className="w-4 h-4 rounded-full border-2 border-gray-300"
                                                 style={{ backgroundColor: member.member.card_theme }}
@@ -237,8 +206,6 @@ export default function TeamDetailsPage() {
                                         </div>
                                     </div>
                                 ))}
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
