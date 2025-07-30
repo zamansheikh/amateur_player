@@ -443,9 +443,9 @@ export default function MessagesPage() {
                     Messages
                   </h1>
                   <div className="flex items-center gap-3">
-                    <div className="text-sm text-gray-500">
+                    {/* <div className="text-sm text-gray-500">
                       {conversations.reduce((total, conv) => total + conv.unreadCount, 0)} unread
-                    </div>
+                    </div> */}
                     <button
                       onClick={handleOpenNewMessageModal}
                       className="p-2 text-white rounded-lg transition-colors hover:opacity-90"
