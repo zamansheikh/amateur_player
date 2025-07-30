@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { MessageCircle, Send, Search, MoreHorizontal, CheckCircle, Clock, Paperclip, X, Image, Video } from 'lucide-react';
+import { MessageCircle, Send, Search, MoreHorizontal, CheckCircle, Clock, Paperclip, X, Image, Video, Plus } from 'lucide-react';
 import { api } from '@/lib/api';
 
 interface Conversation {
@@ -57,6 +57,16 @@ interface Message {
   };
 }
 
+interface AvailableMember {
+  user_id: number;
+  username: string;
+  name: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  profile_picture_url: string;
+}
+
 
 export default function MessagesPage() {
   const searchParams = useSearchParams();
@@ -76,6 +86,25 @@ export default function MessagesPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // New message modal state
+  const [isNewMessageModalOpen, setIsNewMessageModalOpen] = useState(false);
+  const [availableMembers, setAvailableMembers] = useState<AvailableMember[]>([]);
+  const [memberSearchQuery, setMemberSearchQuery] = useState('');
+  const [loadingMembers, setLoadingMembers] = useState(false);
+
+  // Fetch available members for new message
+  const fetchAvailableMembers = async () => {
+    try {
+      setLoadingMembers(true);
+      const response = await api.get('/api/user-data');
+      setAvailableMembers(response.data);
+    } catch (error) {
+      console.error('Error fetching available members:', error);
+    } finally {
+      setLoadingMembers(false);
+    }
+  };
 
   // Scroll to bottom of messages
   const scrollToBottom = () => {
@@ -217,6 +246,46 @@ export default function MessagesPage() {
       stopPolling();
     };
   }, [selectedConversation]);
+
+  // Create new conversation with a user
+  const handleCreateNewConversation = async (member: AvailableMember) => {
+    try {
+      const response = await api.post('/api/chat/rooms', {
+        other_username: member.username
+      });
+
+      if (response.data && response.data.room_id) {
+        // Close modal
+        setIsNewMessageModalOpen(false);
+        setMemberSearchQuery('');
+
+        // Refresh chat rooms to include the new conversation
+        await fetchChatRooms();
+
+        // Find and select the new conversation
+        const newConversation = conversations.find(conv => conv.room_id === response.data.room_id);
+        if (newConversation) {
+          setSelectedConversation(newConversation);
+          await fetchMessages(newConversation.room_id);
+        }
+      }
+    } catch (error) {
+      console.error('Error creating new conversation:', error);
+      alert('Failed to create conversation. Please try again.');
+    }
+  };
+
+  // Handle opening new message modal
+  const handleOpenNewMessageModal = () => {
+    setIsNewMessageModalOpen(true);
+    fetchAvailableMembers();
+  };
+
+  // Filter available members for search
+  const filteredAvailableMembers = availableMembers.filter(member =>
+    member.name.toLowerCase().includes(memberSearchQuery.toLowerCase()) ||
+    member.username.toLowerCase().includes(memberSearchQuery.toLowerCase())
+  );
 
   // Filter conversations
   const filteredConversations = conversations.filter((conversation) => {
@@ -373,8 +442,18 @@ export default function MessagesPage() {
                     <MessageCircle className="w-5 h-5" style={{ color: '#8BC342' }} />
                     Messages
                   </h1>
-                  <div className="text-sm text-gray-500">
-                    {conversations.reduce((total, conv) => total + conv.unreadCount, 0)} unread
+                  <div className="flex items-center gap-3">
+                    <div className="text-sm text-gray-500">
+                      {conversations.reduce((total, conv) => total + conv.unreadCount, 0)} unread
+                    </div>
+                    <button
+                      onClick={handleOpenNewMessageModal}
+                      className="p-2 text-white rounded-lg transition-colors hover:opacity-90"
+                      style={{ backgroundColor: '#8BC342' }}
+                      title="Create New Message"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
 
@@ -719,6 +798,75 @@ export default function MessagesPage() {
           </div>
         </div>
       </div>
+
+      {/* New Message Modal */}
+      {isNewMessageModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4 max-h-[70vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">New Message</h2>
+              <button
+                onClick={() => {
+                  setIsNewMessageModalOpen(false);
+                  setMemberSearchQuery('');
+                }}
+                className="w-8 h-8 bg-red-100 hover:bg-red-200 rounded-full flex items-center justify-center transition-colors"
+              >
+                <X className="w-4 h-4 text-red-600" />
+              </button>
+            </div>
+
+            {/* Search */}
+            <div className="relative mb-4">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                value={memberSearchQuery}
+                onChange={(e) => setMemberSearchQuery(e.target.value)}
+                placeholder="Search users..."
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Members List */}
+            <div className="flex-1 overflow-y-auto">
+              {loadingMembers ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
+                </div>
+              ) : filteredAvailableMembers.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">No users found</p>
+                </div>
+              ) : (
+                <div className="space-y-2 max-h-80 overflow-y-auto">
+                  {filteredAvailableMembers.map((member) => (
+                    <div
+                      key={member.user_id}
+                      onClick={() => handleCreateNewConversation(member)}
+                      className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
+                    >
+                      <img
+                        src={member.profile_picture_url}
+                        alt={member.name}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900">{member.name}</h4>
+                        <p className="text-sm text-gray-600">@{member.username}</p>
+                      </div>
+                      <div className="text-gray-400">
+                        <MessageCircle className="w-4 h-4" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
