@@ -449,8 +449,14 @@ export default function MessagesPage() {
                             </div>
                           </div>
                           <p className="text-sm text-gray-600 truncate">
-                            {conversation.last_message?.message?.text || 
-                             'No messages yet'}
+                            {conversation.last_message ? (
+                              <>
+                                {conversation.last_message.sentByMe && "You: "}
+                                {conversation.last_message.message?.text || 'No messages yet'}
+                              </>
+                            ) : (
+                              'No messages yet'
+                            )}
                           </p>
                         </div>
                       </div>
