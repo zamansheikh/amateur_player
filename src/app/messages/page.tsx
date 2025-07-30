@@ -74,6 +74,13 @@ export default function MessagesPage() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [uploadProgress, setUploadProgress] = useState<{[key: string]: number}>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Scroll to bottom of messages
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   // Fetch chat rooms from API
   const fetchChatRooms = async () => {
@@ -120,11 +127,16 @@ export default function MessagesPage() {
   };
 
   // Fetch messages for a specific room
-  const fetchMessages = async (roomId: number) => {
+  const fetchMessages = async (roomId: number, shouldScroll: boolean = true) => {
     try {
       setMessagesLoading(true);
       const response = await api.get(`/api/chat/room/${roomId}/messages`);
       setMessages(response.data);
+      
+      // Scroll to bottom after messages are loaded
+      if (shouldScroll) {
+        setTimeout(() => scrollToBottom(), 100);
+      }
     } catch (error) {
       console.error('Error fetching messages:', error);
       setMessages([]);
@@ -133,9 +145,78 @@ export default function MessagesPage() {
     }
   };
 
+  // Fetch new messages periodically (for polling)
+  const fetchNewMessages = async () => {
+    if (!selectedConversation) return;
+    
+    try {
+      const response = await api.get(`/api/chat/room/${selectedConversation.room_id}/messages`);
+      const newMessages = response.data;
+      
+      // Only update if there are new messages
+      if (newMessages.length > messages.length) {
+        setMessages(newMessages);
+        // Scroll to bottom when new messages arrive
+        setTimeout(() => scrollToBottom(), 100);
+      }
+    } catch (error) {
+      console.error('Error fetching new messages:', error);
+    }
+  };
+
+  // Start polling for new messages
+  const startPolling = () => {
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    
+    // Start new interval
+    intervalRef.current = setInterval(fetchNewMessages, 5000); // Poll every 5 seconds
+  };
+
+  // Stop polling for new messages
+  const stopPolling = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+
   useEffect(() => {
     fetchChatRooms();
   }, [targetRoomId]); // Re-fetch when targetRoomId changes
+
+  // Handle polling when conversation is selected
+  useEffect(() => {
+    if (selectedConversation) {
+      startPolling();
+    } else {
+      stopPolling();
+    }
+
+    // Cleanup on unmount or conversation change
+    return () => stopPolling();
+  }, [selectedConversation, messages.length]);
+
+  // Handle page visibility change to start/stop polling
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        stopPolling();
+      } else if (selectedConversation) {
+        startPolling();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      stopPolling();
+    };
+  }, [selectedConversation]);
 
   // Filter conversations
   const filteredConversations = conversations.filter((conversation) => {
@@ -255,6 +336,9 @@ export default function MessagesPage() {
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
+
+      // Scroll to bottom after sending message
+      setTimeout(() => scrollToBottom(), 100);
 
     } catch (error) {
       console.error('Error sending message:', error);
@@ -475,6 +559,8 @@ export default function MessagesPage() {
                             </div>
                           </div>
                         ))}
+                        {/* Scroll anchor */}
+                        <div ref={messagesEndRef} />
                       </div>
                     )}
                   </div>
