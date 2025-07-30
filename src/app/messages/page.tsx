@@ -92,6 +92,7 @@ export default function MessagesPage() {
   const [availableMembers, setAvailableMembers] = useState<AvailableMember[]>([]);
   const [memberSearchQuery, setMemberSearchQuery] = useState('');
   const [loadingMembers, setLoadingMembers] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Fetch available members for new message
   const fetchAvailableMembers = async () => {
@@ -409,6 +410,13 @@ export default function MessagesPage() {
       // Scroll to bottom after sending message
       setTimeout(() => scrollToBottom(), 100);
 
+      // Keep text box focused after sending
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+        }
+      }, 100);
+
     } catch (error) {
       console.error('Error sending message:', error);
       alert('Failed to send message. Please try again.');
@@ -430,7 +438,7 @@ export default function MessagesPage() {
   if (loading) return <div className="p-10">Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100">
+    <div className="min-h-screen bg-white">
       <div className="container mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden" style={{ height: 'calc(100vh - 120px)' }}>
           <div className="flex h-full">
@@ -736,6 +744,7 @@ export default function MessagesPage() {
 
                           {/* Text Input */}
                           <textarea
+                            ref={textareaRef}
                             value={replyText}
                             onChange={(e) => setReplyText(e.target.value)}
                             placeholder={`Type a message to ${selectedConversation.display_name}...`}
