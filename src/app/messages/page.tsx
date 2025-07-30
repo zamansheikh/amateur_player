@@ -11,6 +11,7 @@ interface Conversation {
   display_name: string; // This is what we'll show to user
   display_image_url: string;
   type: 'private' | 'group';
+  last_activity: string;
   last_message: {
     sentByMe: boolean;
     roomID: number;
@@ -456,11 +457,12 @@ export default function MessagesPage() {
                     </div> */}
                     <button
                       onClick={handleOpenNewMessageModal}
-                      className="p-2 text-white rounded-lg transition-colors hover:opacity-90"
+                      className="p-2 text-white rounded-lg transition-colors hover:opacity-90 flex items-center gap-1"
                       style={{ backgroundColor: '#8BC342' }}
                       title="Create New Message"
                     >
-                      <Plus className="w-4 h-4" />
+                      <MessageCircle className="w-3 h-3" />
+                      <Plus className="w-3 h-3" />
                     </button>
                   </div>
                 </div>
@@ -531,7 +533,7 @@ export default function MessagesPage() {
                                 </span>
                               )}
                               <span className="text-xs text-gray-500">
-                                {conversation.last_message?.timeDetails?.timesince || 'Now'}
+                                {conversation.last_activity || 'Now'}
                               </span>
                             </div>
                           </div>
