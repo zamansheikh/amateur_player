@@ -47,12 +47,21 @@ export default function SignUpPage() {
     const [codeSent, setCodeSent] = useState(false);
     const [userCreated, setUserCreated] = useState(false); // Track if user was created
     
-    // Step 3: Address Info (previously Step 2)
+    // Step 3: Bowling Style & Membership
+    const [bowlingStyle, setBowlingStyle] = useState(''); // 'one-handed' or 'two-handed'
+    const [average, setAverage] = useState('');
+    const [division, setDivision] = useState(''); // 'senior', 'mens', 'womens'
+    const [isPBACardHolder, setIsPBACardHolder] = useState(false);
+    const [pbaCardNumber, setPbaCardNumber] = useState('');
+    const [isUSBCMember, setIsUSBCMember] = useState(false);
+    const [usbcMemberNumber, setUSBCMemberNumber] = useState('');
+    
+    // Step 4: Address Info (previously Step 3)
     const [zipCode, setZipCode] = useState('');
     const [city, setCity] = useState('');
     const [state, setState] = useState('');
     
-    // Step 4: Favorite Brands (previously Step 3)
+    // Step 5: Favorite Brands (previously Step 4)
     const [selectedBrands, setSelectedBrands] = useState({
         balls: [] as number[],
         shoes: [] as number[],
@@ -103,7 +112,7 @@ export default function SignUpPage() {
             }
         };
 
-        if (currentStep === 4) { // Updated from 3 to 4
+        if (currentStep === 5) { // Updated from 4 to 5
             fetchBrands();
         }
     }, [currentStep]);
@@ -250,6 +259,31 @@ export default function SignUpPage() {
     };
 
     const validateStep3 = () => {
+        if (!bowlingStyle) {
+            setError('Please select your bowling style');
+            return false;
+        }
+        if (!average) {
+            setError('Please enter your average');
+            return false;
+        }
+        if (!division) {
+            setError('Please select your division');
+            return false;
+        }
+        if (isPBACardHolder && !pbaCardNumber) {
+            setError('Please enter your PBA card number');
+            return false;
+        }
+        if (isUSBCMember && !usbcMemberNumber) {
+            setError('Please enter your USBC member number');
+            return false;
+        }
+        setError('');
+        return true;
+    };
+
+    const validateStep4 = () => {
         if (!zipCode || !city || !state) {
             setError('Please fill in all location fields');
             return false;
@@ -272,6 +306,8 @@ export default function SignUpPage() {
             setCurrentStep(3);
         } else if (currentStep === 3 && validateStep3()) {
             setCurrentStep(4);
+        } else if (currentStep === 4 && validateStep4()) {
+            setCurrentStep(5);
         }
     };
 
@@ -343,7 +379,7 @@ export default function SignUpPage() {
                     </div>
                     <h2 className="text-3xl font-bold text-gray-900">Create your account</h2>
                     <p className="mt-2 text-sm text-gray-600">
-                        Step {currentStep} of 4
+                        Step {currentStep} of 5
                     </p>
                 </div>
 
@@ -351,11 +387,11 @@ export default function SignUpPage() {
                 <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
                         className="bg-green-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${(currentStep / 4) * 100}%` }}
+                        style={{ width: `${(currentStep / 5) * 100}%` }}
                     ></div>
                 </div>
 
-                <form className="mt-8 space-y-6" onSubmit={currentStep === 4 ? handleSubmit : async (e) => { e.preventDefault(); await handleNext(); }}>
+                <form className="mt-8 space-y-6" onSubmit={currentStep === 5 ? handleSubmit : async (e) => { e.preventDefault(); await handleNext(); }}>
                     {/* Step 1: Basic Information */}
                     {currentStep === 1 && (
                         <div className="space-y-4">
@@ -687,8 +723,169 @@ export default function SignUpPage() {
                         </div>
                     )}
 
-                    {/* Step 3: Address Information (previously Step 2) */}
+                    {/* Step 3: Bowling Style & Membership */}
                     {currentStep === 3 && (
+                        <div className="space-y-6">
+                            <h3 className="text-lg font-medium text-gray-900 text-center">Bowling Style & Membership</h3>
+                            
+                            {/* Bowling Style */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-3">
+                                    Bowling Style
+                                </label>
+                                <div className="space-y-2">
+                                    <label className="flex items-center space-x-3 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="bowlingStyle"
+                                            value="one-handed"
+                                            checked={bowlingStyle === 'one-handed'}
+                                            onChange={(e) => setBowlingStyle(e.target.value)}
+                                            className="border-gray-300 text-green-600 focus:ring-green-500"
+                                        />
+                                        <span className="text-sm text-gray-700">One Handed</span>
+                                        <span className="text-green-600">✓</span>
+                                    </label>
+                                    <label className="flex items-center space-x-3 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="bowlingStyle"
+                                            value="two-handed"
+                                            checked={bowlingStyle === 'two-handed'}
+                                            onChange={(e) => setBowlingStyle(e.target.value)}
+                                            className="border-gray-300 text-green-600 focus:ring-green-500"
+                                        />
+                                        <span className="text-sm text-gray-700">Two Handed</span>
+                                        <span className="text-green-600">✓</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            {/* Average */}
+                            <div>
+                                <label htmlFor="average" className="block text-sm font-medium text-gray-700">
+                                    Average
+                                </label>
+                                <input
+                                    id="average"
+                                    name="average"
+                                    type="number"
+                                    min="0"
+                                    max="300"
+                                    required
+                                    value={average}
+                                    onChange={(e) => setAverage(e.target.value)}
+                                    className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                                    placeholder="Enter your bowling average"
+                                />
+                            </div>
+
+                            {/* Division */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-3">
+                                    Division
+                                </label>
+                                <div className="space-y-2">
+                                    <label className="flex items-center space-x-3 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="division"
+                                            value="senior"
+                                            checked={division === 'senior'}
+                                            onChange={(e) => setDivision(e.target.value)}
+                                            className="border-gray-300 text-green-600 focus:ring-green-500"
+                                        />
+                                        <span className="text-sm text-gray-700">Senior</span>
+                                    </label>
+                                    <label className="flex items-center space-x-3 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="division"
+                                            value="mens"
+                                            checked={division === 'mens'}
+                                            onChange={(e) => setDivision(e.target.value)}
+                                            className="border-gray-300 text-green-600 focus:ring-green-500"
+                                        />
+                                        <span className="text-sm text-gray-700">Men's</span>
+                                    </label>
+                                    <label className="flex items-center space-x-3 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="division"
+                                            value="womens"
+                                            checked={division === 'womens'}
+                                            onChange={(e) => setDivision(e.target.value)}
+                                            className="border-gray-300 text-green-600 focus:ring-green-500"
+                                        />
+                                        <span className="text-sm text-gray-700">Women's</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            {/* PBA Card Holder */}
+                            <div>
+                                <label className="flex items-center space-x-3 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={isPBACardHolder}
+                                        onChange={(e) => {
+                                            setIsPBACardHolder(e.target.checked);
+                                            if (!e.target.checked) {
+                                                setPbaCardNumber('');
+                                            }
+                                        }}
+                                        className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                                    />
+                                    <span className="text-sm text-gray-700">PBA Card Holder</span>
+                                </label>
+                                
+                                {isPBACardHolder && (
+                                    <div className="mt-3">
+                                        <input
+                                            type="text"
+                                            value={pbaCardNumber}
+                                            onChange={(e) => setPbaCardNumber(e.target.value)}
+                                            placeholder="Enter PBA member number"
+                                            className="w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* USBC Member */}
+                            <div>
+                                <label className="flex items-center space-x-3 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={isUSBCMember}
+                                        onChange={(e) => {
+                                            setIsUSBCMember(e.target.checked);
+                                            if (!e.target.checked) {
+                                                setUSBCMemberNumber('');
+                                            }
+                                        }}
+                                        className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                                    />
+                                    <span className="text-sm text-gray-700">USBC Member</span>
+                                </label>
+                                
+                                {isUSBCMember && (
+                                    <div className="mt-3">
+                                        <input
+                                            type="text"
+                                            value={usbcMemberNumber}
+                                            onChange={(e) => setUSBCMemberNumber(e.target.value)}
+                                            placeholder="Enter USBC member number"
+                                            className="w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Step 4: Address Information (previously Step 3) */}
+                    {currentStep === 4 && (
                         <div className="space-y-4">
                             <h3 className="text-lg font-medium text-gray-900 text-center">Location Information</h3>
                             <div className="grid grid-cols-2 gap-4">
@@ -741,8 +938,8 @@ export default function SignUpPage() {
                         </div>
                     )}
 
-                    {/* Step 4: Favorite Brands (previously Step 3) */}
-                    {currentStep === 4 && (
+                    {/* Step 5: Favorite Brands (previously Step 4) */}
+                    {currentStep === 5 && (
                         <div className="space-y-6">
                             <h3 className="text-lg font-medium text-gray-900 text-center">Choose Your Favorite Brands</h3>
                             <p className="text-sm text-gray-600 text-center">Select brands you're interested in (optional)</p>
@@ -904,7 +1101,7 @@ export default function SignUpPage() {
                                 }
                             }}
                         >
-                            {currentStep === 4 
+                            {currentStep === 5 
                                 ? (isLoading ? 'Creating account...' : 'Create account')
                                 : currentStep === 1 && isUnder13 
                                     ? 'Age requirement not met'
@@ -926,7 +1123,7 @@ export default function SignUpPage() {
                         </div>
                     )}
 
-                    {currentStep === 4 && (
+                    {currentStep === 5 && (
                         <div className="text-center">
                             <p className="text-sm text-gray-600">
                                 By creating an account, you agree to our Terms of Service and Privacy Policy
