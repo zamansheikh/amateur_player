@@ -24,6 +24,8 @@ interface BrandsResponse {
 
 export default function SignUpPage() {
     const [currentStep, setCurrentStep] = useState(1);
+    const [isProfileComplete, setIsProfileComplete] = useState(false);
+    const [showAdditionalSteps, setShowAdditionalSteps] = useState(false);
     
     // Step 1: Basic Info
     const [firstName, setFirstName] = useState('');
@@ -73,6 +75,7 @@ export default function SignUpPage() {
     const [brandsLoading, setBrandsLoading] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [isCreatingAccount, setIsCreatingAccount] = useState(false);
 
     const { signup, signin } = useAuth();
     const router = useRouter();
@@ -138,10 +141,7 @@ export default function SignUpPage() {
             if (error.response?.status === 409) {
                 setIsEmailVerified(true);
                 setError('');
-                // Auto-advance to next step since email is already verified
-                setTimeout(() => {
-                    setCurrentStep(3);
-                }, 1500);
+                // Don't auto-advance, let user click button to proceed
             } else {
                 setError(error.response?.data?.message || 'Failed to send verification code. Please try again.');
             }
@@ -163,10 +163,7 @@ export default function SignUpPage() {
             await userApi.verifyEmail(email, verificationCode);
             setIsEmailVerified(true);
             setError('');
-            // Auto-advance to next step after successful verification
-            setTimeout(() => {
-                setCurrentStep(3);
-            }, 1500);
+            // Don't auto-advance, let user click the button to proceed
         } catch (error: any) {
             console.error('Error verifying email:', error);
             setError(error.response?.data?.message || 'Invalid verification code. Please try again.');
@@ -303,11 +300,76 @@ export default function SignUpPage() {
                 setCurrentStep(2);
             }
         } else if (currentStep === 2 && validateStep2()) {
-            setCurrentStep(3);
+            // After email verification, complete the core signup
+            await handleCoreSignup();
         } else if (currentStep === 3 && validateStep3()) {
             setCurrentStep(4);
         } else if (currentStep === 4 && validateStep4()) {
             setCurrentStep(5);
+        }
+    };
+
+    // Handle core signup (steps 1-2)
+    const handleCoreSignup = async () => {
+        setError('');
+        setIsCreatingAccount(true);
+
+        try {
+            // Create the user account with basic info only
+            const userData = {
+                basicInfo: {
+                    username,
+                    first_name: firstName,
+                    last_name: lastName,
+                    email,
+                    password,
+                    birth_date: birthDate,
+                    // Include parent information if user is under 18
+                    ...(isUnder18 && {
+                        parent_first_name: parentFirstName,
+                        parent_last_name: parentLastName,
+                        parent_email: parentEmail
+                    })
+                },
+                brandIDs: [] // Empty for now
+            };
+
+            const success = await signup(userData);
+            if (success) {
+                setUserCreated(true);
+                // Check if profile is complete
+                await checkProfileCompletion();
+            } else {
+                setError('Failed to create account. Please try again.');
+            }
+        } catch (err) {
+            console.error('Signup error:', err);
+            setError('An error occurred during account creation. Please try again.');
+        } finally {
+            setIsCreatingAccount(false);
+        }
+    };
+
+    // Check profile completion status
+    const checkProfileCompletion = async () => {
+        try {
+            const profile = await userApi.getProfile();
+            
+            if (profile.is_complete) {
+                // Profile is complete, redirect to home
+                router.push('/');
+            } else {
+                // Profile incomplete, show additional steps
+                setShowAdditionalSteps(true);
+                setCurrentStep(3);
+                setUserCreated(true);
+            }
+        } catch (error) {
+            console.error('Error checking profile completion:', error);
+            // If error, assume profile incomplete and show additional steps
+            setShowAdditionalSteps(true);
+            setCurrentStep(3);
+            setUserCreated(true);
         }
     };
 
@@ -322,6 +384,7 @@ export default function SignUpPage() {
         setIsLoading(true);
 
         try {
+            // This handles the additional profile completion (steps 3-5)
             // Flatten all selected brand IDs into a single array
             const allBrandIDs = [
                 ...selectedBrands.balls,
@@ -330,34 +393,29 @@ export default function SignUpPage() {
                 ...selectedBrands.apparels
             ];
 
-            // Create the user account now that all steps are complete
-            const userData = {
-                basicInfo: {
-                    username,
-                    first_name: firstName,
-                    last_name: lastName,
-                    email,
-                    password,
-                    // birth_date: birthDate,
-                    // Include parent information if user is under 18
-                    // ...(isUnder18 && {
-                    //     parent_first_name: parentFirstName,
-                    //     parent_last_name: parentLastName,
-                    //     parent_email: parentEmail
-                    // })
-                },
-                brandIDs: allBrandIDs
+            // Update profile with additional information
+            const additionalData = {
+                bowling_style: bowlingStyle,
+                average: parseInt(average),
+                division: division,
+                pba_card_holder: isPBACardHolder,
+                pba_card_number: isPBACardHolder ? pbaCardNumber : null,
+                usbc_member: isUSBCMember,
+                usbc_member_number: isUSBCMember ? usbcMemberNumber : null,
+                city: city,
+                state: state,
+                zip_code: zipCode,
+                brand_ids: allBrandIDs
             };
 
-            const success = await signup(userData);
-            if (success) {
-                router.push('/');
-            } else {
-                setError('Failed to create account. Please try again.');
-            }
+            // Call API to update profile with additional data
+            await userApi.updateProfile(additionalData);
+            
+            // Redirect to home page after completing profile
+            router.push('/');
         } catch (err) {
-            console.error('Signup error:', err);
-            setError('An error occurred during account creation. Please try again.');
+            console.error('Profile update error:', err);
+            setError('An error occurred while updating your profile. Please try again.');
         } finally {
             setIsLoading(false);
         }
@@ -377,9 +435,14 @@ export default function SignUpPage() {
                         />
                         <span className="text-2xl font-bold text-gray-900">Bowlers Network</span>
                     </div>
-                    <h2 className="text-3xl font-bold text-gray-900">Create your account</h2>
+                    <h2 className="text-3xl font-bold text-gray-900">
+                        {!showAdditionalSteps ? 'Create your account' : 'Complete your profile'}
+                    </h2>
                     <p className="mt-2 text-sm text-gray-600">
-                        Step {currentStep} of 5
+                        {!showAdditionalSteps 
+                            ? `Step ${currentStep} of 2`
+                            : `Step ${currentStep - 2} of 3 (Additional Information)`
+                        }
                     </p>
                 </div>
 
@@ -387,11 +450,31 @@ export default function SignUpPage() {
                 <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
                         className="bg-green-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${(currentStep / 5) * 100}%` }}
+                        style={{ 
+                            width: !showAdditionalSteps 
+                                ? `${(currentStep / 2) * 100}%`
+                                : `${((currentStep - 2) / 3) * 100}%`
+                        }}
                     ></div>
                 </div>
 
-                <form className="mt-8 space-y-6" onSubmit={currentStep === 5 ? handleSubmit : async (e) => { e.preventDefault(); await handleNext(); }}>
+                <form className="mt-8 space-y-6" onSubmit={
+                    currentStep === 5 && showAdditionalSteps
+                        ? handleSubmit 
+                        : async (e) => { 
+                            e.preventDefault(); 
+                            if (currentStep === 1 || (currentStep === 3 && showAdditionalSteps) || (currentStep === 4 && showAdditionalSteps)) {
+                                await handleNext(); 
+                            }
+                        }
+                }>
+                    {/* Account Created Successfully Message */}
+                    {showAdditionalSteps && currentStep === 3 && (
+                        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg text-sm text-center">
+                            <p className="font-medium">🎉 Account Created Successfully!</p>
+                            <p>Please complete your profile with the following additional information to get the best experience.</p>
+                        </div>
+                    )}
                     {/* Step 1: Basic Information */}
                     {currentStep === 1 && (
                         <div className="space-y-4">
@@ -695,36 +778,47 @@ export default function SignUpPage() {
                                                 {codeSent ? 'Email Verified Successfully!' : 'Email Already Verified!'}
                                             </p>
                                             <p className="text-sm text-gray-600">
-                                                {codeSent ? 'Redirecting to the next step...' : 'This email is already verified. Proceeding to the next step...'}
+                                                Click the button below to create your account.
                                             </p>
+                                            <button
+                                                type="button"
+                                                onClick={handleCoreSignup}
+                                                disabled={isCreatingAccount}
+                                                className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                                            >
+                                                {isCreatingAccount ? 'Creating Account...' : 'Create Account'}
+                                            </button>
                                         </div>
                                     )}
                                 </div>
                             </div>
 
                             {/* Back to step 1 to change email if needed */}
-                            {!isEmailVerified && (
-                                <div className="text-center">
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setCurrentStep(1);
-                                            setCodeSent(false);
-                                            setVerificationCode('');
-                                            setIsEmailVerified(false);
-                                            setError('');
-                                        }}
-                                        className="text-sm text-gray-600 hover:text-gray-900 underline"
-                                    >
-                                        Wrong email? Go back to change it
-                                    </button>
-                                </div>
-                            )}
+                            <div className="flex gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setCurrentStep(1);
+                                        setCodeSent(false);
+                                        setVerificationCode('');
+                                        setIsEmailVerified(false);
+                                        setError('');
+                                    }}
+                                    className="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                                >
+                                    Back
+                                </button>
+                                {!isEmailVerified && (
+                                    <div className="flex-1 flex items-center justify-center">
+                                        <span className="text-sm text-gray-500">Verify email to continue</span>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     )}
 
                     {/* Step 3: Bowling Style & Membership */}
-                    {currentStep === 3 && (
+                    {currentStep === 3 && showAdditionalSteps && (
                         <div className="space-y-6">
                             <h3 className="text-lg font-medium text-gray-900 text-center">Bowling Style & Membership</h3>
                             
@@ -885,7 +979,7 @@ export default function SignUpPage() {
                     )}
 
                     {/* Step 4: Address Information (previously Step 3) */}
-                    {currentStep === 4 && (
+                    {currentStep === 4 && showAdditionalSteps && (
                         <div className="space-y-4">
                             <h3 className="text-lg font-medium text-gray-900 text-center">Location Information</h3>
                             <div className="grid grid-cols-2 gap-4">
@@ -939,7 +1033,7 @@ export default function SignUpPage() {
                     )}
 
                     {/* Step 5: Favorite Brands (previously Step 4) */}
-                    {currentStep === 5 && (
+                    {currentStep === 5 && showAdditionalSteps && (
                         <div className="space-y-6">
                             <h3 className="text-lg font-medium text-gray-900 text-center">Choose Your Favorite Brands</h3>
                             <p className="text-sm text-gray-600 text-center">Select brands you're interested in (optional)</p>
@@ -1073,44 +1167,52 @@ export default function SignUpPage() {
                     )}
 
                     {/* Navigation Buttons */}
-                    <div className="flex gap-4">
-                        {currentStep > 1 && (
+                    {currentStep !== 2 && (
+                        <div className="flex gap-4">
+                            {currentStep > 1 && showAdditionalSteps && (
+                                <button
+                                    type="button"
+                                    onClick={handleBack}
+                                    className="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                                >
+                                    Back
+                                </button>
+                            )}
                             <button
-                                type="button"
-                                onClick={handleBack}
-                                className="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                                type="submit"
+                                disabled={
+                                    isLoading || 
+                                    isCreatingAccount ||
+                                    (currentStep === 1 && isUnder13)
+                                }
+                                className="flex-1 py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                style={{
+                                    backgroundColor: (isLoading || isCreatingAccount || (currentStep === 1 && isUnder13)) ? '#d1d5db' : '#8BC342',
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (!e.currentTarget.disabled) {
+                                        e.currentTarget.style.backgroundColor = '#7aa838';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!e.currentTarget.disabled) {
+                                        e.currentTarget.style.backgroundColor = '#8BC342';
+                                    }
+                                }}
                             >
-                                Back
-                            </button>
-                        )}
-                        <button
-                            type="submit"
-                            disabled={isLoading || (currentStep === 1 && isUnder13) || (currentStep === 2 && !isEmailVerified)}
-                            className="flex-1 py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                            style={{
-                                backgroundColor: (isLoading || (currentStep === 1 && isUnder13) || (currentStep === 2 && !isEmailVerified)) ? '#d1d5db' : '#8BC342',
-                            }}
-                            onMouseEnter={(e) => {
-                                if (!e.currentTarget.disabled) {
-                                    e.currentTarget.style.backgroundColor = '#7aa838';
-                                }
-                            }}
-                            onMouseLeave={(e) => {
-                                if (!e.currentTarget.disabled) {
-                                    e.currentTarget.style.backgroundColor = '#8BC342';
-                                }
-                            }}
-                        >
-                            {currentStep === 5 
-                                ? (isLoading ? 'Creating account...' : 'Create account')
-                                : currentStep === 1 && isUnder13 
+                                {currentStep === 1 && isUnder13 
                                     ? 'Age requirement not met'
-                                    : currentStep === 2 && !isEmailVerified
-                                        ? 'Verify email to continue'
+                                    : currentStep === 1
+                                        ? (isLoading ? 'Validating...' : 'Next')
+                                    : showAdditionalSteps && currentStep === 5 
+                                        ? (isLoading ? 'Completing profile...' : 'Complete profile')
+                                    : showAdditionalSteps
+                                        ? 'Next'
                                         : 'Next'
-                            }
-                        </button>
-                    </div>
+                                }
+                            </button>
+                        </div>
+                    )}
 
                     {currentStep === 1 && (
                         <div className="text-center">
@@ -1123,7 +1225,7 @@ export default function SignUpPage() {
                         </div>
                     )}
 
-                    {currentStep === 5 && (
+                    {((currentStep === 2 && !showAdditionalSteps) || (currentStep === 5 && showAdditionalSteps)) && (
                         <div className="text-center">
                             <p className="text-sm text-gray-600">
                                 By creating an account, you agree to our Terms of Service and Privacy Policy
