@@ -525,6 +525,30 @@ export default function SignUpPage() {
                                     <p>✓ You meet the age requirement to create an account independently.</p>
                                 </div>
                             )}
+
+                            {/* USBC Checkboxes based on age */}
+                            {birthDate && userAge > 0 && (
+                                <div className="space-y-3">
+                                    {userAge < 18 ? (
+                                        <label className="flex items-center space-x-3 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                                            />
+                                            <span className="text-sm text-gray-700">I am a USBC youth bowler</span>
+                                        </label>
+                                    ) : (
+                                        <label className="flex items-center space-x-3 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                                            />
+                                            <span className="text-sm text-gray-700">I am a USBC youth coach</span>
+                                        </label>
+                                    )}
+                                </div>
+                            )}
+
                             <div>
                                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                                     Password
