@@ -302,13 +302,13 @@ export default function SignUpPage() {
                     last_name: lastName,
                     email,
                     password,
-                    birth_date: birthDate,
+                    // birth_date: birthDate,
                     // Include parent information if user is under 18
-                    ...(isUnder18 && {
-                        parent_first_name: parentFirstName,
-                        parent_last_name: parentLastName,
-                        parent_email: parentEmail
-                    })
+                    // ...(isUnder18 && {
+                    //     parent_first_name: parentFirstName,
+                    //     parent_last_name: parentLastName,
+                    //     parent_email: parentEmail
+                    // })
                 },
                 brandIDs: allBrandIDs
             };
