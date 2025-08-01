@@ -98,6 +98,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             last_name: string;
             email: string;
             password: string;
+            birth_date?: string;
+            parent_first_name?: string;
+            parent_last_name?: string;
+            parent_email?: string;
         };
         brandIDs: number[];
     }): Promise<boolean> => {

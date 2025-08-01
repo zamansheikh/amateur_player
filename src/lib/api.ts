@@ -61,10 +61,25 @@ export const authApi = {
             last_name: string;
             email: string;
             password: string;
+            birth_date?: string;
+            parent_first_name?: string;
+            parent_last_name?: string;
+            parent_email?: string;
         };
         brandIDs: number[];
     }) => {
         const response = await api.post('/api/create-user', userData);
+        return response.data;
+    },
+
+    validateSignupData: async (validationData: {
+        first_name: string;
+        last_name: string;
+        username: string;
+        email: string;
+        password: string;
+    }) => {
+        const response = await api.post('/api/validate-signup-data', validationData);
         return response.data;
     }
 };
@@ -88,6 +103,17 @@ export const userApi = {
 
     verifyEmail: async (email: string, code: string) => {
         const response = await api.post('/api/verify-email', { email, code });
+        return response.data;
+    },
+
+    validateSignupData: async (validationData: {
+        first_name: string;
+        last_name: string;
+        username: string;
+        email: string;
+        password: string;
+    }) => {
+        const response = await api.post('/api/validate-signup-data', validationData);
         return response.data;
     }
 };

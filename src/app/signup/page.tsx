@@ -45,6 +45,7 @@ export default function SignUpPage() {
     const [isSendingCode, setIsSendingCode] = useState(false);
     const [isVerifyingCode, setIsVerifyingCode] = useState(false);
     const [codeSent, setCodeSent] = useState(false);
+    const [userCreated, setUserCreated] = useState(false); // Track if user was created
     
     // Step 3: Address Info (previously Step 2)
     const [zipCode, setZipCode] = useState('');
@@ -64,7 +65,7 @@ export default function SignUpPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const { signup } = useAuth();
+    const { signup, signin } = useAuth();
     const router = useRouter();
 
     // Helper function to calculate age
@@ -174,7 +175,7 @@ export default function SignUpPage() {
         }));
     };
 
-    const validateStep1 = () => {
+    const validateStep1 = async (): Promise<boolean> => {
         if (!firstName || !lastName || !username || !email || !password || !confirmPassword || !birthDate) {
             setError('Please fill in all fields');
             return false;
@@ -207,8 +208,36 @@ export default function SignUpPage() {
             setError('Password must contain both letters and numbers');
             return false;
         }
-        setError('');
-        return true;
+
+        // Validate with the new validation API
+        try {
+            setIsLoading(true);
+            const validationData = {
+                first_name: firstName,
+                last_name: lastName,
+                username: username,
+                email: email,
+                password: password
+            };
+
+            const result = await userApi.validateSignupData(validationData);
+
+            if (result.isValid) {
+                setError('');
+                return true;
+            } else {
+                // Display validation errors
+                const errorMessage = result.errors ? result.errors.join(' ') : 'Validation failed';
+                setError(errorMessage);
+                return false;
+            }
+        } catch (error) {
+            console.error('Validation error:', error);
+            setError('An error occurred while validating your information. Please try again.');
+            return false;
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const validateStep2 = () => {
@@ -229,13 +258,16 @@ export default function SignUpPage() {
         return true;
     };
 
-    const handleNext = () => {
-        if (currentStep === 1 && validateStep1()) {
-            // Reset email verification state when entering step 2 with a new email
-            setIsEmailVerified(false);
-            setCodeSent(false);
-            setVerificationCode('');
-            setCurrentStep(2);
+    const handleNext = async () => {
+        if (currentStep === 1) {
+            const isValid = await validateStep1();
+            if (isValid) {
+                // Reset email verification state when entering step 2 with a new email
+                setIsEmailVerified(false);
+                setCodeSent(false);
+                setVerificationCode('');
+                setCurrentStep(2);
+            }
         } else if (currentStep === 2 && validateStep2()) {
             setCurrentStep(3);
         } else if (currentStep === 3 && validateStep3()) {
@@ -254,16 +286,16 @@ export default function SignUpPage() {
         setIsLoading(true);
 
         try {
-            // Collect all selected brand IDs from all categories
-            const allSelectedBrandIds = [
+            // Flatten all selected brand IDs into a single array
+            const allBrandIDs = [
                 ...selectedBrands.balls,
                 ...selectedBrands.shoes,
                 ...selectedBrands.accessories,
                 ...selectedBrands.apparels
             ];
 
-            // Prepare the signup data with birth date and parent info
-            const signupData = {
+            // Create the user account now that all steps are complete
+            const userData = {
                 basicInfo: {
                     username,
                     first_name: firstName,
@@ -278,17 +310,18 @@ export default function SignUpPage() {
                         parent_email: parentEmail
                     })
                 },
-                brandIDs: allSelectedBrandIds
+                brandIDs: allBrandIDs
             };
 
-            const success = await signup(signupData);
+            const success = await signup(userData);
             if (success) {
                 router.push('/');
             } else {
                 setError('Failed to create account. Please try again.');
             }
         } catch (err) {
-            setError('An error occurred. Please try again.');
+            console.error('Signup error:', err);
+            setError('An error occurred during account creation. Please try again.');
         } finally {
             setIsLoading(false);
         }
@@ -322,7 +355,7 @@ export default function SignUpPage() {
                     ></div>
                 </div>
 
-                <form className="mt-8 space-y-6" onSubmit={currentStep === 4 ? handleSubmit : (e) => { e.preventDefault(); handleNext(); }}>
+                <form className="mt-8 space-y-6" onSubmit={currentStep === 4 ? handleSubmit : async (e) => { e.preventDefault(); await handleNext(); }}>
                     {/* Step 1: Basic Information */}
                     {currentStep === 1 && (
                         <div className="space-y-4">
