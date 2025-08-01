@@ -563,7 +563,7 @@ export default function SignUpPage() {
                                                     onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                                                     placeholder="Enter 6-digit code"
                                                     maxLength={6}
-                                                    className="w-48 px-4 py-3 text-center text-2xl font-mono border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 tracking-widest"
+                                                    className="w-64 px-4 py-3 text-center text-sm font-mono border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 tracking-widest"
                                                 />
                                                 <button
                                                     type="button"
