@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { ArrowLeft, Camera, Upload } from 'lucide-react';
-import { api } from '@/lib/api';
+import { ArrowLeft, Camera, Upload, Mail, Check, Clock } from 'lucide-react';
+import { api, userApi } from '@/lib/api';
 
 export default function EditProfilePage() {
     const { user, refreshUser } = useAuth();
@@ -25,6 +25,14 @@ export default function EditProfilePage() {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
+    // Email verification states
+    const [isEmailVerified, setIsEmailVerified] = useState(false);
+    const [isSendingCode, setIsSendingCode] = useState(false);
+    const [isVerifyingCode, setIsVerifyingCode] = useState(false);
+    const [showVerificationInput, setShowVerificationInput] = useState(false);
+    const [verificationCode, setVerificationCode] = useState('');
+    const [codeSent, setCodeSent] = useState(false);
+
     useEffect(() => {
         if (user) {
             setFormData({
@@ -35,6 +43,9 @@ export default function EditProfilePage() {
                 name: user.name || '',
                 profile_picture_url: user.profile_picture_url || ''
             });
+            
+            // Check if email is verified from user data
+            setIsEmailVerified(user.email_verified || false);
         }
     }, [user]);
 
@@ -44,6 +55,60 @@ export default function EditProfilePage() {
             ...prev,
             [name]: value
         }));
+        
+        // Reset email verification status if email is changed
+        if (name === 'email') {
+            setIsEmailVerified(false);
+            setCodeSent(false);
+            setShowVerificationInput(false);
+            setVerificationCode('');
+        }
+    };
+
+    const sendVerificationCode = async () => {
+        if (!formData.email) {
+            setError('Please enter an email address first');
+            return;
+        }
+
+        setIsSendingCode(true);
+        setError(null);
+
+        try {
+            await userApi.sendVerificationCode(formData.email);
+            setCodeSent(true);
+            setShowVerificationInput(true);
+            setSuccess('Verification code sent to your email!');
+        } catch (error: any) {
+            console.error('Error sending verification code:', error);
+            setError(error.response?.data?.message || 'Failed to send verification code. Please try again.');
+        } finally {
+            setIsSendingCode(false);
+        }
+    };
+
+    const verifyEmailCode = async () => {
+        if (!verificationCode) {
+            setError('Please enter the verification code');
+            return;
+        }
+
+        setIsVerifyingCode(true);
+        setError(null);
+
+        try {
+            await userApi.verifyEmail(formData.email, verificationCode);
+            setIsEmailVerified(true);
+            setShowVerificationInput(false);
+            setSuccess('Email verified successfully!');
+            setCodeSent(false);
+            setVerificationCode('');
+        } catch (error: any) {
+            console.error('Error verifying email:', error);
+            setError(error.response?.data?.message || 'Invalid verification code. Please try again.');
+        } finally {
+            setIsVerifyingCode(false);
+        }
     };
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -236,15 +301,98 @@ export default function EditProfilePage() {
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                                 Email Address
                             </label>
-                            <input
-                                type="email"
-                                id="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleInputChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                required
-                            />
+                            <div className="space-y-3">
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={handleInputChange}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                    required
+                                />
+                                
+                                {/* Email Verification Section */}
+                                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div className="flex items-center gap-2">
+                                            <Mail className="w-4 h-4 text-gray-500" />
+                                            <span className="text-sm font-medium text-gray-700">Email Verification</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            {isEmailVerified ? (
+                                                <>
+                                                    <Check className="w-4 h-4 text-green-600" />
+                                                    <span className="text-sm text-green-600 font-medium">Verified</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Clock className="w-4 h-4 text-orange-500" />
+                                                    <span className="text-sm text-orange-600 font-medium">Unverified</span>
+                                                </>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {!isEmailVerified && (
+                                        <div className="space-y-3">
+                                            {!showVerificationInput ? (
+                                                <div>
+                                                    <p className="text-sm text-gray-600 mb-3">
+                                                        Verify your email address to ensure account security and receive important notifications.
+                                                    </p>
+                                                    <button
+                                                        type="button"
+                                                        onClick={sendVerificationCode}
+                                                        disabled={isSendingCode || !formData.email}
+                                                        className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-colors"
+                                                    >
+                                                        {isSendingCode ? 'Sending...' : 'Send Verification Code'}
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-3">
+                                                    <p className="text-sm text-gray-600">
+                                                        Enter the 6-digit verification code sent to your email:
+                                                    </p>
+                                                    <div className="flex gap-2">
+                                                        <input
+                                                            type="text"
+                                                            value={verificationCode}
+                                                            onChange={(e) => setVerificationCode(e.target.value)}
+                                                            placeholder="Enter 6-digit code"
+                                                            maxLength={6}
+                                                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 text-center text-lg font-mono"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={verifyEmailCode}
+                                                            disabled={isVerifyingCode || verificationCode.length !== 6}
+                                                            className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-colors"
+                                                        >
+                                                            {isVerifyingCode ? 'Verifying...' : 'Verify'}
+                                                        </button>
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        onClick={sendVerificationCode}
+                                                        disabled={isSendingCode}
+                                                        className="text-sm text-green-600 hover:text-green-700 underline"
+                                                    >
+                                                        {isSendingCode ? 'Sending...' : 'Resend Code'}
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {isEmailVerified && (
+                                        <p className="text-sm text-green-600">
+                                            ✓ Your email address has been verified successfully!
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
                         </div>
 
                         {/* Error/Success Messages */}
@@ -261,21 +409,30 @@ export default function EditProfilePage() {
                         )}
 
                         {/* Submit Button */}
-                        <div className="flex gap-4">
-                            <button
-                                type="button"
-                                onClick={() => router.back()}
-                                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={isLoading}
-                                className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors"
-                            >
-                                {isLoading ? 'Saving...' : 'Save Changes'}
-                            </button>
+                        <div className="space-y-3">
+                            {!isEmailVerified && formData.email && (
+                                <div className="bg-orange-50 border border-orange-200 text-orange-700 px-4 py-3 rounded-lg text-sm">
+                                    <p className="font-medium">Email Verification Recommended</p>
+                                    <p>We recommend verifying your email address before saving changes to ensure account security.</p>
+                                </div>
+                            )}
+                            
+                            <div className="flex gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => router.back()}
+                                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                                >
+                                    {isLoading ? 'Saving...' : 'Save Changes'}
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>

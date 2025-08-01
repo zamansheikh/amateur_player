@@ -8,6 +8,7 @@ export interface User {
     intro_video_url?: string;
     xp: number;
     email: string;
+    email_verified?: boolean;
     level: number;
     card_theme: string;
     is_pro: boolean;

@@ -79,5 +79,15 @@ export const userApi = {
     updateProfile: async (data: any) => {
         const response = await api.put('/api/user/profile', data);
         return response.data;
+    },
+
+    sendVerificationCode: async (email: string) => {
+        const response = await api.post('/api/send-verification-code', { email });
+        return response.data;
+    },
+
+    verifyEmail: async (email: string, code: string) => {
+        const response = await api.post('/api/verify-email', { email, code });
+        return response.data;
     }
 };
