@@ -31,6 +31,12 @@ export default function SignUpPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [birthDate, setBirthDate] = useState('');
+    
+    // Parent information (for users under 18)
+    const [parentFirstName, setParentFirstName] = useState('');
+    const [parentLastName, setParentLastName] = useState('');
+    const [parentEmail, setParentEmail] = useState('');
     
     // Step 2: Address Info
     const [zipCode, setZipCode] = useState('');
@@ -52,6 +58,24 @@ export default function SignUpPage() {
 
     const { signup } = useAuth();
     const router = useRouter();
+
+    // Helper function to calculate age
+    const calculateAge = (birthDate: string): number => {
+        if (!birthDate) return 0;
+        const today = new Date();
+        const birth = new Date(birthDate);
+        let age = today.getFullYear() - birth.getFullYear();
+        const monthDiff = today.getMonth() - birth.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+            age--;
+        }
+        return age;
+    };
+
+    // Get user age from birth date
+    const userAge = calculateAge(birthDate);
+    const isUnder18 = userAge > 0 && userAge < 18;
+    const isUnder13 = userAge > 0 && userAge < 13;
 
     // Fetch brands data
     useEffect(() => {
@@ -85,10 +109,23 @@ export default function SignUpPage() {
     };
 
     const validateStep1 = () => {
-        if (!firstName || !lastName || !username || !email || !password || !confirmPassword) {
+        if (!firstName || !lastName || !username || !email || !password || !confirmPassword || !birthDate) {
             setError('Please fill in all fields');
             return false;
         }
+        
+        // Check age restrictions
+        if (isUnder13) {
+            setError('You must be at least 13 years old to create an account');
+            return false;
+        }
+        
+        // Check parent information for users under 18
+        if (isUnder18 && (!parentFirstName || !parentLastName || !parentEmail)) {
+            setError('Parent information is required for users under 18');
+            return false;
+        }
+        
         if (password !== confirmPassword) {
             setError('Passwords do not match');
             return false;
@@ -144,14 +181,21 @@ export default function SignUpPage() {
                 ...selectedBrands.apparels
             ];
 
-            // Prepare the new API body structure
+            // Prepare the signup data with birth date and parent info
             const signupData = {
                 basicInfo: {
                     username,
                     first_name: firstName,
                     last_name: lastName,
                     email,
-                    password
+                    password,
+                    birth_date: birthDate,
+                    // Include parent information if user is under 18
+                    ...(isUnder18 && {
+                        parent_first_name: parentFirstName,
+                        parent_last_name: parentLastName,
+                        parent_email: parentEmail
+                    })
                 },
                 brandIDs: allSelectedBrandIds
             };
@@ -264,6 +308,109 @@ export default function SignUpPage() {
                                     placeholder="Enter your email address"
                                 />
                             </div>
+                            <div>
+                                <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700">
+                                    Birth Date
+                                </label>
+                                <input
+                                    id="birthDate"
+                                    name="birthDate"
+                                    type="date"
+                                    required
+                                    value={birthDate}
+                                    onChange={(e) => {
+                                        setBirthDate(e.target.value);
+                                        // Clear parent fields if user becomes 18 or older
+                                        const age = calculateAge(e.target.value);
+                                        if (age >= 18) {
+                                            setParentFirstName('');
+                                            setParentLastName('');
+                                            setParentEmail('');
+                                        }
+                                        // Clear error when birth date changes
+                                        setError('');
+                                    }}
+                                    max={new Date().toISOString().split('T')[0]} // Prevent future dates
+                                    className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                                />
+                            </div>
+
+                            {/* Age restriction warning for users under 13 */}
+                            {isUnder13 && (
+                                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+                                    <p className="font-medium">Age Restriction</p>
+                                    <p>You must be at least 13 years old to create an account on this platform.</p>
+                                </div>
+                            )}
+
+                            {/* Parent information section for users under 18 (but 13 and older) */}
+                            {isUnder18 && !isUnder13 && (
+                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-4">
+                                    <div className="text-sm text-blue-800">
+                                        <p className="font-medium">Parent/Guardian Information Required</p>
+                                        <p>Since you are under 18, we need your parent or guardian's information for account verification and safety purposes.</p>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label htmlFor="parentFirstName" className="block text-sm font-medium text-gray-700">
+                                                Parent's First Name
+                                            </label>
+                                            <input
+                                                id="parentFirstName"
+                                                name="parentFirstName"
+                                                type="text"
+                                                required={isUnder18}
+                                                value={parentFirstName}
+                                                onChange={(e) => setParentFirstName(e.target.value)}
+                                                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                                                placeholder="Parent's first name"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label htmlFor="parentLastName" className="block text-sm font-medium text-gray-700">
+                                                Parent's Last Name
+                                            </label>
+                                            <input
+                                                id="parentLastName"
+                                                name="parentLastName"
+                                                type="text"
+                                                required={isUnder18}
+                                                value={parentLastName}
+                                                onChange={(e) => setParentLastName(e.target.value)}
+                                                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                                                placeholder="Parent's last name"
+                                            />
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label htmlFor="parentEmail" className="block text-sm font-medium text-gray-700">
+                                            Parent's Email Address
+                                        </label>
+                                        <input
+                                            id="parentEmail"
+                                            name="parentEmail"
+                                            type="email"
+                                            required={isUnder18}
+                                            value={parentEmail}
+                                            onChange={(e) => setParentEmail(e.target.value)}
+                                            className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                                            placeholder="Parent's email address"
+                                        />
+                                        {/* <p className="mt-1 text-xs text-gray-500">
+                                            Your parent/guardian will receive a notification about this account creation.
+                                        </p> */}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Success message for users 18 and older */}
+                            {userAge >= 18 && birthDate && (
+                                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+                                    <p>✓ You meet the age requirement to create an account independently.</p>
+                                </div>
+                            )}
                             <div>
                                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                                     Password
@@ -498,10 +645,10 @@ export default function SignUpPage() {
                         )}
                         <button
                             type="submit"
-                            disabled={isLoading}
+                            disabled={isLoading || (currentStep === 1 && isUnder13)}
                             className="flex-1 py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             style={{
-                                backgroundColor: isLoading ? '#d1d5db' : '#8BC342',
+                                backgroundColor: (isLoading || (currentStep === 1 && isUnder13)) ? '#d1d5db' : '#8BC342',
                             }}
                             onMouseEnter={(e) => {
                                 if (!e.currentTarget.disabled) {
@@ -516,7 +663,7 @@ export default function SignUpPage() {
                         >
                             {currentStep === 3 
                                 ? (isLoading ? 'Creating account...' : 'Create account')
-                                : 'Next'
+                                : (currentStep === 1 && isUnder13 ? 'Age requirement not met' : 'Next')
                             }
                         </button>
                     </div>
