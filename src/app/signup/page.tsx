@@ -123,7 +123,18 @@ export default function SignUpPage() {
             setError('');
         } catch (error: any) {
             console.error('Error sending verification code:', error);
-            setError(error.response?.data?.message || 'Failed to send verification code. Please try again.');
+            
+            // Check if email is already verified (status code 409)
+            if (error.response?.status === 409) {
+                setIsEmailVerified(true);
+                setError('');
+                // Auto-advance to next step since email is already verified
+                setTimeout(() => {
+                    setCurrentStep(3);
+                }, 1500);
+            } else {
+                setError(error.response?.data?.message || 'Failed to send verification code. Please try again.');
+            }
         } finally {
             setIsSendingCode(false);
         }
@@ -522,11 +533,11 @@ export default function SignUpPage() {
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                                 <div className="text-center">
                                     <p className="text-sm text-blue-800 mb-2">
-                                        We've sent a verification code to:
+                                        {isEmailVerified ? 'Email already verified:' : 'We will send a verification code to:'}
                                     </p>
                                     <p className="font-medium text-blue-900 mb-4">{email}</p>
                                     
-                                    {!codeSent ? (
+                                    {!codeSent && !isEmailVerified ? (
                                         <div className="space-y-4">
                                             <p className="text-sm text-gray-600">
                                                 Click the button below to send a verification code to your email address.
@@ -537,10 +548,10 @@ export default function SignUpPage() {
                                                 disabled={isSendingCode}
                                                 className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors"
                                             >
-                                                {isSendingCode ? 'Sending Code...' : 'Send Verification Code'}
+                                                {isSendingCode ? 'Checking Email Status...' : 'Send Verification Code'}
                                             </button>
                                         </div>
-                                    ) : !isEmailVerified ? (
+                                    ) : codeSent && !isEmailVerified ? (
                                         <div className="space-y-4">
                                             <p className="text-sm text-gray-600">
                                                 Enter the 6-digit verification code sent to your email:
@@ -570,12 +581,13 @@ export default function SignUpPage() {
                                                     onClick={() => {
                                                         setCodeSent(false);
                                                         setVerificationCode('');
+                                                        setError('');
                                                         sendVerificationCode();
                                                     }}
                                                     disabled={isSendingCode}
                                                     className="text-sm text-green-600 hover:text-green-700 underline"
                                                 >
-                                                    {isSendingCode ? 'Sending...' : "Didn't receive the code? Resend"}
+                                                    {isSendingCode ? 'Checking...' : "Didn't receive the code? Resend"}
                                                 </button>
                                             </div>
                                         </div>
@@ -586,8 +598,12 @@ export default function SignUpPage() {
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                                                 </svg>
                                             </div>
-                                            <p className="text-green-600 font-medium">Email Verified Successfully!</p>
-                                            <p className="text-sm text-gray-600">Redirecting to the next step...</p>
+                                            <p className="text-green-600 font-medium">
+                                                {codeSent ? 'Email Verified Successfully!' : 'Email Already Verified!'}
+                                            </p>
+                                            <p className="text-sm text-gray-600">
+                                                {codeSent ? 'Redirecting to the next step...' : 'This email is already verified. Proceeding to the next step...'}
+                                            </p>
                                         </div>
                                     )}
                                 </div>
