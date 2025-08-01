@@ -33,15 +33,15 @@ interface FeedPost {
     is_following: boolean;
     viewer_is_author: boolean;
   };
-  likes: [{
+  likes: {
     total: number;
     likers: Array<{
       user_id: number;
       name: string;
       profile_pic_url: string;
     }>;
-  }];
-  comments: [{
+  };
+  comments: {
     total: number;
     comment_list: Array<{
       comment_id: number;
@@ -54,7 +54,7 @@ interface FeedPost {
       pics: any[];
       replies: any[];
     }>;
-  }];
+  };
   caption: string;
   media: string[];
   poll: any;
@@ -172,10 +172,10 @@ export default function PostDetailPage() {
           ...post.metadata,
           total_comments: post.metadata.total_comments + 1
         },
-        comments: [{
-          total: post.comments[0].total + 1,
-          comment_list: [newComment, ...post.comments[0].comment_list]
-        }]
+        comments: {
+          total: post.comments.total + 1,
+          comment_list: [newComment, ...post.comments.comment_list]
+        }
       };
 
       setPost(updatedPost);
@@ -299,7 +299,7 @@ export default function PostDetailPage() {
 
             {/* Comments List */}
             <div className="space-y-4">
-              {post.comments[0].comment_list.map((comment) => (
+              {post.comments.comment_list.map((comment) => (
                 <div key={comment.comment_id} className="space-y-3">
                   <div className="flex items-start gap-3">
                     <img
@@ -389,7 +389,7 @@ export default function PostDetailPage() {
                 </div>
               ))}
 
-              {post.comments[0].comment_list.length === 0 && (
+              {post.comments.comment_list.length === 0 && (
                 <div className="text-center py-8">
                   <p className="text-gray-500">No comments yet. Be the first to comment!</p>
                 </div>

@@ -30,15 +30,15 @@ interface UserPost {
         name: string;
         profile_picture_url: string;
     };
-    likes: [{
+    likes: {
         total: number;
         likers: Array<{
             user_id: number;
             name: string;
             profile_pic_url: string;
         }>;
-    }];
-    comments: [{
+    };
+    comments: {
         total: number;
         comment_list: Array<{
             comment_id: number;
@@ -51,7 +51,7 @@ interface UserPost {
             pics: any[];
             replies: any[];
         }>;
-    }];
+    };
     caption: string;
     media: string[];
     poll: any;

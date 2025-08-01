@@ -30,32 +30,28 @@ interface FeedPost {
     is_following: boolean;
     viewer_is_author: boolean;
   };
-  likes: [
-    {
-      total: number;
-      likers: Array<{
+  likes: {
+    total: number;
+    likers: Array<{
+      user_id: number;
+      name: string;
+      profile_pic_url: string;
+    }>;
+  };
+  comments: {
+    total: number;
+    comment_list: Array<{
+      comment_id: number;
+      user: {
         user_id: number;
         name: string;
-        profile_pic_url: string;
-      }>;
-    }
-  ];
-  comments: [
-    {
-      total: number;
-      comment_list: Array<{
-        comment_id: number;
-        user: {
-          user_id: number;
-          name: string;
           profile_picture_url: string;
         };
         text: string;
         pics: any[];
         replies: any[];
       }>;
-    }
-  ];
+    };
   caption: string;
   media: string[];
   poll: any;
