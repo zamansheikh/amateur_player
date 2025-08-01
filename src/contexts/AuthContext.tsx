@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         checkAuth();
     }, []);
 
-    const signin = async (username: string, password: string): Promise<boolean> => {
+    const signin = async (username: string, password: string): Promise<{ success: boolean; profileComplete?: boolean }> => {
         try {
             setIsLoading(true);
 
@@ -71,13 +71,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 localStorage.setItem('user', JSON.stringify(userData));
                 setUser(userData);
 
-                return true;
+                // Return success and profile completion status
+                return { 
+                    success: true, 
+                    profileComplete: userProfile.is_complete 
+                };
             }
 
-            return false;
+            return { success: false };
         } catch (error) {
             console.error('Login error:', error);
-            return false;
+            return { success: false };
         } finally {
             setIsLoading(false);
         }
@@ -113,7 +117,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             if (signupResponse && signupResponse.message) {
                 // Auto-login after successful signup using basic info
-                return await signin(userData.basicInfo.username, userData.basicInfo.password);
+                const signinResult = await signin(userData.basicInfo.username, userData.basicInfo.password);
+                return signinResult.success;
             }
 
             return false;

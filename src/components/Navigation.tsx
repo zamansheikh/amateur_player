@@ -2,12 +2,42 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { Home, BarChart3, MessageCircle, Settings, Bell, Menu, X, LogOut, Users, Trophy, Target, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import GlobalHeader from '@/components/GlobalHeader';
+
+// Profile Completion Check Component
+function ProfileCompletionCheck({ children }: { children: React.ReactNode }) {
+    const { user, isLoading } = useAuth();
+    const router = useRouter();
+    const pathname = usePathname();
+
+    useEffect(() => {
+        // Skip check if on complete-profile page or if still loading
+        if (pathname === '/complete-profile' || isLoading) {
+            return;
+        }
+
+        // Check if user exists, is authenticated, and profile is incomplete
+        if (user && user.authenticated && user.is_complete === false) {
+            router.push('/complete-profile');
+        }
+    }, [user, isLoading, pathname, router]);
+
+    // If user's profile is incomplete and not on complete-profile page, show loading
+    if (!isLoading && user && user.authenticated && user.is_complete === false && pathname !== '/complete-profile') {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-xl text-green-600">Redirecting to complete your profile...</div>
+            </div>
+        );
+    }
+
+    return <>{children}</>;
+}
 
 const navigation = [
     { name: 'Newsfeed', href: '/home', icon: Home },
@@ -26,7 +56,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
     const { user, signout, isLoading } = useAuth();
 
     // Public routes that don't require authentication
-    const publicRoutes = ['/signin', '/signup', '/landing', '/landing/page', '/', '/select-your-role'];
+    const publicRoutes = ['/signin', '/signup', '/landing', '/landing/page', '/', '/select-your-role', '/complete-profile'];
     
     // Check if it's a pro player public route
     const isProPlayerRoute = pathname.startsWith('/pro/');
@@ -123,7 +153,8 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
 
     return (
         <ProtectedRoute>
-            <div className="flex h-screen bg-gray-100">
+            <ProfileCompletionCheck>
+                <div className="flex h-screen bg-gray-100">
                 {/* Mobile sidebar */}
                 {sidebarOpen && (
                     <div className="fixed inset-0 z-40 lg:hidden">
@@ -286,6 +317,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
                     </main>
                 </div>
             </div>
+            </ProfileCompletionCheck>
         </ProtectedRoute>
     );
 }

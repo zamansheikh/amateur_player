@@ -15,17 +15,9 @@ interface Brand {
     logo_url: string;
 }
 
-interface BrandsResponse {
-    Shoes: Brand[];
-    Apparels: Brand[];
-    Balls: Brand[];
-    Accessories: Brand[];
-}
-
 export default function SignUpPage() {
     const [currentStep, setCurrentStep] = useState(1);
     const [isProfileComplete, setIsProfileComplete] = useState(false);
-    const [showAdditionalSteps, setShowAdditionalSteps] = useState(false);
     
     // Step 1: Basic Info
     const [firstName, setFirstName] = useState('');
@@ -47,37 +39,13 @@ export default function SignUpPage() {
     const [isSendingCode, setIsSendingCode] = useState(false);
     const [isVerifyingCode, setIsVerifyingCode] = useState(false);
     const [codeSent, setCodeSent] = useState(false);
-    const [userCreated, setUserCreated] = useState(false); // Track if user was created
+    const [userCreated, setUserCreated] = useState(false);
     
-    // Step 3: Bowling Style & Membership
-    const [bowlingStyle, setBowlingStyle] = useState(''); // 'one-handed' or 'two-handed'
-    const [average, setAverage] = useState('');
-    const [division, setDivision] = useState(''); // 'senior', 'mens', 'womens'
-    const [isPBACardHolder, setIsPBACardHolder] = useState(false);
-    const [pbaCardNumber, setPbaCardNumber] = useState('');
-    const [isUSBCMember, setIsUSBCMember] = useState(false);
-    const [usbcMemberNumber, setUSBCMemberNumber] = useState('');
-    
-    // Step 4: Address Info (previously Step 3)
-    const [zipCode, setZipCode] = useState('');
-    const [city, setCity] = useState('');
-    const [state, setState] = useState('');
-    
-    // Step 5: Favorite Brands (previously Step 4)
-    const [selectedBrands, setSelectedBrands] = useState({
-        balls: [] as number[],
-        shoes: [] as number[],
-        accessories: [] as number[],
-        apparels: [] as number[]
-    });
-    
-    const [brands, setBrands] = useState<BrandsResponse | null>(null);
-    const [brandsLoading, setBrandsLoading] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [isCreatingAccount, setIsCreatingAccount] = useState(false);
 
-    const { signup, signin } = useAuth();
+    const { signup } = useAuth();
     const router = useRouter();
 
     // Helper function to calculate age
@@ -98,28 +66,6 @@ export default function SignUpPage() {
     const isUnder18 = userAge > 0 && userAge < 18;
     const isUnder13 = userAge > 0 && userAge < 13;
 
-    // Fetch brands data
-    useEffect(() => {
-        const fetchBrands = async () => {
-            setBrandsLoading(true);
-            try {
-                const response = await fetch('https://test.bowlersnetwork.com/api/brands');
-                if (response.ok) {
-                    const data = await response.json();
-                    setBrands(data);
-                }
-            } catch (error) {
-                console.error('Failed to fetch brands:', error);
-            } finally {
-                setBrandsLoading(false);
-            }
-        };
-
-        if (currentStep === 5) { // Updated from 4 to 5
-            fetchBrands();
-        }
-    }, [currentStep]);
-
     // Email verification functions
     const sendVerificationCode = async () => {
         if (!email) {
@@ -137,11 +83,9 @@ export default function SignUpPage() {
         } catch (error: any) {
             console.error('Error sending verification code:', error);
             
-            // Check if email is already verified (status code 409)
             if (error.response?.status === 409) {
                 setIsEmailVerified(true);
                 setError('');
-                // Don't auto-advance, let user click button to proceed
             } else {
                 setError(error.response?.data?.message || 'Failed to send verification code. Please try again.');
             }
@@ -163,7 +107,6 @@ export default function SignUpPage() {
             await userApi.verifyEmail(email, verificationCode);
             setIsEmailVerified(true);
             setError('');
-            // Don't auto-advance, let user click the button to proceed
         } catch (error: any) {
             console.error('Error verifying email:', error);
             setError(error.response?.data?.message || 'Invalid verification code. Please try again.');
@@ -172,28 +115,17 @@ export default function SignUpPage() {
         }
     };
 
-    const handleBrandToggle = (category: keyof typeof selectedBrands, brandId: number) => {
-        setSelectedBrands(prev => ({
-            ...prev,
-            [category]: prev[category].includes(brandId)
-                ? prev[category].filter(id => id !== brandId)
-                : [...prev[category], brandId]
-        }));
-    };
-
     const validateStep1 = async (): Promise<boolean> => {
         if (!firstName || !lastName || !username || !email || !password || !confirmPassword || !birthDate) {
             setError('Please fill in all fields');
             return false;
         }
         
-        // Check age restrictions
         if (isUnder13) {
             setError('You must be at least 13 years old to create an account');
             return false;
         }
         
-        // Check parent information for users under 18
         if (isUnder18 && (!parentFirstName || !parentLastName || !parentEmail)) {
             setError('Parent information is required for users under 18');
             return false;
@@ -207,7 +139,6 @@ export default function SignUpPage() {
             setError('Password must be at least 8 characters long');
             return false;
         }
-        // Check if password contains both letters and numbers
         const hasLetter = /[a-zA-Z]/.test(password);
         const hasNumber = /\d/.test(password);
         if (!hasLetter || !hasNumber) {
@@ -215,7 +146,6 @@ export default function SignUpPage() {
             return false;
         }
 
-        // Validate with the new validation API
         try {
             setIsLoading(true);
             const validationData = {
@@ -232,7 +162,6 @@ export default function SignUpPage() {
                 setError('');
                 return true;
             } else {
-                // Display validation errors
                 const errorMessage = result.errors ? result.errors.join(' ') : 'Validation failed';
                 setError(errorMessage);
                 return false;
@@ -255,67 +184,25 @@ export default function SignUpPage() {
         return true;
     };
 
-    const validateStep3 = () => {
-        if (!bowlingStyle) {
-            setError('Please select your bowling style');
-            return false;
-        }
-        if (!average) {
-            setError('Please enter your average');
-            return false;
-        }
-        if (!division) {
-            setError('Please select your division');
-            return false;
-        }
-        if (isPBACardHolder && !pbaCardNumber) {
-            setError('Please enter your PBA card number');
-            return false;
-        }
-        if (isUSBCMember && !usbcMemberNumber) {
-            setError('Please enter your USBC member number');
-            return false;
-        }
-        setError('');
-        return true;
-    };
-
-    const validateStep4 = () => {
-        if (!zipCode || !city || !state) {
-            setError('Please fill in all location fields');
-            return false;
-        }
-        setError('');
-        return true;
-    };
-
     const handleNext = async () => {
         if (currentStep === 1) {
             const isValid = await validateStep1();
             if (isValid) {
-                // Reset email verification state when entering step 2 with a new email
                 setIsEmailVerified(false);
                 setCodeSent(false);
                 setVerificationCode('');
                 setCurrentStep(2);
             }
         } else if (currentStep === 2 && validateStep2()) {
-            // After email verification, complete the core signup
             await handleCoreSignup();
-        } else if (currentStep === 3 && validateStep3()) {
-            setCurrentStep(4);
-        } else if (currentStep === 4 && validateStep4()) {
-            setCurrentStep(5);
         }
     };
 
-    // Handle core signup (steps 1-2)
     const handleCoreSignup = async () => {
         setError('');
         setIsCreatingAccount(true);
 
         try {
-            // Create the user account with basic info only
             const userData = {
                 basicInfo: {
                     username,
@@ -324,21 +211,19 @@ export default function SignUpPage() {
                     email,
                     password,
                     birth_date: birthDate,
-                    // Include parent information if user is under 18
                     ...(isUnder18 && {
                         parent_first_name: parentFirstName,
                         parent_last_name: parentLastName,
                         parent_email: parentEmail
                     })
                 },
-                brandIDs: [] // Empty for now
+                brandIDs: []
             };
 
             const success = await signup(userData);
             if (success) {
                 setUserCreated(true);
-                // Check if profile is complete
-                await checkProfileCompletion();
+                router.push('/');
             } else {
                 setError('Failed to create account. Please try again.');
             }
@@ -347,77 +232,6 @@ export default function SignUpPage() {
             setError('An error occurred during account creation. Please try again.');
         } finally {
             setIsCreatingAccount(false);
-        }
-    };
-
-    // Check profile completion status
-    const checkProfileCompletion = async () => {
-        try {
-            const profile = await userApi.getProfile();
-            
-            if (profile.is_complete) {
-                // Profile is complete, redirect to home
-                router.push('/');
-            } else {
-                // Profile incomplete, show additional steps
-                setShowAdditionalSteps(true);
-                setCurrentStep(3);
-                setUserCreated(true);
-            }
-        } catch (error) {
-            console.error('Error checking profile completion:', error);
-            // If error, assume profile incomplete and show additional steps
-            setShowAdditionalSteps(true);
-            setCurrentStep(3);
-            setUserCreated(true);
-        }
-    };
-
-    const handleBack = () => {
-        setCurrentStep(prev => prev - 1);
-        setError('');
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
-        setIsLoading(true);
-
-        try {
-            // This handles the additional profile completion (steps 3-5)
-            // Flatten all selected brand IDs into a single array
-            const allBrandIDs = [
-                ...selectedBrands.balls,
-                ...selectedBrands.shoes,
-                ...selectedBrands.accessories,
-                ...selectedBrands.apparels
-            ];
-
-            // Update profile with additional information
-            const additionalData = {
-                bowling_style: bowlingStyle,
-                average: parseInt(average),
-                division: division,
-                pba_card_holder: isPBACardHolder,
-                pba_card_number: isPBACardHolder ? pbaCardNumber : null,
-                usbc_member: isUSBCMember,
-                usbc_member_number: isUSBCMember ? usbcMemberNumber : null,
-                city: city,
-                state: state,
-                zip_code: zipCode,
-                brand_ids: allBrandIDs
-            };
-
-            // Call API to update profile with additional data
-            await userApi.updateProfile(additionalData);
-            
-            // Redirect to home page after completing profile
-            router.push('/');
-        } catch (err) {
-            console.error('Profile update error:', err);
-            setError('An error occurred while updating your profile. Please try again.');
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -435,47 +249,23 @@ export default function SignUpPage() {
                         />
                         <span className="text-2xl font-bold text-gray-900">Bowlers Network</span>
                     </div>
-                    <h2 className="text-3xl font-bold text-gray-900">
-                        {!showAdditionalSteps ? 'Create your account' : 'Complete your profile'}
-                    </h2>
-                    <p className="mt-2 text-sm text-gray-600">
-                        {!showAdditionalSteps 
-                            ? `Step ${currentStep} of 2`
-                            : `Step ${currentStep - 2} of 3 (Additional Information)`
-                        }
-                    </p>
+                    <h2 className="text-3xl font-bold text-gray-900">Create your account</h2>
+                    <p className="mt-2 text-sm text-gray-600">Step {currentStep} of 2</p>
                 </div>
 
-                {/* Progress Bar */}
                 <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
                         className="bg-green-600 h-2 rounded-full transition-all duration-300"
-                        style={{ 
-                            width: !showAdditionalSteps 
-                                ? `${(currentStep / 2) * 100}%`
-                                : `${((currentStep - 2) / 3) * 100}%`
-                        }}
+                        style={{ width: `${(currentStep / 2) * 100}%` }}
                     ></div>
                 </div>
 
-                <form className="mt-8 space-y-6" onSubmit={
-                    currentStep === 5 && showAdditionalSteps
-                        ? handleSubmit 
-                        : async (e) => { 
-                            e.preventDefault(); 
-                            if (currentStep === 1 || (currentStep === 3 && showAdditionalSteps) || (currentStep === 4 && showAdditionalSteps)) {
-                                await handleNext(); 
-                            }
-                        }
-                }>
-                    {/* Account Created Successfully Message */}
-                    {showAdditionalSteps && currentStep === 3 && (
-                        <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg text-sm text-center">
-                            <p className="font-medium">🎉 Account Created Successfully!</p>
-                            <p>Please complete your profile with the following additional information to get the best experience.</p>
-                        </div>
-                    )}
-                    {/* Step 1: Basic Information */}
+                <form className="mt-8 space-y-6" onSubmit={async (e) => { 
+                    e.preventDefault(); 
+                    if (currentStep === 1) {
+                        await handleNext(); 
+                    }
+                }}>
                     {currentStep === 1 && (
                         <div className="space-y-4">
                             <h3 className="text-lg font-medium text-gray-900 text-center">Basic Information</h3>
@@ -553,22 +343,19 @@ export default function SignUpPage() {
                                     value={birthDate}
                                     onChange={(e) => {
                                         setBirthDate(e.target.value);
-                                        // Clear parent fields if user becomes 18 or older
                                         const age = calculateAge(e.target.value);
                                         if (age >= 18) {
                                             setParentFirstName('');
                                             setParentLastName('');
                                             setParentEmail('');
                                         }
-                                        // Clear error when birth date changes
                                         setError('');
                                     }}
-                                    max={new Date().toISOString().split('T')[0]} // Prevent future dates
+                                    max={new Date().toISOString().split('T')[0]}
                                     className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
                                 />
                             </div>
 
-                            {/* Age restriction warning for users under 13 */}
                             {isUnder13 && (
                                 <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
                                     <p className="font-medium">Age Restriction</p>
@@ -576,7 +363,6 @@ export default function SignUpPage() {
                                 </div>
                             )}
 
-                            {/* Parent information section for users under 18 (but 13 and older) */}
                             {isUnder18 && !isUnder13 && (
                                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-4">
                                     <div className="text-sm text-blue-800">
@@ -631,21 +417,16 @@ export default function SignUpPage() {
                                             className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
                                             placeholder="Parent's email address"
                                         />
-                                        {/* <p className="mt-1 text-xs text-gray-500">
-                                            Your parent/guardian will receive a notification about this account creation.
-                                        </p> */}
                                     </div>
                                 </div>
                             )}
 
-                            {/* Success message for users 18 and older */}
                             {userAge >= 18 && birthDate && (
                                 <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
                                     <p>✓ You meet the age requirement to create an account independently.</p>
                                 </div>
                             )}
 
-                            {/* USBC Checkboxes based on age */}
                             {birthDate && userAge > 0 && (
                                 <div className="space-y-3">
                                     {userAge < 18 ? (
@@ -701,7 +482,6 @@ export default function SignUpPage() {
                         </div>
                     )}
 
-                    {/* Step 2: Email Verification */}
                     {currentStep === 2 && (
                         <div className="space-y-6">
                             <h3 className="text-lg font-medium text-gray-900 text-center">Verify Your Email</h3>
@@ -793,7 +573,6 @@ export default function SignUpPage() {
                                 </div>
                             </div>
 
-                            {/* Back to step 1 to change email if needed */}
                             <div className="flex gap-4">
                                 <button
                                     type="button"
@@ -817,374 +596,17 @@ export default function SignUpPage() {
                         </div>
                     )}
 
-                    {/* Step 3: Bowling Style & Membership */}
-                    {currentStep === 3 && showAdditionalSteps && (
-                        <div className="space-y-6">
-                            <h3 className="text-lg font-medium text-gray-900 text-center">Bowling Style & Membership</h3>
-                            
-                            {/* Bowling Style */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-3">
-                                    Bowling Style
-                                </label>
-                                <div className="space-y-2">
-                                    <label className="flex items-center space-x-3 cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            name="bowlingStyle"
-                                            value="one-handed"
-                                            checked={bowlingStyle === 'one-handed'}
-                                            onChange={(e) => setBowlingStyle(e.target.value)}
-                                            className="border-gray-300 text-green-600 focus:ring-green-500"
-                                        />
-                                        <span className="text-sm text-gray-700">One Handed</span>
-                                        <span className="text-green-600">✓</span>
-                                    </label>
-                                    <label className="flex items-center space-x-3 cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            name="bowlingStyle"
-                                            value="two-handed"
-                                            checked={bowlingStyle === 'two-handed'}
-                                            onChange={(e) => setBowlingStyle(e.target.value)}
-                                            className="border-gray-300 text-green-600 focus:ring-green-500"
-                                        />
-                                        <span className="text-sm text-gray-700">Two Handed</span>
-                                        <span className="text-green-600">✓</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            {/* Average */}
-                            <div>
-                                <label htmlFor="average" className="block text-sm font-medium text-gray-700">
-                                    Average
-                                </label>
-                                <input
-                                    id="average"
-                                    name="average"
-                                    type="number"
-                                    min="0"
-                                    max="300"
-                                    required
-                                    value={average}
-                                    onChange={(e) => setAverage(e.target.value)}
-                                    className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                                    placeholder="Enter your bowling average"
-                                />
-                            </div>
-
-                            {/* Division */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-3">
-                                    Division
-                                </label>
-                                <div className="space-y-2">
-                                    <label className="flex items-center space-x-3 cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            name="division"
-                                            value="senior"
-                                            checked={division === 'senior'}
-                                            onChange={(e) => setDivision(e.target.value)}
-                                            className="border-gray-300 text-green-600 focus:ring-green-500"
-                                        />
-                                        <span className="text-sm text-gray-700">Senior</span>
-                                    </label>
-                                    <label className="flex items-center space-x-3 cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            name="division"
-                                            value="mens"
-                                            checked={division === 'mens'}
-                                            onChange={(e) => setDivision(e.target.value)}
-                                            className="border-gray-300 text-green-600 focus:ring-green-500"
-                                        />
-                                        <span className="text-sm text-gray-700">Men's</span>
-                                    </label>
-                                    <label className="flex items-center space-x-3 cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            name="division"
-                                            value="womens"
-                                            checked={division === 'womens'}
-                                            onChange={(e) => setDivision(e.target.value)}
-                                            className="border-gray-300 text-green-600 focus:ring-green-500"
-                                        />
-                                        <span className="text-sm text-gray-700">Women's</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            {/* PBA Card Holder */}
-                            <div>
-                                <label className="flex items-center space-x-3 cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={isPBACardHolder}
-                                        onChange={(e) => {
-                                            setIsPBACardHolder(e.target.checked);
-                                            if (!e.target.checked) {
-                                                setPbaCardNumber('');
-                                            }
-                                        }}
-                                        className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                                    />
-                                    <span className="text-sm text-gray-700">PBA Card Holder</span>
-                                </label>
-                                
-                                {isPBACardHolder && (
-                                    <div className="mt-3">
-                                        <input
-                                            type="text"
-                                            value={pbaCardNumber}
-                                            onChange={(e) => setPbaCardNumber(e.target.value)}
-                                            placeholder="Enter PBA member number"
-                                            className="w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                                        />
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* USBC Member */}
-                            <div>
-                                <label className="flex items-center space-x-3 cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={isUSBCMember}
-                                        onChange={(e) => {
-                                            setIsUSBCMember(e.target.checked);
-                                            if (!e.target.checked) {
-                                                setUSBCMemberNumber('');
-                                            }
-                                        }}
-                                        className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                                    />
-                                    <span className="text-sm text-gray-700">USBC Member</span>
-                                </label>
-                                
-                                {isUSBCMember && (
-                                    <div className="mt-3">
-                                        <input
-                                            type="text"
-                                            value={usbcMemberNumber}
-                                            onChange={(e) => setUSBCMemberNumber(e.target.value)}
-                                            placeholder="Enter USBC member number"
-                                            className="w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Step 4: Address Information (previously Step 3) */}
-                    {currentStep === 4 && showAdditionalSteps && (
-                        <div className="space-y-4">
-                            <h3 className="text-lg font-medium text-gray-900 text-center">Location Information</h3>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label htmlFor="city" className="block text-sm font-medium text-gray-700">
-                                        City
-                                    </label>
-                                    <input
-                                        id="city"
-                                        name="city"
-                                        type="text"
-                                        required
-                                        value={city}
-                                        onChange={(e) => setCity(e.target.value)}
-                                        className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                                        placeholder="City"
-                                    />
-                                </div>
-                                <div>
-                                    <label htmlFor="state" className="block text-sm font-medium text-gray-700">
-                                        State
-                                    </label>
-                                    <input
-                                        id="state"
-                                        name="state"
-                                        type="text"
-                                        required
-                                        value={state}
-                                        onChange={(e) => setState(e.target.value)}
-                                        className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                                        placeholder="State"
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700">
-                                    ZIP Code
-                                </label>
-                                <input
-                                    id="zipCode"
-                                    name="zipCode"
-                                    type="text"
-                                    required
-                                    value={zipCode}
-                                    onChange={(e) => setZipCode(e.target.value)}
-                                    className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                                    placeholder="12345"
-                                />
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Step 5: Favorite Brands (previously Step 4) */}
-                    {currentStep === 5 && showAdditionalSteps && (
-                        <div className="space-y-6">
-                            <h3 className="text-lg font-medium text-gray-900 text-center">Choose Your Favorite Brands</h3>
-                            <p className="text-sm text-gray-600 text-center">Select brands you're interested in (optional)</p>
-                            
-                            {brandsLoading ? (
-                                <div className="flex justify-center py-8">
-                                    <div className="text-gray-500">Loading brands...</div>
-                                </div>
-                            ) : brands ? (
-                                <>
-                                    {/* Ball Brands */}
-                                    {brands.Balls && brands.Balls.length > 0 && (
-                                        <div>
-                                            <h4 className="text-md font-medium text-gray-800 mb-3">Ball Brands</h4>
-                                            <div className="grid grid-cols-1 gap-3">
-                                                {brands.Balls.map((brand) => (
-                                                    <label key={brand.brand_id} className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg border hover:bg-gray-50 transition-colors">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={selectedBrands.balls.includes(brand.brand_id)}
-                                                            onChange={() => handleBrandToggle('balls', brand.brand_id)}
-                                                            className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                                                        />
-                                                        <Image
-                                                            src={brand.logo_url}
-                                                            alt={`${brand.formal_name} logo`}
-                                                            width={32}
-                                                            height={32}
-                                                            className="object-contain"
-                                                        />
-                                                        <span className="text-sm text-gray-700 flex-1">{brand.formal_name}</span>
-                                                    </label>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Shoes */}
-                                    {brands.Shoes && brands.Shoes.length > 0 && (
-                                        <div>
-                                            <h4 className="text-md font-medium text-gray-800 mb-3">Shoes</h4>
-                                            <div className="grid grid-cols-1 gap-3">
-                                                {brands.Shoes.map((brand) => (
-                                                    <label key={brand.brand_id} className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg border hover:bg-gray-50 transition-colors">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={selectedBrands.shoes.includes(brand.brand_id)}
-                                                            onChange={() => handleBrandToggle('shoes', brand.brand_id)}
-                                                            className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                                                        />
-                                                        <Image
-                                                            src={brand.logo_url}
-                                                            alt={`${brand.formal_name} logo`}
-                                                            width={32}
-                                                            height={32}
-                                                            className="object-contain"
-                                                        />
-                                                        <span className="text-sm text-gray-700 flex-1">{brand.formal_name}</span>
-                                                    </label>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Accessories */}
-                                    {brands.Accessories && brands.Accessories.length > 0 && (
-                                        <div>
-                                            <h4 className="text-md font-medium text-gray-800 mb-3">Accessories</h4>
-                                            <div className="grid grid-cols-1 gap-3">
-                                                {brands.Accessories.map((brand) => (
-                                                    <label key={brand.brand_id} className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg border hover:bg-gray-50 transition-colors">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={selectedBrands.accessories.includes(brand.brand_id)}
-                                                            onChange={() => handleBrandToggle('accessories', brand.brand_id)}
-                                                            className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                                                        />
-                                                        <Image
-                                                            src={brand.logo_url}
-                                                            alt={`${brand.formal_name} logo`}
-                                                            width={32}
-                                                            height={32}
-                                                            className="object-contain"
-                                                        />
-                                                        <span className="text-sm text-gray-700 flex-1">{brand.formal_name}</span>
-                                                    </label>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Apparel */}
-                                    {brands.Apparels && brands.Apparels.length > 0 && (
-                                        <div>
-                                            <h4 className="text-md font-medium text-gray-800 mb-3">Apparel</h4>
-                                            <div className="grid grid-cols-1 gap-3">
-                                                {brands.Apparels.map((brand) => (
-                                                    <label key={brand.brand_id} className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg border hover:bg-gray-50 transition-colors">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={selectedBrands.apparels.includes(brand.brand_id)}
-                                                            onChange={() => handleBrandToggle('apparels', brand.brand_id)}
-                                                            className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                                                        />
-                                                        <Image
-                                                            src={brand.logo_url}
-                                                            alt={`${brand.formal_name} logo`}
-                                                            width={32}
-                                                            height={32}
-                                                            className="object-contain"
-                                                        />
-                                                        <span className="text-sm text-gray-700 flex-1">{brand.formal_name}</span>
-                                                    </label>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                </>
-                            ) : (
-                                <div className="text-center py-8">
-                                    <div className="text-gray-500">Failed to load brands. Please try again.</div>
-                                </div>
-                            )}
-                        </div>
-                    )}
-
                     {error && (
                         <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
                             {error}
                         </div>
                     )}
 
-                    {/* Navigation Buttons */}
                     {currentStep !== 2 && (
                         <div className="flex gap-4">
-                            {currentStep > 1 && showAdditionalSteps && (
-                                <button
-                                    type="button"
-                                    onClick={handleBack}
-                                    className="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                                >
-                                    Back
-                                </button>
-                            )}
                             <button
                                 type="submit"
-                                disabled={
-                                    isLoading || 
-                                    isCreatingAccount ||
-                                    (currentStep === 1 && isUnder13)
-                                }
+                                disabled={isLoading || isCreatingAccount || (currentStep === 1 && isUnder13)}
                                 className="flex-1 py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                                 style={{
                                     backgroundColor: (isLoading || isCreatingAccount || (currentStep === 1 && isUnder13)) ? '#d1d5db' : '#8BC342',
@@ -1202,13 +624,7 @@ export default function SignUpPage() {
                             >
                                 {currentStep === 1 && isUnder13 
                                     ? 'Age requirement not met'
-                                    : currentStep === 1
-                                        ? (isLoading ? 'Validating...' : 'Next')
-                                    : showAdditionalSteps && currentStep === 5 
-                                        ? (isLoading ? 'Completing profile...' : 'Complete profile')
-                                    : showAdditionalSteps
-                                        ? 'Next'
-                                        : 'Next'
+                                    : (isLoading ? 'Validating...' : 'Next')
                                 }
                             </button>
                         </div>
@@ -1225,7 +641,7 @@ export default function SignUpPage() {
                         </div>
                     )}
 
-                    {((currentStep === 2 && !showAdditionalSteps) || (currentStep === 5 && showAdditionalSteps)) && (
+                    {currentStep === 2 && (
                         <div className="text-center">
                             <p className="text-sm text-gray-600">
                                 By creating an account, you agree to our Terms of Service and Privacy Policy

@@ -115,5 +115,10 @@ export const userApi = {
     }) => {
         const response = await api.post('/api/validate-signup-data', validationData);
         return response.data;
+    },
+
+    updateFavoriteBrands: async (brandIDs: number[]) => {
+        const response = await api.patch('/api/user/brands/favorites', { brandIDs });
+        return response.data;
     }
 };

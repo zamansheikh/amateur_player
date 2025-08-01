@@ -22,11 +22,17 @@ export default function SignInPage() {
 
         try {
             console.log('Attempting to sign in...');
-            const success = await signin(username, password);
-            console.log('Sign in result:', success);
-            if (success) {
-                console.log('Sign in successful, redirecting to /');
-                router.push('/');
+            const result = await signin(username, password);
+            console.log('Sign in result:', result);
+            if (result.success) {
+                console.log('Sign in successful');
+                if (result.profileComplete === false) {
+                    console.log('Profile incomplete, redirecting to complete-profile');
+                    router.push('/complete-profile');
+                } else {
+                    console.log('Profile complete, redirecting to home');
+                    router.push('/');
+                }
             } else {
                 setError('Invalid credentials. Please try again.');
             }

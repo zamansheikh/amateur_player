@@ -12,6 +12,7 @@ export interface User {
     level: number;
     card_theme: string;
     is_pro: boolean;
+    is_complete?: boolean;
     follower_count: number;
     authenticated: boolean;
     access_token?: string;
@@ -56,7 +57,7 @@ export interface PaginatedResponse<T> {
 export interface AuthContextType {
     user: User | null;
     isLoading: boolean;
-    signin: (username: string, password: string) => Promise<boolean>;
+    signin: (username: string, password: string) => Promise<{ success: boolean; profileComplete?: boolean }>;
     signup: (userData: {
         basicInfo: {
             username: string;
