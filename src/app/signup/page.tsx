@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { userApi } from '@/lib/api';
 
 interface Brand {
     brand_id: number;
@@ -38,12 +39,19 @@ export default function SignUpPage() {
     const [parentLastName, setParentLastName] = useState('');
     const [parentEmail, setParentEmail] = useState('');
     
-    // Step 2: Address Info
+    // Step 2: Email Verification
+    const [verificationCode, setVerificationCode] = useState('');
+    const [isEmailVerified, setIsEmailVerified] = useState(false);
+    const [isSendingCode, setIsSendingCode] = useState(false);
+    const [isVerifyingCode, setIsVerifyingCode] = useState(false);
+    const [codeSent, setCodeSent] = useState(false);
+    
+    // Step 3: Address Info (previously Step 2)
     const [zipCode, setZipCode] = useState('');
     const [city, setCity] = useState('');
     const [state, setState] = useState('');
     
-    // Step 3: Favorite Brands
+    // Step 4: Favorite Brands (previously Step 3)
     const [selectedBrands, setSelectedBrands] = useState({
         balls: [] as number[],
         shoes: [] as number[],
@@ -94,10 +102,57 @@ export default function SignUpPage() {
             }
         };
 
-        if (currentStep === 3) {
+        if (currentStep === 4) { // Updated from 3 to 4
             fetchBrands();
         }
     }, [currentStep]);
+
+    // Email verification functions
+    const sendVerificationCode = async () => {
+        if (!email) {
+            setError('Please enter an email address first');
+            return;
+        }
+
+        setIsSendingCode(true);
+        setError('');
+
+        try {
+            await userApi.sendVerificationCode(email);
+            setCodeSent(true);
+            setError('');
+        } catch (error: any) {
+            console.error('Error sending verification code:', error);
+            setError(error.response?.data?.message || 'Failed to send verification code. Please try again.');
+        } finally {
+            setIsSendingCode(false);
+        }
+    };
+
+    const verifyEmailCode = async () => {
+        if (!verificationCode) {
+            setError('Please enter the verification code');
+            return;
+        }
+
+        setIsVerifyingCode(true);
+        setError('');
+
+        try {
+            await userApi.verifyEmail(email, verificationCode);
+            setIsEmailVerified(true);
+            setError('');
+            // Auto-advance to next step after successful verification
+            setTimeout(() => {
+                setCurrentStep(3);
+            }, 1500);
+        } catch (error: any) {
+            console.error('Error verifying email:', error);
+            setError(error.response?.data?.message || 'Invalid verification code. Please try again.');
+        } finally {
+            setIsVerifyingCode(false);
+        }
+    };
 
     const handleBrandToggle = (category: keyof typeof selectedBrands, brandId: number) => {
         setSelectedBrands(prev => ({
@@ -146,6 +201,15 @@ export default function SignUpPage() {
     };
 
     const validateStep2 = () => {
+        if (!isEmailVerified) {
+            setError('Please verify your email address before continuing');
+            return false;
+        }
+        setError('');
+        return true;
+    };
+
+    const validateStep3 = () => {
         if (!zipCode || !city || !state) {
             setError('Please fill in all location fields');
             return false;
@@ -156,9 +220,15 @@ export default function SignUpPage() {
 
     const handleNext = () => {
         if (currentStep === 1 && validateStep1()) {
+            // Reset email verification state when entering step 2 with a new email
+            setIsEmailVerified(false);
+            setCodeSent(false);
+            setVerificationCode('');
             setCurrentStep(2);
         } else if (currentStep === 2 && validateStep2()) {
             setCurrentStep(3);
+        } else if (currentStep === 3 && validateStep3()) {
+            setCurrentStep(4);
         }
     };
 
@@ -229,7 +299,7 @@ export default function SignUpPage() {
                     </div>
                     <h2 className="text-3xl font-bold text-gray-900">Create your account</h2>
                     <p className="mt-2 text-sm text-gray-600">
-                        Step {currentStep} of 3
+                        Step {currentStep} of 4
                     </p>
                 </div>
 
@@ -237,11 +307,11 @@ export default function SignUpPage() {
                 <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
                         className="bg-green-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${(currentStep / 3) * 100}%` }}
+                        style={{ width: `${(currentStep / 4) * 100}%` }}
                     ></div>
                 </div>
 
-                <form className="mt-8 space-y-6" onSubmit={currentStep === 3 ? handleSubmit : (e) => { e.preventDefault(); handleNext(); }}>
+                <form className="mt-8 space-y-6" onSubmit={currentStep === 4 ? handleSubmit : (e) => { e.preventDefault(); handleNext(); }}>
                     {/* Step 1: Basic Information */}
                     {currentStep === 1 && (
                         <div className="space-y-4">
@@ -444,8 +514,108 @@ export default function SignUpPage() {
                         </div>
                     )}
 
-                    {/* Step 2: Address Information */}
+                    {/* Step 2: Email Verification */}
                     {currentStep === 2 && (
+                        <div className="space-y-6">
+                            <h3 className="text-lg font-medium text-gray-900 text-center">Verify Your Email</h3>
+                            
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <div className="text-center">
+                                    <p className="text-sm text-blue-800 mb-2">
+                                        We've sent a verification code to:
+                                    </p>
+                                    <p className="font-medium text-blue-900 mb-4">{email}</p>
+                                    
+                                    {!codeSent ? (
+                                        <div className="space-y-4">
+                                            <p className="text-sm text-gray-600">
+                                                Click the button below to send a verification code to your email address.
+                                            </p>
+                                            <button
+                                                type="button"
+                                                onClick={sendVerificationCode}
+                                                disabled={isSendingCode}
+                                                className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                                            >
+                                                {isSendingCode ? 'Sending Code...' : 'Send Verification Code'}
+                                            </button>
+                                        </div>
+                                    ) : !isEmailVerified ? (
+                                        <div className="space-y-4">
+                                            <p className="text-sm text-gray-600">
+                                                Enter the 6-digit verification code sent to your email:
+                                            </p>
+                                            <div className="flex flex-col items-center space-y-4">
+                                                <input
+                                                    type="text"
+                                                    value={verificationCode}
+                                                    onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                                                    placeholder="Enter 6-digit code"
+                                                    maxLength={6}
+                                                    className="w-48 px-4 py-3 text-center text-2xl font-mono border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 tracking-widest"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={verifyEmailCode}
+                                                    disabled={isVerifyingCode || verificationCode.length !== 6}
+                                                    className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                                                >
+                                                    {isVerifyingCode ? 'Verifying...' : 'Verify Email'}
+                                                </button>
+                                            </div>
+                                            
+                                            <div className="text-center">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setCodeSent(false);
+                                                        setVerificationCode('');
+                                                        sendVerificationCode();
+                                                    }}
+                                                    disabled={isSendingCode}
+                                                    className="text-sm text-green-600 hover:text-green-700 underline"
+                                                >
+                                                    {isSendingCode ? 'Sending...' : "Didn't receive the code? Resend"}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center space-y-4">
+                                            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                                                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            </div>
+                                            <p className="text-green-600 font-medium">Email Verified Successfully!</p>
+                                            <p className="text-sm text-gray-600">Redirecting to the next step...</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Back to step 1 to change email if needed */}
+                            {!isEmailVerified && (
+                                <div className="text-center">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setCurrentStep(1);
+                                            setCodeSent(false);
+                                            setVerificationCode('');
+                                            setIsEmailVerified(false);
+                                            setError('');
+                                        }}
+                                        className="text-sm text-gray-600 hover:text-gray-900 underline"
+                                    >
+                                        Wrong email? Go back to change it
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Step 3: Address Information (previously Step 2) */}
+                    {currentStep === 3 && (
                         <div className="space-y-4">
                             <h3 className="text-lg font-medium text-gray-900 text-center">Location Information</h3>
                             <div className="grid grid-cols-2 gap-4">
@@ -498,8 +668,8 @@ export default function SignUpPage() {
                         </div>
                     )}
 
-                    {/* Step 3: Favorite Brands */}
-                    {currentStep === 3 && (
+                    {/* Step 4: Favorite Brands (previously Step 3) */}
+                    {currentStep === 4 && (
                         <div className="space-y-6">
                             <h3 className="text-lg font-medium text-gray-900 text-center">Choose Your Favorite Brands</h3>
                             <p className="text-sm text-gray-600 text-center">Select brands you're interested in (optional)</p>
@@ -645,10 +815,10 @@ export default function SignUpPage() {
                         )}
                         <button
                             type="submit"
-                            disabled={isLoading || (currentStep === 1 && isUnder13)}
+                            disabled={isLoading || (currentStep === 1 && isUnder13) || (currentStep === 2 && !isEmailVerified)}
                             className="flex-1 py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             style={{
-                                backgroundColor: (isLoading || (currentStep === 1 && isUnder13)) ? '#d1d5db' : '#8BC342',
+                                backgroundColor: (isLoading || (currentStep === 1 && isUnder13) || (currentStep === 2 && !isEmailVerified)) ? '#d1d5db' : '#8BC342',
                             }}
                             onMouseEnter={(e) => {
                                 if (!e.currentTarget.disabled) {
@@ -661,9 +831,13 @@ export default function SignUpPage() {
                                 }
                             }}
                         >
-                            {currentStep === 3 
+                            {currentStep === 4 
                                 ? (isLoading ? 'Creating account...' : 'Create account')
-                                : (currentStep === 1 && isUnder13 ? 'Age requirement not met' : 'Next')
+                                : currentStep === 1 && isUnder13 
+                                    ? 'Age requirement not met'
+                                    : currentStep === 2 && !isEmailVerified
+                                        ? 'Verify email to continue'
+                                        : 'Next'
                             }
                         </button>
                     </div>
@@ -679,7 +853,7 @@ export default function SignUpPage() {
                         </div>
                     )}
 
-                    {currentStep === 3 && (
+                    {currentStep === 4 && (
                         <div className="text-center">
                             <p className="text-sm text-gray-600">
                                 By creating an account, you agree to our Terms of Service and Privacy Policy
