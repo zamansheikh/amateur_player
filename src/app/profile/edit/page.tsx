@@ -3,13 +3,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { ArrowLeft, Camera, Upload, Mail, Check, Clock } from 'lucide-react';
+import { ArrowLeft, Camera, Upload, Image as ImageIcon } from 'lucide-react';
 import { api, userApi } from '@/lib/api';
 
 export default function EditProfilePage() {
     const { user, refreshUser } = useAuth();
     const router = useRouter();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const coverFileInputRef = useRef<HTMLInputElement>(null);
     
     const [formData, setFormData] = useState({
         first_name: '',
@@ -17,21 +18,15 @@ export default function EditProfilePage() {
         email: '',
         username: '',
         name: '',
-        profile_picture_url: ''
+        profile_picture_url: '',
+        cover_photo_url: ''
     });
     
     const [isLoading, setIsLoading] = useState(false);
     const [isUploadingImage, setIsUploadingImage] = useState(false);
+    const [isUploadingCover, setIsUploadingCover] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
-
-    // Email verification states
-    const [isEmailVerified, setIsEmailVerified] = useState(false);
-    const [isSendingCode, setIsSendingCode] = useState(false);
-    const [isVerifyingCode, setIsVerifyingCode] = useState(false);
-    const [showVerificationInput, setShowVerificationInput] = useState(false);
-    const [verificationCode, setVerificationCode] = useState('');
-    const [codeSent, setCodeSent] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -41,11 +36,9 @@ export default function EditProfilePage() {
                 email: user.email || '',
                 username: user.username || '',
                 name: user.name || '',
-                profile_picture_url: user.profile_picture_url || ''
+                profile_picture_url: user.profile_picture_url || '',
+                cover_photo_url: user.cover_photo_url || ''
             });
-            
-            // Check if email is verified from user data
-            setIsEmailVerified(user.email_verified || false);
         }
     }, [user]);
 
@@ -55,59 +48,52 @@ export default function EditProfilePage() {
             ...prev,
             [name]: value
         }));
-        
-        // Reset email verification status if email is changed
-        if (name === 'email') {
-            setIsEmailVerified(false);
-            setCodeSent(false);
-            setShowVerificationInput(false);
-            setVerificationCode('');
-        }
     };
 
-    const sendVerificationCode = async () => {
-        if (!formData.email) {
-            setError('Please enter an email address first');
+    const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Check file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            setError('Image size must be less than 5MB');
             return;
         }
 
-        setIsSendingCode(true);
-        setError(null);
-
-        try {
-            await userApi.sendVerificationCode(formData.email);
-            setCodeSent(true);
-            setShowVerificationInput(true);
-            setSuccess('Verification code sent to your email!');
-        } catch (error: any) {
-            console.error('Error sending verification code:', error);
-            setError(error.response?.data?.message || 'Failed to send verification code. Please try again.');
-        } finally {
-            setIsSendingCode(false);
-        }
-    };
-
-    const verifyEmailCode = async () => {
-        if (!verificationCode) {
-            setError('Please enter the verification code');
+        // Check file type
+        if (!file.type.startsWith('image/')) {
+            setError('Please select a valid image file');
             return;
         }
 
-        setIsVerifyingCode(true);
+        setIsUploadingCover(true);
         setError(null);
 
         try {
-            await userApi.verifyEmail(formData.email, verificationCode);
-            setIsEmailVerified(true);
-            setShowVerificationInput(false);
-            setSuccess('Email verified successfully!');
-            setCodeSent(false);
-            setVerificationCode('');
+            const formDataUpload = new FormData();
+            formDataUpload.append('image', file);
+
+            const response = await api.post('/api/user/profile/upload-cover-photo', formDataUpload, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            if (response.data && response.data.image_public_url) {
+                setFormData(prev => ({
+                    ...prev,
+                    cover_photo_url: response.data.image_public_url
+                }));
+                setSuccess('Cover photo updated successfully!');
+                
+                // Refresh user data in AuthContext
+                await refreshUser();
+            }
         } catch (error: any) {
-            console.error('Error verifying email:', error);
-            setError(error.response?.data?.message || 'Invalid verification code. Please try again.');
+            console.error('Error uploading cover photo:', error);
+            setError('Failed to upload cover photo. Please try again.');
         } finally {
-            setIsVerifyingCode(false);
+            setIsUploadingCover(false);
         }
     };
 
@@ -235,6 +221,55 @@ export default function EditProfilePage() {
                             <p className="text-sm text-gray-500">Click the camera icon to change your profile picture</p>
                         </div>
 
+                        {/* Cover Photo Section */}
+                        <div className="text-center">
+                            <label className="block text-sm font-medium text-gray-700 mb-3">Cover Photo</label>
+                            <div className="relative">
+                                <div className="w-full h-32 bg-gray-200 rounded-lg overflow-hidden mb-4">
+                                    {formData.cover_photo_url ? (
+                                        <img
+                                            src={formData.cover_photo_url}
+                                            alt="Cover"
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                            <div className="text-center">
+                                                <ImageIcon className="w-8 h-8 mx-auto mb-2" />
+                                                <p className="text-sm">No cover photo</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => coverFileInputRef.current?.click()}
+                                    disabled={isUploadingCover}
+                                    className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 mx-auto"
+                                >
+                                    {isUploadingCover ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                            Uploading...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Upload className="w-4 h-4" />
+                                            {formData.cover_photo_url ? 'Change Cover Photo' : 'Upload Cover Photo'}
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                            <input
+                                ref={coverFileInputRef}
+                                type="file"
+                                accept="image/*"
+                                onChange={handleCoverUpload}
+                                className="hidden"
+                            />
+                            <p className="text-sm text-gray-500 mt-2">Recommended size: 1200x300 pixels</p>
+                        </div>
+
                         {/* Form Fields */}
                         <div className="grid grid-cols-2 gap-4">
                             <div>
@@ -301,98 +336,15 @@ export default function EditProfilePage() {
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                                 Email Address
                             </label>
-                            <div className="space-y-3">
-                                <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                    required
-                                />
-                                
-                                {/* Email Verification Section */}
-                                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <div className="flex items-center gap-2">
-                                            <Mail className="w-4 h-4 text-gray-500" />
-                                            <span className="text-sm font-medium text-gray-700">Email Verification</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            {isEmailVerified ? (
-                                                <>
-                                                    <Check className="w-4 h-4 text-green-600" />
-                                                    <span className="text-sm text-green-600 font-medium">Verified</span>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Clock className="w-4 h-4 text-orange-500" />
-                                                    <span className="text-sm text-orange-600 font-medium">Unverified</span>
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {!isEmailVerified && (
-                                        <div className="space-y-3">
-                                            {!showVerificationInput ? (
-                                                <div>
-                                                    <p className="text-sm text-gray-600 mb-3">
-                                                        Verify your email address to ensure account security and receive important notifications.
-                                                    </p>
-                                                    <button
-                                                        type="button"
-                                                        onClick={sendVerificationCode}
-                                                        disabled={isSendingCode || !formData.email}
-                                                        className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-colors"
-                                                    >
-                                                        {isSendingCode ? 'Sending...' : 'Send Verification Code'}
-                                                    </button>
-                                                </div>
-                                            ) : (
-                                                <div className="space-y-3">
-                                                    <p className="text-sm text-gray-600">
-                                                        Enter the 6-digit verification code sent to your email:
-                                                    </p>
-                                                    <div className="flex gap-2">
-                                                        <input
-                                                            type="text"
-                                                            value={verificationCode}
-                                                            onChange={(e) => setVerificationCode(e.target.value)}
-                                                            placeholder="Enter 6-digit code"
-                                                            maxLength={6}
-                                                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 text-center text-lg font-mono"
-                                                        />
-                                                        <button
-                                                            type="button"
-                                                            onClick={verifyEmailCode}
-                                                            disabled={isVerifyingCode || verificationCode.length !== 6}
-                                                            className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-colors"
-                                                        >
-                                                            {isVerifyingCode ? 'Verifying...' : 'Verify'}
-                                                        </button>
-                                                    </div>
-                                                    <button
-                                                        type="button"
-                                                        onClick={sendVerificationCode}
-                                                        disabled={isSendingCode}
-                                                        className="text-sm text-green-600 hover:text-green-700 underline"
-                                                    >
-                                                        {isSendingCode ? 'Sending...' : 'Resend Code'}
-                                                    </button>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-
-                                    {isEmailVerified && (
-                                        <p className="text-sm text-green-600">
-                                            ✓ Your email address has been verified successfully!
-                                        </p>
-                                    )}
-                                </div>
-                            </div>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                required
+                            />
                         </div>
 
                         {/* Error/Success Messages */}
@@ -410,13 +362,6 @@ export default function EditProfilePage() {
 
                         {/* Submit Button */}
                         <div className="space-y-3">
-                            {!isEmailVerified && formData.email && (
-                                <div className="bg-orange-50 border border-orange-200 text-orange-700 px-4 py-3 rounded-lg text-sm">
-                                    <p className="font-medium">Email Verification Recommended</p>
-                                    <p>We recommend verifying your email address before saving changes to ensure account security.</p>
-                                </div>
-                            )}
-                            
                             <div className="flex gap-4">
                                 <button
                                     type="button"
