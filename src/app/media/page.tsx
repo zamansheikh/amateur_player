@@ -96,7 +96,7 @@ export default function MediaPage() {
             {/* Header with Trending Title */}
             <div className="relative">
                 {/* BFK-style header background */}
-                <div className="h-48 relative overflow-hidden">
+                <div className="h-32 relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-400"></div>
                     <div className="absolute inset-0 bg-black bg-opacity-40"></div>
                     
@@ -117,11 +117,10 @@ export default function MediaPage() {
                                 />
                             </div>
                             <div className="text-white">
-                                <h1 className="text-3xl font-bold tracking-wider">BOWLERS</h1>
-                                <h2 className="text-2xl font-bold tracking-widest">NETWORK</h2>
+                                <h1 className="text-3xl font-bold tracking-wider">TRENDING ON BOWLERS NETWORK</h1>
+                                
                             </div>
                         </div>
-                        <h3 className="text-xl font-bold text-white tracking-wide">TRENDING ON BOWLERS NETWORK</h3>
                     </div>
                 </div>
             </div>
