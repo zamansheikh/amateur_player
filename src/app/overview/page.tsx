@@ -254,12 +254,9 @@ export default function OverviewPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#8BC342] via-[#6fa332] to-[#8BC342]" />
         {/* Overlay for depth */}
         <div className="absolute inset-0 bg-black bg-opacity-30" />
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-400"></div>
-        <div className="absolute inset-0 bg-black bg-opacity-40"></div>
-
         {/* Geometric design elements */}
-        <div className="absolute top-0 left-0 w-64 h-64 bg-blue-500 opacity-20 transform -skew-x-12 -translate-x-20 -translate-y-20" />
-        <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-400 opacity-20 transform skew-x-12 translate-x-20 -translate-y-20" />
+        <div className="absolute top-0 left-0 w-64 h-64 bg-[#8BC342] opacity-20 transform -skew-x-12 -translate-x-20 -translate-y-20" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[#6fa332] opacity-20 transform skew-x-12 translate-x-20 -translate-y-20" />
         {/* Content */}
         <div className="relative z-10 flex items-center gap-5 px-8">
           <div className="w-16 h-16 bg-black bg-opacity-80 rounded-full flex items-center justify-center border-4 border-white">

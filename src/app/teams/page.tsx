@@ -239,21 +239,29 @@ export default function TeamsPage() {
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
             {/* Header */}
-            <div className="mb-6">
-                <div className="flex items-center justify-between">
+            <div className="mb-6 relative h-48 rounded-2xl overflow-hidden shadow-lg">
+                {/* Gradient background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-400"></div>
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+                {/* Geometric design elements */}
+                <div className="absolute top-0 left-0 w-64 h-64 bg-blue-500 opacity-20 transform -skew-x-12 -translate-x-20 -translate-y-20"></div>
+                <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-400 opacity-20 transform skew-x-12 translate-x-20 -translate-y-20"></div>
+                {/* Content */}
+                <div className="relative z-10 flex items-center justify-between h-full px-8">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">My Teams</h1>
-                        <p className="text-gray-600 text-sm mt-1">
+                        <h1 className="text-2xl font-bold text-white">My Teams</h1>
+                        <p className="text-gray-100 text-sm mt-1">
                             Communications from bowling centers, manufacturers, and BowlersNetwork
                         </p>
                     </div>
                     <div className="flex items-center gap-4">
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-300 w-4 h-4" />
                             <input
                                 type="text"
                                 placeholder="Search teams..."
-                                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent w-64"
+                                className="pl-10 pr-4 py-2 border border-transparent rounded-lg text-sm focus:ring-2 focus:ring-cyan-300 focus:border-transparent w-64 bg-white bg-opacity-90 text-gray-900 placeholder-gray-500"
                             />
                         </div>
                     </div>
@@ -264,7 +272,7 @@ export default function TeamsPage() {
             <div className="mb-8">
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                     {/* Tab Headers */}
-                    <div className="bg-gradient-to-r from-green-600 to-green-700 px-6 py-4">
+                    <div className="bg-gradient-to-r from-cyan-600 to-cyan-700 px-6 py-4">
                         <div className="flex items-center justify-between">
                             <div>
                                 <h2 className="text-lg font-semibold text-white flex items-center gap-2">
@@ -278,7 +286,7 @@ export default function TeamsPage() {
                             {activeTab === 'teams' && (
                                 <button
                                     onClick={() => setIsCreateModalOpen(true)}
-                                    className="bg-white text-green-600 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors hover:bg-green-50"
+                                    className="bg-white text-cyan-600 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors hover:bg-green-50"
                                 >
                                     <Plus className="w-4 h-4" />
                                     Create Team
@@ -402,7 +410,7 @@ export default function TeamsPage() {
                                         <p className="text-gray-400 text-sm mb-4">Create your first team to get started!</p>
                                         <button
                                             onClick={() => setIsCreateModalOpen(true)}
-                                            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors mx-auto"
+                                            className="bg-cyan-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors mx-auto"
                                         >
                                             <Plus className="w-4 h-4" />
                                             Create Team
