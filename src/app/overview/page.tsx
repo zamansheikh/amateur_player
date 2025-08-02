@@ -248,25 +248,36 @@ export default function OverviewPage() {
   return (
     <div className="bg-gray-50 min-h-screen">
       {/* Welcome Header */}
-      <div
-        className="text-white px-6 py-6"
-        style={{ background: "linear-gradient(to right, #8BC342, #6fa332)" }}
-      >
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full overflow-hidden bg-green-100 flex items-center justify-center">
-            <Image
-              src={player.avatar || "/default-avatar.png"}
-              alt={player.name}
-              width={48}
-              height={48}
-              className="w-12 h-12 object-cover rounded-full"
-            />
+      {/* BFK-style header background */}
+      <div className="h-36 relative overflow-hidden flex items-center">
+        {/* Gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#8BC342] via-[#6fa332] to-[#8BC342]" />
+        {/* Overlay for depth */}
+        <div className="absolute inset-0 bg-black bg-opacity-30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-400"></div>
+        <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+
+        {/* Geometric design elements */}
+        <div className="absolute top-0 left-0 w-64 h-64 bg-blue-500 opacity-20 transform -skew-x-12 -translate-x-20 -translate-y-20" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-400 opacity-20 transform skew-x-12 translate-x-20 -translate-y-20" />
+        {/* Content */}
+        <div className="relative z-10 flex items-center gap-5 px-8">
+          <div className="w-16 h-16 bg-black bg-opacity-80 rounded-full flex items-center justify-center border-4 border-white">
+        <Image
+          src={player.avatar || "/default-avatar.png"}
+          alt={player.name}
+          width={56}
+          height={56}
+          className="rounded-full object-cover"
+        />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">Overview</h1>
-            <p className="text-green-100">
-              Welcome back, {player.name || "Johan Smith"}
-            </p>
+        <h1 className="text-3xl font-bold tracking-wider text-white mb-1">
+          Overview
+        </h1>
+        <p className="text-green-100 text-lg font-medium">
+          Welcome back, {player.name || "Johan Smith"}
+        </p>
           </div>
         </div>
       </div>
