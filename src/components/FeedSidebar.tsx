@@ -199,7 +199,7 @@ export default function FeedSidebar() {
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold text-gray-900">Featured Partners</h3>
                     <button 
-                        onClick={() => router.push('/parks')}
+                        onClick={() => router.push('/perks')}
                         className="text-green-600 hover:text-green-700 text-sm flex items-center gap-1"
                     >
                         View All <ArrowRight className="w-4 h-4" />

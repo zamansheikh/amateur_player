@@ -44,7 +44,7 @@ const navigation = [
     { name: 'Pro Players', href: '/pro-players', icon: Trophy },
     { name: 'Overview', href: '/overview', icon: BarChart3 },
     { name: 'Media', href: '/media', icon: Play },
-    { name: 'Parks', href: '/parks', icon: Gift },
+    { name: 'Perks', href: '/perks', icon: Gift },
     { name: 'Messages', href: '/messages', icon: MessageCircle },
     { name: 'My Teams', href: '/teams', icon: Users },
     { name: 'Analytics', href: '/analytics', icon: Target },
