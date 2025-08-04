@@ -73,7 +73,7 @@ export default function EditProfilePage() {
             const formDataUpload = new FormData();
             formDataUpload.append('image', file);
 
-            const response = await api.post('/api/user/profile/upload-cover-photo', formDataUpload, {
+            const response = await api.post('/api/user/profile/upload-cover-photo/', formDataUpload, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -120,7 +120,7 @@ export default function EditProfilePage() {
             const formDataUpload = new FormData();
             formDataUpload.append('image', file);
 
-            const response = await api.post('/api/user/profile/upload-profile-picture', formDataUpload, {
+            const response = await api.post('/api/user/profile/upload-profile-picture/', formDataUpload, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
