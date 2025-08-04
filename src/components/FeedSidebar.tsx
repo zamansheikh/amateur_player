@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, User, TrendingUp, Hash } from 'lucide-react';
+import { Search, User, TrendingUp, Hash, Gift, Star, ArrowRight } from 'lucide-react';
 import { api } from '@/lib/api';
 
 interface SuggestedUser {
@@ -192,6 +192,48 @@ export default function FeedSidebar() {
                 <button className="w-full text-green-600 hover:text-green-700 text-sm font-medium mt-4">
                     Show more
                 </button>
+            </div>
+
+            {/* Featured Partners */}
+            <div className="bg-white rounded-xl p-4 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-gray-900">Featured Partners</h3>
+                    <button 
+                        onClick={() => router.push('/parks')}
+                        className="text-green-600 hover:text-green-700 text-sm flex items-center gap-1"
+                    >
+                        View All <ArrowRight className="w-4 h-4" />
+                    </button>
+                </div>
+                <div className="space-y-3">
+                    <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                        <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                            <Gift className="w-4 h-4 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="font-medium text-gray-900 text-sm">Mario's Italian Kitchen</p>
+                            <p className="text-xs text-green-600 font-medium">25% OFF with BOWLERS25</p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                            <span className="text-xs">4.8</span>
+                        </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                        <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                            <Gift className="w-4 h-4 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="font-medium text-gray-900 text-sm">FitZone Gym</p>
+                            <p className="text-xs text-blue-600 font-medium">30% OFF First Month</p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                            <span className="text-xs">4.6</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* What's happening Section */}
