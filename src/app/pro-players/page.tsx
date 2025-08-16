@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Star } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
-import PlayerCard from '@/components/PlayerCard';
+import PlayerCard from '@/app/landing/components/PlayerCard';
 
 interface ProPlayer {
     user_id: number;
@@ -55,6 +55,18 @@ export default function ProPlayersPage() {
     const [proPlayers, setProPlayers] = useState<ProPlayer[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    // Define different card themes for variety
+    const cardThemes = [
+        { borderColor: "#EE2E55", backgroundColor: "white" },
+        { borderColor: "#3B82F6", backgroundColor: "rgba(59, 130, 246, 0.08)" },
+        { borderColor: "#10B981", backgroundColor: "rgba(16, 185, 129, 0.08)" },
+        { borderColor: "#F59E0B", backgroundColor: "rgba(245, 158, 11, 0.08)" },
+        { borderColor: "#8B5CF6", backgroundColor: "rgba(139, 92, 246, 0.08)" },
+        { borderColor: "#EF4444", backgroundColor: "rgba(239, 68, 68, 0.08)" },
+        { borderColor: "#06B6D4", backgroundColor: "rgba(6, 182, 212, 0.08)" },
+        { borderColor: "#84CC16", backgroundColor: "rgba(132, 204, 22, 0.08)" },
+    ];
 
     useEffect(() => {
         const fetchProPlayers = async () => {
@@ -138,12 +150,31 @@ export default function ProPlayersPage() {
             <div className="py-12">
                 <div className="max-w-7xl mx-auto px-4">
                     {/* Players Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {proPlayers.map((player) => (
-                            <div key={player.user_id} className="transform hover:scale-105 transition-transform duration-200">
-                                <PlayerCard player={player} />
-                            </div>
-                        ))}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
+                        {proPlayers.map((player, index) => {
+                            const theme = cardThemes[index % cardThemes.length];
+                            return (
+                                <div key={player.user_id} className="transform hover:scale-105 transition-transform duration-200">
+                                    <PlayerCard 
+                                        imageUrl={player.profile_picture_url}
+                                        level={player.level}
+                                        name={player.name}
+                                        stats={{
+                                            average: player.stats?.average_score || 0,
+                                            highGame: player.stats?.high_game || 0,
+                                            highSeries: player.stats?.high_series || 0,
+                                            experience: player.stats?.experience || 0,
+                                            Xp: player.xp || 0,
+                                            follower: player.follower_count || 0,
+                                        }}
+                                        borderColor={theme.borderColor}
+                                        backgroundColor={theme.backgroundColor}
+                                        width={320}
+                                        height={480}
+                                    />
+                                </div>
+                            );
+                        })}
                     </div>
 
                     {/* Show message if no players */}

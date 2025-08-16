@@ -135,19 +135,32 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
     useEffect(() => {
         // Handle transparent background
         if (backgroundColor === "transparent") {
-            setTextColor('black');
+            setTextColor('#1E2D5E');
             return;
         }
 
         // Handle RGBA colors - extract RGB values for luminance calculation
         if (backgroundColor.startsWith('rgba(')) {
-            const rgbaMatch = backgroundColor.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)$/);
+            const rgbaMatch = backgroundColor.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)$/);
             if (rgbaMatch) {
                 const r = parseInt(rgbaMatch[1], 10);
                 const g = parseInt(rgbaMatch[2], 10);
                 const b = parseInt(rgbaMatch[3], 10);
-                const luminance = getLuminance(r, g, b);
-                setTextColor(luminance > 0.5 ? 'black' : 'white');
+                const alpha = parseFloat(rgbaMatch[4] || '1');
+                
+                // For very low alpha values (< 0.1), treat as white background
+                if (alpha < 0.1) {
+                    setTextColor('#1E2D5E');
+                    return;
+                }
+                
+                // Blend with white background for alpha calculation
+                const blendedR = Math.round(r * alpha + 255 * (1 - alpha));
+                const blendedG = Math.round(g * alpha + 255 * (1 - alpha));
+                const blendedB = Math.round(b * alpha + 255 * (1 - alpha));
+                
+                const luminance = getLuminance(blendedR, blendedG, blendedB);
+                setTextColor(luminance > 0.5 ? '#1E2D5E' : 'white');
                 return;
             }
         }
@@ -159,8 +172,8 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
         const luminance = getLuminance(r, g, b);
 
         // Set text color based on luminance
-        // Threshold of 0.5 is based on W3C accessibility guidelines
-        setTextColor(luminance > 0.5 ? 'black' : 'white');
+        // Use darker blue for light backgrounds, white for dark backgrounds
+        setTextColor(luminance > 0.5 ? '#1E2D5E' : 'white');
     }, [backgroundColor]);
 
     // Determine the effective background color for rendering
@@ -283,11 +296,11 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
-                        background: isTransparent || isRgbaColor ? "rgba(255, 255, 255, 0.95)" : effectiveBackgroundColor,
+                        background: isTransparent || isRgbaColor || textColor === '#1E2D5E' ? "rgba(255, 255, 255, 0.95)" : "rgba(30, 45, 94, 0.95)",
                         padding: `${16 * averageScale}px ${scaledPadding}px ${12 * averageScale}px ${scaledPadding}px`,
                         fontWeight: 700,
                         fontSize: scaledFontSize,
-                        color: textColor,
+                        color: textColor === '#1E2D5E' ? '#1E2D5E' : 'white',
                         borderRadius: 0,
                         borderBottom: textColor === 'white' ? '1.5px solid rgba(255, 255, 255, 0.2)' : '1.5px solid rgba(30, 45, 94, 0.13)',
                         boxSizing: "border-box",
@@ -298,7 +311,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                         style={{
                             background: "none",
                             border: "none",
-                            color: textColor,
+                            color: textColor === '#1E2D5E' ? '#1E2D5E' : 'white',
                             fontWeight: 500,
                             cursor: "pointer",
                             fontSize: 16 * averageScale,
@@ -307,7 +320,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                             gap: 4 * averageScale,
                         }}
                     >
-                        <span style={{ fontSize: 20 * averageScale, color: textColor, fontWeight: 700 }}>
+                        <span style={{ fontSize: 20 * averageScale, color: textColor === '#1E2D5E' ? '#1E2D5E' : 'white', fontWeight: 700 }}>
                             +
                         </span>{" "}
                         Follow
