@@ -58,14 +58,18 @@ export default function ProPlayersPage() {
 
     // Define different card themes for variety
     const cardThemes = [
-        { borderColor: "#EE2E55", backgroundColor: "white" },
-        { borderColor: "#3B82F6", backgroundColor: "rgba(59, 130, 246, 0.08)" },
-        { borderColor: "#10B981", backgroundColor: "rgba(16, 185, 129, 0.08)" },
-        { borderColor: "#F59E0B", backgroundColor: "rgba(245, 158, 11, 0.08)" },
-        { borderColor: "#8B5CF6", backgroundColor: "rgba(139, 92, 246, 0.08)" },
-        { borderColor: "#EF4444", backgroundColor: "rgba(239, 68, 68, 0.08)" },
-        { borderColor: "#06B6D4", backgroundColor: "rgba(6, 182, 212, 0.08)" },
-        { borderColor: "#84CC16", backgroundColor: "rgba(132, 204, 22, 0.08)" },
+        { borderColor: "#EE2E55", backgroundColor: "white", pathColor: "#EE2E55" },
+        { borderColor: "#3B82F6", backgroundColor: "rgba(59, 130, 246, 0.08)", pathColor: "#1E40AF" },
+        { borderColor: "#10B981", backgroundColor: "rgba(16, 185, 129, 0.08)", pathColor: "#047857" },
+        { borderColor: "#F59E0B", backgroundColor: "rgba(245, 158, 11, 0.08)", pathColor: "#D97706" },
+        { borderColor: "#8B5CF6", backgroundColor: "rgba(139, 92, 246, 0.08)", pathColor: "#7C3AED" },
+        { borderColor: "#EF4444", backgroundColor: "rgba(239, 68, 68, 0.08)", pathColor: "#DC2626" },
+        { borderColor: "#06B6D4", backgroundColor: "rgba(6, 182, 212, 0.08)", pathColor: "#0891B2" },
+        { borderColor: "#84CC16", backgroundColor: "rgba(132, 204, 22, 0.08)", pathColor: "#65A30D" },
+        { borderColor: "#F97316", backgroundColor: "rgba(249, 115, 22, 0.08)", pathColor: "#EA580C" },
+        { borderColor: "#EC4899", backgroundColor: "rgba(236, 72, 153, 0.08)", pathColor: "#DB2777" },
+        { borderColor: "#14B8A6", backgroundColor: "rgba(20, 184, 166, 0.08)", pathColor: "#0F766E" },
+        { borderColor: "#A855F7", backgroundColor: "rgba(168, 85, 247, 0.08)", pathColor: "#9333EA" },
     ];
 
     useEffect(() => {
@@ -169,6 +173,7 @@ export default function ProPlayersPage() {
                                         }}
                                         borderColor={theme.borderColor}
                                         backgroundColor={theme.backgroundColor}
+                                        pathColor={theme.pathColor}
                                         width={320}
                                         height={480}
                                     />

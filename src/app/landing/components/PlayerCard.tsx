@@ -94,6 +94,7 @@ interface PlayerCardProps {
     };
     borderColor?: string;
     backgroundColor?: string;
+    pathColor?: string;
 }
 
 const PlayerCard: React.FC<PlayerCardProps> = ({
@@ -113,6 +114,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
     },
     borderColor = "#EE2E55",
     backgroundColor = "white",
+    pathColor,
 }) => {
     const [textColor, setTextColor] = useState<string>('black');
     
@@ -217,7 +219,7 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                 <path
                     d="M40.0537 60.1366C27.0067 69.0807 9.24832 73.9255 2 75.2298C3.4094 187.217 5.50336 417.453 2.60403 442.497C-0.295302 467.54 17.1007 477.155 26.1611 478.832L77.5034 495.043C141.289 508.46 174.148 531.938 182.604 542C198.067 516.957 282.47 492.435 322.738 483.304C353.181 478.385 361.597 461.13 362 453.118V75.2298C353.342 75.2298 328.054 68.5217 296.161 41.6894C264.268 14.8571 235.356 9.26708 224.886 9.82609C216.671 25.9255 200.523 21.0062 193.477 16.5342L182 2L168.107 16.5342C153.128 25.4783 140.926 15.7888 136.698 9.82609C96.2282 10.3851 56.3624 48.9565 40.0537 60.1366Z"
                     fill={isTransparent ? "rgba(255, 255, 255, 0.8)" : (isRgbaColor ? backgroundColor : effectiveBackgroundColor)}
-                    stroke={`url(#paint0_linear_${width}_${height})`}
+                    stroke={pathColor ? pathColor : `url(#paint0_linear_${width}_${height})`}
                     strokeWidth="2"
                 />
                 <defs>
