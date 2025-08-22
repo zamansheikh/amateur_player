@@ -379,7 +379,7 @@ const PlayerCardV2: React.FC<PlayerCardV2Props> = ({
                         width: "100%",
                         display: "flex",
                         justifyContent: "space-between",
-                        padding: `${20 * averageScale}px ${scaledPadding}px`,
+                        padding: `${10 * averageScale}px ${scaledPadding}px`,
                         fontSize: 18 * averageScale,
                         color: textColor,
                         fontWeight: 500,
@@ -391,26 +391,26 @@ const PlayerCardV2: React.FC<PlayerCardV2Props> = ({
                             flex: 1,
                             display: "flex",
                             flexDirection: "column",
-                            gap: 18 * averageScale,
+                            gap: 8 * averageScale,
                             paddingLeft: 32 * scaleX,
                             alignItems: "flex-end",
                         }}
                     >
                         <div style={{ display: "flex", alignItems: "center", gap: 8 * averageScale }}>
-                            <span style={{ fontSize: scaledStatsFontSize, minWidth: 55 * scaleX, textAlign: "right", fontWeight: 600 }}>{stats.average}</span>
-                            <span style={{ color: textColor, fontSize: 16 * averageScale, opacity: 0.7 , minWidth: 35 * scaleX, textAlign: "right" }}>
+                            <span style={{ fontSize: scaledStatsFontSize * 1.2, minWidth: 55 * scaleX, textAlign: "right", fontWeight: 700 }}>{stats.average}</span>
+                            <span style={{ color: textColor, fontSize: 16 * averageScale, opacity: 0.9, minWidth: 35 * scaleX, textAlign: "right", fontWeight: 700 }}>
                                 AVG
                             </span>
                         </div>
                         <div style={{ display: "flex", alignItems: "center", gap: 8 * averageScale }}>
-                            <span style={{ fontSize: scaledStatsFontSize, minWidth: 55 * scaleX, textAlign: "right", fontWeight: 600 }}>{stats.highGame}</span>
-                            <span style={{ color: textColor, fontSize: 16 * averageScale, opacity: 0.7 ,  minWidth: 35 * scaleX, textAlign: "right"}}>
+                            <span style={{ fontSize: scaledStatsFontSize * 1.2, minWidth: 55 * scaleX, textAlign: "right", fontWeight: 700 }}>{stats.highGame}</span>
+                            <span style={{ color: textColor, fontSize: 16 * averageScale, opacity: 0.9, minWidth: 35 * scaleX, textAlign: "right", fontWeight: 700 }}>
                                 HG
                             </span>
                         </div>
                         <div style={{ display: "flex", alignItems: "center", gap: 8 * averageScale }}>
-                            <span style={{ fontSize: scaledStatsFontSize, minWidth: 55 * scaleX, textAlign: "right", fontWeight: 600 }}>{stats.highSeries}</span>
-                            <span style={{ color: textColor, fontSize: 16 * averageScale, opacity: 0.7,  minWidth: 35 * scaleX, textAlign: "right" }}>
+                            <span style={{ fontSize: scaledStatsFontSize * 1.2, minWidth: 55 * scaleX, textAlign: "right", fontWeight: 700 }}>{stats.highSeries}</span>
+                            <span style={{ color: textColor, fontSize: 16 * averageScale, opacity: 0.9, minWidth: 35 * scaleX, textAlign: "right", fontWeight: 700 }}>
                                 HS
                             </span>
                         </div>
@@ -439,28 +439,28 @@ const PlayerCardV2: React.FC<PlayerCardV2Props> = ({
                             flex: 1,
                             display: "flex",
                             flexDirection: "column",
-                            gap: 18 * averageScale,
+                            gap: 8 * averageScale,
                             paddingRight: 32 * scaleX,
                             alignItems: "flex-start",
                         }}
                     >
                         <div style={{ display: "flex", alignItems: "center", gap: 8 * averageScale }}>
-                            <span style={{ color: textColor, fontSize: 16 * averageScale, opacity: 0.7, minWidth: 35 * scaleX }}>
+                            <span style={{ color: textColor, fontSize: 16 * averageScale, opacity: 0.9, minWidth: 35 * scaleX, fontWeight: 700 }}>
                                 EXP
                             </span>
-                            <span style={{ fontSize: scaledStatsFontSize, minWidth: 55 * scaleX, textAlign: "left", fontWeight: 600 }}>{stats.experience}</span>
+                            <span style={{ fontSize: scaledStatsFontSize * 1.2, minWidth: 55 * scaleX, textAlign: "left", fontWeight: 700 }}>{stats.experience}</span>
                         </div>
                         <div style={{ display: "flex", alignItems: "center", gap: 8 * averageScale }}>
-                            <span style={{ color: textColor, fontSize: 16 * averageScale, opacity: 0.7, minWidth: 35 * scaleX }}>
+                            <span style={{ color: textColor, fontSize: 16 * averageScale, opacity: 0.9, minWidth: 35 * scaleX, fontWeight: 700 }}>
                                 XP
                             </span>
-                            <span style={{ fontSize: scaledStatsFontSize, minWidth: 55 * scaleX, textAlign: "left", fontWeight: 600 }}>{stats.Xp}</span>
+                            <span style={{ fontSize: scaledStatsFontSize * 1.2, minWidth: 55 * scaleX, textAlign: "left", fontWeight: 700 }}>{stats.Xp}</span>
                         </div>
                         <div style={{ display: "flex", alignItems: "center", gap: 8 * averageScale }}>
-                            <span style={{ color: textColor, fontSize: 16 * averageScale, opacity: 0.7, minWidth: 35 * scaleX }}>
+                            <span style={{ color: textColor, fontSize: 16 * averageScale, opacity: 0.9, minWidth: 35 * scaleX, fontWeight: 700 }}>
                                 FOL
                             </span>
-                            <span style={{ fontSize: scaledStatsFontSize, minWidth: 55 * scaleX, textAlign: "left", fontWeight: 600 }}>{stats.follower}</span>
+                            <span style={{ fontSize: scaledStatsFontSize * 1.2, minWidth: 55 * scaleX, textAlign: "left", fontWeight: 700 }}>{stats.follower}</span>
                         </div>
                     </div>
                 </div>
