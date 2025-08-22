@@ -310,7 +310,7 @@ const PlayerCardV2: React.FC<PlayerCardV2Props> = ({
                     /> */}
                 </div>
 
-                {/* Name with glow spread effect */}
+                {/* Name with glow spread effect - UPPERCASE and larger */}
                 <div
                     style={{
                         position: "absolute",
@@ -318,18 +318,26 @@ const PlayerCardV2: React.FC<PlayerCardV2Props> = ({
                         left: 10 * scaleX,
                         width: "95%",
                         display: "flex",
+                        flexDirection: "column",
                         alignItems: "center",
                         justifyContent: "center",
-                        padding: `${16 * averageScale}px ${scaledPadding}px ${12 * averageScale}px ${scaledPadding}px`,
+                        padding: `${16 * averageScale}px ${scaledPadding}px ${8 * averageScale}px ${scaledPadding}px`,
                         fontWeight: 700,
-                        fontSize: scaledFontSize,
+                        fontSize: scaledFontSize * 1.5, // Larger font
                         color: textColor,
                         zIndex: 10,
                         textAlign: "center",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        maxWidth: "95%",
+                        lineHeight: 1.1,
                     }}
+                    title={name}
                 >
                     <span
                         style={{
+                            textTransform: "uppercase",
                             textShadow: `
                                 0 0 10px rgba(${hexToRgb(primaryColor).r}, ${hexToRgb(primaryColor).g}, ${hexToRgb(primaryColor).b}, 0.8),
                                 0 0 20px rgba(${hexToRgb(primaryColor).r}, ${hexToRgb(primaryColor).g}, ${hexToRgb(primaryColor).b}, 0.6),
@@ -338,10 +346,28 @@ const PlayerCardV2: React.FC<PlayerCardV2Props> = ({
                                 0 0 50px rgba(${hexToRgb(primaryColor).r}, ${hexToRgb(primaryColor).g}, ${hexToRgb(primaryColor).b}, 0.2)
                             `,
                             filter: `drop-shadow(0 0 15px rgba(${hexToRgb(primaryColor).r}, ${hexToRgb(primaryColor).g}, ${hexToRgb(primaryColor).b}, 0.7))`,
+                            display: "inline-block",
+                            maxWidth: "100%",
+                            verticalAlign: "top",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
                         }}
                     >
                         {name}
                     </span>
+                    
+                    {/* Horizontal divider after name */}
+                    <div
+                        style={{
+                            width: "80%",
+                            height: "2px",
+                            background: textColor,
+                            marginTop: 8 * averageScale,
+                            opacity: 0.6,
+                            borderRadius: "1px",
+                        }}
+                    />
                 </div>
 
                 {/* Stats Grid - Exact copy from V1 */}
@@ -438,6 +464,21 @@ const PlayerCardV2: React.FC<PlayerCardV2Props> = ({
                         </div>
                     </div>
                 </div>
+
+                {/* Bottom horizontal divider */}
+                <div
+                    style={{
+                        position: "absolute",
+                        bottom: 60 * scaleY,
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        width: "15%",
+                        height: "1.5px",
+                        background: textColor,
+                        opacity: 0.4,
+                        borderRadius: "1px",
+                    }}
+                />
             </div>
         </div>
     );
