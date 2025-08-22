@@ -5,6 +5,7 @@ import { Star } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import PlayerCard from '@/app/landing/components/PlayerCard';
+import PlayerCardV2 from '@/app/landing/components/PlayerCardV2';
 
 interface ProPlayer {
     user_id: number;
@@ -55,8 +56,9 @@ export default function ProPlayersPage() {
     const [proPlayers, setProPlayers] = useState<ProPlayer[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [useNewDesign, setUseNewDesign] = useState(false);
 
-    // Define different card themes for variety
+    // Define different card themes for variety (V1)
     const cardThemes = [
         { borderColor: "#EE2E55", backgroundColor: "white", pathColor: "#EE2E55" },
         { borderColor: "#3B82F6", backgroundColor: "rgba(59, 130, 246, 0.08)", pathColor: "#1E40AF" },
@@ -70,6 +72,22 @@ export default function ProPlayersPage() {
         { borderColor: "#EC4899", backgroundColor: "rgba(236, 72, 153, 0.08)", pathColor: "#DB2777" },
         { borderColor: "#14B8A6", backgroundColor: "rgba(20, 184, 166, 0.08)", pathColor: "#0F766E" },
         { borderColor: "#A855F7", backgroundColor: "rgba(168, 85, 247, 0.08)", pathColor: "#9333EA" },
+    ];
+
+    // Define V2 color themes
+    const cardThemesV2 = [
+        { primaryColor: "#8BC342", secondaryColor: "#385019", accentColor: "#75B11D" },
+        { primaryColor: "#3B82F6", secondaryColor: "#1E3A8A", accentColor: "#60A5FA" },
+        { primaryColor: "#8B5CF6", secondaryColor: "#4C1D95", accentColor: "#A78BFA" },
+        { primaryColor: "#F59E0B", secondaryColor: "#92400E", accentColor: "#FBBF24" },
+        { primaryColor: "#EC4899", secondaryColor: "#BE185D", accentColor: "#F472B6" },
+        { primaryColor: "#10B981", secondaryColor: "#047857", accentColor: "#34D399" },
+        { primaryColor: "#EF4444", secondaryColor: "#B91C1C", accentColor: "#F87171" },
+        { primaryColor: "#06B6D4", secondaryColor: "#0E7490", accentColor: "#67E8F9" },
+        { primaryColor: "#84CC16", secondaryColor: "#365314", accentColor: "#A3E635" },
+        { primaryColor: "#F97316", secondaryColor: "#C2410C", accentColor: "#FB923C" },
+        { primaryColor: "#14B8A6", secondaryColor: "#0F766E", accentColor: "#5EEAD4" },
+        { primaryColor: "#A855F7", secondaryColor: "#6B21A8", accentColor: "#C084FC" },
     ];
 
     useEffect(() => {
@@ -146,6 +164,32 @@ export default function ProPlayersPage() {
                                 <span>Verified Profiles</span>
                             </div>
                         </div>
+                        
+                        {/* Card Design Toggle */}
+                        <div className="mt-8 flex items-center justify-center">
+                            <div className="bg-white rounded-lg p-1 shadow-md border">
+                                <button
+                                    onClick={() => setUseNewDesign(false)}
+                                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                                        !useNewDesign
+                                            ? 'bg-green-600 text-white shadow-sm'
+                                            : 'text-gray-600 hover:text-gray-900'
+                                    }`}
+                                >
+                                    Classic Design
+                                </button>
+                                <button
+                                    onClick={() => setUseNewDesign(true)}
+                                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                                        useNewDesign
+                                            ? 'bg-green-600 text-white shadow-sm'
+                                            : 'text-gray-600 hover:text-gray-900'
+                                    }`}
+                                >
+                                    New Design V2
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -157,26 +201,48 @@ export default function ProPlayersPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
                         {proPlayers.map((player, index) => {
                             const theme = cardThemes[index % cardThemes.length];
+                            const themeV2 = cardThemesV2[index % cardThemesV2.length];
                             return (
                                 <div key={player.user_id} className="transform hover:scale-105 transition-transform duration-200">
-                                    <PlayerCard 
-                                        imageUrl={player.profile_picture_url}
-                                        level={player.level}
-                                        name={player.name}
-                                        stats={{
-                                            average: player.stats?.average_score || 0,
-                                            highGame: player.stats?.high_game || 0,
-                                            highSeries: player.stats?.high_series || 0,
-                                            experience: player.stats?.experience || 0,
-                                            Xp: player.xp || 0,
-                                            follower: player.follower_count || 0,
-                                        }}
-                                        borderColor={theme.borderColor}
-                                        backgroundColor={theme.backgroundColor}
-                                        pathColor={theme.pathColor}
-                                        width={320}
-                                        height={480}
-                                    />
+                                    {useNewDesign ? (
+                                        <PlayerCardV2 
+                                            imageUrl={player.profile_picture_url}
+                                            level={player.level}
+                                            name={player.name}
+                                            stats={{
+                                                average: player.stats?.average_score || 0,
+                                                highGame: player.stats?.high_game || 0,
+                                                highSeries: player.stats?.high_series || 0,
+                                                experience: player.stats?.experience || 0,
+                                                Xp: player.xp || 0,
+                                                follower: player.follower_count || 0,
+                                            }}
+                                            primaryColor={themeV2.primaryColor}
+                                            secondaryColor={themeV2.secondaryColor}
+                                            accentColor={themeV2.accentColor}
+                                            width={320}
+                                            height={480}
+                                        />
+                                    ) : (
+                                        <PlayerCard 
+                                            imageUrl={player.profile_picture_url}
+                                            level={player.level}
+                                            name={player.name}
+                                            stats={{
+                                                average: player.stats?.average_score || 0,
+                                                highGame: player.stats?.high_game || 0,
+                                                highSeries: player.stats?.high_series || 0,
+                                                experience: player.stats?.experience || 0,
+                                                Xp: player.xp || 0,
+                                                follower: player.follower_count || 0,
+                                            }}
+                                            borderColor={theme.borderColor}
+                                            backgroundColor={theme.backgroundColor}
+                                            pathColor={theme.pathColor}
+                                            width={320}
+                                            height={480}
+                                        />
+                                    )}
                                 </div>
                             );
                         })}
