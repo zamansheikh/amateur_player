@@ -280,8 +280,8 @@ const PlayerCardV2: React.FC<PlayerCardV2Props> = ({
                         position: "absolute",
                         top: 60 * scaleY,
                         right: 30 * scaleX,
-                        width: scaledImageWidth * 0.7,
-                        height: scaledImageHeight,
+                        width: scaledImageWidth * 0.75,
+                        height: scaledImageHeight * 1.2,
                         borderRadius: 12 * averageScale,
                         overflow: "hidden",
                         zIndex: 3,
@@ -297,17 +297,17 @@ const PlayerCardV2: React.FC<PlayerCardV2Props> = ({
                         }}
                     />
                     {/* Blue glow effect at bottom */}
-                    <div
+                    {/* <div
                         style={{
                             position: "absolute",
                             bottom: -10,
-                            left: 0,
+                            left: -10,
                             right: 0,
                             height: "40%",
                             background: `linear-gradient(to top, rgba(${hexToRgb(primaryColor).r}, ${hexToRgb(primaryColor).g}, ${hexToRgb(primaryColor).b}, 0.3), transparent)`,
                             pointerEvents: "none"
                         }}
-                    />
+                    /> */}
                 </div>
 
                 {/* Name with spread blur background */}
@@ -330,7 +330,11 @@ const PlayerCardV2: React.FC<PlayerCardV2Props> = ({
                         borderRadius: 0,
                         border: `1px solid rgba(${hexToRgb(primaryColor).r}, ${hexToRgb(primaryColor).g}, ${hexToRgb(primaryColor).b}, 0.1)`,
                         boxSizing: "border-box",
-                        boxShadow: `0 4px 20px rgba(${hexToRgb(primaryColor).r}, ${hexToRgb(primaryColor).g}, ${hexToRgb(primaryColor).b}, 0.1)`,
+                        boxShadow: `
+                            0 4px 20px rgba(${hexToRgb(primaryColor).r}, ${hexToRgb(primaryColor).g}, ${hexToRgb(primaryColor).b}, 0.1),
+                            0 0 32px 8px rgba(${hexToRgb(primaryColor).r}, ${hexToRgb(primaryColor).g}, ${hexToRgb(primaryColor).b}, 0.25)
+                        `,
+                        zIndex: 10,
                     }}
                 >
                     <span>{name}</span>
