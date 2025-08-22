@@ -310,7 +310,7 @@ const PlayerCardV2: React.FC<PlayerCardV2Props> = ({
                     /> */}
                 </div>
 
-                {/* Name with spread blur background */}
+                {/* Name with glow spread effect */}
                 <div
                     style={{
                         position: "absolute",
@@ -320,24 +320,28 @@ const PlayerCardV2: React.FC<PlayerCardV2Props> = ({
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        background: `rgba(${hexToRgb(primaryColor).r}, ${hexToRgb(primaryColor).g}, ${hexToRgb(primaryColor).b}, 0.08)`,
-                        backdropFilter: "blur(15px)",
-                        WebkitBackdropFilter: "blur(15px)",
                         padding: `${16 * averageScale}px ${scaledPadding}px ${12 * averageScale}px ${scaledPadding}px`,
                         fontWeight: 700,
                         fontSize: scaledFontSize,
                         color: textColor,
-                        borderRadius: 0,
-                        border: `1px solid rgba(${hexToRgb(primaryColor).r}, ${hexToRgb(primaryColor).g}, ${hexToRgb(primaryColor).b}, 0.1)`,
-                        boxSizing: "border-box",
-                        boxShadow: `
-                            0 4px 20px rgba(${hexToRgb(primaryColor).r}, ${hexToRgb(primaryColor).g}, ${hexToRgb(primaryColor).b}, 0.1),
-                            0 0 32px 8px rgba(${hexToRgb(primaryColor).r}, ${hexToRgb(primaryColor).g}, ${hexToRgb(primaryColor).b}, 0.25)
-                        `,
                         zIndex: 10,
+                        textAlign: "center",
                     }}
                 >
-                    <span>{name}</span>
+                    <span
+                        style={{
+                            textShadow: `
+                                0 0 10px rgba(${hexToRgb(primaryColor).r}, ${hexToRgb(primaryColor).g}, ${hexToRgb(primaryColor).b}, 0.8),
+                                0 0 20px rgba(${hexToRgb(primaryColor).r}, ${hexToRgb(primaryColor).g}, ${hexToRgb(primaryColor).b}, 0.6),
+                                0 0 30px rgba(${hexToRgb(primaryColor).r}, ${hexToRgb(primaryColor).g}, ${hexToRgb(primaryColor).b}, 0.4),
+                                0 0 40px rgba(${hexToRgb(primaryColor).r}, ${hexToRgb(primaryColor).g}, ${hexToRgb(primaryColor).b}, 0.3),
+                                0 0 50px rgba(${hexToRgb(primaryColor).r}, ${hexToRgb(primaryColor).g}, ${hexToRgb(primaryColor).b}, 0.2)
+                            `,
+                            filter: `drop-shadow(0 0 15px rgba(${hexToRgb(primaryColor).r}, ${hexToRgb(primaryColor).g}, ${hexToRgb(primaryColor).b}, 0.7))`,
+                        }}
+                    >
+                        {name}
+                    </span>
                 </div>
 
                 {/* Stats Grid - Exact copy from V1 */}
