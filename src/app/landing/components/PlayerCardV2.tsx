@@ -233,10 +233,10 @@ const PlayerCardV2: React.FC<PlayerCardV2Props> = ({
             >
                 {/* Level - Moved more to the right */}
                 <div
-                    style={{ position: "absolute", top: 80 * scaleY, left: 50 * scaleX, textAlign: "left" }}
+                    style={{ position: "absolute", top: 80 * scaleY, left: 40 * scaleX, textAlign: "left" }}
                 >
-                    <div style={{ fontSize: 20 * averageScale, fontWeight: 500, color: textColor }}>
-                        Level
+                    <div style={{ fontSize: 20 * averageScale, fontWeight: 600, color: textColor }}>
+                        LEVEL
                     </div>
                     <div
                         style={{
@@ -246,24 +246,24 @@ const PlayerCardV2: React.FC<PlayerCardV2Props> = ({
                             lineHeight: 1,
                         }}
                     >
-                        {level}
+                        {level<10 ? `0${level}` : level}
                     </div>
                 </div>
 
-                {/* Follow Button - Moved under the Level */}
+                {/* Follow Button - Better alignment and reduced radius */}
                 <div
                     style={{
                         position: "absolute",
-                        top: 160 * scaleY,
-                        left: 50 * scaleX,
-                        background: "rgba(255, 255, 255, 0.9)",
+                        top: 190 * scaleY,
+                        left: 40 * scaleX,
+                        background: "rgba(255, 255, 255, 0.95)",
                         border: "none",
                         color: textColor === '#1E2D5E' ? '#1E2D5E' : primaryColor,
                         fontWeight: 600,
                         cursor: "pointer",
                         fontSize: 12 * averageScale,
-                        padding: `${6 * averageScale}px ${12 * averageScale}px`,
-                        borderRadius: `${15 * averageScale}px`,
+                        padding: `${6 * averageScale}px ${8 * averageScale}px`,
+                        borderRadius: `${8 * averageScale}px`,
                         display: "flex",
                         alignItems: "center",
                         gap: 4 * averageScale,
@@ -274,23 +274,43 @@ const PlayerCardV2: React.FC<PlayerCardV2Props> = ({
                     Follow
                 </div>
 
-                {/* Player Image - Right-aligned */}
-                <img
-                    src={imageSrc}
-                    alt={name}
+                {/* Player Image - Right-aligned with blue glow effect */}
+                <div
                     style={{
                         position: "absolute",
                         top: 60 * scaleY,
                         right: 30 * scaleX,
                         width: scaledImageWidth * 0.7,
                         height: scaledImageHeight,
-                        objectFit: "cover",
                         borderRadius: 12 * averageScale,
+                        overflow: "hidden",
                         zIndex: 3,
                     }}
-                />
+                >
+                    <img
+                        src={imageSrc}
+                        alt={name}
+                        style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                        }}
+                    />
+                    {/* Blue glow effect at bottom */}
+                    <div
+                        style={{
+                            position: "absolute",
+                            bottom: -10,
+                            left: 0,
+                            right: 0,
+                            height: "40%",
+                            background: `linear-gradient(to top, rgba(${hexToRgb(primaryColor).r}, ${hexToRgb(primaryColor).g}, ${hexToRgb(primaryColor).b}, 0.3), transparent)`,
+                            pointerEvents: "none"
+                        }}
+                    />
+                </div>
 
-                {/* Name with blurred card color background */}
+                {/* Name with spread blur background */}
                 <div
                     style={{
                         position: "absolute",
@@ -300,15 +320,17 @@ const PlayerCardV2: React.FC<PlayerCardV2Props> = ({
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        background: `rgba(${hexToRgb(primaryColor).r}, ${hexToRgb(primaryColor).g}, ${hexToRgb(primaryColor).b}, 0.15)`,
-                        backdropFilter: "blur(10px)",
+                        background: `rgba(${hexToRgb(primaryColor).r}, ${hexToRgb(primaryColor).g}, ${hexToRgb(primaryColor).b}, 0.08)`,
+                        backdropFilter: "blur(15px)",
+                        WebkitBackdropFilter: "blur(15px)",
                         padding: `${16 * averageScale}px ${scaledPadding}px ${12 * averageScale}px ${scaledPadding}px`,
                         fontWeight: 700,
                         fontSize: scaledFontSize,
                         color: textColor,
                         borderRadius: 0,
-                        borderBottom: textColor === 'white' ? '1.5px solid rgba(255, 255, 255, 0.2)' : '1.5px solid rgba(30, 45, 94, 0.13)',
+                        border: `1px solid rgba(${hexToRgb(primaryColor).r}, ${hexToRgb(primaryColor).g}, ${hexToRgb(primaryColor).b}, 0.1)`,
                         boxSizing: "border-box",
+                        boxShadow: `0 4px 20px rgba(${hexToRgb(primaryColor).r}, ${hexToRgb(primaryColor).g}, ${hexToRgb(primaryColor).b}, 0.1)`,
                     }}
                 >
                     <span>{name}</span>
