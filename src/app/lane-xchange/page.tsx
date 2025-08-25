@@ -264,7 +264,7 @@ const mockProducts: Product[] = [
   }
 ];
 
-export default function LaneXchangePage() {
+export default function XchangePage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedCondition, setSelectedCondition] = useState<string>('all');
@@ -462,7 +462,7 @@ export default function LaneXchangePage() {
                 <ShoppingCart className="w-10 h-10 text-white" />
               </div>
               <div className="text-left">
-                <h1 className="text-5xl font-bold mb-2">Lane Xchange</h1>
+                <h1 className="text-5xl font-bold mb-2">Xchange</h1>
                 <p className="text-xl text-white/90">Buy & Sell Bowling Equipment within the Community</p>
               </div>
             </div>
@@ -627,10 +627,10 @@ export default function LaneXchangePage() {
         {/* Seller Info Section */}
         <div className="bg-white rounded-lg shadow-lg p-8 mt-12">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Join the Lane Xchange Community</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Join the Xchange Community</h2>
             <p className="text-gray-600 mb-6 max-w-3xl mx-auto">
               Whether you're looking to upgrade your equipment or sell items you no longer need, 
-              Lane Xchange connects you with passionate bowlers, professionals, and trusted manufacturers.
+              Xchange connects you with passionate bowlers, professionals, and trusted manufacturers.
             </p>
           </div>
 
