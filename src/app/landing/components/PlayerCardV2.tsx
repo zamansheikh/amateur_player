@@ -84,6 +84,13 @@ interface PlayerCardV2Props {
     primaryColor?: string;
     secondaryColor?: string;
     accentColor?: string;
+    // New props for follow functionality
+    playerId?: number;
+    username?: string;
+    isFollowed?: boolean;
+    onFollow?: () => void;
+    onCardClick?: (username?: string) => void;
+    isFollowLoading?: boolean;
 }
 
 const PlayerCardV2: React.FC<PlayerCardV2Props> = ({
@@ -104,6 +111,12 @@ const PlayerCardV2: React.FC<PlayerCardV2Props> = ({
     primaryColor = "#8BC342",
     secondaryColor = "#385019",
     accentColor = "#75B11D",
+    playerId,
+    username,
+    isFollowed = false,
+    onFollow,
+    onCardClick,
+    isFollowLoading = false,
 }) => {
     const [textColor, setTextColor] = useState<string>('#FFFFFF');
     
@@ -179,6 +192,24 @@ const PlayerCardV2: React.FC<PlayerCardV2Props> = ({
                 />
                 
                 <defs>
+                    {/* Squiggly Line Pattern */}
+                    <pattern id={`stripes_${width}_${height}`} width="8" height="8" patternUnits="userSpaceOnUse"
+                             patternTransform="rotate(25)">
+                        <rect width="8" height="8" fill="transparent"/>
+                        <line x1="0" y1="0" x2="0" y2="8" stroke={textColor === 'white' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)'} strokeWidth="1.2" />
+                    </pattern>
+
+                    <filter id={`squiggle_${width}_${height}`} x="-30%" y="-30%" width="160%" height="160%">
+                        <feTurbulence type="fractalNoise" baseFrequency="0.008 0.018"
+                                      numOctaves="2" seed="3" result="noise"/>
+                        <feDisplacementMap in="SourceGraphic" in2="noise" scale="15"
+                                           xChannelSelector="R" yChannelSelector="G"/>
+                    </filter>
+
+                    <clipPath id={`clip_${width}_${height}`}>
+                        <path d="M44.5874 68.1677C31.7579 76.9627 14.2955 81.7267 7.16797 83.0093C8.55387 193.13 10.6129 419.529 7.76193 444.155C4.91092 468.781 22.017 478.236 30.9264 479.885L81.4129 495.826C144.135 509.019 176.447 532.106 184.762 542C199.967 517.374 282.963 493.261 322.561 484.283C352.496 479.445 360.772 462.478 361.168 454.599V83.0093C352.655 83.0093 327.787 76.413 296.426 50.0279C265.065 23.6429 236.634 18.146 226.339 18.6957C218.261 34.5267 202.383 29.6894 195.453 25.2919L184.168 11L170.507 25.2919C155.777 34.087 143.779 24.559 139.621 18.6957C99.8257 19.2453 60.6243 57.1739 44.5874 68.1677Z"/>
+                    </clipPath>
+
                     <linearGradient 
                         id={`paint0_linear_${width}_${height}`} 
                         x1="170.565" 
@@ -215,6 +246,22 @@ const PlayerCardV2: React.FC<PlayerCardV2Props> = ({
                 </defs>
             </svg>
 
+            {/* Line Pattern Overlay - Between background and content */}
+            <svg
+                width={width}
+                height={height}
+                viewBox={`0 0 ${CARD_WIDTH} ${CARD_HEIGHT}`}
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                style={{ position: "absolute", top: 0, left: 0, zIndex: 1.5 }}
+            >
+                <rect width="100%" height="100%" 
+                      fill={`url(#stripes_${width}_${height})`}
+                      filter={`url(#squiggle_${width}_${height})`} 
+                      clipPath={`url(#clip_${width}_${height})`}
+                      opacity="0.8" />
+            </svg>
+
             {/* Card Content - Copied from V1 PlayerCard */}
             <div
                 style={{
@@ -229,6 +276,16 @@ const PlayerCardV2: React.FC<PlayerCardV2Props> = ({
                     alignItems: "center",
                     fontFamily: "sans-serif",
                     color: textColor,
+                    cursor: onCardClick ? "pointer" : "default",
+                }}
+                onClick={(e) => {
+                    // Prevent card click when clicking on follow button
+                    if ((e.target as HTMLElement).closest('.follow-button')) {
+                        return;
+                    }
+                    if (onCardClick) {
+                        onCardClick(username);
+                    }
                 }}
             >
                 {/* Level - Moved more to the right */}
@@ -251,7 +308,8 @@ const PlayerCardV2: React.FC<PlayerCardV2Props> = ({
                 </div>
 
                 {/* Follow Button - Better alignment and reduced radius */}
-                <div
+                <button
+                    className="follow-button"
                     style={{
                         position: "absolute",
                         top: 190 * scaleY,
@@ -260,7 +318,7 @@ const PlayerCardV2: React.FC<PlayerCardV2Props> = ({
                         border: "none",
                         color: textColor === '#1E2D5E' ? '#1E2D5E' : primaryColor,
                         fontWeight: 600,
-                        cursor: "pointer",
+                        cursor: isFollowLoading ? "not-allowed" : "pointer",
                         fontSize: 12 * averageScale,
                         padding: `${6 * averageScale}px ${8 * averageScale}px`,
                         borderRadius: `${8 * averageScale}px`,
@@ -268,11 +326,21 @@ const PlayerCardV2: React.FC<PlayerCardV2Props> = ({
                         alignItems: "center",
                         gap: 4 * averageScale,
                         boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                        opacity: isFollowLoading ? 0.6 : 1,
                     }}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (onFollow && !isFollowLoading) {
+                            onFollow();
+                        }
+                    }}
+                    disabled={isFollowLoading}
                 >
-                    <span style={{ fontSize: 14 * averageScale, fontWeight: 700 }}>+</span>
-                    Follow
-                </div>
+                    <span style={{ fontSize: 14 * averageScale, fontWeight: 700 }}>
+                        {isFollowLoading ? '...' : (isFollowed ? '' : '+')}
+                    </span>
+                    {isFollowLoading ? 'Loading...' : (isFollowed ? 'Following' : 'Follow')}
+                </button>
 
                 {/* Player Image - Right-aligned with blue glow effect */}
                 <div

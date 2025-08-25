@@ -95,6 +95,13 @@ interface PlayerCardProps {
     borderColor?: string;
     backgroundColor?: string;
     pathColor?: string;
+    // New props for follow functionality
+    playerId?: number;
+    username?: string;
+    isFollowed?: boolean;
+    onFollow?: () => void;
+    onCardClick?: (username?: string) => void;
+    isFollowLoading?: boolean;
 }
 
 const PlayerCard: React.FC<PlayerCardProps> = ({
@@ -115,6 +122,12 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
     borderColor = "#EE2E55",
     backgroundColor = "white",
     pathColor,
+    playerId,
+    username,
+    isFollowed = false,
+    onFollow,
+    onCardClick,
+    isFollowLoading = false,
 }) => {
     const [textColor, setTextColor] = useState<string>('black');
     
@@ -250,6 +263,16 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                     alignItems: "center",
                     fontFamily: "sans-serif",
                     color: "#1E2D5E",
+                    cursor: onCardClick ? "pointer" : "default",
+                }}
+                onClick={(e) => {
+                    // Prevent card click when clicking on follow button
+                    if ((e.target as HTMLElement).closest('.follow-button')) {
+                        return;
+                    }
+                    if (onCardClick) {
+                        onCardClick(username);
+                    }
                 }}
             >
                 {/* Level */}
@@ -310,22 +333,35 @@ const PlayerCard: React.FC<PlayerCardProps> = ({
                 >
                     <span>{name}</span>
                     <button
+                        className="follow-button"
                         style={{
                             background: "none",
                             border: "none",
                             color: textColor === '#1E2D5E' ? '#1E2D5E' : 'white',
                             fontWeight: 500,
-                            cursor: "pointer",
+                            cursor: isFollowLoading ? "not-allowed" : "pointer",
                             fontSize: 16 * averageScale,
                             display: "flex",
                             alignItems: "center",
                             gap: 4 * averageScale,
+                            opacity: isFollowLoading ? 0.6 : 1,
                         }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (onFollow && !isFollowLoading) {
+                                onFollow();
+                            }
+                        }}
+                        disabled={isFollowLoading}
                     >
-                        <span style={{ fontSize: 20 * averageScale, color: textColor === '#1E2D5E' ? '#1E2D5E' : 'white', fontWeight: 700 }}>
-                            +
+                        <span style={{ 
+                            fontSize: 20 * averageScale, 
+                            color: textColor === '#1E2D5E' ? '#1E2D5E' : 'white', 
+                            fontWeight: 700 
+                        }}>
+                            {isFollowLoading ? '...' : (isFollowed ? '' : '+')}
                         </span>{" "}
-                        Follow
+                        {isFollowLoading ? 'Loading...' : (isFollowed ? 'Following' : 'Follow')}
                     </button>
                 </div>
                 {/* Stats Grid */}

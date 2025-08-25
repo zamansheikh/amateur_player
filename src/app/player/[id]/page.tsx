@@ -404,11 +404,12 @@ export default function PlayerProfilePage() {
                             title={`Follow on ${social.social}`}
                             style={{ background: "none" }}
                           >
-                            <img
+                            <Image
                               src={social.logo}
                               alt={social.social}
+                              width={32}
+                              height={32}
                               className="w-10 h-10 object-contain"
-                              style={{ objectFit: "contain" }}
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
                                 target.style.display = "none";

@@ -3,7 +3,9 @@
 import Link from 'next/link';
 import { Star } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import PlayerCard from '@/app/landing/components/PlayerCard';
 import PlayerCardV2 from '@/app/landing/components/PlayerCardV2';
 
@@ -53,10 +55,14 @@ interface ProPlayer {
 }
 
 export default function ProPlayersPage() {
+    const router = useRouter();
+    const { user } = useAuth();
     const [proPlayers, setProPlayers] = useState<ProPlayer[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [useNewDesign, setUseNewDesign] = useState(false);
+    const [followingStates, setFollowingStates] = useState<{ [key: number]: boolean }>({});
+    const [followLoading, setFollowLoading] = useState<{ [key: number]: boolean }>({});
 
     // Define different card themes for variety (V1)
     const cardThemes = [
@@ -96,6 +102,14 @@ export default function ProPlayersPage() {
                 setLoading(true);
                 const response = await api.get('/api/user/pro-player-public-profile');
                 setProPlayers(response.data);
+                
+                // Initialize following states based on API response
+                const followStates: { [key: number]: boolean } = {};
+                response.data.forEach((player: ProPlayer) => {
+                    followStates[player.user_id] = player.is_followed || false;
+                });
+                setFollowingStates(followStates);
+                
                 setError(null);
             } catch (err) {
                 console.error('Error fetching pro players:', err);
@@ -107,6 +121,54 @@ export default function ProPlayersPage() {
 
         fetchProPlayers();
     }, []);
+
+    // Handle follow/unfollow functionality
+    const handleFollow = async (player: ProPlayer, e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent card click navigation
+        
+        if (!user) {
+            router.push('/signin');
+            return;
+        }
+
+        if (followLoading[player.user_id]) return; // Prevent multiple requests
+
+        try {
+            setFollowLoading(prev => ({ ...prev, [player.user_id]: true }));
+            
+            const response = await api.post('/api/user/follow', {
+                user_id: player.user_id
+            });
+
+            if (response.status === 200) {
+                // Toggle the follow state
+                setFollowingStates(prev => ({
+                    ...prev,
+                    [player.user_id]: !prev[player.user_id]
+                }));
+                
+                // Update the player data in the list
+                setProPlayers(prev => prev.map(p => 
+                    p.user_id === player.user_id 
+                        ? { 
+                            ...p, 
+                            is_followed: !p.is_followed,
+                            follower_count: p.is_followed ? p.follower_count - 1 : p.follower_count + 1
+                        }
+                        : p
+                ));
+            }
+        } catch (error) {
+            console.error('Error following/unfollowing user:', error);
+        } finally {
+            setFollowLoading(prev => ({ ...prev, [player.user_id]: false }));
+        }
+    };
+
+    // Handle card click to navigate to player profile
+    const handleCardClick = (player: ProPlayer) => {
+        router.push(`/player/${player.username}`);
+    };
 
     // Removed auto-scroll functionality - using grid layout instead
 
@@ -222,6 +284,15 @@ export default function ProPlayersPage() {
                                             accentColor={themeV2.accentColor}
                                             width={320}
                                             height={480}
+                                            playerId={player.user_id}
+                                            username={player.username}
+                                            isFollowed={player.is_followed}
+                                            onFollow={() => {
+                                                const event = { stopPropagation: () => {} } as React.MouseEvent;
+                                                handleFollow(player, event);
+                                            }}
+                                            onCardClick={() => handleCardClick(player)}
+                                            isFollowLoading={followLoading[player.user_id] || false}
                                         />
                                     ) : (
                                         <PlayerCard 
@@ -241,6 +312,15 @@ export default function ProPlayersPage() {
                                             pathColor={theme.pathColor}
                                             width={320}
                                             height={480}
+                                            playerId={player.user_id}
+                                            username={player.username}
+                                            isFollowed={player.is_followed}
+                                            onFollow={() => {
+                                                const event = { stopPropagation: () => {} } as React.MouseEvent;
+                                                handleFollow(player, event);
+                                            }}
+                                            onCardClick={() => handleCardClick(player)}
+                                            isFollowLoading={followLoading[player.user_id] || false}
                                         />
                                     )}
                                 </div>
