@@ -64,6 +64,23 @@ interface ProPlayer {
   }[];
 }
 
+interface PollOption {
+  option_id: number;
+  content: string;
+  vote: number;
+  perc: number;
+}
+
+interface PollContent {
+  id: number;
+  uid: string;
+  title: string;
+  poll_type: string;
+  options: PollOption[];
+  total_votes?: number;
+  viewer_vote?: number;
+}
+
 interface FeedPost {
   metadata: {
     id: number;
@@ -111,7 +128,7 @@ interface FeedPost {
   };
   caption: string;
   media: string[];
-  poll: any;
+  poll: PollContent | null;
   event: any;
   tags: string[];
   is_liked_by_me: boolean;
