@@ -54,7 +54,18 @@ interface FeedPost {
     };
   caption: string;
   media: string[];
-  poll: any;
+  poll: {
+    id: number;
+    uid: string;
+    title: string;
+    poll_type: string;
+    options: Array<{
+      option_id: number;
+      content: string;
+      vote: number;
+      perc: number;
+    }>;
+  } | null;
   event: any;
   tags: string[];
   is_liked_by_me: boolean;
@@ -76,6 +87,8 @@ export default function FeedPostCard({
   const [localLikes, setLocalLikes] = useState(post.metadata.total_likes);
   const [isLiking, setIsLiking] = useState(false);
   const [localPost, setLocalPost] = useState(post);
+  const [selectedPollOption, setSelectedPollOption] = useState<number | null>(null);
+  const [isVoting, setIsVoting] = useState(false);
   const router = useRouter();
 
   // Initialize following state
@@ -154,6 +167,29 @@ export default function FeedPostCard({
     }
   };
 
+  const handlePollVote = async (optionId: number) => {
+    if (isVoting || !localPost.poll) return;
+
+    try {
+      setIsVoting(true);
+      
+      // Call the poll vote API with the correct endpoint
+      await api.get(`/api/user/post/vote/${optionId}`);
+
+      // Update local state to show vote was cast
+      setSelectedPollOption(optionId);
+      
+      // You might want to refetch the post to get updated vote counts
+      if (onPostUpdate) {
+        onPostUpdate();
+      }
+    } catch (error) {
+      console.error("Error voting in poll:", error);
+    } finally {
+      setIsVoting(false);
+    }
+  };
+
   // Function to parse caption (API returns it as string array format)
   const parseCaption = (caption: string): string => {
     try {
@@ -221,10 +257,83 @@ export default function FeedPostCard({
 
         {/* Post Content - Clickable */}
         <div className="mb-4 cursor-pointer" onClick={handlePostClick}>
-          <p className="text-gray-800 leading-relaxed text-[15px] line-height-6">
-            {renderTextWithTags(post.caption, post.tags)}
-          </p>
+          {post.caption && (
+            <p className="text-gray-800 leading-relaxed text-[15px] line-height-6">
+              {renderTextWithTags(post.caption, post.tags)}
+            </p>
+          )}
         </div>
+
+        {/* Poll Content */}
+        {localPost.poll && (
+          <div className="mb-4 bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <h4 className="text-lg font-semibold text-gray-900 mb-3">
+              📊 {localPost.poll.title}
+            </h4>
+            <div className="space-y-3">
+              {localPost.poll.options.map((option) => {
+                const totalVotes = localPost.poll!.options.reduce((sum, opt) => sum + opt.vote, 0);
+                const percentage = totalVotes > 0 ? (option.vote / totalVotes) * 100 : 0;
+                const isSelected = selectedPollOption === option.option_id;
+                
+                return (
+                  <div key={option.option_id} className="relative">
+                    <button
+                      onClick={() => handlePollVote(option.option_id)}
+                      disabled={isVoting || selectedPollOption !== null}
+                      className={`w-full text-left p-3 rounded-lg border transition-all duration-200 relative overflow-hidden ${
+                        isSelected
+                          ? 'border-green-500 bg-green-50 text-green-700'
+                          : selectedPollOption !== null || totalVotes > 0
+                          ? 'border-gray-300 bg-white text-gray-700 cursor-default'
+                          : 'border-gray-300 bg-white text-gray-700 hover:border-green-400 hover:bg-green-50'
+                      } ${isVoting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      {/* Progress bar background */}
+                      {(selectedPollOption !== null || totalVotes > 0) && (
+                        <div
+                          className={`absolute inset-0 transition-all duration-500 ${
+                            isSelected ? 'bg-green-200' : 'bg-gray-200'
+                          }`}
+                          style={{ width: `${percentage}%` }}
+                        />
+                      )}
+                      
+                      {/* Option content */}
+                      <div className="relative flex items-center justify-between">
+                        <span className="font-medium">{option.content}</span>
+                        {(selectedPollOption !== null || totalVotes > 0) && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600">
+                              {option.vote} vote{option.vote !== 1 ? 's' : ''}
+                            </span>
+                            <span className="text-sm font-bold text-gray-800">
+                              {percentage.toFixed(1)}%
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+            
+            {/* Poll info */}
+            <div className="mt-3 pt-3 border-t border-gray-200">
+              <div className="flex items-center justify-between text-sm text-gray-600">
+                <span>
+                  {localPost.poll.options.reduce((sum, opt) => sum + opt.vote, 0)} total vote
+                  {localPost.poll.options.reduce((sum, opt) => sum + opt.vote, 0) !== 1 ? 's' : ''}
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  {localPost.poll.poll_type} Choice
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Post Media Gallery - Clickable */}
         {post.media && post.media.length > 0 && (
