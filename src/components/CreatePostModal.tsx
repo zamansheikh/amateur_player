@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { X, Globe, ChevronDown, BarChart3, Image, Video, CheckCircle } from 'lucide-react';
+import { X, Globe, ChevronDown, BarChart3, Image, Video, CheckCircle, Plus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 
@@ -23,6 +23,13 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
     const [uploadProgress, setUploadProgress] = useState(0);
     const [postingStep, setPostingStep] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
+    
+    // Poll-related state
+    const [isPollMode, setIsPollMode] = useState(false);
+    const [pollTitle, setPollTitle] = useState('');
+    const [pollType, setPollType] = useState<'Single' | 'Multiple'>('Single');
+    const [pollOptions, setPollOptions] = useState<string[]>(['', '']);
+    const [currentPollOption, setCurrentPollOption] = useState('');
 
     // Update selected files when initial files change
     useEffect(() => {
@@ -74,6 +81,46 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
         return [...new Set(allTags)]; // Remove duplicates
     };
 
+    // Poll option handlers
+    const updatePollOption = (index: number, value: string) => {
+        const newOptions = [...pollOptions];
+        newOptions[index] = value;
+        setPollOptions(newOptions);
+    };
+
+    const addPollOption = () => {
+        if (pollOptions.length < 5) { // Limit to 5 options
+            setPollOptions([...pollOptions, '']);
+        }
+    };
+
+    const removePollOption = (index: number) => {
+        if (pollOptions.length > 2) { // Minimum 2 options
+            const newOptions = pollOptions.filter((_, i) => i !== index);
+            setPollOptions(newOptions);
+        }
+    };
+
+    const togglePollMode = () => {
+        setIsPollMode(!isPollMode);
+        if (!isPollMode) {
+            // Reset media files when entering poll mode (polls are text-only)
+            setSelectedFiles([]);
+        } else {
+            // Reset poll data when exiting poll mode
+            setPollTitle('');
+            setPollOptions(['', '']);
+            setPollType('Single');
+        }
+    };
+
+    // Validate poll data
+    const isPollValid = (): boolean => {
+        if (!isPollMode) return true;
+        return pollTitle.trim().length > 0 && 
+               pollOptions.filter(option => option.trim().length > 0).length >= 2;
+    };
+
     // Helper function to check if a file is a video
     const isVideo = (file: File): boolean => {
         return file.type.startsWith('video/');
@@ -86,8 +133,13 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Allow posting if there's either text content or media files
-        if ((!postText.trim() && selectedFiles.length === 0) || isPosting) return;
+        
+        // Validation: Check if there's content or valid poll
+        if (isPollMode) {
+            if (!isPollValid() || isPosting) return;
+        } else {
+            if ((!postText.trim() && selectedFiles.length === 0) || isPosting) return;
+        }
 
         try {
             setIsPosting(true);
@@ -97,50 +149,78 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
             // Simulate initial progress
             setUploadProgress(10);
             
-            // Create FormData
-            const formData = new FormData();
-            
-            // Add caption (can be empty if there are media files)
-            formData.append('caption', postText.trim() || '');
-            
-            // Add all tags (from hashtags and manual tags)
+            // Get all tags (from hashtags and manual tags)
             const allTags = getAllTags();
-            allTags.forEach(tag => {
-                formData.append('tags', tag);
-            });
             
-            setPostingStep('Uploading media files...');
-            setUploadProgress(30);
-            
-            // Add media files
-            selectedFiles.forEach(file => {
-                formData.append('media', file);
-            });
-
-            setUploadProgress(60);
-            setPostingStep('Creating your post...');
-
-            // Send FormData with progress tracking
-            await api.post('/api/user/posts', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-                onUploadProgress: (progressEvent) => {
-                    if (progressEvent.total) {
-                        const progress = Math.round((progressEvent.loaded * 40) / progressEvent.total) + 60;
-                        setUploadProgress(Math.min(progress, 95));
+            if (isPollMode) {
+                // Create poll post with JSON payload
+                setPostingStep('Creating your poll...');
+                setUploadProgress(50);
+                
+                const pollPayload = {
+                    caption: postText.trim(),
+                    tags: allTags,
+                    poll: {
+                        title: pollTitle.trim(),
+                        poll_type: pollType,
+                        options: pollOptions.filter(option => option.trim().length > 0)
                     }
-                }
-            });
+                };
+
+                await api.post('/api/user/posts', pollPayload, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+            } else {
+                // Create regular post with FormData (for media uploads)
+                const formData = new FormData();
+                
+                // Add caption (can be empty if there are media files)
+                formData.append('caption', postText.trim() || '');
+                
+                // Add all tags
+                allTags.forEach(tag => {
+                    formData.append('tags', tag);
+                });
+                
+                setPostingStep('Uploading media files...');
+                setUploadProgress(30);
+                
+                // Add media files
+                selectedFiles.forEach(file => {
+                    formData.append('media', file);
+                });
+
+                setUploadProgress(60);
+                setPostingStep('Creating your post...');
+
+                // Send FormData with progress tracking
+                await api.post('/api/user/posts', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                    onUploadProgress: (progressEvent) => {
+                        if (progressEvent.total) {
+                            const progress = Math.round((progressEvent.loaded * 40) / progressEvent.total) + 60;
+                            setUploadProgress(Math.min(progress, 95));
+                        }
+                    }
+                });
+            }
             
             setUploadProgress(100);
-            setPostingStep('Post created successfully!');
+            setPostingStep(isPollMode ? 'Poll created successfully!' : 'Post created successfully!');
             
             // Reset form
             setPostText('');
             setSelectedFiles([]);
             setManualTags([]);
             setCurrentTag('');
+            setPollTitle('');
+            setPollOptions(['', '']);
+            setPollType('Single');
+            setIsPollMode(false);
             setShowSuccess(true);
             
             if (onPostCreated) {
@@ -154,7 +234,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
             
         } catch (error) {
             console.error('Error creating post:', error);
-            setPostingStep('Failed to create post. Please try again.');
+            setPostingStep(`Failed to create ${isPollMode ? 'poll' : 'post'}. Please try again.`);
             setUploadProgress(0);
             
             // Reset posting state after showing error
@@ -171,6 +251,10 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
         setSelectedFiles([]);
         setManualTags([]);
         setCurrentTag('');
+        setPollTitle('');
+        setPollOptions(['', '']);
+        setPollType('Single');
+        setIsPollMode(false);
         setShowSuccess(false);
         setUploadProgress(0);
         setPostingStep('');
@@ -191,7 +275,10 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                 {/* Modal Header */}
                 <div className="h-[56px] flex items-center justify-between px-4 border-b border-gray-200 flex-shrink-0">
                     <h2 className="text-xl font-semibold text-gray-900">
-                        {isPosting ? 'Creating Post...' : 'Create Post'}
+                        {isPosting ? 
+                            (isPollMode ? 'Creating Poll...' : 'Creating Post...') : 
+                            (isPollMode ? 'Create Poll' : 'Create Post')
+                        }
                     </h2>
                     <button
                         onClick={handleClose}
@@ -210,7 +297,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                 {showSuccess && (
                     <div className="mx-4 mt-4 p-3 bg-green-100 border border-green-200 rounded-lg text-green-700 text-sm flex items-center gap-2 flex-shrink-0">
                         <CheckCircle className="w-4 h-4" />
-                        Post created successfully!
+                        {isPollMode ? 'Poll created successfully!' : 'Post created successfully!'}
                     </div>
                 )}
 
@@ -263,9 +350,11 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                             <textarea
                                 value={postText}
                                 onChange={(e) => setPostText(e.target.value)}
-                                placeholder={selectedFiles.length > 0 
-                                    ? "Write a caption... (optional)" 
-                                    : "What's on your mind? Share your thoughts with the bowling community! 🎳"
+                                placeholder={isPollMode 
+                                    ? "Write a caption for your poll... (optional)" 
+                                    : selectedFiles.length > 0 
+                                        ? "Write a caption... (optional)" 
+                                        : "What's on your mind? Share your thoughts with the bowling community! 🎳"
                                 }
                                 className={`w-full h-20 p-3 text-gray-800 placeholder-gray-400 border-0 resize-none focus:outline-none text-base ${
                                     isPosting ? 'bg-gray-50 cursor-not-allowed' : ''
@@ -273,6 +362,119 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                                 disabled={isPosting}
                             />
                         </div>
+
+                        {/* Poll Creation Section */}
+                        {isPollMode && (
+                            <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg flex-shrink-0">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <BarChart3 className="w-5 h-5 text-blue-600" />
+                                    <h4 className="font-medium text-gray-900">Create Poll</h4>
+                                </div>
+                                
+                                {/* Poll Title */}
+                                <div className="mb-3">
+                                    <input
+                                        type="text"
+                                        value={pollTitle}
+                                        onChange={(e) => setPollTitle(e.target.value)}
+                                        placeholder="Ask a question..."
+                                        disabled={isPosting}
+                                        className={`w-full p-3 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${
+                                            isPosting ? 'bg-gray-50 cursor-not-allowed' : 'bg-white'
+                                        }`}
+                                    />
+                                </div>
+
+                                {/* Poll Type */}
+                                <div className="mb-3">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Poll Type</label>
+                                    <div className="flex gap-3">
+                                        <label className="flex items-center">
+                                            <input
+                                                type="radio"
+                                                name="pollType"
+                                                value="Single"
+                                                checked={pollType === 'Single'}
+                                                onChange={(e) => setPollType(e.target.value as 'Single' | 'Multiple')}
+                                                disabled={isPosting}
+                                                className="mr-2 text-blue-600 focus:ring-blue-500"
+                                            />
+                                            <span className="text-sm text-gray-700">Single Choice</span>
+                                        </label>
+                                        <label className="flex items-center">
+                                            <input
+                                                type="radio"
+                                                name="pollType"
+                                                value="Multiple"
+                                                checked={pollType === 'Multiple'}
+                                                onChange={(e) => setPollType(e.target.value as 'Single' | 'Multiple')}
+                                                disabled={isPosting}
+                                                className="mr-2 text-blue-600 focus:ring-blue-500"
+                                            />
+                                            <span className="text-sm text-gray-700">Multiple Choice</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {/* Poll Options */}
+                                <div className="mb-3">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Options</label>
+                                    <div className="space-y-2">
+                                        {pollOptions.map((option, index) => (
+                                            <div key={index} className="flex items-center gap-2">
+                                                <div className="flex-1">
+                                                    <input
+                                                        type="text"
+                                                        value={option}
+                                                        onChange={(e) => updatePollOption(index, e.target.value)}
+                                                        placeholder={`Option ${index + 1}`}
+                                                        disabled={isPosting}
+                                                        className={`w-full p-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${
+                                                            isPosting ? 'bg-gray-50 cursor-not-allowed' : 'bg-white'
+                                                        }`}
+                                                    />
+                                                </div>
+                                                {pollOptions.length > 2 && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removePollOption(index)}
+                                                        disabled={isPosting}
+                                                        className="w-8 h-8 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg flex items-center justify-center transition-colors"
+                                                    >
+                                                        <X className="w-4 h-4" />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    
+                                    {/* Add Option Button */}
+                                    {pollOptions.length < 5 && (
+                                        <button
+                                            type="button"
+                                            onClick={addPollOption}
+                                            disabled={isPosting}
+                                            className="mt-2 text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1 transition-colors"
+                                        >
+                                            <div className="w-4 h-4 border border-blue-600 rounded flex items-center justify-center">
+                                                <Plus className="w-3 h-3" />
+                                            </div>
+                                            Add Option
+                                        </button>
+                                    )}
+                                </div>
+
+                                {/* Exit Poll Mode */}
+                                <button
+                                    type="button"
+                                    onClick={togglePollMode}
+                                    disabled={isPosting}
+                                    className="text-sm text-gray-600 hover:text-gray-800 underline"
+                                >
+                                    Cancel Poll
+                                </button>
+                            </div>
+                        )}
 
                         {/* Show extracted hashtags and manual tags preview */}
                         {getAllTags().length > 0 && (
@@ -316,7 +518,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                         </div>
 
                         {/* Selected Files Preview */}
-                        {selectedFiles.length > 0 && (
+                        {selectedFiles.length > 0 && !isPollMode && (
                             <div className="mb-4 flex-shrink-0">
                                 <h5 className="text-sm font-medium text-gray-900 mb-2">
                                     Selected Media ({selectedFiles.length})
@@ -379,15 +581,22 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                             <div className="grid grid-cols-2 gap-2">
                                 <button
                                     type="button"
+                                    onClick={togglePollMode}
                                     disabled={isPosting}
-                                    className={`flex items-center gap-2 p-2 border border-gray-200 rounded-lg transition-colors ${
-                                        isPosting ? 'cursor-not-allowed' : 'hover:bg-gray-50'
-                                    }`}
+                                    className={`flex items-center gap-2 p-2 border rounded-lg transition-colors ${
+                                        isPollMode 
+                                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                                            : 'border-gray-200 hover:bg-gray-50'
+                                    } ${isPosting ? 'cursor-not-allowed' : ''}`}
                                 >
-                                    <div className="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center">
-                                        <BarChart3 className="w-4 h-4 text-blue-600" />
+                                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${
+                                        isPollMode ? 'bg-blue-200' : 'bg-blue-100'
+                                    }`}>
+                                        <BarChart3 className={`w-4 h-4 ${isPollMode ? 'text-blue-700' : 'text-blue-600'}`} />
                                     </div>
-                                    <span className="text-xs text-gray-700">Create Poll</span>
+                                    <span className="text-xs text-gray-700">
+                                        {isPollMode ? 'Exit Poll' : 'Create Poll'}
+                                    </span>
                                 </button>
 
                                 <button
@@ -407,10 +616,14 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
 
                                 <button
                                     type="button"
-                                    onClick={() => !isPosting && fileInputRef.current?.click()}
-                                    disabled={isPosting}
+                                    onClick={() => !isPosting && !isPollMode && fileInputRef.current?.click()}
+                                    disabled={isPosting || isPollMode}
                                     className={`flex items-center gap-2 p-2 border border-gray-200 rounded-lg transition-colors ${
-                                        isPosting ? 'cursor-not-allowed' : 'hover:bg-gray-50'
+                                        isPollMode 
+                                            ? 'opacity-50 cursor-not-allowed bg-gray-50'
+                                            : isPosting 
+                                                ? 'cursor-not-allowed' 
+                                                : 'hover:bg-gray-50'
                                     }`}
                                 >
                                     <div className="w-6 h-6 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -437,20 +650,28 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                         {/* Post Button */}
                         <button
                             type="submit"
-                            disabled={(!postText.trim() && selectedFiles.length === 0) || isPosting}
+                            disabled={
+                                isPosting || 
+                                (isPollMode ? !isPollValid() : (!postText.trim() && selectedFiles.length === 0))
+                            }
                             className={`w-full h-10 font-medium rounded-full transition-all duration-200 flex items-center justify-center gap-2 flex-shrink-0 ${
                                 isPosting
                                     ? 'bg-gray-400 cursor-not-allowed text-gray-600'
-                                    : (!postText.trim() && selectedFiles.length === 0)
+                                    : (isPollMode ? !isPollValid() : (!postText.trim() && selectedFiles.length === 0))
                                         ? 'bg-gray-300 cursor-not-allowed text-gray-500'
                                         : 'bg-green-500 hover:bg-green-600 text-white'
                             }`}
-                            style={!isPosting && (postText.trim() || selectedFiles.length > 0) ? { backgroundColor: '#8BC342' } : {}}
+                            style={!isPosting && (
+                                isPollMode ? isPollValid() : (postText.trim() || selectedFiles.length > 0)
+                            ) ? { backgroundColor: '#8BC342' } : {}}
                         >
                             {isPosting && (
                                 <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin"></div>
                             )}
-                            {isPosting ? 'Creating Post...' : 'Post'}
+                            {isPosting 
+                                ? (isPollMode ? 'Creating Poll...' : 'Creating Post...') 
+                                : (isPollMode ? 'Create Poll' : 'Post')
+                            }
                         </button>
                     </form>
                 </div>
