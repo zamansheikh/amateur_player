@@ -269,7 +269,9 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                 className={`bg-white rounded-[20px] shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ${
                     selectedFiles.length > 0 
                         ? 'w-full max-w-2xl max-h-[85vh]' 
-                        : 'w-[488px] max-h-[762px]'
+                        : isPollMode
+                            ? 'w-[488px] max-h-[90vh]'
+                            : 'w-[488px] max-h-[762px]'
                 }`}
             >
                 {/* Modal Header */}
@@ -344,336 +346,344 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                         </div>
                     </div>
 
-                    {/* Post Content */}
-                    <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden min-h-0">
-                        <div className="flex-shrink-0 mb-4" style={{ minHeight: '80px' }}>
-                            <textarea
-                                value={postText}
-                                onChange={(e) => setPostText(e.target.value)}
-                                placeholder={isPollMode 
-                                    ? "Write a caption for your poll... (optional)" 
-                                    : selectedFiles.length > 0 
-                                        ? "Write a caption... (optional)" 
-                                        : "What's on your mind? Share your thoughts with the bowling community! 🎳"
-                                }
-                                className={`w-full h-20 p-3 text-gray-800 placeholder-gray-400 border-0 resize-none focus:outline-none text-base ${
-                                    isPosting ? 'bg-gray-50 cursor-not-allowed' : ''
-                                }`}
-                                disabled={isPosting}
-                            />
-                        </div>
-
-                        {/* Poll Creation Section */}
-                        {isPollMode && (
-                            <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg flex-shrink-0">
-                                <div className="flex items-center gap-2 mb-3">
-                                    <BarChart3 className="w-5 h-5 text-blue-600" />
-                                    <h4 className="font-medium text-gray-900">Create Poll</h4>
+                    {/* Scrollable Content Area */}
+                    <div className="flex-1 overflow-y-auto min-h-0">
+                        {/* Post Content */}
+                        <form onSubmit={handleSubmit} className="flex flex-col h-full">
+                            <div className="flex-1">
+                                <div className="flex-shrink-0 mb-4" style={{ minHeight: '80px' }}>
+                                    <textarea
+                                        value={postText}
+                                        onChange={(e) => setPostText(e.target.value)}
+                                        placeholder={isPollMode 
+                                            ? "Write a caption for your poll... (optional)" 
+                                            : selectedFiles.length > 0 
+                                                ? "Write a caption... (optional)" 
+                                                : "What's on your mind? Share your thoughts with the bowling community! 🎳"
+                                        }
+                                        className={`w-full h-20 p-3 text-gray-800 placeholder-gray-400 border-0 resize-none focus:outline-none text-base ${
+                                            isPosting ? 'bg-gray-50 cursor-not-allowed' : ''
+                                        }`}
+                                        disabled={isPosting}
+                                    />
                                 </div>
-                                
-                                {/* Poll Title */}
-                                <div className="mb-3">
+
+                                {/* Poll Creation Section */}
+                                {isPollMode && (
+                                    <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg flex-shrink-0">
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <BarChart3 className="w-5 h-5 text-blue-600" />
+                                            <h4 className="font-medium text-gray-900">Create Poll</h4>
+                                        </div>
+                                        
+                                        {/* Poll Title */}
+                                        <div className="mb-3">
+                                            <input
+                                                type="text"
+                                                value={pollTitle}
+                                                onChange={(e) => setPollTitle(e.target.value)}
+                                                placeholder="Ask a question..."
+                                                disabled={isPosting}
+                                                className={`w-full p-3 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${
+                                                    isPosting ? 'bg-gray-50 cursor-not-allowed' : 'bg-white'
+                                                }`}
+                                            />
+                                        </div>
+
+                                        {/* Poll Type */}
+                                        <div className="mb-3">
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Poll Type</label>
+                                            <div className="flex gap-3">
+                                                <label className="flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        name="pollType"
+                                                        value="Single"
+                                                        checked={pollType === 'Single'}
+                                                        onChange={(e) => setPollType(e.target.value as 'Single' | 'Multiple')}
+                                                        disabled={isPosting}
+                                                        className="mr-2 text-blue-600 focus:ring-blue-500"
+                                                    />
+                                                    <span className="text-sm text-gray-700">Single Choice</span>
+                                                </label>
+                                                <label className="flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        name="pollType"
+                                                        value="Multiple"
+                                                        checked={pollType === 'Multiple'}
+                                                        onChange={(e) => setPollType(e.target.value as 'Single' | 'Multiple')}
+                                                        disabled={isPosting}
+                                                        className="mr-2 text-blue-600 focus:ring-blue-500"
+                                                    />
+                                                    <span className="text-sm text-gray-700">Multiple Choice</span>
+                                                </label>
+                                            </div>
+                                        </div>
+
+                                        {/* Poll Options */}
+                                        <div className="mb-3">
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Options</label>
+                                            <div className="space-y-2">
+                                                {pollOptions.map((option, index) => (
+                                                    <div key={index} className="flex items-center gap-2">
+                                                        <div className="flex-1">
+                                                            <input
+                                                                type="text"
+                                                                value={option}
+                                                                onChange={(e) => updatePollOption(index, e.target.value)}
+                                                                placeholder={`Option ${index + 1}`}
+                                                                disabled={isPosting}
+                                                                className={`w-full p-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${
+                                                                    isPosting ? 'bg-gray-50 cursor-not-allowed' : 'bg-white'
+                                                                }`}
+                                                            />
+                                                        </div>
+                                                        {pollOptions.length > 2 && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => removePollOption(index)}
+                                                                disabled={isPosting}
+                                                                className="w-8 h-8 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg flex items-center justify-center transition-colors"
+                                                            >
+                                                                <X className="w-4 h-4" />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            
+                                            {/* Add Option Button */}
+                                            {pollOptions.length < 5 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={addPollOption}
+                                                    disabled={isPosting}
+                                                    className="mt-2 text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1 transition-colors"
+                                                >
+                                                    <div className="w-4 h-4 border border-blue-600 rounded flex items-center justify-center">
+                                                        <Plus className="w-3 h-3" />
+                                                    </div>
+                                                    Add Option
+                                                </button>
+                                            )}
+                                        </div>
+
+                                        {/* Exit Poll Mode */}
+                                        <button
+                                            type="button"
+                                            onClick={togglePollMode}
+                                            disabled={isPosting}
+                                            className="text-sm text-gray-600 hover:text-gray-800 underline"
+                                        >
+                                            Cancel Poll
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* Show extracted hashtags and manual tags preview */}
+                                {getAllTags().length > 0 && (
+                                    <div className="mb-4">
+                                        <div className="flex flex-wrap gap-2">
+                                            <span className="text-sm text-gray-500">Tags:</span>
+                                            {getAllTags().map((tag, index) => (
+                                                <span 
+                                                    key={index}
+                                                    className="text-sm bg-green-100 text-green-700 px-2 py-1 rounded-full flex items-center gap-1"
+                                                >
+                                                    #{tag}
+                                                    {manualTags.includes(tag) && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeTag(tag)}
+                                                            className="ml-1 text-green-600 hover:text-green-800"
+                                                        >
+                                                            <X className="w-3 h-3" />
+                                                        </button>
+                                                    )}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Manual Tag Input */}
+                                <div className="mb-3 flex-shrink-0">
                                     <input
                                         type="text"
-                                        value={pollTitle}
-                                        onChange={(e) => setPollTitle(e.target.value)}
-                                        placeholder="Ask a question..."
+                                        value={currentTag}
+                                        onChange={(e) => setCurrentTag(e.target.value)}
+                                        onKeyDown={addTag}
+                                        placeholder="Add tags (press Enter to add)"
                                         disabled={isPosting}
-                                        className={`w-full p-3 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${
-                                            isPosting ? 'bg-gray-50 cursor-not-allowed' : 'bg-white'
+                                        className={`w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm ${
+                                            isPosting ? 'bg-gray-50 cursor-not-allowed' : ''
                                         }`}
                                     />
                                 </div>
 
-                                {/* Poll Type */}
-                                <div className="mb-3">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Poll Type</label>
-                                    <div className="flex gap-3">
-                                        <label className="flex items-center">
-                                            <input
-                                                type="radio"
-                                                name="pollType"
-                                                value="Single"
-                                                checked={pollType === 'Single'}
-                                                onChange={(e) => setPollType(e.target.value as 'Single' | 'Multiple')}
-                                                disabled={isPosting}
-                                                className="mr-2 text-blue-600 focus:ring-blue-500"
-                                            />
-                                            <span className="text-sm text-gray-700">Single Choice</span>
-                                        </label>
-                                        <label className="flex items-center">
-                                            <input
-                                                type="radio"
-                                                name="pollType"
-                                                value="Multiple"
-                                                checked={pollType === 'Multiple'}
-                                                onChange={(e) => setPollType(e.target.value as 'Single' | 'Multiple')}
-                                                disabled={isPosting}
-                                                className="mr-2 text-blue-600 focus:ring-blue-500"
-                                            />
-                                            <span className="text-sm text-gray-700">Multiple Choice</span>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                {/* Poll Options */}
-                                <div className="mb-3">
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Options</label>
-                                    <div className="space-y-2">
-                                        {pollOptions.map((option, index) => (
-                                            <div key={index} className="flex items-center gap-2">
-                                                <div className="flex-1">
-                                                    <input
-                                                        type="text"
-                                                        value={option}
-                                                        onChange={(e) => updatePollOption(index, e.target.value)}
-                                                        placeholder={`Option ${index + 1}`}
-                                                        disabled={isPosting}
-                                                        className={`w-full p-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${
-                                                            isPosting ? 'bg-gray-50 cursor-not-allowed' : 'bg-white'
-                                                        }`}
-                                                    />
-                                                </div>
-                                                {pollOptions.length > 2 && (
+                                {/* Selected Files Preview */}
+                                {selectedFiles.length > 0 && !isPollMode && (
+                                    <div className="mb-4 flex-shrink-0">
+                                        <h5 className="text-sm font-medium text-gray-900 mb-2">
+                                            Selected Media ({selectedFiles.length})
+                                        </h5>
+                                        <div className={`grid gap-2 ${
+                                            selectedFiles.length === 1 ? 'grid-cols-1' :
+                                            selectedFiles.length === 2 ? 'grid-cols-2' :
+                                            selectedFiles.length === 3 ? 'grid-cols-3' :
+                                            'grid-cols-4'
+                                        } max-h-32 overflow-y-auto p-1`}>
+                                            {selectedFiles.map((file, index) => (
+                                                <div key={index} className="relative group" style={{ aspectRatio: '1/1', height: '120px' }}>
+                                                    {isVideo(file) ? (
+                                                        <div className="relative w-full h-full">
+                                                            <video
+                                                                src={getPreviewUrl(file)}
+                                                                className="w-full h-full object-cover rounded-lg border-2 border-green-200"
+                                                                muted
+                                                                preload="metadata"
+                                                            />
+                                                            <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-lg">
+                                                                <div className="bg-white bg-opacity-90 rounded-full p-1">
+                                                                    <Video className="w-3 h-3 text-gray-800" />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <img
+                                                            src={getPreviewUrl(file)}
+                                                            alt="Preview"
+                                                            className="w-full h-full object-cover rounded-lg border-2 border-green-200"
+                                                        />
+                                                    )}
                                                     <button
                                                         type="button"
-                                                        onClick={() => removePollOption(index)}
-                                                        disabled={isPosting}
-                                                        className="w-8 h-8 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg flex items-center justify-center transition-colors"
+                                                        onClick={() => removeFile(index)}
+                                                        className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg z-10"
                                                     >
-                                                        <X className="w-4 h-4" />
+                                                        <X className="w-3 h-3" />
                                                     </button>
-                                                )}
-                                            </div>
-                                        ))}
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
-                                    
-                                    {/* Add Option Button */}
-                                    {pollOptions.length < 5 && (
+                                )}
+
+                                {/* Hidden File Input */}
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    onChange={handleFileSelect}
+                                    multiple
+                                    accept="image/*,video/*"
+                                    className="hidden"
+                                />
+                            </div>
+
+                            {/* Fixed Bottom Section */}
+                            <div className="flex-shrink-0 mt-4 pt-3 border-t border-gray-100">
+                                {/* Add your Post Section */}
+                                <div className={`mb-3 ${isPosting ? 'opacity-50' : ''}`}>
+                                    <h4 className="text-sm font-medium text-gray-900 mb-2">Add your Post</h4>
+                                    <div className="grid grid-cols-2 gap-2">
                                         <button
                                             type="button"
-                                            onClick={addPollOption}
+                                            onClick={togglePollMode}
                                             disabled={isPosting}
-                                            className="mt-2 text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center gap-1 transition-colors"
+                                            className={`flex items-center gap-2 p-2 border rounded-lg transition-colors ${
+                                                isPollMode 
+                                                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                                                    : 'border-gray-200 hover:bg-gray-50'
+                                            } ${isPosting ? 'cursor-not-allowed' : ''}`}
                                         >
-                                            <div className="w-4 h-4 border border-blue-600 rounded flex items-center justify-center">
-                                                <Plus className="w-3 h-3" />
+                                            <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${
+                                                isPollMode ? 'bg-blue-200' : 'bg-blue-100'
+                                            }`}>
+                                                <BarChart3 className={`w-4 h-4 ${isPollMode ? 'text-blue-700' : 'text-blue-600'}`} />
                                             </div>
-                                            Add Option
+                                            <span className="text-xs text-gray-700">
+                                                {isPollMode ? 'Exit Poll' : 'Create Poll'}
+                                            </span>
                                         </button>
-                                    )}
-                                </div>
 
-                                {/* Exit Poll Mode */}
-                                <button
-                                    type="button"
-                                    onClick={togglePollMode}
-                                    disabled={isPosting}
-                                    className="text-sm text-gray-600 hover:text-gray-800 underline"
-                                >
-                                    Cancel Poll
-                                </button>
-                            </div>
-                        )}
-
-                        {/* Show extracted hashtags and manual tags preview */}
-                        {getAllTags().length > 0 && (
-                            <div className="mb-4">
-                                <div className="flex flex-wrap gap-2">
-                                    <span className="text-sm text-gray-500">Tags:</span>
-                                    {getAllTags().map((tag, index) => (
-                                        <span 
-                                            key={index}
-                                            className="text-sm bg-green-100 text-green-700 px-2 py-1 rounded-full flex items-center gap-1"
+                                        <button
+                                            type="button"
+                                            disabled={isPosting}
+                                            className={`flex items-center gap-2 p-2 border border-gray-200 rounded-lg transition-colors ${
+                                                isPosting ? 'cursor-not-allowed' : 'hover:bg-gray-50'
+                                            }`}
                                         >
-                                            #{tag}
-                                            {manualTags.includes(tag) && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeTag(tag)}
-                                                    className="ml-1 text-green-600 hover:text-green-800"
-                                                >
-                                                    <X className="w-3 h-3" />
-                                                </button>
-                                            )}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Manual Tag Input */}
-                        <div className="mb-3 flex-shrink-0">
-                            <input
-                                type="text"
-                                value={currentTag}
-                                onChange={(e) => setCurrentTag(e.target.value)}
-                                onKeyDown={addTag}
-                                placeholder="Add tags (press Enter to add)"
-                                disabled={isPosting}
-                                className={`w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm ${
-                                    isPosting ? 'bg-gray-50 cursor-not-allowed' : ''
-                                }`}
-                            />
-                        </div>
-
-                        {/* Selected Files Preview */}
-                        {selectedFiles.length > 0 && !isPollMode && (
-                            <div className="mb-4 flex-shrink-0">
-                                <h5 className="text-sm font-medium text-gray-900 mb-2">
-                                    Selected Media ({selectedFiles.length})
-                                </h5>
-                                <div className={`grid gap-2 ${
-                                    selectedFiles.length === 1 ? 'grid-cols-1' :
-                                    selectedFiles.length === 2 ? 'grid-cols-2' :
-                                    selectedFiles.length === 3 ? 'grid-cols-3' :
-                                    'grid-cols-4'
-                                } max-h-32 overflow-y-auto p-1`}>
-                                    {selectedFiles.map((file, index) => (
-                                        <div key={index} className="relative group" style={{ aspectRatio: '1/1', height: '120px' }}>
-                                            {isVideo(file) ? (
-                                                <div className="relative w-full h-full">
-                                                    <video
-                                                        src={getPreviewUrl(file)}
-                                                        className="w-full h-full object-cover rounded-lg border-2 border-green-200"
-                                                        muted
-                                                        preload="metadata"
-                                                    />
-                                                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-lg">
-                                                        <div className="bg-white bg-opacity-90 rounded-full p-1">
-                                                            <Video className="w-3 h-3 text-gray-800" />
-                                                        </div>
-                                                    </div>
+                                            <div className="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center">
+                                                <div className="w-4 h-4 bg-green-600 rounded flex items-center justify-center">
+                                                    <div className="w-2 h-2 bg-white rounded-sm"></div>
                                                 </div>
-                                            ) : (
-                                                <img
-                                                    src={getPreviewUrl(file)}
-                                                    alt="Preview"
-                                                    className="w-full h-full object-cover rounded-lg border-2 border-green-200"
-                                                />
-                                            )}
-                                            <button
-                                                type="button"
-                                                onClick={() => removeFile(index)}
-                                                className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg z-10"
-                                            >
-                                                <X className="w-3 h-3" />
-                                            </button>
-                                        </div>
-                                    ))}
+                                            </div>
+                                            <span className="text-xs text-gray-700">Create Event</span>
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => !isPosting && !isPollMode && fileInputRef.current?.click()}
+                                            disabled={isPosting || isPollMode}
+                                            className={`flex items-center gap-2 p-2 border border-gray-200 rounded-lg transition-colors ${
+                                                isPollMode 
+                                                    ? 'opacity-50 cursor-not-allowed bg-gray-50'
+                                                    : isPosting 
+                                                        ? 'cursor-not-allowed' 
+                                                        : 'hover:bg-gray-50'
+                                            }`}
+                                        >
+                                            <div className="w-6 h-6 bg-purple-100 rounded-lg flex items-center justify-center">
+                                                <Image className="w-4 h-4 text-purple-600" />
+                                            </div>
+                                            <span className="text-xs text-gray-700">Photo/ Video</span>
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            disabled={isPosting}
+                                            className={`flex items-center gap-2 p-2 border border-gray-200 rounded-lg transition-colors ${
+                                                isPosting ? 'cursor-not-allowed' : 'hover:bg-gray-50'
+                                            }`}
+                                        >
+                                            <div className="w-6 h-6 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                                <span className="text-yellow-600 font-bold text-xs">GIF</span>
+                                            </div>
+                                            <span className="text-xs text-gray-700">Gif</span>
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
 
-                        {/* Hidden File Input */}
-                        <input
-                            type="file"
-                            ref={fileInputRef}
-                            onChange={handleFileSelect}
-                            multiple
-                            accept="image/*,video/*"
-                            className="hidden"
-                        />
-
-                        {/* Add your Post Section */}
-                        <div className={`border-t border-gray-100 pt-3 mb-3 flex-shrink-0 ${isPosting ? 'opacity-50' : ''}`}>
-                            <h4 className="text-sm font-medium text-gray-900 mb-2">Add your Post</h4>
-                            <div className="grid grid-cols-2 gap-2">
+                                {/* Post Button */}
                                 <button
-                                    type="button"
-                                    onClick={togglePollMode}
-                                    disabled={isPosting}
-                                    className={`flex items-center gap-2 p-2 border rounded-lg transition-colors ${
-                                        isPollMode 
-                                            ? 'border-blue-500 bg-blue-50 text-blue-700'
-                                            : 'border-gray-200 hover:bg-gray-50'
-                                    } ${isPosting ? 'cursor-not-allowed' : ''}`}
-                                >
-                                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${
-                                        isPollMode ? 'bg-blue-200' : 'bg-blue-100'
-                                    }`}>
-                                        <BarChart3 className={`w-4 h-4 ${isPollMode ? 'text-blue-700' : 'text-blue-600'}`} />
-                                    </div>
-                                    <span className="text-xs text-gray-700">
-                                        {isPollMode ? 'Exit Poll' : 'Create Poll'}
-                                    </span>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    disabled={isPosting}
-                                    className={`flex items-center gap-2 p-2 border border-gray-200 rounded-lg transition-colors ${
-                                        isPosting ? 'cursor-not-allowed' : 'hover:bg-gray-50'
+                                    type="submit"
+                                    disabled={
+                                        isPosting || 
+                                        (isPollMode ? !isPollValid() : (!postText.trim() && selectedFiles.length === 0))
+                                    }
+                                    className={`w-full h-10 font-medium rounded-full transition-all duration-200 flex items-center justify-center gap-2 ${
+                                        isPosting
+                                            ? 'bg-gray-400 cursor-not-allowed text-gray-600'
+                                            : (isPollMode ? !isPollValid() : (!postText.trim() && selectedFiles.length === 0))
+                                                ? 'bg-gray-300 cursor-not-allowed text-gray-500'
+                                                : 'bg-green-500 hover:bg-green-600 text-white'
                                     }`}
+                                    style={!isPosting && (
+                                        isPollMode ? isPollValid() : (postText.trim() || selectedFiles.length > 0)
+                                    ) ? { backgroundColor: '#8BC342' } : {}}
                                 >
-                                    <div className="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center">
-                                        <div className="w-4 h-4 bg-green-600 rounded flex items-center justify-center">
-                                            <div className="w-2 h-2 bg-white rounded-sm"></div>
-                                        </div>
-                                    </div>
-                                    <span className="text-xs text-gray-700">Create Event</span>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    onClick={() => !isPosting && !isPollMode && fileInputRef.current?.click()}
-                                    disabled={isPosting || isPollMode}
-                                    className={`flex items-center gap-2 p-2 border border-gray-200 rounded-lg transition-colors ${
-                                        isPollMode 
-                                            ? 'opacity-50 cursor-not-allowed bg-gray-50'
-                                            : isPosting 
-                                                ? 'cursor-not-allowed' 
-                                                : 'hover:bg-gray-50'
-                                    }`}
-                                >
-                                    <div className="w-6 h-6 bg-purple-100 rounded-lg flex items-center justify-center">
-                                        <Image className="w-4 h-4 text-purple-600" />
-                                    </div>
-                                    <span className="text-xs text-gray-700">Photo/ Video</span>
-                                </button>
-
-                                <button
-                                    type="button"
-                                    disabled={isPosting}
-                                    className={`flex items-center gap-2 p-2 border border-gray-200 rounded-lg transition-colors ${
-                                        isPosting ? 'cursor-not-allowed' : 'hover:bg-gray-50'
-                                    }`}
-                                >
-                                    <div className="w-6 h-6 bg-yellow-100 rounded-lg flex items-center justify-center">
-                                        <span className="text-yellow-600 font-bold text-xs">GIF</span>
-                                    </div>
-                                    <span className="text-xs text-gray-700">Gif</span>
+                                    {isPosting && (
+                                        <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin"></div>
+                                    )}
+                                    {isPosting 
+                                        ? (isPollMode ? 'Creating Poll...' : 'Creating Post...') 
+                                        : (isPollMode ? 'Create Poll' : 'Post')
+                                    }
                                 </button>
                             </div>
-                        </div>
-
-                        {/* Post Button */}
-                        <button
-                            type="submit"
-                            disabled={
-                                isPosting || 
-                                (isPollMode ? !isPollValid() : (!postText.trim() && selectedFiles.length === 0))
-                            }
-                            className={`w-full h-10 font-medium rounded-full transition-all duration-200 flex items-center justify-center gap-2 flex-shrink-0 ${
-                                isPosting
-                                    ? 'bg-gray-400 cursor-not-allowed text-gray-600'
-                                    : (isPollMode ? !isPollValid() : (!postText.trim() && selectedFiles.length === 0))
-                                        ? 'bg-gray-300 cursor-not-allowed text-gray-500'
-                                        : 'bg-green-500 hover:bg-green-600 text-white'
-                            }`}
-                            style={!isPosting && (
-                                isPollMode ? isPollValid() : (postText.trim() || selectedFiles.length > 0)
-                            ) ? { backgroundColor: '#8BC342' } : {}}
-                        >
-                            {isPosting && (
-                                <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin"></div>
-                            )}
-                            {isPosting 
-                                ? (isPollMode ? 'Creating Poll...' : 'Creating Post...') 
-                                : (isPollMode ? 'Create Poll' : 'Post')
-                            }
-                        </button>
-                    </form>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
