@@ -54,7 +54,18 @@ interface UserPost {
     };
     caption: string;
     media: string[];
-    poll: any;
+    poll: {
+        id: number;
+        uid: string;
+        title: string;
+        poll_type: string;
+        options: Array<{
+            option_id: number;
+            content: string;
+            vote: number;
+            perc: number;
+        }>;
+    } | null;
     event: any;
     tags: string[];
     is_liked_by_me: boolean;

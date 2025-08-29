@@ -51,7 +51,18 @@ interface UserPost {
   };
   caption: string;
   media: string[];
-  poll: any;
+  poll: {
+    id: number;
+    uid: string;
+    title: string;
+    poll_type: string;
+    options: Array<{
+      option_id: number;
+      content: string;
+      vote: number;
+      perc: number;
+    }>;
+  } | null;
   event: any;
   tags: string[];
   is_liked_by_me: boolean;
@@ -73,6 +84,8 @@ export default function UserPostCard({
   const [localLikes, setLocalLikes] = useState(post.metadata.total_likes);
   const [isLiking, setIsLiking] = useState(false);
   const [localPost, setLocalPost] = useState(post);
+  const [selectedPollOption, setSelectedPollOption] = useState<number | null>(null);
+  const [isVoting, setIsVoting] = useState(false);
   const router = useRouter();
 
   const handlePostClick = () => {
@@ -113,6 +126,29 @@ export default function UserPostCard({
       setLocalLikes(post.metadata.total_likes);
     } finally {
       setIsLiking(false);
+    }
+  };
+
+  const handlePollVote = async (optionId: number) => {
+    if (isVoting || !localPost.poll) return;
+
+    try {
+      setIsVoting(true);
+      
+      // Call the poll vote API with the correct endpoint
+      await api.get(`/api/user/post/vote/${optionId}`);
+
+      // Update local state to show vote was cast
+      setSelectedPollOption(optionId);
+      
+      // You might want to refetch the post to get updated vote counts
+      if (onPostUpdate) {
+        onPostUpdate();
+      }
+    } catch (error) {
+      console.error("Error voting in poll:", error);
+    } finally {
+      setIsVoting(false);
     }
   };
 
@@ -163,7 +199,7 @@ export default function UserPostCard({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-col h-[420px]">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-col min-h-[420px]">
       {/* Post Header */}
       <div className="p-4 pb-3 flex-shrink-0">
         <div className="flex items-center gap-3 mb-3">
@@ -184,14 +220,81 @@ export default function UserPostCard({
 
         {/* Post Content - Clickable */}
         <div className="cursor-pointer" onClick={handlePostClick}>
-          <p className="text-gray-800 leading-relaxed text-sm line-clamp-2 mb-3">
-            {renderTextWithTags(localPost.caption, localPost.tags)}
-          </p>
+          {localPost.caption && (
+            <p className="text-gray-800 leading-relaxed text-sm line-clamp-2 mb-3">
+              {renderTextWithTags(localPost.caption, localPost.tags)}
+            </p>
+          )}
         </div>
       </div>
 
-      {/* Post Media Gallery - Clickable */}
-      {localPost.media && localPost.media.length > 0 ? (
+      {/* Poll Content */}
+      {localPost.poll ? (
+        <div className="px-4 pb-4 flex-1 min-h-0">
+          <div className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+            <h4 className="text-sm font-semibold text-gray-900 mb-2">
+              📊 {localPost.poll.title}
+            </h4>
+            <div className="space-y-2">
+              {localPost.poll.options.map((option) => {
+                const totalVotes = localPost.poll!.options.reduce((sum, opt) => sum + opt.vote, 0);
+                const percentage = totalVotes > 0 ? (option.vote / totalVotes) * 100 : 0;
+                const isSelected = selectedPollOption === option.option_id;
+                
+                return (
+                  <div key={option.option_id} className="relative">
+                    <button
+                      onClick={() => handlePollVote(option.option_id)}
+                      disabled={isVoting || selectedPollOption !== null}
+                      className={`w-full text-left p-2 rounded-md border transition-all duration-200 relative overflow-hidden text-xs ${
+                        isSelected
+                          ? 'border-green-500 bg-green-50 text-green-700'
+                          : selectedPollOption !== null || totalVotes > 0
+                          ? 'border-gray-300 bg-white text-gray-700 cursor-default'
+                          : 'border-gray-300 bg-white text-gray-700 hover:border-green-400 hover:bg-green-50'
+                      } ${isVoting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      {/* Progress bar background */}
+                      {(selectedPollOption !== null || totalVotes > 0) && (
+                        <div
+                          className={`absolute inset-0 transition-all duration-500 ${
+                            isSelected ? 'bg-green-200' : 'bg-gray-200'
+                          }`}
+                          style={{ width: `${percentage}%` }}
+                        />
+                      )}
+                      
+                      {/* Option content */}
+                      <div className="relative flex items-center justify-between">
+                        <span className="font-medium">{option.content}</span>
+                        {(selectedPollOption !== null || totalVotes > 0) && (
+                          <span className="text-xs font-bold text-gray-800">
+                            {percentage.toFixed(1)}%
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+            
+            {/* Poll info */}
+            <div className="mt-2 pt-2 border-t border-gray-200">
+              <div className="flex items-center justify-between text-xs text-gray-600">
+                <span>
+                  {localPost.poll.options.reduce((sum, opt) => sum + opt.vote, 0)} vote
+                  {localPost.poll.options.reduce((sum, opt) => sum + opt.vote, 0) !== 1 ? 's' : ''}
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                  {localPost.poll.poll_type}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : localPost.media && localPost.media.length > 0 ? (
         <div 
           className={`flex-1 min-h-0 ${enableMediaLightbox ? "" : "cursor-pointer"}`} 
           onClick={enableMediaLightbox ? undefined : handlePostClick}
