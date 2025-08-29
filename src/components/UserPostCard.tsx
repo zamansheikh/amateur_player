@@ -135,18 +135,55 @@ export default function UserPostCard({
     try {
       setIsVoting(true);
       
-      // Call the poll vote API with the correct endpoint
-      await api.get(`/api/user/post/vote/${optionId}`);
+      // Calculate current total votes from options
+      const currentTotalVotes = localPost.poll.options.reduce((sum, option) => sum + option.vote, 0);
+      const newTotalVotes = currentTotalVotes + 1;
+      
+      // Optimistic update - update local state immediately
+      const updatedPoll = {
+        ...localPost.poll,
+        options: localPost.poll.options.map(option => {
+          if (option.option_id === optionId) {
+            return {
+              ...option,
+              vote: option.vote + 1,
+              perc: Math.round(((option.vote + 1) / newTotalVotes) * 100)
+            };
+          }
+          return {
+            ...option,
+            perc: Math.round((option.vote / newTotalVotes) * 100)
+          };
+        })
+      };
 
-      // Update local state to show vote was cast
+      const updatedPost: UserPost = {
+        ...localPost,
+        poll: updatedPoll
+      };
+
+      setLocalPost(updatedPost);
       setSelectedPollOption(optionId);
       
-      // You might want to refetch the post to get updated vote counts
-      if (onPostUpdate) {
-        onPostUpdate();
+      // Call the poll vote API
+      const response = await api.get(`/api/user/post/vote/${optionId}`);
+      
+      // Check if response is successful (200-299 status codes)
+      if (response.status >= 200 && response.status < 300) {
+        // Vote was successful, keep the optimistic update
+        if (onPostChange) {
+          onPostChange(updatedPost);
+        }
+      } else {
+        // Revert optimistic update on non-success status
+        setLocalPost(localPost);
+        setSelectedPollOption(null);
       }
     } catch (error) {
       console.error("Error voting in poll:", error);
+      // Revert optimistic update on error
+      setLocalPost(localPost);
+      setSelectedPollOption(null);
     } finally {
       setIsVoting(false);
     }
