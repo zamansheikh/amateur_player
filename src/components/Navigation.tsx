@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Home, BarChart3, MessageCircle, Settings, Bell, Menu, X, LogOut, Users, Trophy, Target, MessageSquare, Play, Gift, ShoppingCart } from 'lucide-react';
+import { Home, BarChart3, MessageCircle, Settings, Package, Menu, X, LogOut, Users, Trophy, Target, MessageSquare, Play, Gift, ShoppingCart } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import GlobalHeader from '@/components/GlobalHeader';
@@ -44,6 +44,7 @@ const navigation = [
     { name: 'Pro Players', href: '/pro-players', icon: Trophy },
     { name: 'Overview', href: '/overview', icon: BarChart3 },
     { name: 'Media', href: '/media', icon: Play },
+    { name: 'Products', href: '/products', icon: Package },
     { name: 'Xchange', href: '/xchange', icon: ShoppingCart },
     { name: 'Perks', href: '/perks', icon: Gift },
     { name: 'Messages', href: '/messages', icon: MessageCircle },
