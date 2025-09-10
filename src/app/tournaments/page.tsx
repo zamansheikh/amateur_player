@@ -353,13 +353,13 @@ export default function TournamentsPage() {
                         </p>
                     </div>
                     <div className="flex items-center gap-4">
-                        <button
+                        {/* <button
                             onClick={() => setShowCreateModal(true)}
                             className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
                         >
                             <Plus className="w-4 h-4" />
                             Create Tournament
-                        </button>
+                        </button> */}
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                             <input
