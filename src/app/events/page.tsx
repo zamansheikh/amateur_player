@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { tournamentApi } from "@/lib/api";
+import { Tournament } from "@/types";
+import { format } from "date-fns";
 import {
   Calendar,
   Clock,
@@ -60,186 +63,53 @@ export default function EventsPage() {
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
   const [filterType, setFilterType] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock events data
-  const mockEvents: CalendarEvent[] = [
-    // August 2025 Events
-    {
-      id: '1',
-      title: 'Summer Championship Tournament',
+  // Fetch tournaments from API
+  useEffect(() => {
+    const fetchTournaments = async () => {
+      try {
+        setLoading(true);
+        const data = await tournamentApi.getTournaments();
+        setTournaments(data);
+      } catch (err) {
+        console.error('Error fetching tournaments:', err);
+        setError('Failed to load tournaments. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTournaments();
+  }, []);
+
+  // Convert tournaments to calendar events
+  const convertTournamentsToEvents = (): CalendarEvent[] => {
+    return tournaments.map((tournament: Tournament) => ({
+      id: tournament.id.toString(),
+      title: tournament.name,
       type: 'tournament',
-      date: '2025-08-16',
-      time: '10:00 AM',
-      endTime: '6:00 PM',
-      description: 'Annual summer championship with cash prizes. Open to all skill levels.',
-      location: 'Main Lanes 1-16',
-      participants: 45,
-      maxParticipants: 64,
-      entryFee: 50,
-      prizePool: 3200,
-      status: 'upcoming',
-      priority: 'high',
-      organizer: 'Bowlers Network',
-      registrationDeadline: '2025-08-14',
-      format: 'Singles',
-      gameType: 'Scratch'
-    },
-    {
-      id: '2',
-      title: 'Sunday Night League - Week 4',
-      type: 'league',
-      date: '2025-08-17',
-      time: '7:00 PM',
-      endTime: '10:00 PM',
-      description: 'Regular league play for Sunday Night League teams.',
-      location: 'Lanes 5-12',
-      participants: 32,
-      status: 'upcoming',
-      priority: 'medium',
-      organizer: 'Sunday League Committee',
-      format: 'Teams',
-      gameType: 'Handicap'
-    },
-    {
-      id: '3',
-      title: 'Monday Mixed League - Week 3',
-      type: 'league',
-      date: '2025-08-18',
-      time: '6:30 PM',
-      endTime: '9:30 PM',
-      description: 'Mixed doubles league play with handicap scoring.',
-      location: 'Lanes 1-8',
-      participants: 24,
-      status: 'upcoming',
-      priority: 'medium',
-      organizer: 'Mixed League Committee',
-      format: 'Doubles',
-      gameType: 'Mixed'
-    },
-    {
-      id: '4',
-      title: 'Youth Bowling Clinic',
-      type: 'special',
-      date: '2025-08-19',
-      time: '4:00 PM',
-      endTime: '6:00 PM',
-      description: 'Free bowling clinic for kids aged 8-16. Equipment provided.',
-      location: 'Lanes 17-20',
-      participants: 12,
-      maxParticipants: 20,
-      status: 'upcoming',
-      priority: 'medium',
-      organizer: 'Youth Program',
-      format: 'Clinic',
-      gameType: 'Instructional'
-    },
-    {
-      id: '5',
-      title: 'Wednesday Senior League',
-      type: 'league',
-      date: '2025-08-20',
-      time: '2:00 PM',
-      endTime: '5:00 PM',
-      description: 'Senior league for bowlers 55+. Afternoon timing.',
-      location: 'Lanes 9-16',
-      participants: 18,
-      status: 'upcoming',
-      priority: 'medium',
-      organizer: 'Senior Committee',
-      format: 'Singles',
-      gameType: 'Handicap'
-    },
-    {
-      id: '6',
-      title: 'Cosmic Bowling Night',
-      type: 'special',
-      date: '2025-08-22',
-      time: '9:00 PM',
-      endTime: '12:00 AM',
-      description: 'Glow-in-the-dark bowling with music and special lighting.',
-      location: 'All Lanes',
-      participants: 0,
-      maxParticipants: 100,
-      entryFee: 15,
-      status: 'upcoming',
-      priority: 'low',
-      organizer: 'Event Team',
-      format: 'Open',
-      gameType: 'Fun'
-    },
-    {
-      id: '7',
-      title: 'Pro-Am Tournament',
-      type: 'tournament',
-      date: '2025-08-24',
-      time: '1:00 PM',
-      endTime: '8:00 PM',
-      description: 'Professional and amateur bowlers compete together.',
-      location: 'Championship Lanes 1-8',
-      participants: 32,
-      maxParticipants: 32,
-      entryFee: 75,
-      prizePool: 2400,
-      status: 'upcoming',
-      priority: 'high',
-      organizer: 'Pro Shop',
-      format: 'Pro-Am',
-      gameType: 'Scratch'
-    },
-    {
-      id: '8',
-      title: 'Lane Maintenance',
-      type: 'maintenance',
-      date: '2025-08-25',
-      time: '6:00 AM',
-      endTime: '12:00 PM',
-      description: 'Scheduled lane maintenance and cleaning. Center closed for public.',
-      location: 'All Lanes',
-      participants: 0,
-      status: 'upcoming',
-      priority: 'high',
-      organizer: 'Maintenance Team'
-    },
-    // September 2025 Events
-    {
-      id: '9',
-      title: 'Labor Day Weekend Tournament',
-      type: 'tournament',
-      date: '2025-08-30',
-      time: '11:00 AM',
-      endTime: '7:00 PM',
-      description: 'Special Labor Day weekend tournament with double prizes.',
-      location: 'All Tournament Lanes',
-      participants: 28,
-      maxParticipants: 48,
-      entryFee: 60,
-      prizePool: 2880,
-      status: 'upcoming',
-      priority: 'high',
+      date: tournament.start_date.split('T')[0], // Extract date part
+      time: format(new Date(tournament.start_date), 'h:mm a'),
+      endTime: format(new Date(tournament.reg_deadline), 'h:mm a'),
+      description: `${tournament.format} tournament. Registration fee: $${tournament.reg_fee}`,
+      location: tournament.address || 'Location TBD',
+      participants: 0, // We don't have this data from API
+      maxParticipants: undefined,
+      entryFee: tournament.reg_fee,
+      prizePool: undefined, // We don't have this data from API
+      status: new Date(tournament.reg_deadline) > new Date() ? 'upcoming' : 'completed',
+      priority: tournament.reg_fee > 50 ? 'high' : 'medium',
       organizer: 'Tournament Committee',
-      registrationDeadline: '2025-08-28',
-      format: 'Singles',
-      gameType: 'Handicap'
-    },
-    {
-      id: '10',
-      title: 'Back to School Family Night',
-      type: 'special',
-      date: '2025-09-01',
-      time: '5:00 PM',
-      endTime: '9:00 PM',
-      description: 'Family-friendly bowling with discounted rates and prizes.',
-      location: 'Family Lanes 13-20',
-      participants: 15,
-      maxParticipants: 80,
-      entryFee: 12,
-      status: 'upcoming',
-      priority: 'medium',
-      organizer: 'Family Events',
-      format: 'Family',
-      gameType: 'Fun'
-    }
-  ];
+      registrationDeadline: tournament.reg_deadline.split('T')[0], // Extract date part
+      format: tournament.format,
+      gameType: 'Tournament'
+    }));
+  };
+
+  const mockEvents = convertTournamentsToEvents();
 
   // Calendar generation logic
   const generateCalendar = () => {
@@ -450,32 +320,42 @@ export default function EventsPage() {
               </div>
 
               {/* Calendar Grid */}
-              <div className="grid grid-cols-7 gap-1">
-                {/* Week Day Headers */}
-                {weekDays.map((day) => (
-                  <div key={day} className="p-3 text-center text-sm font-medium text-gray-500">
-                    {day}
-                  </div>
-                ))}
-                
-                {/* Calendar Days */}
-                {calendar.map((day, index) => (
-                  <div
-                    key={index}
-                    onClick={() => selectDate(day)}
-                    className={`min-h-[100px] p-2 border border-gray-100 cursor-pointer transition-all ${
-                      day.isCurrentMonth
-                        ? 'bg-white hover:bg-gray-50'
-                        : 'bg-gray-50 text-gray-400'
-                    } ${
-                      day.isToday
-                        ? 'ring-2 ring-green-500 ring-inset'
-                        : ''
-                    } ${
-                      selectedDate && selectedDate.getDate() === day.date && day.isCurrentMonth
-                        ? 'bg-green-50 ring-2 ring-green-500 ring-inset'
-                        : ''
-                    }`}
+              {loading ? (
+                <div className="flex justify-center items-center py-12">
+                  <div className="text-gray-500">Loading tournaments...</div>
+                </div>
+              ) : error ? (
+                <div className="text-center py-12">
+                  <div className="text-red-500 text-lg mb-2">Error</div>
+                  <p className="text-gray-500">{error}</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-7 gap-1">
+                  {/* Week Day Headers */}
+                  {weekDays.map((day) => (
+                    <div key={day} className="p-3 text-center text-sm font-medium text-gray-500">
+                      {day}
+                    </div>
+                  ))}
+                  
+                  {/* Calendar Days */}
+                  {calendar.map((day, index) => (
+                    <div
+                      key={index}
+                      onClick={() => selectDate(day)}
+                      className={`min-h-[100px] p-2 border border-gray-100 cursor-pointer transition-all ${
+                        day.isCurrentMonth
+                          ? 'bg-white hover:bg-gray-50'
+                          : 'bg-gray-50 text-gray-400'
+                      } ${
+                        day.isToday
+                          ? 'ring-2 ring-green-500 ring-inset'
+                          : ''
+                      } ${
+                        selectedDate && selectedDate.getDate() === day.date && day.isCurrentMonth
+                          ? 'bg-green-50 ring-2 ring-green-500 ring-inset'
+                          : ''
+                      }`}
                   >
                     <div className="flex items-center justify-between mb-1">
                       <span className={`text-sm font-medium ${
@@ -507,13 +387,12 @@ export default function EventsPage() {
                         </div>
                       )}
                     </div>
-                  </div>
-                ))}
-              </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-
-          {/* Events Sidebar */}
+          </div>          {/* Events Sidebar */}
           <div className="space-y-6">
             {/* Event Type Legend */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -675,27 +554,27 @@ export default function EventsPage() {
                     <span className="text-sm text-gray-600">Tournaments</span>
                   </div>
                   <span className="font-medium text-gray-900">
-                    {mockEvents.filter(e => e.type === 'tournament' && new Date(e.date).getMonth() === currentDate.getMonth()).length}
+                    {loading ? '...' : mockEvents.filter(e => e.type === 'tournament' && new Date(e.date).getMonth() === currentDate.getMonth()).length}
                   </span>
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-blue-600" />
-                    <span className="text-sm text-gray-600">League Games</span>
+                    <span className="text-sm text-gray-600">Singles Format</span>
                   </div>
                   <span className="font-medium text-gray-900">
-                    {mockEvents.filter(e => e.type === 'league' && new Date(e.date).getMonth() === currentDate.getMonth()).length}
+                    {loading ? '...' : mockEvents.filter(e => e.format === 'Singles' && new Date(e.date).getMonth() === currentDate.getMonth()).length}
                   </span>
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Star className="w-4 h-4 text-purple-600" />
-                    <span className="text-sm text-gray-600">Special Events</span>
+                    <Users className="w-4 h-4 text-green-600" />
+                    <span className="text-sm text-gray-600">Team Format</span>
                   </div>
                   <span className="font-medium text-gray-900">
-                    {mockEvents.filter(e => e.type === 'special' && new Date(e.date).getMonth() === currentDate.getMonth()).length}
+                    {loading ? '...' : mockEvents.filter(e => (e.format === 'Teams' || e.format === 'Doubles') && new Date(e.date).getMonth() === currentDate.getMonth()).length}
                   </span>
                 </div>
 
@@ -703,7 +582,7 @@ export default function EventsPage() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-900">Total Events</span>
                     <span className="text-lg font-bold text-green-600">
-                      {mockEvents.filter(e => new Date(e.date).getMonth() === currentDate.getMonth()).length}
+                      {loading ? '...' : mockEvents.filter(e => new Date(e.date).getMonth() === currentDate.getMonth()).length}
                     </span>
                   </div>
                 </div>
