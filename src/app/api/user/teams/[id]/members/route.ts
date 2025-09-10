@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 interface RouteParams {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
     try {
-        const { id } = params;
+        const { id } = await params;
         
         // Get the authorization header
         const authHeader = request.headers.get('authorization');

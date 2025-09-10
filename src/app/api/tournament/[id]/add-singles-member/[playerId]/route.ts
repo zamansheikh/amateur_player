@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 interface RouteParams {
-    params: {
+    params: Promise<{
         id: string;
         playerId: string;
-    };
+    }>;
 }
 
 export async function POST(request: NextRequest, { params }: RouteParams) {
     try {
-        const { id, playerId } = params;
+        const { id, playerId } = await params;
         
         // Get the authorization header
         const authHeader = request.headers.get('authorization');
