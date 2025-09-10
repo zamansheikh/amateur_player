@@ -6,6 +6,8 @@ import { Tournament } from '@/types';
 import { tournamentApi, teamsApi } from '@/lib/api';
 import { format } from 'date-fns';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface FilterState {
     contentType: string[];
@@ -319,9 +321,12 @@ export default function TournamentsPage() {
             </div>
 
             <div className="flex gap-3">
-                <button className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors">
+                <Link 
+                    href={`/tournaments/${tournament.id}`}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors text-center"
+                >
                     View Details
-                </button>
+                </Link>
                 <button 
                     onClick={() => handleRegistration(tournament)}
                     className={`flex-1 py-2 px-4 rounded-lg transition-colors ${

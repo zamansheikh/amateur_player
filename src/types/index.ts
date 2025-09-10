@@ -114,4 +114,26 @@ export interface Tournament {
     access_type: string;
     format: 'Singles' | 'Doubles' | 'Teams';
     already_enrolled: number;
+    participants_count?: number;
+}
+
+export interface TournamentTeam {
+    display_name: string;
+    profile_picture: string;
+    players: TournamentPlayer[];
+}
+
+export interface TournamentPlayer {
+    user_id: number;
+    username: string;
+    name: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    profile_picture_url: string;
+    intro_video_url?: string;
+    cover_photo_url: string;
+    xp: number;
+    level: number;
+    card_theme: string;
 }

@@ -163,6 +163,11 @@ export const tournamentApi = {
     unregisterFromTournament: async (tournamentId: number) => {
         const response = await api.delete(`/api/tournaments/${tournamentId}/register`);
         return response.data;
+    },
+
+    getTournamentTeams: async (tournamentId: number) => {
+        const response = await api.get(`/api/tournament/${tournamentId}/teams`);
+        return response.data;
     }
 };
 
