@@ -103,3 +103,15 @@ export interface Sponsor {
     formal_name: string;
     logo_url: string;
 }
+
+export interface Tournament {
+    id: number;
+    name: string;
+    start_date: string;
+    reg_deadline: string;
+    address: string;
+    reg_fee: number;
+    access_type: string;
+    format: 'Singles' | 'Doubles' | 'Teams';
+    already_enrolled: number;
+}

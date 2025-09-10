@@ -116,6 +116,11 @@ src/
 - `POST /api/feedback` - Submit feedback
 - `GET /api/feedback-types` - Get feedback categories
 
+**Tournament System:**
+- `GET /api/tournaments` - Get all available tournaments
+- `POST /api/tournaments/[id]/register` - Register for a tournament
+- `DELETE /api/tournaments/[id]/register` - Unregister from a tournament
+
 **User Management:**
 - `POST /api/send-verification-code` - Send email verification
 - `POST /api/verify-email` - Verify email with code
@@ -128,6 +133,9 @@ src/
 - `PUT /api/user/profile` - Profile updates
 - `GET /api/feedbacks` - Feedback management
 - `GET /api/feedback-types` - Feedback categories
+- `GET /api/tournaments` - Tournament listings
+- `POST /api/tournaments/[id]/register` - Tournament registration
+- `DELETE /api/tournaments/[id]/register` - Tournament unregistration
 
 ## 🧭 Navigation & Routing
 

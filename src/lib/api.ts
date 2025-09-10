@@ -122,3 +122,21 @@ export const userApi = {
         return response.data;
     }
 };
+
+// Tournament API functions
+export const tournamentApi = {
+    getTournaments: async () => {
+        const response = await api.get('/api/tournaments');
+        return response.data;
+    },
+
+    registerForTournament: async (tournamentId: number) => {
+        const response = await api.post(`/api/tournaments/${tournamentId}/register`);
+        return response.data;
+    },
+
+    unregisterFromTournament: async (tournamentId: number) => {
+        const response = await api.delete(`/api/tournaments/${tournamentId}/register`);
+        return response.data;
+    }
+};
