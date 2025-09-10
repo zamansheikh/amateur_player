@@ -130,6 +130,19 @@ export const tournamentApi = {
         return response.data;
     },
 
+    createTournament: async (tournamentData: {
+        name: string;
+        start_date: string;
+        reg_deadline: string;
+        reg_fee: string;
+        participants_count: number;
+        address: string;
+        access_type: string;
+    }) => {
+        const response = await api.post('/api/tournaments', tournamentData);
+        return response.data;
+    },
+
     registerForTournament: async (tournamentId: number) => {
         const response = await api.post(`/api/tournaments/${tournamentId}/register`);
         return response.data;

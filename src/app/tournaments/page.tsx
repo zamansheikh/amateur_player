@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, MapPin, Calendar, Users, DollarSign, Clock } from 'lucide-react';
+import { Search, MapPin, Calendar, Users, DollarSign, Clock, X, Plus } from 'lucide-react';
 import { Tournament } from '@/types';
 import { tournamentApi } from '@/lib/api';
 import { format } from 'date-fns';
@@ -11,6 +11,17 @@ interface FilterState {
     accessLevel: string[];
     uploadDate: string[];
     duration: string;
+}
+
+interface CreateTournamentForm {
+    name: string;
+    start_date: string;
+    reg_deadline: string;
+    reg_fee: string;
+    address: string;
+    format: 'Singles' | 'Doubles' | 'Teams';
+    participants_count: number;
+    access_type: string;
 }
 
 export default function TournamentsPage() {
@@ -25,6 +36,18 @@ export default function TournamentsPage() {
         duration: '2-60+ min'
     });
     const [durationValue, setDurationValue] = useState(30);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [createLoading, setCreateLoading] = useState(false);
+    const [createTournamentForm, setCreateTournamentForm] = useState<CreateTournamentForm>({
+        name: '',
+        start_date: '',
+        reg_deadline: '',
+        reg_fee: '',
+        address: '',
+        format: 'Singles',
+        participants_count: 1,
+        access_type: 'Open'
+    });
 
     const tabs = ['All Tournament', 'Registered', 'Available'];
 
@@ -121,6 +144,64 @@ export default function TournamentsPage() {
         }
     };
 
+    const handleFormatChange = (format: 'Singles' | 'Doubles' | 'Teams') => {
+        let participants_count = 1;
+        if (format === 'Doubles') {
+            participants_count = 2;
+        } else if (format === 'Teams') {
+            participants_count = 10; // Default team size
+        }
+        
+        setCreateTournamentForm(prev => ({
+            ...prev,
+            format,
+            participants_count
+        }));
+    };
+
+    const handleCreateTournament = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setCreateLoading(true);
+        
+        try {
+            // Format dates for API
+            const formattedData = {
+                name: createTournamentForm.name,
+                start_date: new Date(createTournamentForm.start_date).toISOString(),
+                reg_deadline: new Date(createTournamentForm.reg_deadline).toISOString(),
+                reg_fee: createTournamentForm.reg_fee,
+                participants_count: createTournamentForm.participants_count,
+                address: createTournamentForm.address,
+                access_type: createTournamentForm.access_type
+            };
+
+            const newTournament = await tournamentApi.createTournament(formattedData);
+            
+            // Refresh tournaments list
+            const updatedTournaments = await tournamentApi.getTournaments();
+            setTournaments(updatedTournaments);
+            
+            // Reset form and close modal
+            setCreateTournamentForm({
+                name: '',
+                start_date: '',
+                reg_deadline: '',
+                reg_fee: '',
+                address: '',
+                format: 'Singles',
+                participants_count: 1,
+                access_type: 'Open'
+            });
+            setShowCreateModal(false);
+            
+        } catch (error) {
+            console.error('Error creating tournament:', error);
+            setError('Failed to create tournament. Please try again.');
+        } finally {
+            setCreateLoading(false);
+        }
+    };
+
     const renderTournamentCard = (tournament: Tournament) => (
         <div key={tournament.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
             <div className="flex justify-between items-start mb-4">
@@ -189,11 +270,18 @@ export default function TournamentsPage() {
                         </p>
                     </div>
                     <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => setShowCreateModal(true)}
+                            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Create Tournament
+                        </button>
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                             <input
                                 type="text"
-                                placeholder="Overview"
+                                placeholder="Search tournaments..."
                                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                             />
                         </div>
@@ -364,6 +452,200 @@ export default function TournamentsPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Create Tournament Modal */}
+            {showCreateModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        <div className="flex items-center justify-between p-6 border-b">
+                            <h3 className="text-xl font-semibold text-gray-900">Create New Tournament</h3>
+                            <button
+                                onClick={() => setShowCreateModal(false)}
+                                className="text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleCreateTournament} className="p-6 space-y-6">
+                            {/* Tournament Name */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Tournament Name *
+                                </label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={createTournamentForm.name}
+                                    onChange={(e) => setCreateTournamentForm(prev => ({
+                                        ...prev,
+                                        name: e.target.value
+                                    }))}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    placeholder="Enter tournament name"
+                                />
+                            </div>
+
+                            {/* Format Selection */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Format *
+                                </label>
+                                <div className="grid grid-cols-3 gap-3">
+                                    {(['Singles', 'Doubles', 'Teams'] as const).map((format) => (
+                                        <button
+                                            key={format}
+                                            type="button"
+                                            onClick={() => handleFormatChange(format)}
+                                            className={`p-3 rounded-lg border text-center transition-colors ${
+                                                createTournamentForm.format === format
+                                                    ? 'border-green-600 bg-green-50 text-green-700'
+                                                    : 'border-gray-300 hover:border-gray-400'
+                                            }`}
+                                        >
+                                            <div className="font-medium">{format}</div>
+                                            <div className="text-xs text-gray-500">
+                                                {format === 'Singles' && 'Individual play'}
+                                                {format === 'Doubles' && '2 players'}
+                                                {format === 'Teams' && 'Team play'}
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Team Size (only show if Teams format is selected) */}
+                            {createTournamentForm.format === 'Teams' && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Team Size
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min="3"
+                                        max="50"
+                                        value={createTournamentForm.participants_count}
+                                        onChange={(e) => setCreateTournamentForm(prev => ({
+                                            ...prev,
+                                            participants_count: parseInt(e.target.value) || 3
+                                        }))}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    />
+                                </div>
+                            )}
+
+                            {/* Dates */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Start Date & Time *
+                                    </label>
+                                    <input
+                                        type="datetime-local"
+                                        required
+                                        value={createTournamentForm.start_date}
+                                        onChange={(e) => setCreateTournamentForm(prev => ({
+                                            ...prev,
+                                            start_date: e.target.value
+                                        }))}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Registration Deadline *
+                                    </label>
+                                    <input
+                                        type="datetime-local"
+                                        required
+                                        value={createTournamentForm.reg_deadline}
+                                        onChange={(e) => setCreateTournamentForm(prev => ({
+                                            ...prev,
+                                            reg_deadline: e.target.value
+                                        }))}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Registration Fee */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Registration Fee ($) *
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    required
+                                    value={createTournamentForm.reg_fee}
+                                    onChange={(e) => setCreateTournamentForm(prev => ({
+                                        ...prev,
+                                        reg_fee: e.target.value
+                                    }))}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    placeholder="0.00"
+                                />
+                            </div>
+
+                            {/* Address */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Venue Address
+                                </label>
+                                <textarea
+                                    rows={3}
+                                    value={createTournamentForm.address}
+                                    onChange={(e) => setCreateTournamentForm(prev => ({
+                                        ...prev,
+                                        address: e.target.value
+                                    }))}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+                                    placeholder="Enter venue address (optional)"
+                                />
+                            </div>
+
+                            {/* Access Type */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Access Type
+                                </label>
+                                <select
+                                    value={createTournamentForm.access_type}
+                                    onChange={(e) => setCreateTournamentForm(prev => ({
+                                        ...prev,
+                                        access_type: e.target.value
+                                    }))}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                >
+                                    <option value="Open">Open</option>
+                                    <option value="Private">Private</option>
+                                    <option value="Invite Only">Invite Only</option>
+                                </select>
+                            </div>
+
+                            {/* Form Actions */}
+                            <div className="flex gap-3 pt-4 border-t">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowCreateModal(false)}
+                                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                                    disabled={createLoading}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={createLoading}
+                                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {createLoading ? 'Creating...' : 'Create Tournament'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
