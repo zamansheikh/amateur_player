@@ -118,8 +118,15 @@ src/
 
 **Tournament System:**
 - `GET /api/tournaments` - Get all available tournaments
-- `POST /api/tournaments/[id]/register` - Register for a tournament
+- `POST /api/tournaments` - Create a new tournament
+- `POST /api/tournament/[id]/add-singles-member/[playerId]` - Register individual for singles tournament
+- `POST /api/tournament/[id]/add-teams-member/[teamId]` - Register team for doubles/teams tournament
+- `POST /api/tournaments/[id]/register` - Generic tournament registration
 - `DELETE /api/tournaments/[id]/register` - Unregister from a tournament
+
+**Teams Management:**
+- `GET /api/user/teams` - Get user's teams
+- `GET /api/user/teams/[id]/members` - Get team members
 
 **User Management:**
 - `POST /api/send-verification-code` - Send email verification

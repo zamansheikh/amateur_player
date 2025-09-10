@@ -143,6 +143,18 @@ export const tournamentApi = {
         return response.data;
     },
 
+    // Singles tournament registration
+    registerSingles: async (tournamentId: number, playerId: number) => {
+        const response = await api.post(`/api/tournament/${tournamentId}/add-singles-member/${playerId}`);
+        return response.data;
+    },
+
+    // Doubles/Teams tournament registration
+    registerWithTeam: async (tournamentId: number, teamId: number) => {
+        const response = await api.post(`/api/tournament/${tournamentId}/add-teams-member/${teamId}`);
+        return response.data;
+    },
+
     registerForTournament: async (tournamentId: number) => {
         const response = await api.post(`/api/tournaments/${tournamentId}/register`);
         return response.data;
@@ -150,6 +162,19 @@ export const tournamentApi = {
 
     unregisterFromTournament: async (tournamentId: number) => {
         const response = await api.delete(`/api/tournaments/${tournamentId}/register`);
+        return response.data;
+    }
+};
+
+// Teams API functions
+export const teamsApi = {
+    getUserTeams: async () => {
+        const response = await api.get('/api/user/teams');
+        return response.data;
+    },
+
+    getTeamMembers: async (teamId: number) => {
+        const response = await api.get(`/api/user/teams/${teamId}/members`);
         return response.data;
     }
 };

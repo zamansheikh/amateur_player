@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { Search, MapPin, Calendar, Users, DollarSign, Clock, X, Plus } from 'lucide-react';
 import { Tournament } from '@/types';
-import { tournamentApi } from '@/lib/api';
+import { tournamentApi, teamsApi } from '@/lib/api';
 import { format } from 'date-fns';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface FilterState {
     contentType: string[];
@@ -24,6 +25,13 @@ interface CreateTournamentForm {
     access_type: string;
 }
 
+interface Team {
+    team_id: number;
+    name: string;
+    logo_url: string;
+    member_count?: number;
+}
+
 export default function TournamentsPage() {
     const [activeTab, setActiveTab] = useState('All Tournament');
     const [tournaments, setTournaments] = useState<Tournament[]>([]);
@@ -38,6 +46,11 @@ export default function TournamentsPage() {
     const [durationValue, setDurationValue] = useState(30);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [createLoading, setCreateLoading] = useState(false);
+    const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+    const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
+    const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
+    const [teams, setTeams] = useState<Team[]>([]);
+    const [registrationLoading, setRegistrationLoading] = useState(false);
     const [createTournamentForm, setCreateTournamentForm] = useState<CreateTournamentForm>({
         name: '',
         start_date: '',
@@ -50,6 +63,7 @@ export default function TournamentsPage() {
     });
 
     const tabs = ['All Tournament', 'Registered', 'Available'];
+    const { user } = useAuth();
 
     // Fetch tournaments from API
     useEffect(() => {
@@ -68,6 +82,37 @@ export default function TournamentsPage() {
 
         fetchTournaments();
     }, []);
+
+    // Fetch user's teams for registration
+    useEffect(() => {
+        const fetchTeams = async () => {
+            if (!user?.authenticated) return;
+            
+            try {
+                const teamsResponse = await teamsApi.getUserTeams();
+                if (teamsResponse.my_teams) {
+                    const teamsWithCount = await Promise.all(
+                        teamsResponse.my_teams.map(async (team: Team) => {
+                            try {
+                                const membersResponse = await teamsApi.getTeamMembers(team.team_id);
+                                return {
+                                    ...team,
+                                    member_count: membersResponse.members?.member_count || 0
+                                };
+                            } catch (error) {
+                                return { ...team, member_count: 0 };
+                            }
+                        })
+                    );
+                    setTeams(teamsWithCount);
+                }
+            } catch (error) {
+                console.error('Error fetching teams:', error);
+            }
+        };
+
+        fetchTeams();
+    }, [user]);
 
     const toggleFilter = (category: keyof FilterState, value: string) => {
         if (category === 'duration') return; // Don't toggle duration
@@ -122,25 +167,58 @@ export default function TournamentsPage() {
     const filteredTournaments = getFilteredTournaments();
 
     const handleRegistration = async (tournament: Tournament) => {
-        try {
-            if (tournament.already_enrolled > 0) {
-                // Unregister from tournament
+        if (tournament.already_enrolled > 0) {
+            // Handle unregistration
+            try {
                 await tournamentApi.unregisterFromTournament(tournament.id);
-                // Update local state
                 setTournaments(prev => prev.map(t => 
                     t.id === tournament.id ? { ...t, already_enrolled: 0 } : t
                 ));
-            } else {
-                // Register for tournament
-                await tournamentApi.registerForTournament(tournament.id);
-                // Update local state
-                setTournaments(prev => prev.map(t => 
-                    t.id === tournament.id ? { ...t, already_enrolled: 1 } : t
-                ));
+            } catch (error) {
+                console.error('Error with tournament unregistration:', error);
+                setError('Failed to unregister. Please try again.');
             }
+        } else {
+            // Show registration modal for enrollment
+            setSelectedTournament(tournament);
+            setSelectedTeamId(null);
+            setShowRegistrationModal(true);
+        }
+    };
+
+    const handleConfirmRegistration = async () => {
+        if (!selectedTournament || !user) return;
+
+        try {
+            setRegistrationLoading(true);
+
+            if (selectedTournament.format === 'Singles') {
+                // Register for singles tournament
+                await tournamentApi.registerSingles(selectedTournament.id, user.user_id);
+            } else {
+                // Register for doubles/teams tournament
+                if (!selectedTeamId) {
+                    setError('Please select a team for this tournament format.');
+                    return;
+                }
+                await tournamentApi.registerWithTeam(selectedTournament.id, selectedTeamId);
+            }
+
+            // Update local state
+            setTournaments(prev => prev.map(t => 
+                t.id === selectedTournament.id ? { ...t, already_enrolled: 1 } : t
+            ));
+
+            // Close modal
+            setShowRegistrationModal(false);
+            setSelectedTournament(null);
+            setSelectedTeamId(null);
+
         } catch (error) {
             console.error('Error with tournament registration:', error);
-            setError('Failed to update registration. Please try again.');
+            setError('Failed to register. Please try again.');
+        } finally {
+            setRegistrationLoading(false);
         }
     };
 
@@ -452,6 +530,142 @@ export default function TournamentsPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Tournament Registration Modal */}
+            {showRegistrationModal && selectedTournament && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg max-w-md w-full">
+                        <div className="flex items-center justify-between p-6 border-b">
+                            <h3 className="text-xl font-semibold text-gray-900">Register for Tournament</h3>
+                            <button
+                                onClick={() => {
+                                    setShowRegistrationModal(false);
+                                    setSelectedTournament(null);
+                                    setSelectedTeamId(null);
+                                }}
+                                className="text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <X className="w-6 h-6" />
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            {/* Tournament Info */}
+                            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                                <h4 className="font-semibold text-gray-900 mb-2">{selectedTournament.name}</h4>
+                                <div className="space-y-1 text-sm text-gray-600">
+                                    <div className="flex items-center gap-2">
+                                        <Calendar className="w-4 h-4" />
+                                        <span>{format(new Date(selectedTournament.start_date), 'MMM dd, yyyy')}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <DollarSign className="w-4 h-4" />
+                                        <span>${selectedTournament.reg_fee}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Users className="w-4 h-4" />
+                                        <span>{selectedTournament.format}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Registration Form */}
+                            {selectedTournament.format === 'Singles' ? (
+                                <div className="mb-6">
+                                    <div className="flex items-center gap-2 text-green-600 mb-2">
+                                        <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                                        <span className="text-sm font-medium">Individual Registration</span>
+                                    </div>
+                                    <p className="text-sm text-gray-600">
+                                        You will be registered as an individual player for this singles tournament.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="mb-6">
+                                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                                        Select Team for {selectedTournament.format} Tournament *
+                                    </label>
+                                    
+                                    {teams.length > 0 ? (
+                                        <div className="space-y-2 max-h-48 overflow-y-auto">
+                                            {teams.map((team) => (
+                                                <div
+                                                    key={team.team_id}
+                                                    onClick={() => setSelectedTeamId(team.team_id)}
+                                                    className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                                                        selectedTeamId === team.team_id
+                                                            ? 'border-green-600 bg-green-50'
+                                                            : 'border-gray-200 hover:border-gray-300'
+                                                    }`}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                                                            {team.logo_url ? (
+                                                                <img src={team.logo_url} alt={team.name} className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                                                                    <span className="text-gray-500 text-lg">👥</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <h5 className="font-medium text-gray-900 truncate">{team.name}</h5>
+                                                            <p className="text-xs text-gray-500">{team.member_count || 0} members</p>
+                                                        </div>
+                                                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                                                            selectedTeamId === team.team_id
+                                                                ? 'border-green-600 bg-green-600'
+                                                                : 'border-gray-300'
+                                                        }`}>
+                                                            {selectedTeamId === team.team_id && (
+                                                                <div className="w-2 h-2 bg-white rounded-full"></div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-8 text-gray-500">
+                                            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                                <span className="text-gray-400 text-xl">👥</span>
+                                            </div>
+                                            <p className="text-sm">No teams available</p>
+                                            <p className="text-xs text-gray-400 mt-1">Create a team first to register for this tournament</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-3 pt-4 border-t">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowRegistrationModal(false);
+                                        setSelectedTournament(null);
+                                        setSelectedTeamId(null);
+                                    }}
+                                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                                    disabled={registrationLoading}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleConfirmRegistration}
+                                    disabled={
+                                        registrationLoading || 
+                                        (selectedTournament.format !== 'Singles' && !selectedTeamId)
+                                    }
+                                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {registrationLoading ? 'Registering...' : 'Confirm Registration'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Create Tournament Modal */}
             {showCreateModal && (
