@@ -838,8 +838,7 @@ export default function TournamentsPage() {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                 >
                                     <option value="Open">Open</option>
-                                    <option value="Private">Private</option>
-                                    <option value="Invite Only">Invite Only</option>
+                                    <option value="Invitational">Invitational</option>
                                 </select>
                             </div>
 
