@@ -2,8 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, User, TrendingUp, Hash, Gift, Star, ArrowRight } from 'lucide-react';
+import { Search, User, TrendingUp, Hash, Gift, Star, ArrowRight, Calendar, Trophy } from 'lucide-react';
 import { api } from '@/lib/api';
+import { tournamentApi } from '@/lib/api';
+import { Tournament } from '@/types';
+import EventCard from './EventCard';
+import Link from 'next/link';
 
 interface SuggestedUser {
     user_id: number;
@@ -24,10 +28,32 @@ export default function FeedSidebar() {
     const [suggestedUsers, setSuggestedUsers] = useState<SuggestedUser[]>([]);
     const [trendingTopics, setTrendingTopics] = useState<TrendingTopic[]>([]);
     const [followingUsers, setFollowingUsers] = useState<Set<number>>(new Set());
+    const [tournaments, setTournaments] = useState<Tournament[]>([]);
+    const [tournamentsLoading, setTournamentsLoading] = useState(true);
     const router = useRouter();
 
     // Mock data - replace with real API calls
     useEffect(() => {
+        // Fetch tournaments
+        const fetchTournaments = async () => {
+            try {
+                setTournamentsLoading(true);
+                const data = await tournamentApi.getTournaments();
+                // Show only upcoming tournaments (next 3 for sidebar)
+                const upcomingTournaments = data
+                    .filter((t: Tournament) => new Date(t.reg_deadline) > new Date())
+                    .sort((a: Tournament, b: Tournament) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
+                    .slice(0, 3);
+                setTournaments(upcomingTournaments);
+            } catch (err) {
+                console.error('Error fetching tournaments:', err);
+            } finally {
+                setTournamentsLoading(false);
+            }
+        };
+
+        fetchTournaments();
+
         // Mock suggested users
         setSuggestedUsers([
             {
@@ -192,6 +218,45 @@ export default function FeedSidebar() {
                 <button className="w-full text-green-600 hover:text-green-700 text-sm font-medium mt-4">
                     Show more
                 </button>
+            </div>
+
+            {/* Upcoming Events Section */}
+            <div className="bg-white rounded-xl p-4 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                        <Calendar className="w-5 h-5 text-green-600" />
+                        <h3 className="text-lg font-semibold text-gray-900">Upcoming Events</h3>
+                    </div>
+                    <Link
+                        href="/events"
+                        className="text-green-600 hover:text-green-700 text-sm flex items-center gap-1"
+                    >
+                        View All <ArrowRight className="w-4 h-4" />
+                    </Link>
+                </div>
+
+                {tournamentsLoading ? (
+                    <div className="flex items-center justify-center py-4">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
+                    </div>
+                ) : tournaments.length > 0 ? (
+                    <div className="space-y-3">
+                        {tournaments.map((tournament) => (
+                            <EventCard key={tournament.id} tournament={tournament} />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-4">
+                        <Trophy className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                        <p className="text-gray-500 text-sm">No upcoming tournaments</p>
+                        <Link
+                            href="/tournaments"
+                            className="text-green-600 hover:text-green-700 font-medium text-sm mt-1 inline-block"
+                        >
+                            Browse all →
+                        </Link>
+                    </div>
+                )}
             </div>
 
             {/* Featured Partners */}
