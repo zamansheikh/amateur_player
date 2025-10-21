@@ -35,7 +35,7 @@ interface UserFeedback {
 export default function FeedbackPage() {
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState<'submit' | 'history'>('submit');
-    
+
     // Submit feedback state
     const [feedbackTypes, setFeedbackTypes] = useState<FeedbackType[]>([]);
     const [formData, setFormData] = useState({
@@ -46,7 +46,7 @@ export default function FeedbackPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    
+
     // Feedback history state
     const [userFeedback, setUserFeedback] = useState<UserFeedback>({});
     const [isLoadingHistory, setIsLoadingHistory] = useState(false);
@@ -58,7 +58,7 @@ export default function FeedbackPage() {
                 const response = await api.get('/api/feedback-types');
                 const data = await response.data;
                 setFeedbackTypes(data.feedback_types || []);
-                
+
                 // Set default feedback type
                 if (data.feedback_types && data.feedback_types.length > 0) {
                     setFormData(prev => ({
@@ -111,7 +111,7 @@ export default function FeedbackPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!formData.title.trim() || !formData.details.trim() || !formData.feedback_type_id) {
             alert('Please fill in all required fields.');
             return;
@@ -133,7 +133,7 @@ export default function FeedbackPage() {
                     details: '',
                     feedback_type_id: feedbackTypes.length > 0 ? feedbackTypes[0].feedback_type_id : 0
                 });
-                
+
                 // Reset success message after 5 seconds
                 setTimeout(() => {
                     setIsSubmitted(false);
@@ -166,11 +166,10 @@ export default function FeedbackPage() {
                         <nav className="-mb-px flex">
                             <button
                                 onClick={() => setActiveTab('submit')}
-                                className={`w-1/2 py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors ${
-                                    activeTab === 'submit'
+                                className={`w-1/2 py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors ${activeTab === 'submit'
                                         ? 'border-green-500 text-green-600'
                                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                }`}
+                                    }`}
                             >
                                 <div className="flex items-center justify-center gap-2">
                                     <MessageSquare className="w-4 h-4" />
@@ -179,11 +178,10 @@ export default function FeedbackPage() {
                             </button>
                             <button
                                 onClick={() => setActiveTab('history')}
-                                className={`w-1/2 py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors ${
-                                    activeTab === 'history'
+                                className={`w-1/2 py-4 px-6 text-center border-b-2 font-medium text-sm transition-colors ${activeTab === 'history'
                                         ? 'border-green-500 text-green-600'
                                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                }`}
+                                    }`}
                             >
                                 <div className="flex items-center justify-center gap-2">
                                     <History className="w-4 h-4" />
@@ -227,7 +225,7 @@ export default function FeedbackPage() {
                                             </span>
                                             <ChevronDown className={`w-4 h-4 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
                                         </button>
-                                        
+
                                         {dropdownOpen && (
                                             <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
                                                 {feedbackTypes.map((type) => (
@@ -364,11 +362,10 @@ export default function FeedbackPage() {
                                                                     {feedback.title}
                                                                 </h4>
                                                                 <div className="flex items-center gap-2">
-                                                                    <span className={`px-2 py-1 text-xs rounded-full ${
-                                                                        feedback.dealt_with 
-                                                                            ? 'bg-green-100 text-green-800' 
+                                                                    <span className={`px-2 py-1 text-xs rounded-full ${feedback.dealt_with
+                                                                            ? 'bg-green-100 text-green-800'
                                                                             : 'bg-yellow-100 text-yellow-800'
-                                                                    }`}>
+                                                                        }`}>
                                                                         {feedback.dealt_with ? 'Resolved' : 'Pending'}
                                                                     </span>
                                                                 </div>

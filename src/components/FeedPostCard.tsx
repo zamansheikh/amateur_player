@@ -46,21 +46,21 @@ interface FeedPost {
         user_id: number;
         name: string;
         profile_pic_url: string;
+      };
+      text: string;
+      pics: string[];
+      replies: Array<{
+        reply_id: number;
+        user: {
+          user_id: number;
+          name: string;
+          profile_pic_url: string;
         };
         text: string;
         pics: string[];
-        replies: Array<{
-          reply_id: number;
-          user: {
-            user_id: number;
-            name: string;
-            profile_pic_url: string;
-          };
-          text: string;
-          pics: string[];
-        }>;
       }>;
-    };
+    }>;
+  };
   caption: string;
   media: string[];
   poll: {
@@ -186,11 +186,11 @@ export default function FeedPostCard({
 
     try {
       setIsVoting(true);
-      
+
       // Calculate current total votes from options
       const currentTotalVotes = localPost.poll.options.reduce((sum, option) => sum + option.vote, 0);
       const newTotalVotes = currentTotalVotes + 1;
-      
+
       // Optimistic update - update local state immediately
       const updatedPoll = {
         ...localPost.poll,
@@ -216,10 +216,10 @@ export default function FeedPostCard({
 
       setLocalPost(updatedPost);
       setSelectedPollOption(optionId);
-      
+
       // Call the poll vote API
       const response = await api.get(`/api/user/post/vote/${optionId}`);
-      
+
       // Check if response is successful (200-299 status codes)
       if (response.status >= 200 && response.status < 300) {
         // Vote was successful, keep the optimistic update
@@ -294,11 +294,10 @@ export default function FeedPostCard({
           </div>
           {!post.author.viewer_is_author && (
             <button
-              className={`border px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
-                post.author.is_following
+              className={`border px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${post.author.is_following
                   ? "border-gray-300 text-gray-600 hover:bg-gray-50"
                   : "border-green-600 text-green-600 hover:bg-green-50 hover:border-green-700"
-              }`}
+                }`}
               onClick={handleFollow}
             >
               {post.author.is_following ? "Following" : "+ Follow"}
@@ -326,30 +325,28 @@ export default function FeedPostCard({
                 const totalVotes = localPost.poll!.options.reduce((sum, opt) => sum + opt.vote, 0);
                 const percentage = totalVotes > 0 ? (option.vote / totalVotes) * 100 : 0;
                 const isSelected = selectedPollOption === option.option_id;
-                
+
                 return (
                   <div key={option.option_id} className="relative">
                     <button
                       onClick={() => handlePollVote(option.option_id)}
                       disabled={isVoting || selectedPollOption !== null}
-                      className={`w-full text-left p-3 rounded-lg border transition-all duration-200 relative overflow-hidden ${
-                        isSelected
+                      className={`w-full text-left p-3 rounded-lg border transition-all duration-200 relative overflow-hidden ${isSelected
                           ? 'border-green-500 bg-green-50 text-green-700'
                           : selectedPollOption !== null || totalVotes > 0
-                          ? 'border-gray-300 bg-white text-gray-700 cursor-default'
-                          : 'border-gray-300 bg-white text-gray-700 hover:border-green-400 hover:bg-green-50'
-                      } ${isVoting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            ? 'border-gray-300 bg-white text-gray-700 cursor-default'
+                            : 'border-gray-300 bg-white text-gray-700 hover:border-green-400 hover:bg-green-50'
+                        } ${isVoting ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                       {/* Progress bar background */}
                       {(selectedPollOption !== null || totalVotes > 0) && (
                         <div
-                          className={`absolute inset-0 transition-all duration-500 ${
-                            isSelected ? 'bg-green-200' : 'bg-gray-200'
-                          }`}
+                          className={`absolute inset-0 transition-all duration-500 ${isSelected ? 'bg-green-200' : 'bg-gray-200'
+                            }`}
                           style={{ width: `${percentage}%` }}
                         />
                       )}
-                      
+
                       {/* Option content */}
                       <div className="relative flex items-center justify-between">
                         <span className="font-medium">{option.content}</span>
@@ -369,7 +366,7 @@ export default function FeedPostCard({
                 );
               })}
             </div>
-            
+
             {/* Poll info */}
             <div className="mt-3 pt-3 border-t border-gray-200">
               <div className="flex items-center justify-between text-sm text-gray-600">
@@ -388,14 +385,14 @@ export default function FeedPostCard({
 
         {/* Post Media Gallery - Clickable */}
         {post.media && post.media.length > 0 && (
-          <div 
-            className={`max-h-fit overflow-hidden ${enableMediaLightbox ? "" : "cursor-pointer"}`} 
+          <div
+            className={`max-h-fit overflow-hidden ${enableMediaLightbox ? "" : "cursor-pointer"}`}
             onClick={enableMediaLightbox ? undefined : handlePostClick}
           >
-            <MediaGallery 
-              media={post.media} 
-              enableLightbox={enableMediaLightbox} 
-              // maxHeight="400px"
+            <MediaGallery
+              media={post.media}
+              enableLightbox={enableMediaLightbox}
+            // maxHeight="400px"
             />
           </div>
         )}
@@ -408,11 +405,10 @@ export default function FeedPostCard({
             <button
               onClick={handleLike}
               disabled={isLiking}
-              className={`transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-                localPost.is_liked_by_me
+              className={`transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${localPost.is_liked_by_me
                   ? "text-red-500 hover:text-red-600"
                   : "text-green-400 hover:text-red-500"
-              }`}
+                }`}
             >
               {localPost.is_liked_by_me ? (
                 <Image

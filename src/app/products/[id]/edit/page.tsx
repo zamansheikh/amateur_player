@@ -56,7 +56,7 @@ export default function EditProductPage() {
   const router = useRouter();
   const params = useParams();
   const productId = params.id as string;
-  
+
   const [product, setProduct] = useState<Product | null>(null);
   const [formData, setFormData] = useState<Partial<Product>>({});
   const [newSpecKey, setNewSpecKey] = useState('');
@@ -204,23 +204,23 @@ export default function EditProductPage() {
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
-    
+
     if (!formData.name?.trim()) newErrors.name = 'Product name is required';
     if (!formData.category) newErrors.category = 'Category is required';
     if (!formData.brand?.trim()) newErrors.brand = 'Brand is required';
     if ((formData.price || 0) <= 0) newErrors.price = 'Price must be greater than 0';
     if (!formData.description?.trim()) newErrors.description = 'Description is required';
     if ((formData.stockQuantity || 0) < 0) newErrors.stockQuantity = 'Stock quantity cannot be negative';
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
-    
+
     setIsSubmitting(true);
-    
+
     try {
       const productData = {
         ...formData,
@@ -230,13 +230,13 @@ export default function EditProductPage() {
           : 0,
         updatedAt: new Date().toISOString()
       };
-      
+
       // Here you would typically send the data to your API
       console.log('Updated product data:', productData);
-      
+
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       // Redirect to products page
       router.push('/products');
     } catch (error) {
@@ -325,11 +325,10 @@ export default function EditProductPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as 'edit' | 'analytics')}
-                className={`flex items-center gap-2 px-1 py-2 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === tab.id
+                className={`flex items-center gap-2 px-1 py-2 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
                     ? 'border-green-600 text-green-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
+                  }`}
               >
                 <tab.icon className="w-4 h-4" />
                 {tab.label}
@@ -360,9 +359,8 @@ export default function EditProductPage() {
                       type="text"
                       value={formData.name || ''}
                       onChange={(e) => handleInputChange('name', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                        errors.name ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.name ? 'border-red-300' : 'border-gray-300'
+                        }`}
                       placeholder="e.g., Storm Phaze II Bowling Ball"
                     />
                     {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
@@ -375,9 +373,8 @@ export default function EditProductPage() {
                     <select
                       value={formData.category || ''}
                       onChange={(e) => handleInputChange('category', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                        errors.category ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.category ? 'border-red-300' : 'border-gray-300'
+                        }`}
                     >
                       <option value="">Select Category</option>
                       {categories.map((category) => (
@@ -395,9 +392,8 @@ export default function EditProductPage() {
                       type="text"
                       value={formData.brand || ''}
                       onChange={(e) => handleInputChange('brand', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                        errors.brand ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.brand ? 'border-red-300' : 'border-gray-300'
+                        }`}
                       placeholder="e.g., Storm, Brunswick, Dexter"
                     />
                     {errors.brand && <p className="text-red-600 text-sm mt-1">{errors.brand}</p>}
@@ -428,9 +424,8 @@ export default function EditProductPage() {
                       value={formData.description || ''}
                       onChange={(e) => handleInputChange('description', e.target.value)}
                       rows={4}
-                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                        errors.description ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.description ? 'border-red-300' : 'border-gray-300'
+                        }`}
                       placeholder="Detailed description of the product, its features, and condition..."
                     />
                     {errors.description && <p className="text-red-600 text-sm mt-1">{errors.description}</p>}
@@ -456,9 +451,8 @@ export default function EditProductPage() {
                       step="0.01"
                       value={formData.price || 0}
                       onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 0)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                        errors.price ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.price ? 'border-red-300' : 'border-gray-300'
+                        }`}
                       placeholder="0.00"
                     />
                     {errors.price && <p className="text-red-600 text-sm mt-1">{errors.price}</p>}
@@ -512,9 +506,8 @@ export default function EditProductPage() {
                       min="0"
                       value={formData.stockQuantity || 0}
                       onChange={(e) => handleInputChange('stockQuantity', parseInt(e.target.value) || 0)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                        errors.stockQuantity ? 'border-red-300' : 'border-gray-300'
-                      }`}
+                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.stockQuantity ? 'border-red-300' : 'border-gray-300'
+                        }`}
                       placeholder="0"
                     />
                     {errors.stockQuantity && <p className="text-red-600 text-sm mt-1">{errors.stockQuantity}</p>}
@@ -637,7 +630,7 @@ export default function EditProductPage() {
               {/* Product Status */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Product Status</h3>
-                
+
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -675,7 +668,7 @@ export default function EditProductPage() {
               {/* Product Stats */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Product Performance</h3>
-                
+
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -684,7 +677,7 @@ export default function EditProductPage() {
                     </div>
                     <span className="font-medium text-gray-900">{product.views}</span>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Star className="w-4 h-4 text-gray-500" />
@@ -692,7 +685,7 @@ export default function EditProductPage() {
                     </div>
                     <span className="font-medium text-gray-900">{product.likes}</span>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <ShoppingCart className="w-4 h-4 text-gray-500" />
@@ -700,7 +693,7 @@ export default function EditProductPage() {
                     </div>
                     <span className="font-medium text-green-600">{product.sales}</span>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <TrendingUp className="w-4 h-4 text-gray-500" />
@@ -763,7 +756,7 @@ export default function EditProductPage() {
             {/* Analytics Details */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-6">Performance Insights</h3>
-              
+
               <div className="text-center py-12">
                 <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                 <h4 className="text-lg font-medium text-gray-900 mb-2">Detailed Analytics Coming Soon</h4>

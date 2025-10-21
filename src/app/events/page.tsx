@@ -116,14 +116,14 @@ export default function EventsPage() {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
     const today = new Date();
-    
+
     const firstDayOfMonth = new Date(year, month, 1);
     const lastDayOfMonth = new Date(year, month + 1, 0);
     const firstDayOfWeek = firstDayOfMonth.getDay();
     const daysInMonth = lastDayOfMonth.getDate();
-    
+
     const calendar: CalendarDay[] = [];
-    
+
     // Add previous month's trailing days
     const prevMonth = new Date(year, month - 1, 0);
     for (let i = firstDayOfWeek - 1; i >= 0; i--) {
@@ -135,7 +135,7 @@ export default function EventsPage() {
         events: []
       });
     }
-    
+
     // Add current month's days
     for (let date = 1; date <= daysInMonth; date++) {
       const currentDay = new Date(year, month, date);
@@ -144,7 +144,7 @@ export default function EventsPage() {
         const eventDate = new Date(event.date);
         return eventDate.toDateString() === currentDay.toDateString();
       });
-      
+
       calendar.push({
         date,
         isCurrentMonth: true,
@@ -152,7 +152,7 @@ export default function EventsPage() {
         events: dayEvents
       });
     }
-    
+
     // Add next month's leading days
     const remainingDays = 42 - calendar.length;
     for (let date = 1; date <= remainingDays; date++) {
@@ -163,7 +163,7 @@ export default function EventsPage() {
         events: []
       });
     }
-    
+
     return calendar;
   };
 
@@ -230,7 +230,7 @@ export default function EventsPage() {
   const filteredEvents = getSelectedDateEvents().filter(event => {
     const matchesType = filterType === 'all' || event.type === filterType;
     const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         event.description.toLowerCase().includes(searchTerm.toLowerCase());
+      event.description.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesType && matchesSearch;
   });
 
@@ -263,11 +263,10 @@ export default function EventsPage() {
                   <button
                     key={view.mode}
                     onClick={() => setViewMode(view.mode as 'month' | 'week' | 'day')}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                      viewMode === view.mode
+                    className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${viewMode === view.mode
                         ? 'bg-white text-green-600 shadow-sm'
                         : 'text-gray-600 hover:text-gray-900'
-                    }`}
+                      }`}
                   >
                     <view.icon className="w-4 h-4" />
                     {view.label}
@@ -310,7 +309,7 @@ export default function EventsPage() {
                     </button>
                   </div>
                 </div>
-                
+
                 <button
                   onClick={() => setCurrentDate(new Date())}
                   className="px-4 py-2 text-sm font-medium text-green-600 hover:bg-green-50 rounded-lg transition-colors"
@@ -337,56 +336,52 @@ export default function EventsPage() {
                       {day}
                     </div>
                   ))}
-                  
+
                   {/* Calendar Days */}
                   {calendar.map((day, index) => (
                     <div
                       key={index}
                       onClick={() => selectDate(day)}
-                      className={`min-h-[100px] p-2 border border-gray-100 cursor-pointer transition-all ${
-                        day.isCurrentMonth
+                      className={`min-h-[100px] p-2 border border-gray-100 cursor-pointer transition-all ${day.isCurrentMonth
                           ? 'bg-white hover:bg-gray-50'
                           : 'bg-gray-50 text-gray-400'
-                      } ${
-                        day.isToday
+                        } ${day.isToday
                           ? 'ring-2 ring-green-500 ring-inset'
                           : ''
-                      } ${
-                        selectedDate && selectedDate.getDate() === day.date && day.isCurrentMonth
+                        } ${selectedDate && selectedDate.getDate() === day.date && day.isCurrentMonth
                           ? 'bg-green-50 ring-2 ring-green-500 ring-inset'
                           : ''
-                      }`}
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className={`text-sm font-medium ${
-                        day.isToday ? 'text-green-600' : 
-                        day.isCurrentMonth ? 'text-gray-900' : 'text-gray-400'
-                      }`}>
-                        {day.date}
-                      </span>
-                      {day.events.length > 0 && (
-                        <span className="bg-green-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                          {day.events.length}
+                        }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className={`text-sm font-medium ${day.isToday ? 'text-green-600' :
+                            day.isCurrentMonth ? 'text-gray-900' : 'text-gray-400'
+                          }`}>
+                          {day.date}
                         </span>
-                      )}
-                    </div>
-                    
-                    <div className="space-y-1">
-                      {day.events.slice(0, 2).map((event) => (
-                        <div
-                          key={event.id}
-                          className={`text-xs px-2 py-1 rounded text-white truncate ${getEventTypeColor(event.type)}`}
-                          title={event.title}
-                        >
-                          {event.title}
-                        </div>
-                      ))}
-                      {day.events.length > 2 && (
-                        <div className="text-xs text-gray-500 px-2">
-                          +{day.events.length - 2} more
-                        </div>
-                      )}
-                    </div>
+                        {day.events.length > 0 && (
+                          <span className="bg-green-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                            {day.events.length}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="space-y-1">
+                        {day.events.slice(0, 2).map((event) => (
+                          <div
+                            key={event.id}
+                            className={`text-xs px-2 py-1 rounded text-white truncate ${getEventTypeColor(event.type)}`}
+                            title={event.title}
+                          >
+                            {event.title}
+                          </div>
+                        ))}
+                        {day.events.length > 2 && (
+                          <div className="text-xs text-gray-500 px-2">
+                            +{day.events.length - 2} more
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -421,10 +416,10 @@ export default function EventsPage() {
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">
-                    {selectedDate.toLocaleDateString('en-US', { 
-                      weekday: 'long', 
-                      month: 'long', 
-                      day: 'numeric' 
+                    {selectedDate.toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      month: 'long',
+                      day: 'numeric'
                     })}
                   </h3>
                   <span className="text-sm text-gray-500">
@@ -444,7 +439,7 @@ export default function EventsPage() {
                       className="w-full pl-10 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     />
                   </div>
-                  
+
                   <select
                     value={filterType}
                     onChange={(e) => setFilterType(e.target.value)}
@@ -474,18 +469,18 @@ export default function EventsPage() {
                             <Eye className="w-4 h-4" />
                           </button>
                         </div>
-                        
+
                         <div className="space-y-2 text-sm text-gray-600">
                           <div className="flex items-center gap-2">
                             <Clock className="w-4 h-4" />
                             <span>{event.time} {event.endTime && `- ${event.endTime}`}</span>
                           </div>
-                          
+
                           <div className="flex items-center gap-2">
                             <MapPin className="w-4 h-4" />
                             <span>{event.location}</span>
                           </div>
-                          
+
                           {event.participants > 0 && (
                             <div className="flex items-center gap-2">
                               <Users className="w-4 h-4" />
@@ -495,14 +490,14 @@ export default function EventsPage() {
                               </span>
                             </div>
                           )}
-                          
+
                           {event.entryFee && (
                             <div className="flex items-center gap-2">
                               <DollarSign className="w-4 h-4" />
                               <span>${event.entryFee} entry fee</span>
                             </div>
                           )}
-                          
+
                           {event.prizePool && (
                             <div className="flex items-center gap-2">
                               <Award className="w-4 h-4" />
@@ -510,19 +505,18 @@ export default function EventsPage() {
                             </div>
                           )}
                         </div>
-                        
+
                         <p className="text-sm text-gray-600 mt-2">{event.description}</p>
-                        
+
                         <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
-                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                            event.status === 'upcoming' ? 'bg-blue-100 text-blue-800' :
-                            event.status === 'ongoing' ? 'bg-green-100 text-green-800' :
-                            event.status === 'completed' ? 'bg-gray-100 text-gray-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${event.status === 'upcoming' ? 'bg-blue-100 text-blue-800' :
+                              event.status === 'ongoing' ? 'bg-green-100 text-green-800' :
+                                event.status === 'completed' ? 'bg-gray-100 text-gray-800' :
+                                  'bg-red-100 text-red-800'
+                            }`}>
                             {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
                           </span>
-                          
+
                           <button className="text-green-600 hover:text-green-700 font-medium text-sm flex items-center gap-1 transition-colors">
                             View Details <ArrowRight className="w-3 h-3" />
                           </button>
@@ -533,8 +527,8 @@ export default function EventsPage() {
                     <div className="text-center py-8">
                       <Calendar className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                       <p className="text-gray-500 text-sm">
-                        {getSelectedDateEvents().length === 0 
-                          ? "No events on this date" 
+                        {getSelectedDateEvents().length === 0
+                          ? "No events on this date"
                           : "No events match your filters"
                         }
                       </p>
@@ -557,7 +551,7 @@ export default function EventsPage() {
                     {loading ? '...' : mockEvents.filter(e => e.type === 'tournament' && new Date(e.date).getMonth() === currentDate.getMonth()).length}
                   </span>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-blue-600" />
@@ -567,7 +561,7 @@ export default function EventsPage() {
                     {loading ? '...' : mockEvents.filter(e => e.format === 'Singles' && new Date(e.date).getMonth() === currentDate.getMonth()).length}
                   </span>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Users className="w-4 h-4 text-green-600" />

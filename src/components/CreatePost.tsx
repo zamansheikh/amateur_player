@@ -42,7 +42,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
                 {/* Action Buttons Row */}
                 <div className="flex items-center gap-6 mb-6">
-                    <button 
+                    <button
                         onClick={handleCreatePostClick}
                         className="flex items-center gap-3 text-gray-600 hover:text-blue-600 transition-colors"
                     >
@@ -54,7 +54,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                         <span className="font-medium">Create Post</span>
                     </button>
 
-                    <button 
+                    <button
                         onClick={handlePhotoVideoClick}
                         className="flex items-center gap-3 text-gray-600 hover:text-red-600 transition-colors"
                     >

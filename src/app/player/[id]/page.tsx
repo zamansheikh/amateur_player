@@ -252,7 +252,7 @@ export default function PlayerProfilePage() {
       router.push("/signin");
       return;
     }
-    
+
     if (!player?.username) {
       console.error("Player username not available");
       return;
@@ -260,7 +260,7 @@ export default function PlayerProfilePage() {
 
     try {
       setIsCreatingConversation(true);
-      
+
       // Call API to create or get existing conversation
       const response = await api.post("/api/chat/rooms", {
         other_username: player.username
@@ -272,7 +272,7 @@ export default function PlayerProfilePage() {
       // Navigate to messages page with the room_id as a query parameter
       // This will help the messages page auto-select this conversation
       router.push(`/messages?room_id=${conversationData.room_id}`);
-      
+
     } catch (error) {
       console.error("Error creating/getting conversation:", error);
       // Still navigate to messages page as fallback
@@ -354,25 +354,25 @@ export default function PlayerProfilePage() {
         {/* Profile Header */}
         <div className="relative">
           {/* Cover Video */}
-            <div className="h-64 relative overflow-hidden rounded-lg">
+          <div className="h-64 relative overflow-hidden rounded-lg">
             {player?.is_pro && player?.intro_video_url ? (
               <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="w-full h-full object-cover"
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover"
               >
-              <source src={player.intro_video_url} type="video/mp4" />
+                <source src={player.intro_video_url} type="video/mp4" />
               </video>
             ) : player?.cover_photo_url ? (
               <Image
-              src={player.cover_photo_url}
-              alt="Cover Photo"
-              width={1200}
-              height={256}
-              className="w-full h-full object-cover"
-              priority
+                src={player.cover_photo_url}
+                alt="Cover Photo"
+                width={1200}
+                height={256}
+                className="w-full h-full object-cover"
+                priority
               />
             ) : (
               <div className="w-full h-full bg-gradient-to-r from-green-400 to-blue-500"></div>
@@ -380,10 +380,10 @@ export default function PlayerProfilePage() {
             <div className="absolute inset-0 bg-black bg-opacity-20"></div>
             {player?.is_pro && player?.intro_video_url && (
               <button className="absolute bottom-4 right-4 w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all">
-              <Play className="w-6 h-6 text-white" />
+                <Play className="w-6 h-6 text-white" />
               </button>
             )}
-            </div>
+          </div>
 
           {/* Profile Info */}
           <div className="px-6 pb-4 pt-8">
@@ -462,32 +462,30 @@ export default function PlayerProfilePage() {
                 {/* Buttons and Stats Row */}
                 <div className="flex items-center justify-between">
                   {/* Action Buttons */}
-                    <div className="flex gap-3">
+                  <div className="flex gap-3">
                     {player?.is_me ? (
                       <button
-                      onClick={handleEditProfile}
-                      className="px-6 py-2 border border-gray-300 rounded-full text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={handleEditProfile}
+                        className="px-6 py-2 border border-gray-300 rounded-full text-gray-700 hover:bg-gray-50 transition-colors"
                       >
-                      Edit Profile
+                        Edit Profile
                       </button>
                     ) : (
                       <button
-                      onClick={handleFollow}
-                      className={`px-6 py-2 rounded-full font-medium transition-colors ${
-                        isFollowing
-                        ? "bg-green-100 text-green-700 hover:bg-green-200"
-                        : "bg-green-600 text-white hover:bg-green-700"
-                      }`}
+                        onClick={handleFollow}
+                        className={`px-6 py-2 rounded-full font-medium transition-colors ${isFollowing
+                            ? "bg-green-100 text-green-700 hover:bg-green-200"
+                            : "bg-green-600 text-white hover:bg-green-700"
+                          }`}
                       >
-                      {isFollowing ? "Following" : "Follow"}
+                        {isFollowing ? "Following" : "Follow"}
                       </button>
                     )}
                     <button
                       onClick={handleGetInTouch}
                       disabled={isCreatingConversation}
-                      className={`px-6 py-2 border border-gray-300 rounded-full text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2 ${
-                        isCreatingConversation ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
+                      className={`px-6 py-2 border border-gray-300 rounded-full text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2 ${isCreatingConversation ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
                     >
                       {isCreatingConversation ? (
                         <>
@@ -498,7 +496,7 @@ export default function PlayerProfilePage() {
                         'Get in Touch'
                       )}
                     </button>
-                    </div>
+                  </div>
 
                   {/* Stats */}
                   <div className="flex items-center gap-6">

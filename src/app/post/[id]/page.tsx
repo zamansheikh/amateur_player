@@ -141,7 +141,7 @@ export default function PostDetailPage() {
   // Function to render text with hashtags
   const renderTextWithTags = (text: string, tags: string[]) => {
     const cleanText = parseCaption(text);
-    
+
     return cleanText.split(/(#\w+)/g).map((part, index) => {
       if (part.startsWith('#')) {
         return (
@@ -294,7 +294,7 @@ export default function PostDetailPage() {
             <form onSubmit={handleCommentSubmit} className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-ful flex items-center justify-center flex-shrink-0">
                 <span className="text-white font-medium text-sm">
-                 <Image
+                  <Image
                     src={user?.profile_picture_url || "/default-avatar.png"}
                     alt={user?.name || "User"}
                     width={24}

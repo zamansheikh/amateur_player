@@ -155,8 +155,8 @@ export default function ProfilePage() {
 
         } catch (error: unknown) {
             console.error('Error updating stats:', error);
-            const errorMessage = error instanceof Error 
-                ? error.message 
+            const errorMessage = error instanceof Error
+                ? error.message
                 : (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Unknown error';
             alert(`Failed to update statistics: ${errorMessage}`);
         } finally {
@@ -240,7 +240,7 @@ export default function ProfilePage() {
                                 </div>
                                 <h2 className="text-xl font-bold text-gray-900">{user?.name || "User Name"}</h2>
                                 <p className="text-green-600 font-medium">{user?.is_pro ? "Pro Player" : "Amateur Player"}</p>
-                                <button 
+                                <button
                                     onClick={() => router.push('/profile/edit')}
                                     className="text-green-600 text-sm hover:underline"
                                 >
@@ -385,7 +385,7 @@ export default function ProfilePage() {
                                         {['Balls', 'Shoes', 'Accessories', 'Apparels'].map((brandType) => {
                                             const brandsOfType = user.favorite_brands?.filter(brand => brand.brandType === brandType) || [];
                                             if (brandsOfType.length === 0) return null;
-                                            
+
                                             return (
                                                 <div key={brandType}>
                                                     <h4 className="text-sm font-medium text-gray-700 mb-2">{brandType}</h4>

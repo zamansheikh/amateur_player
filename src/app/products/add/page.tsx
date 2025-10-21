@@ -47,7 +47,7 @@ interface ProductForm {
 export default function AddProductPage() {
   const { user } = useAuth();
   const router = useRouter();
-  
+
   const [formData, setFormData] = useState<ProductForm>({
     name: '',
     category: '',
@@ -157,39 +157,39 @@ export default function AddProductPage() {
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
-    
+
     if (!formData.name.trim()) newErrors.name = 'Product name is required';
     if (!formData.category) newErrors.category = 'Category is required';
     if (!formData.brand.trim()) newErrors.brand = 'Brand is required';
     if (formData.price <= 0) newErrors.price = 'Price must be greater than 0';
     if (!formData.description.trim()) newErrors.description = 'Description is required';
     if (formData.stockQuantity < 0) newErrors.stockQuantity = 'Stock quantity cannot be negative';
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (status: 'draft' | 'active') => {
     if (!validateForm()) return;
-    
+
     setIsSubmitting(true);
-    
+
     try {
       const productData = {
         ...formData,
         status,
         images: imageUrls.filter(url => url.trim() !== ''),
-        discountPercentage: formData.originalPrice > formData.price 
+        discountPercentage: formData.originalPrice > formData.price
           ? Math.round(((formData.originalPrice - formData.price) / formData.originalPrice) * 100)
           : 0
       };
-      
+
       // Here you would typically send the data to your API
       console.log('Product data:', productData);
-      
+
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       // Redirect to products page
       router.push('/products');
     } catch (error) {
@@ -272,9 +272,8 @@ export default function AddProductPage() {
                     type="text"
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                      errors.name ? 'border-red-300' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.name ? 'border-red-300' : 'border-gray-300'
+                      }`}
                     placeholder="e.g., Storm Phaze II Bowling Ball"
                   />
                   {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
@@ -287,9 +286,8 @@ export default function AddProductPage() {
                   <select
                     value={formData.category}
                     onChange={(e) => handleInputChange('category', e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                      errors.category ? 'border-red-300' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.category ? 'border-red-300' : 'border-gray-300'
+                      }`}
                   >
                     <option value="">Select Category</option>
                     {categories.map((category) => (
@@ -307,9 +305,8 @@ export default function AddProductPage() {
                     type="text"
                     value={formData.brand}
                     onChange={(e) => handleInputChange('brand', e.target.value)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                      errors.brand ? 'border-red-300' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.brand ? 'border-red-300' : 'border-gray-300'
+                      }`}
                     placeholder="e.g., Storm, Brunswick, Dexter"
                   />
                   {errors.brand && <p className="text-red-600 text-sm mt-1">{errors.brand}</p>}
@@ -340,9 +337,8 @@ export default function AddProductPage() {
                     value={formData.description}
                     onChange={(e) => handleInputChange('description', e.target.value)}
                     rows={4}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                      errors.description ? 'border-red-300' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.description ? 'border-red-300' : 'border-gray-300'
+                      }`}
                     placeholder="Detailed description of the product, its features, and condition..."
                   />
                   {errors.description && <p className="text-red-600 text-sm mt-1">{errors.description}</p>}
@@ -368,9 +364,8 @@ export default function AddProductPage() {
                     step="0.01"
                     value={formData.price}
                     onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 0)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                      errors.price ? 'border-red-300' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.price ? 'border-red-300' : 'border-gray-300'
+                      }`}
                     placeholder="0.00"
                   />
                   {errors.price && <p className="text-red-600 text-sm mt-1">{errors.price}</p>}
@@ -427,9 +422,8 @@ export default function AddProductPage() {
                     min="0"
                     value={formData.stockQuantity}
                     onChange={(e) => handleInputChange('stockQuantity', parseInt(e.target.value) || 0)}
-                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                      errors.stockQuantity ? 'border-red-300' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 ${errors.stockQuantity ? 'border-red-300' : 'border-gray-300'
+                      }`}
                     placeholder="0"
                   />
                   {errors.stockQuantity && <p className="text-red-600 text-sm mt-1">{errors.stockQuantity}</p>}
@@ -483,7 +477,7 @@ export default function AddProductPage() {
                     )}
                   </div>
                 ))}
-                
+
                 <button
                   onClick={addImageUrl}
                   className="flex items-center gap-2 px-4 py-2 text-green-600 border border-green-300 rounded-lg hover:bg-green-50 transition-colors"
@@ -491,7 +485,7 @@ export default function AddProductPage() {
                   <Plus className="w-4 h-4" />
                   Add Another Image
                 </button>
-                
+
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <div className="flex items-start gap-3">
                     <Info className="w-5 h-5 text-blue-600 mt-0.5" />
@@ -598,7 +592,7 @@ export default function AddProductPage() {
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
-                
+
                 <p className="text-xs text-gray-500">
                   Tags help customers find your products. Press Enter or click + to add tags.
                 </p>
@@ -611,7 +605,7 @@ export default function AddProductPage() {
             {/* Status & Visibility */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Status & Visibility</h3>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -652,7 +646,7 @@ export default function AddProductPage() {
             {/* Product Preview */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Product Preview</h3>
-              
+
               <div className="border border-gray-200 rounded-lg overflow-hidden">
                 {/* Mini Product Card Preview */}
                 <div className="relative h-32 bg-gradient-to-br from-gray-100 to-gray-200">
@@ -669,25 +663,25 @@ export default function AddProductPage() {
                       <p className="text-xs font-medium">{formData.brand || 'Brand'}</p>
                     </div>
                   </div>
-                  
+
                   {formData.featured && (
                     <div className="absolute top-2 left-2 bg-yellow-400 text-yellow-900 px-2 py-1 rounded text-xs font-bold">
                       ⭐ FEATURED
                     </div>
                   )}
-                  
+
                   {discountPercentage > 0 && (
                     <div className="absolute bottom-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">
                       -{discountPercentage}% OFF
                     </div>
                   )}
                 </div>
-                
+
                 <div className="p-4">
                   <h4 className="font-semibold text-gray-900 text-sm mb-2 line-clamp-2">
                     {formData.name || 'Product Name'}
                   </h4>
-                  
+
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-lg font-bold text-green-600">${formData.price || 0}</span>
@@ -696,7 +690,7 @@ export default function AddProductPage() {
                       )}
                     </div>
                   </div>
-                  
+
                   {formData.tags.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-2">
                       {formData.tags.slice(0, 2).map((tag) => (
@@ -713,23 +707,23 @@ export default function AddProductPage() {
             {/* Quick Stats */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Tips</h3>
-              
+
               <div className="space-y-3 text-sm">
                 <div className="flex items-start gap-2">
                   <CheckCircle className="w-4 h-4 text-green-600 mt-0.5" />
                   <span className="text-gray-700">Add detailed specifications for better search visibility</span>
                 </div>
-                
+
                 <div className="flex items-start gap-2">
                   <CheckCircle className="w-4 h-4 text-green-600 mt-0.5" />
                   <span className="text-gray-700">Use high-quality images to attract more customers</span>
                 </div>
-                
+
                 <div className="flex items-start gap-2">
                   <CheckCircle className="w-4 h-4 text-green-600 mt-0.5" />
                   <span className="text-gray-700">Set competitive pricing based on condition and market value</span>
                 </div>
-                
+
                 <div className="flex items-start gap-2">
                   <CheckCircle className="w-4 h-4 text-green-600 mt-0.5" />
                   <span className="text-gray-700">Add relevant tags to help customers discover your products</span>

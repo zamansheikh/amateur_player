@@ -300,31 +300,28 @@ export default function TeamsPage() {
                         <nav className="flex space-x-8 px-6" aria-label="Tabs">
                             <button
                                 onClick={() => setActiveTab('teams')}
-                                className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors ${
-                                    activeTab === 'teams'
+                                className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors ${activeTab === 'teams'
                                         ? 'border-green-500 text-green-600'
                                         : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                                }`}
+                                    }`}
                             >
                                 Teams ({teams.length})
                             </button>
                             <button
                                 onClick={() => setActiveTab('pending')}
-                                className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors ${
-                                    activeTab === 'pending'
+                                className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors ${activeTab === 'pending'
                                         ? 'border-green-500 text-green-600'
                                         : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                                }`}
+                                    }`}
                             >
                                 Pending ({invitations.received.length})
                             </button>
                             <button
                                 onClick={() => setActiveTab('sent')}
-                                className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors ${
-                                    activeTab === 'sent'
+                                className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors ${activeTab === 'sent'
                                         ? 'border-green-500 text-green-600'
                                         : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                                }`}
+                                    }`}
                             >
                                 Sent ({invitations.sent.length})
                             </button>
@@ -345,7 +342,7 @@ export default function TeamsPage() {
                                         {teams.map((team) => (
                                             <div key={team.team_id} className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
                                                 <div className="flex items-center justify-between">
-                                                    <div 
+                                                    <div
                                                         className="flex items-center gap-4 flex-1 cursor-pointer"
                                                         onClick={() => router.push(`/teams/${team.team_id}`)}
                                                     >
@@ -367,7 +364,7 @@ export default function TeamsPage() {
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-2">
-                                                        <button 
+                                                        <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 handleTeamChat(team);
@@ -377,7 +374,7 @@ export default function TeamsPage() {
                                                             <MessageCircle className="w-4 h-4" />
                                                             Chat
                                                         </button>
-                                                        <button 
+                                                        <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 handleManageTeam(team);
@@ -387,7 +384,7 @@ export default function TeamsPage() {
                                                             <span>⚙️</span>
                                                             Manage
                                                         </button>
-                                                        <button 
+                                                        <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 handleDeleteTeam(team.team_id);
@@ -585,7 +582,7 @@ export default function TeamsPage() {
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Select Members (Optional)
                             </label>
-                            
+
                             {!isSelectingMembers ? (
                                 <button
                                     onClick={handleSelectMemberClick}

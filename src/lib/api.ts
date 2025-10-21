@@ -32,7 +32,7 @@ api.interceptors.response.use(
                 // Check if we're on a public pro route - don't redirect
                 const currentPath = window.location.pathname;
                 const isProRoute = currentPath.startsWith('/pro/');
-                
+
                 if (!isProRoute) {
                     localStorage.removeItem('access_token');
                     localStorage.removeItem('user');

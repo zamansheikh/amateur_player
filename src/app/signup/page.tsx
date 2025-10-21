@@ -18,7 +18,7 @@ interface Brand {
 export default function SignUpPage() {
     const [currentStep, setCurrentStep] = useState(1);
     const [isProfileComplete, setIsProfileComplete] = useState(false);
-    
+
     // Step 1: Basic Info
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -27,12 +27,12 @@ export default function SignUpPage() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [birthDate, setBirthDate] = useState('');
-    
+
     // Parent information (for users under 18)
     const [parentFirstName, setParentFirstName] = useState('');
     const [parentLastName, setParentLastName] = useState('');
     const [parentEmail, setParentEmail] = useState('');
-    
+
     // Step 2: Email Verification
     const [verificationCode, setVerificationCode] = useState('');
     const [isEmailVerified, setIsEmailVerified] = useState(false);
@@ -40,7 +40,7 @@ export default function SignUpPage() {
     const [isVerifyingCode, setIsVerifyingCode] = useState(false);
     const [codeSent, setCodeSent] = useState(false);
     const [userCreated, setUserCreated] = useState(false);
-    
+
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [isCreatingAccount, setIsCreatingAccount] = useState(false);
@@ -83,7 +83,7 @@ export default function SignUpPage() {
         } catch (error: unknown) {
             console.error('Error sending verification code:', error);
             const err = error as { response?: { status?: number; data?: { message?: string } } };
-            
+
             if (err.response?.status === 409) {
                 setIsEmailVerified(true);
                 setError('');
@@ -122,17 +122,17 @@ export default function SignUpPage() {
             setError('Please fill in all fields');
             return false;
         }
-        
+
         if (isUnder13) {
             setError('You must be at least 13 years old to create an account');
             return false;
         }
-        
+
         if (isUnder18 && (!parentFirstName || !parentLastName || !parentEmail)) {
             setError('Parent information is required for users under 18');
             return false;
         }
-        
+
         if (password !== confirmPassword) {
             setError('Passwords do not match');
             return false;
@@ -256,16 +256,16 @@ export default function SignUpPage() {
                 </div>
 
                 <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
+                    <div
                         className="bg-green-600 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${(currentStep / 2) * 100}%` }}
                     ></div>
                 </div>
 
-                <form className="mt-8 space-y-6" onSubmit={async (e) => { 
-                    e.preventDefault(); 
+                <form className="mt-8 space-y-6" onSubmit={async (e) => {
+                    e.preventDefault();
                     if (currentStep === 1) {
-                        await handleNext(); 
+                        await handleNext();
                     }
                 }}>
                     {currentStep === 1 && (
@@ -371,7 +371,7 @@ export default function SignUpPage() {
                                         <p className="font-medium">Parent/Guardian Information Required</p>
                                         <p>Since you are under 18, we need your parent or guardian&apos;s information for account verification and safety purposes.</p>
                                     </div>
-                                    
+
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label htmlFor="parentFirstName" className="block text-sm font-medium text-gray-700">
@@ -404,7 +404,7 @@ export default function SignUpPage() {
                                             />
                                         </div>
                                     </div>
-                                    
+
                                     <div>
                                         <label htmlFor="parentEmail" className="block text-sm font-medium text-gray-700">
                                             Parent&apos;s Email Address
@@ -487,14 +487,14 @@ export default function SignUpPage() {
                     {currentStep === 2 && (
                         <div className="space-y-6">
                             <h3 className="text-lg font-medium text-gray-900 text-center">Verify Your Email</h3>
-                            
+
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                                 <div className="text-center">
                                     <p className="text-sm text-blue-800 mb-2">
                                         {isEmailVerified ? 'Email already verified:' : 'We will send a verification code to:'}
                                     </p>
                                     <p className="font-medium text-blue-900 mb-4">{email}</p>
-                                    
+
                                     {!codeSent && !isEmailVerified ? (
                                         <div className="space-y-4">
                                             <p className="text-sm text-gray-600">
@@ -532,7 +532,7 @@ export default function SignUpPage() {
                                                     {isVerifyingCode ? 'Verifying...' : 'Verify Email'}
                                                 </button>
                                             </div>
-                                            
+
                                             <div className="text-center">
                                                 <button
                                                     type="button"
@@ -624,7 +624,7 @@ export default function SignUpPage() {
                                     }
                                 }}
                             >
-                                {currentStep === 1 && isUnder13 
+                                {currentStep === 1 && isUnder13
                                     ? 'Age requirement not met'
                                     : (isLoading ? 'Validating...' : 'Next')
                                 }

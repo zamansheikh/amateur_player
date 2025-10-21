@@ -72,7 +72,7 @@ interface AvailableMember {
 export default function MessagesPage() {
   const searchParams = useSearchParams();
   const targetRoomId = searchParams.get('room_id');
-  
+
   const [messages, setMessages] = useState<Message[]>([]);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
@@ -83,7 +83,7 @@ export default function MessagesPage() {
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [uploadProgress, setUploadProgress] = useState<{[key: string]: number}>({});
+  const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -118,23 +118,23 @@ export default function MessagesPage() {
     try {
       setLoading(true);
       const response = await api.get('/api/chat/rooms');
-      
+
       // Combine private and group conversations
       const privateRooms: Conversation[] = response.data.private.map((room: { id: number; name: string; avatar?: string; lastMessage?: string; lastMessageTime?: string }) => ({
         ...room,
         type: 'private' as const,
         unreadCount: 0 // We'll implement this later
       }));
-      
+
       const groupRooms: Conversation[] = response.data.group.map((room: { id: number; name: string; avatar?: string; lastMessage?: string; lastMessageTime?: string }) => ({
         ...room,
         type: 'group' as const,
         unreadCount: 0 // We'll implement this later
       }));
-      
+
       const allConversations = [...privateRooms, ...groupRooms];
       setConversations(allConversations);
-      
+
       // Check if we need to select a specific conversation based on room_id query parameter
       if (targetRoomId) {
         const targetConversation = allConversations.find(conv => conv.room_id.toString() === targetRoomId);
@@ -144,7 +144,7 @@ export default function MessagesPage() {
           return; // Exit early, don't auto-select first conversation
         }
       }
-      
+
       // Auto-select first conversation if available and no specific target
       if (allConversations.length > 0) {
         setSelectedConversation(allConversations[0]);
@@ -163,7 +163,7 @@ export default function MessagesPage() {
       setMessagesLoading(true);
       const response = await api.get(`/api/chat/room/${roomId}/messages`);
       setMessages(response.data);
-      
+
       // Scroll to bottom after messages are loaded
       if (shouldScroll) {
         setTimeout(() => scrollToBottom(), 100);
@@ -179,11 +179,11 @@ export default function MessagesPage() {
   // Fetch new messages periodically (for polling)
   const fetchNewMessages = async () => {
     if (!selectedConversation) return;
-    
+
     try {
       const response = await api.get(`/api/chat/room/${selectedConversation.room_id}/messages`);
       const newMessages = response.data;
-      
+
       // Only update if there are new messages
       if (newMessages.length > messages.length) {
         setMessages(newMessages);
@@ -201,7 +201,7 @@ export default function MessagesPage() {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
-    
+
     // Start new interval
     intervalRef.current = setInterval(fetchNewMessages, 5000); // Poll every 5 seconds
   };
@@ -292,27 +292,27 @@ export default function MessagesPage() {
   // Filter conversations
   const filteredConversations = conversations.filter((conversation) => {
     const lastMessageText = conversation.last_message?.message?.text || '';
-    
+
     const matchesSearch =
       conversation.display_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       lastMessageText.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     const matchesFilter =
       filterType === 'all' ||
       (filterType === 'private' && conversation.type === 'private') ||
       (filterType === 'group' && conversation.type === 'group');
-    
+
     return matchesSearch && matchesFilter;
   });
 
   const handleSelectConversation = async (conversation: Conversation) => {
     setSelectedConversation(conversation);
     await fetchMessages(conversation.room_id);
-    
+
     // Mark conversation as read
-    setConversations(prev => 
-      prev.map(conv => 
-        conv.room_id === conversation.room_id 
+    setConversations(prev =>
+      prev.map(conv =>
+        conv.room_id === conversation.room_id
           ? { ...conv, unreadCount: 0 }
           : conv
       )
@@ -333,21 +333,21 @@ export default function MessagesPage() {
   // Send message with media
   const handleSendReply = async () => {
     if ((!replyText.trim() && selectedFiles.length === 0) || !selectedConversation) return;
-    
+
     try {
       setSendingMessage(true);
-      
+
       // Create FormData for the API call
       const formData = new FormData();
       formData.append('text', replyText);
-      
+
       // Add files to FormData
       selectedFiles.forEach((file, index) => {
         formData.append('media', file);
       });
 
       // Track upload progress for each file
-      const progressTrackers: {[key: string]: number} = {};
+      const progressTrackers: { [key: string]: number } = {};
       selectedFiles.forEach((file, index) => {
         progressTrackers[file.name] = 0;
       });
@@ -365,7 +365,7 @@ export default function MessagesPage() {
             if (progressEvent.total) {
               const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
               // Update progress for all files (simplified)
-              const updatedProgress: {[key: string]: number} = {};
+              const updatedProgress: { [key: string]: number } = {};
               selectedFiles.forEach(file => {
                 updatedProgress[file.name] = percentCompleted;
               });
@@ -380,22 +380,22 @@ export default function MessagesPage() {
       setMessages(prev => [...prev, newMessage]);
 
       // Update the conversation's last message
-      setConversations(prev => 
-        prev.map(conv => 
-          conv.room_id === selectedConversation.room_id 
-            ? { 
-                ...conv, 
-                last_message: {
-                  sentByMe: newMessage.sentByMe,
-                  roomID: newMessage.roomID,
-                  sender: newMessage.sender,
-                  timeDetails: newMessage.timeDetails,
-                  message: {
-                    text: newMessage.message.text,
-                    media: newMessage.message.media || []
-                  }
+      setConversations(prev =>
+        prev.map(conv =>
+          conv.room_id === selectedConversation.room_id
+            ? {
+              ...conv,
+              last_message: {
+                sentByMe: newMessage.sentByMe,
+                roomID: newMessage.roomID,
+                sender: newMessage.sender,
+                timeDetails: newMessage.timeDetails,
+                message: {
+                  text: newMessage.message.text,
+                  media: newMessage.message.media || []
                 }
               }
+            }
             : conv
         )
       );
@@ -483,9 +483,8 @@ export default function MessagesPage() {
                     <button
                       key={filter}
                       onClick={() => setFilterType(filter)}
-                      className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
-                        filterType === filter ? 'text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                      }`}
+                      className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${filterType === filter ? 'text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
                       style={filterType === filter ? { backgroundColor: '#8BC342' } : {}}
                     >
                       {filter.charAt(0).toUpperCase() + filter.slice(1)}
@@ -505,9 +504,8 @@ export default function MessagesPage() {
                     <div
                       key={conversation.room_id}
                       onClick={() => handleSelectConversation(conversation)}
-                      className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                        selectedConversation?.room_id === conversation.room_id ? 'bg-green-50 border-r-2' : ''
-                      }`}
+                      className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${selectedConversation?.room_id === conversation.room_id ? 'bg-green-50 border-r-2' : ''
+                        }`}
                       style={selectedConversation?.room_id === conversation.room_id ? { borderRightColor: '#8BC342' } : {}}
                     >
                       <div className="flex items-start gap-3">
@@ -571,7 +569,7 @@ export default function MessagesPage() {
                           <h2 className="font-semibold text-gray-800">{selectedConversation.display_name}</h2>
                           <p className="text-sm text-gray-500 flex items-center gap-1">
                             <Clock className="w-3 h-3" />
-                            {selectedConversation.type === 'group' ? 
+                            {selectedConversation.type === 'group' ?
                               'Group conversation' :
                               'Private conversation'
                             }
@@ -613,9 +611,8 @@ export default function MessagesPage() {
                                     {message.sentByMe ? 'You' : message.sender.name}
                                   </p>
                                 )}
-                                <div className={`p-3 rounded-lg ${
-                                  message.sentByMe ? 'bg-green-500 text-white' : 'bg-gray-100'
-                                }`}>
+                                <div className={`p-3 rounded-lg ${message.sentByMe ? 'bg-green-500 text-white' : 'bg-gray-100'
+                                  }`}>
                                   <p className="text-sm">{message.message.text}</p>
                                   {/* MEDIA PREVIEW */}
                                   {message.message.media && message.message.media.length > 0 && (
@@ -624,7 +621,7 @@ export default function MessagesPage() {
                                         {message.message.media.slice(0, 4).map((mediaUrl: string, idx: number) => {
                                           // Determine if it's a video based on URL extension
                                           const isVideo = /\.(mp4|webm|ogg|mov|avi)$/i.test(mediaUrl);
-                                          
+
                                           return (
                                             <div key={idx} className="relative">
                                               {isVideo ? (
@@ -632,9 +629,9 @@ export default function MessagesPage() {
                                                   <source src={mediaUrl} type="video/mp4" />
                                                 </video>
                                               ) : (
-                                                <img 
-                                                  src={mediaUrl} 
-                                                  className="w-full h-24 object-cover rounded-md cursor-pointer hover:opacity-80 transition-opacity" 
+                                                <img
+                                                  src={mediaUrl}
+                                                  className="w-full h-24 object-cover rounded-md cursor-pointer hover:opacity-80 transition-opacity"
                                                   alt="media"
                                                   onClick={() => window.open(mediaUrl, '_blank')}
                                                 />
@@ -772,8 +769,8 @@ export default function MessagesPage() {
                         onClick={handleSendReply}
                         disabled={(!replyText.trim() && selectedFiles.length === 0) || sendingMessage}
                         className="px-3 py-3 disabled:bg-gray-300 disabled:cursor-not-allowed text-white rounded-lg transition-colors text-sm flex-shrink-0 flex items-center gap-2"
-                        style={{ 
-                          backgroundColor: ((!replyText.trim() && selectedFiles.length === 0) || sendingMessage) ? '' : '#8BC342' 
+                        style={{
+                          backgroundColor: ((!replyText.trim() && selectedFiles.length === 0) || sendingMessage) ? '' : '#8BC342'
                         }}
                       >
                         {sendingMessage ? (
@@ -792,8 +789,8 @@ export default function MessagesPage() {
                       <div className="mt-2 text-center">
                         <div className="text-xs text-gray-500 flex items-center justify-center gap-2">
                           <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-green-600"></div>
-                          {selectedFiles.length > 0 ? 
-                            `Uploading ${selectedFiles.length} file${selectedFiles.length > 1 ? 's' : ''}...` : 
+                          {selectedFiles.length > 0 ?
+                            `Uploading ${selectedFiles.length} file${selectedFiles.length > 1 ? 's' : ''}...` :
                             'Sending message...'
                           }
                         </div>

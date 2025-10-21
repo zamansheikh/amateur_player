@@ -25,7 +25,7 @@ export default function CompleteProfilePage() {
     const { user, isLoading: authLoading, refreshUser } = useAuth();
     const router = useRouter();
     const [currentStep, setCurrentStep] = useState(1);
-    
+
     // Step 1: Bowling Style & Membership
     const [bowlingStyle, setBowlingStyle] = useState(''); // 'one-handed' or 'two-handed'
     const [average, setAverage] = useState('');
@@ -34,12 +34,12 @@ export default function CompleteProfilePage() {
     const [pbaCardNumber, setPbaCardNumber] = useState('');
     const [isUSBCMember, setIsUSBCMember] = useState(false);
     const [usbcMemberNumber, setUSBCMemberNumber] = useState('');
-    
+
     // Step 2: Address Info
     const [zipCode, setZipCode] = useState('');
     const [city, setCity] = useState('');
     const [state, setState] = useState('');
-    
+
     // Step 3: Favorite Brands
     const [selectedBrands, setSelectedBrands] = useState({
         balls: [] as number[],
@@ -47,7 +47,7 @@ export default function CompleteProfilePage() {
         accessories: [] as number[],
         apparels: [] as number[]
     });
-    
+
     const [brands, setBrands] = useState<BrandsResponse | null>(null);
     const [brandsLoading, setBrandsLoading] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -224,7 +224,7 @@ export default function CompleteProfilePage() {
             // Get stored profile and location data
             const storedProfileData = localStorage.getItem('temp_profile_data');
             const storedLocationData = localStorage.getItem('temp_location_data');
-            
+
             // Parse stored data
             const profileData = storedProfileData ? JSON.parse(storedProfileData) : {};
             const locationData = storedLocationData ? JSON.parse(storedLocationData) : {};
@@ -250,14 +250,14 @@ export default function CompleteProfilePage() {
 
             // Call the dedicated brands API with the correct payload format
             await userApi.updateFavoriteBrands(allBrandIDs);
-            
+
             // Refresh user data to get updated profile status
             await refreshUser();
-            
+
             // Clean up temporary storage
             localStorage.removeItem('temp_profile_data');
             localStorage.removeItem('temp_location_data');
-            
+
             // Redirect to home page after completing brands selection
             router.push('/');
         } catch (err) {
@@ -290,16 +290,16 @@ export default function CompleteProfilePage() {
 
                 {/* Progress Bar */}
                 <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
+                    <div
                         className="bg-green-600 h-2 rounded-full transition-all duration-300"
                         style={{ width: `${(currentStep / 3) * 100}%` }}
                     ></div>
                 </div>
 
                 <form className="mt-8 space-y-6" onSubmit={
-                    currentStep === 3 ? handleSubmit : async (e) => { 
-                        e.preventDefault(); 
-                        await handleNext(); 
+                    currentStep === 3 ? handleSubmit : async (e) => {
+                        e.preventDefault();
+                        await handleNext();
                     }
                 }>
                     {/* Welcome Message */}
@@ -314,7 +314,7 @@ export default function CompleteProfilePage() {
                     {currentStep === 1 && (
                         <div className="space-y-6">
                             <h3 className="text-lg font-medium text-gray-900 text-center">Bowling Style & Membership</h3>
-                            
+
                             {/* Bowling Style */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -425,7 +425,7 @@ export default function CompleteProfilePage() {
                                     />
                                     <span className="text-sm text-gray-700">PBA Card Holder</span>
                                 </label>
-                                
+
                                 {isPBACardHolder && (
                                     <div className="mt-3">
                                         <input
@@ -455,7 +455,7 @@ export default function CompleteProfilePage() {
                                     />
                                     <span className="text-sm text-gray-700">USBC Member</span>
                                 </label>
-                                
+
                                 {isUSBCMember && (
                                     <div className="mt-3">
                                         <input
@@ -530,7 +530,7 @@ export default function CompleteProfilePage() {
                         <div className="space-y-6">
                             <h3 className="text-lg font-medium text-gray-900 text-center">Choose Your Favorite Brands</h3>
                             <p className="text-sm text-gray-600 text-center">Select brands you&apos;re interested in (optional). Your profile will be saved when you complete this step.</p>
-                            
+
                             {brandsLoading ? (
                                 <div className="flex justify-center py-8">
                                     <div className="text-gray-500">Loading brands...</div>
@@ -688,7 +688,7 @@ export default function CompleteProfilePage() {
                                 }
                             }}
                         >
-                            {currentStep === 3 
+                            {currentStep === 3
                                 ? (isLoading ? 'Completing Profile...' : 'Complete Profile')
                                 : (isLoading ? 'Please wait...' : 'Next')
                             }

@@ -11,7 +11,7 @@ export default function EditProfilePage() {
     const router = useRouter();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const coverFileInputRef = useRef<HTMLInputElement>(null);
-    
+
     const [formData, setFormData] = useState({
         first_name: '',
         last_name: '',
@@ -21,7 +21,7 @@ export default function EditProfilePage() {
         profile_picture_url: '',
         cover_photo_url: ''
     });
-    
+
     const [isLoading, setIsLoading] = useState(false);
     const [isUploadingImage, setIsUploadingImage] = useState(false);
     const [isUploadingCover, setIsUploadingCover] = useState(false);
@@ -85,7 +85,7 @@ export default function EditProfilePage() {
                     cover_photo_url: response.data.image_public_url
                 }));
                 setSuccess('Cover photo updated successfully!');
-                
+
                 // Refresh user data in AuthContext
                 await refreshUser();
             }
@@ -132,7 +132,7 @@ export default function EditProfilePage() {
                     profile_picture_url: response.data.image_public_url
                 }));
                 setSuccess('Profile picture updated successfully!');
-                
+
                 // Refresh user data in AuthContext
                 await refreshUser();
             }
@@ -152,13 +152,13 @@ export default function EditProfilePage() {
 
         try {
             const response = await api.put('/api/user/profile', formData);
-            
+
             if (response.status === 200) {
                 setSuccess('Profile updated successfully!');
-                
+
                 // Refresh user data in AuthContext
                 await refreshUser();
-                
+
                 // Small delay to ensure UI updates, then redirect
                 setTimeout(() => {
                     router.push('/profile');

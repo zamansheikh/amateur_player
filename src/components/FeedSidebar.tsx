@@ -117,12 +117,12 @@ export default function FeedSidebar() {
         try {
             // Mock API call - replace with real endpoint
             // await api.post(`/api/users/${userId}/follow`);
-            
+
             // Update local state
             setFollowingUsers(prev => new Set(prev).add(userId));
-            setSuggestedUsers(prev => 
-                prev.map(user => 
-                    user.user_id === userId 
+            setSuggestedUsers(prev =>
+                prev.map(user =>
+                    user.user_id === userId
                         ? { ...user, is_following: true }
                         : user
                 )
@@ -166,7 +166,7 @@ export default function FeedSidebar() {
                 <div className="space-y-3">
                     {suggestedUsers.slice(0, 5).map((user) => (
                         <div key={user.user_id} className="flex items-center justify-between">
-                            <div 
+                            <div
                                 className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors flex-1"
                                 onClick={() => handleUserClick(user.user_id)}
                             >
@@ -204,11 +204,10 @@ export default function FeedSidebar() {
                                     handleFollow(user.user_id);
                                 }}
                                 disabled={followingUsers.has(user.user_id)}
-                                className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${
-                                    followingUsers.has(user.user_id)
+                                className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${followingUsers.has(user.user_id)
                                         ? 'bg-green-100 text-green-700 cursor-not-allowed'
                                         : 'bg-green-600 text-white hover:bg-green-700'
-                                }`}
+                                    }`}
                             >
                                 {followingUsers.has(user.user_id) ? 'Following' : 'Follow'}
                             </button>
@@ -263,7 +262,7 @@ export default function FeedSidebar() {
             <div className="bg-white rounded-xl p-4 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold text-gray-900">Featured Partners</h3>
-                    <button 
+                    <button
                         onClick={() => router.push('/perks')}
                         className="text-green-600 hover:text-green-700 text-sm flex items-center gap-1"
                     >
@@ -271,28 +270,28 @@ export default function FeedSidebar() {
                     </button>
                 </div>
                 <div className="space-y-3">
-                        <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-900 text-sm">Mario&apos;s Italian Kitchen</p>
-                            <p className="text-xs text-green-600 font-medium">25% OFF with BOWLERS25</p>
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                            <span className="text-xs">4.8</span>
-                        </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-900 text-sm">Mario&apos;s Italian Kitchen</p>
+                        <p className="text-xs text-green-600 font-medium">25% OFF with BOWLERS25</p>
                     </div>
+                    <div className="flex items-center gap-1">
+                        <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                        <span className="text-xs">4.8</span>
+                    </div>
+                </div>
 
-                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                        <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                            <Trophy className="w-4 h-4 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-900 text-sm">Pro Shop Gear</p>
-                            <p className="text-xs text-green-600 font-medium">Buy 2 Get 1 Free on Bowling Tape</p>
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <Star className="w-3 h-3 text-yellow-400 fill-current" />
-                            <span className="text-xs">4.9</span>
-                        </div>                    <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                        <Trophy className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-900 text-sm">Pro Shop Gear</p>
+                        <p className="text-xs text-green-600 font-medium">Buy 2 Get 1 Free on Bowling Tape</p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                        <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                        <span className="text-xs">4.9</span>
+                    </div>                    <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
                         <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                             <Gift className="w-4 h-4 text-white" />
                         </div>

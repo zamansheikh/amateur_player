@@ -148,11 +148,11 @@ export default function UserPostCard({
 
     try {
       setIsVoting(true);
-      
+
       // Calculate current total votes from options
       const currentTotalVotes = localPost.poll.options.reduce((sum, option) => sum + option.vote, 0);
       const newTotalVotes = currentTotalVotes + 1;
-      
+
       // Optimistic update - update local state immediately
       const updatedPoll = {
         ...localPost.poll,
@@ -178,10 +178,10 @@ export default function UserPostCard({
 
       setLocalPost(updatedPost);
       setSelectedPollOption(optionId);
-      
+
       // Call the poll vote API
       const response = await api.get(`/api/user/post/vote/${optionId}`);
-      
+
       // Check if response is successful (200-299 status codes)
       if (response.status >= 200 && response.status < 300) {
         // Vote was successful, keep the optimistic update
@@ -291,30 +291,28 @@ export default function UserPostCard({
                 const totalVotes = localPost.poll!.options.reduce((sum, opt) => sum + opt.vote, 0);
                 const percentage = totalVotes > 0 ? (option.vote / totalVotes) * 100 : 0;
                 const isSelected = selectedPollOption === option.option_id;
-                
+
                 return (
                   <div key={option.option_id} className="relative">
                     <button
                       onClick={() => handlePollVote(option.option_id)}
                       disabled={isVoting || selectedPollOption !== null}
-                      className={`w-full text-left p-2 rounded-md border transition-all duration-200 relative overflow-hidden text-xs ${
-                        isSelected
+                      className={`w-full text-left p-2 rounded-md border transition-all duration-200 relative overflow-hidden text-xs ${isSelected
                           ? 'border-green-500 bg-green-50 text-green-700'
                           : selectedPollOption !== null || totalVotes > 0
-                          ? 'border-gray-300 bg-white text-gray-700 cursor-default'
-                          : 'border-gray-300 bg-white text-gray-700 hover:border-green-400 hover:bg-green-50'
-                      } ${isVoting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            ? 'border-gray-300 bg-white text-gray-700 cursor-default'
+                            : 'border-gray-300 bg-white text-gray-700 hover:border-green-400 hover:bg-green-50'
+                        } ${isVoting ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                       {/* Progress bar background */}
                       {(selectedPollOption !== null || totalVotes > 0) && (
                         <div
-                          className={`absolute inset-0 transition-all duration-500 ${
-                            isSelected ? 'bg-green-200' : 'bg-gray-200'
-                          }`}
+                          className={`absolute inset-0 transition-all duration-500 ${isSelected ? 'bg-green-200' : 'bg-gray-200'
+                            }`}
                           style={{ width: `${percentage}%` }}
                         />
                       )}
-                      
+
                       {/* Option content */}
                       <div className="relative flex items-center justify-between">
                         <span className="font-medium">{option.content}</span>
@@ -329,7 +327,7 @@ export default function UserPostCard({
                 );
               })}
             </div>
-            
+
             {/* Poll info */}
             <div className="mt-2 pt-2 border-t border-gray-200">
               <div className="flex items-center justify-between text-xs text-gray-600">
@@ -346,8 +344,8 @@ export default function UserPostCard({
           </div>
         </div>
       ) : localPost.media && localPost.media.length > 0 ? (
-        <div 
-          className={`flex-1 min-h-0 ${enableMediaLightbox ? "" : "cursor-pointer"}`} 
+        <div
+          className={`flex-1 min-h-0 ${enableMediaLightbox ? "" : "cursor-pointer"}`}
           onClick={enableMediaLightbox ? undefined : handlePostClick}
         >
           <div className="h-[200px] overflow-hidden">
@@ -359,7 +357,7 @@ export default function UserPostCard({
           <div className="text-center text-gray-400">
             <div className="w-12 h-12 mx-auto mb-2 opacity-20">
               <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
               </svg>
             </div>
             <p className="text-xs font-medium">Text Post</p>
@@ -374,11 +372,10 @@ export default function UserPostCard({
             <button
               onClick={handleLike}
               disabled={isLiking}
-              className={`transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-                localPost.is_liked_by_me
+              className={`transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${localPost.is_liked_by_me
                   ? "text-red-500 hover:text-red-600"
                   : "text-green-400 hover:text-red-500"
-              }`}
+                }`}
             >
               {localPost.is_liked_by_me ? (
                 <Image

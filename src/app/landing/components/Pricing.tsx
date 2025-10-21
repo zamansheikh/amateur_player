@@ -86,8 +86,8 @@ const Pricing: React.FC = () => {
 
             <button
               className={`w-full py-2 rounded-md font-medium flex justify-center items-center gap-2 border transition-colors ${plan.price === 0
-                  ? 'text-black border-green-500 hover:bg-green-50'
-                  : 'bg-[#8BC342] text-white hover:bg-[#6fa332]'
+                ? 'text-black border-green-500 hover:bg-green-50'
+                : 'bg-[#8BC342] text-white hover:bg-[#6fa332]'
                 }`}
             >
               Get Started <ArrowRight className="w-4 h-4" />

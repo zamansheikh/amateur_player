@@ -19,7 +19,7 @@ export default function MediaPage() {
         {
             id: 2,
             title: "PRO TIPS WEEKLY",
-            time: "Weekdays at 7:00 AM CT", 
+            time: "Weekdays at 7:00 AM CT",
             description: "TECHNIQUE FOCUS",
             image: "/api/placeholder/200/150"
         },
@@ -99,11 +99,11 @@ export default function MediaPage() {
                 <div className="h-32 relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-400"></div>
                     <div className="absolute inset-0 bg-black bg-opacity-40"></div>
-                    
+
                     {/* Geometric design elements */}
                     <div className="absolute top-0 left-0 w-64 h-64 bg-blue-500 opacity-20 transform -skew-x-12 -translate-x-20 -translate-y-20"></div>
                     <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-400 opacity-20 transform skew-x-12 translate-x-20 -translate-y-20"></div>
-                    
+
                     {/* Logo and Title */}
                     <div className="relative z-10 flex flex-col items-center justify-center h-full px-4">
                         <div className="flex items-center gap-3 mb-4">
@@ -118,7 +118,7 @@ export default function MediaPage() {
                             </div>
                             <div className="text-white">
                                 <h1 className="text-3xl font-bold tracking-wider">TRENDING ON BOWLERS NETWORK</h1>
-                                
+
                             </div>
                         </div>
                     </div>
@@ -199,7 +199,7 @@ export default function MediaPage() {
             {/* Category Sections */}
             <div className="px-4 py-8">
                 <div className="max-w-7xl mx-auto space-y-12">
-                    
+
                     {/* Videos Section */}
                     <div>
                         <h3 className="text-2xl font-bold text-white mb-6 tracking-wide">Videos</h3>

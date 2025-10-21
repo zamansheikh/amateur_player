@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Star, Tag, ShoppingCart, Users, Package, Zap, Shirt, Target, Wrench, Trophy,  User, Shield } from 'lucide-react';
+import { Search, Star, Tag, ShoppingCart, Users, Package, Zap, Shirt, Target, Wrench, Trophy, User, Shield } from 'lucide-react';
 import Image from 'next/image';
 
 interface Product {
@@ -271,31 +271,31 @@ export default function XchangePage() {
   const [priceRange, setPriceRange] = useState<string>('all');
 
   const sellerTypes = [
-    { 
-      id: 'pro', 
-      name: 'Professional Players', 
-      icon: Trophy, 
+    {
+      id: 'pro',
+      name: 'Professional Players',
+      icon: Trophy,
       gradient: 'from-purple-600 to-indigo-700',
       description: 'Pro-used equipment and exclusive gear from tournament players'
     },
-    { 
-      id: 'center', 
-      name: 'Bowling Centers', 
-      icon: Users, 
+    {
+      id: 'center',
+      name: 'Bowling Centers',
+      icon: Users,
       gradient: 'from-blue-600 to-cyan-700',
       description: 'Equipment from bowling centers and pro shops'
     },
-    { 
-      id: 'manufacturer', 
-      name: 'Manufacturers', 
-      icon: Shield, 
+    {
+      id: 'manufacturer',
+      name: 'Manufacturers',
+      icon: Shield,
       gradient: 'from-indigo-600 to-purple-700',
       description: 'Direct sales from trusted bowling equipment manufacturers'
     },
-    { 
-      id: 'amateur', 
-      name: 'Amateur Players', 
-      icon: User, 
+    {
+      id: 'amateur',
+      name: 'Amateur Players',
+      icon: User,
       gradient: 'from-green-600 to-emerald-700',
       description: 'Buy and sell equipment from the bowling community'
     }
@@ -311,12 +311,12 @@ export default function XchangePage() {
   ];
 
   const getProductsBySellerType = (sellerType: string) => {
-    return mockProducts.filter(product => 
-      product.sellerType === sellerType && 
-      (searchTerm === '' || 
-       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       product.brand.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    return mockProducts.filter(product =>
+      product.sellerType === sellerType &&
+      (searchTerm === '' ||
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.brand.toLowerCase().includes(searchTerm.toLowerCase())) &&
       (selectedCategory === 'all' || product.category === selectedCategory) &&
       (selectedCondition === 'all' || product.condition === selectedCondition) &&
       (priceRange === 'all' || isPriceInRange(product.price, priceRange))
@@ -370,7 +370,7 @@ export default function XchangePage() {
           ⭐ FEATURED
         </div>
       )}
-      
+
       <div className="relative h-48">
         <div className="absolute inset-0 bg-gradient-to-br from-green-600 to-emerald-700 flex items-center justify-center">
           <div className="text-center text-white">
@@ -378,7 +378,7 @@ export default function XchangePage() {
             <p className="text-sm font-medium">{product.brand}</p>
           </div>
         </div>
-        
+
         {/* Condition Badge */}
         <div className={`absolute top-3 left-3 px-2 py-1 rounded-full text-xs font-bold ${getConditionColor(product.condition)}`}>
           {product.condition.toUpperCase()}
@@ -398,7 +398,7 @@ export default function XchangePage() {
 
       <div className="p-4">
         <h4 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">{product.name}</h4>
-        
+
         {/* Seller Info */}
         <div className="flex items-center gap-2 mb-2">
           <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getSellerTypeColor(product.sellerType)}`}>
@@ -437,12 +437,11 @@ export default function XchangePage() {
         </div>
 
         {/* Action Button */}
-        <button 
-          className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
-            product.inStock 
-              ? 'bg-green-600 text-white hover:bg-green-700' 
+        <button
+          className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${product.inStock
+              ? 'bg-green-600 text-white hover:bg-green-700'
               : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          }`}
+            }`}
           disabled={!product.inStock}
         >
           {product.inStock ? 'View Details' : 'Sold Out'}
@@ -468,7 +467,7 @@ export default function XchangePage() {
             </div>
             <div className="bg-white/10 rounded-lg p-6 max-w-4xl mx-auto">
               <p className="text-lg leading-relaxed">
-                Connect with amateur players, pros, and manufacturers to buy and sell quality bowling equipment. 
+                Connect with amateur players, pros, and manufacturers to buy and sell quality bowling equipment.
                 From beginner gear to professional tournament equipment - find everything you need to improve your game!
               </p>
             </div>
@@ -553,13 +552,13 @@ export default function XchangePage() {
             <h2 className="text-2xl font-bold text-gray-900">Featured Products</h2>
           </div>
           <p className="text-gray-700">Check out these specially curated items from top sellers!</p>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-            {mockProducts.filter(p => p.isFeatured && 
-              (searchTerm === '' || 
-               p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-               p.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-               p.brand.toLowerCase().includes(searchTerm.toLowerCase())) &&
+            {mockProducts.filter(p => p.isFeatured &&
+              (searchTerm === '' ||
+                p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                p.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                p.brand.toLowerCase().includes(searchTerm.toLowerCase())) &&
               (selectedCategory === 'all' || p.category === selectedCategory) &&
               (selectedCondition === 'all' || p.condition === selectedCondition) &&
               (priceRange === 'all' || isPriceInRange(p.price, priceRange))
@@ -576,7 +575,7 @@ export default function XchangePage() {
           {sellerTypes.map((sellerType) => {
             const SellerIcon = sellerType.icon;
             const products = getProductsBySellerType(sellerType.id);
-            
+
             if (products.length === 0) return null;
 
             return (
@@ -590,7 +589,7 @@ export default function XchangePage() {
                     <p className="text-gray-600">{products.length} items available • {sellerType.description}</p>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {products.map((product) => (
                     <ProductCard key={product.id} product={product} />
@@ -602,34 +601,34 @@ export default function XchangePage() {
         </div>
 
         {/* Empty State */}
-        {(searchTerm || selectedCategory !== 'all' || selectedCondition !== 'all' || priceRange !== 'all') && 
-         sellerTypes.every(seller => getProductsBySellerType(seller.id).length === 0) && (
-          <div className="text-center py-12">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Search className="w-8 h-8 text-gray-400" />
+        {(searchTerm || selectedCategory !== 'all' || selectedCondition !== 'all' || priceRange !== 'all') &&
+          sellerTypes.every(seller => getProductsBySellerType(seller.id).length === 0) && (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Search className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
+              <p className="text-gray-600 mb-4">Try adjusting your search terms or filters.</p>
+              <button
+                onClick={() => {
+                  setSearchTerm('');
+                  setSelectedCategory('all');
+                  setSelectedCondition('all');
+                  setPriceRange('all');
+                }}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Clear All Filters
+              </button>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
-            <p className="text-gray-600 mb-4">Try adjusting your search terms or filters.</p>
-            <button 
-              onClick={() => {
-                setSearchTerm('');
-                setSelectedCategory('all');
-                setSelectedCondition('all');
-                setPriceRange('all');
-              }}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-            >
-              Clear All Filters
-            </button>
-          </div>
-        )}
+          )}
 
         {/* Seller Info Section */}
         <div className="bg-white rounded-lg shadow-lg p-8 mt-12">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Join the Xchange Community</h2>
             <p className="text-gray-600 mb-6 max-w-3xl mx-auto">
-              Whether you&apos;re looking to upgrade your equipment or sell items you no longer need, 
+              Whether you&apos;re looking to upgrade your equipment or sell items you no longer need,
               Xchange connects you with passionate bowlers, professionals, and trusted manufacturers.
             </p>
           </div>
