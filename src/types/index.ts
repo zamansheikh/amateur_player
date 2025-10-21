@@ -110,11 +110,18 @@ export interface Tournament {
     start_date: string;
     reg_deadline: string;
     address: string;
+    lat?: string;
+    long?: string;
     reg_fee: number;
     access_type: string;
     format: 'Singles' | 'Doubles' | 'Teams';
     already_enrolled: number;
     participants_count?: number;
+    description?: string;
+    status?: string;
+    tournament_type: 'Handicap' | 'Scratch';
+    average?: number;
+    percentage?: number;
 }
 
 export interface TournamentTeam {

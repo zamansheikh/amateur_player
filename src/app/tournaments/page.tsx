@@ -22,9 +22,15 @@ interface CreateTournamentForm {
     reg_deadline: string;
     reg_fee: string;
     address: string;
+    lat: string;
+    long: string;
     format: 'Singles' | 'Doubles' | 'Teams';
     participants_count: number;
     access_type: string;
+    description: string;
+    tournament_type: 'Handicap' | 'Scratch';
+    average: string;
+    percentage: string;
 }
 
 interface MapboxFeature {
@@ -66,9 +72,15 @@ export default function TournamentsPage() {
         reg_deadline: '',
         reg_fee: '',
         address: '',
+        lat: '',
+        long: '',
         format: 'Singles',
         participants_count: 1,
-        access_type: 'Open'
+        access_type: 'Open',
+        description: '',
+        tournament_type: 'Handicap',
+        average: '',
+        percentage: '90'
     });
 
     // Mapbox address autocomplete states
@@ -133,7 +145,9 @@ export default function TournamentsPage() {
     const handleSelectAddress = (suggestion: MapboxFeature) => {
         setCreateTournamentForm(prev => ({
             ...prev,
-            address: suggestion.place_name
+            address: suggestion.place_name,
+            lat: suggestion.center[1].toString(), // Latitude
+            long: suggestion.center[0].toString() // Longitude
         }));
         setAddressSearchQuery(suggestion.place_name);
         setShowAddressSuggestions(false);
@@ -353,7 +367,13 @@ export default function TournamentsPage() {
                 reg_fee: createTournamentForm.reg_fee,
                 participants_count: createTournamentForm.participants_count,
                 address: createTournamentForm.address,
-                access_type: createTournamentForm.access_type
+                lat: createTournamentForm.lat,
+                long: createTournamentForm.long,
+                access_type: createTournamentForm.access_type,
+                description: createTournamentForm.description,
+                tournament_type: createTournamentForm.tournament_type,
+                average: createTournamentForm.average ? parseFloat(createTournamentForm.average) : undefined,
+                percentage: createTournamentForm.percentage ? parseFloat(createTournamentForm.percentage) : undefined
             };
 
             const newTournament = await tournamentApi.createTournament(formattedData);
@@ -369,9 +389,15 @@ export default function TournamentsPage() {
                 reg_deadline: '',
                 reg_fee: '',
                 address: '',
+                lat: '',
+                long: '',
                 format: 'Singles',
                 participants_count: 1,
-                access_type: 'Open'
+                access_type: 'Open',
+                description: '',
+                tournament_type: 'Handicap',
+                average: '',
+                percentage: '90'
             });
             setAddressSearchQuery('');
             setAddressSuggestions([]);
@@ -434,8 +460,8 @@ export default function TournamentsPage() {
                 <button
                     onClick={() => handleRegistration(tournament)}
                     className={`flex-1 py-2 px-4 rounded-lg transition-colors ${tournament.already_enrolled > 0
-                            ? 'border border-red-600 text-red-600 hover:bg-red-50'
-                            : 'border border-green-600 text-green-600 hover:bg-green-50'
+                        ? 'border border-red-600 text-red-600 hover:bg-red-50'
+                        : 'border border-green-600 text-green-600 hover:bg-green-50'
                         }`}
                 >
                     {tournament.already_enrolled > 0 ? 'Unregister' : 'Register'}
@@ -489,8 +515,8 @@ export default function TournamentsPage() {
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === tab
-                                    ? 'bg-green-600 text-white'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                ? 'bg-green-600 text-white'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                 }`}
                         >
                             {tab}
@@ -700,8 +726,8 @@ export default function TournamentsPage() {
                                                     key={team.team_id}
                                                     onClick={() => setSelectedTeamId(team.team_id)}
                                                     className={`p-3 rounded-lg border cursor-pointer transition-colors ${selectedTeamId === team.team_id
-                                                            ? 'border-green-600 bg-green-50'
-                                                            : 'border-gray-200 hover:border-gray-300'
+                                                        ? 'border-green-600 bg-green-50'
+                                                        : 'border-gray-200 hover:border-gray-300'
                                                         }`}
                                                 >
                                                     <div className="flex items-center gap-3">
@@ -719,8 +745,8 @@ export default function TournamentsPage() {
                                                             <p className="text-xs text-gray-500">{team.member_count || 0} members</p>
                                                         </div>
                                                         <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${selectedTeamId === team.team_id
-                                                                ? 'border-green-600 bg-green-600'
-                                                                : 'border-gray-300'
+                                                            ? 'border-green-600 bg-green-600'
+                                                            : 'border-gray-300'
                                                             }`}>
                                                             {selectedTeamId === team.team_id && (
                                                                 <div className="w-2 h-2 bg-white rounded-full"></div>
@@ -822,8 +848,8 @@ export default function TournamentsPage() {
                                             type="button"
                                             onClick={() => handleFormatChange(format)}
                                             className={`p-3 rounded-lg border text-center transition-colors ${createTournamentForm.format === format
-                                                    ? 'border-green-600 bg-green-50 text-green-700'
-                                                    : 'border-gray-300 hover:border-gray-400'
+                                                ? 'border-green-600 bg-green-50 text-green-700'
+                                                : 'border-gray-300 hover:border-gray-400'
                                                 }`}
                                         >
                                             <div className="font-medium">{format}</div>
@@ -962,6 +988,98 @@ export default function TournamentsPage() {
                                     </div>
                                 )}
                             </div>
+
+                            {/* Description */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Description (Optional)
+                                </label>
+                                <textarea
+                                    value={createTournamentForm.description}
+                                    onChange={(e) => setCreateTournamentForm(prev => ({
+                                        ...prev,
+                                        description: e.target.value
+                                    }))}
+                                    rows={3}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+                                    placeholder="Enter tournament description..."
+                                />
+                            </div>
+
+                            {/* Tournament Type */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Tournament Type
+                                </label>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {(['Handicap', 'Scratch'] as const).map((type) => (
+                                        <button
+                                            key={type}
+                                            type="button"
+                                            onClick={() => setCreateTournamentForm(prev => ({
+                                                ...prev,
+                                                tournament_type: type
+                                            }))}
+                                            className={`px-4 py-2 border-2 rounded-lg transition-all ${createTournamentForm.tournament_type === type
+                                                    ? 'border-green-600 bg-green-50 text-green-600 font-medium'
+                                                    : 'border-gray-300 text-gray-700 hover:border-gray-400'
+                                                }`}
+                                        >
+                                            {type}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Bowling Average */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Bowling Average {createTournamentForm.tournament_type === 'Handicap' && <span className="text-red-500">*</span>}
+                                </label>
+                                <input
+                                    type="number"
+                                    value={createTournamentForm.average}
+                                    onChange={(e) => setCreateTournamentForm(prev => ({
+                                        ...prev,
+                                        average: e.target.value
+                                    }))}
+                                    min="0"
+                                    max="300"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                    placeholder="Enter bowling average (0-300)"
+                                    required={createTournamentForm.tournament_type === 'Handicap'}
+                                />
+                                <p className="mt-1 text-xs text-gray-500">
+                                    {createTournamentForm.tournament_type === 'Handicap'
+                                        ? 'Required for handicap tournaments'
+                                        : 'Optional for scratch tournaments'}
+                                </p>
+                            </div>
+
+                            {/* Handicap Percentage - Only show for Handicap type */}
+                            {createTournamentForm.tournament_type === 'Handicap' && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Handicap Percentage <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="number"
+                                        value={createTournamentForm.percentage}
+                                        onChange={(e) => setCreateTournamentForm(prev => ({
+                                            ...prev,
+                                            percentage: e.target.value
+                                        }))}
+                                        min="50"
+                                        max="100"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                        placeholder="Enter percentage (50-100)"
+                                        required
+                                    />
+                                    <p className="mt-1 text-xs text-gray-500">
+                                        Typical range: 50% - 100%
+                                    </p>
+                                </div>
+                            )}
 
                             {/* Access Type */}
                             <div>
