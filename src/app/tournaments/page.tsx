@@ -70,7 +70,7 @@ export default function TournamentsPage() {
         participants_count: 1,
         access_type: 'Open'
     });
-    
+
     // Mapbox address autocomplete states
     const [addressSuggestions, setAddressSuggestions] = useState<MapboxFeature[]>([]);
     const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
@@ -100,7 +100,7 @@ export default function TournamentsPage() {
                 `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&types=address,place&limit=5`
             );
             const data = await response.json();
-            
+
             if (data.features) {
                 setAddressSuggestions(data.features);
                 setShowAddressSuggestions(true);
@@ -190,7 +190,7 @@ export default function TournamentsPage() {
     useEffect(() => {
         const fetchTeams = async () => {
             if (!user?.authenticated) return;
-            
+
             try {
                 const teamsResponse = await teamsApi.getUserTeams();
                 if (teamsResponse.my_teams) {
@@ -219,7 +219,7 @@ export default function TournamentsPage() {
 
     const toggleFilter = (category: keyof FilterState, value: string) => {
         if (category === 'duration') return; // Don't toggle duration
-        
+
         setSelectedFilters(prev => ({
             ...prev,
             [category]: (prev[category] as string[]).includes(value)
@@ -254,7 +254,7 @@ export default function TournamentsPage() {
 
         // Filter by content type (format)
         if (selectedFilters.contentType.length > 0) {
-            filtered = filtered.filter(tournament => 
+            filtered = filtered.filter(tournament =>
                 selectedFilters.contentType.includes(tournament.format)
             );
         }
@@ -274,7 +274,7 @@ export default function TournamentsPage() {
             // Handle unregistration
             try {
                 await tournamentApi.unregisterFromTournament(tournament.id);
-                setTournaments(prev => prev.map(t => 
+                setTournaments(prev => prev.map(t =>
                     t.id === tournament.id ? { ...t, already_enrolled: 0 } : t
                 ));
             } catch (error) {
@@ -308,7 +308,7 @@ export default function TournamentsPage() {
             }
 
             // Update local state
-            setTournaments(prev => prev.map(t => 
+            setTournaments(prev => prev.map(t =>
                 t.id === selectedTournament.id ? { ...t, already_enrolled: 1 } : t
             ));
 
@@ -332,7 +332,7 @@ export default function TournamentsPage() {
         } else if (format === 'Teams') {
             participants_count = 10; // Default team size
         }
-        
+
         setCreateTournamentForm(prev => ({
             ...prev,
             format,
@@ -343,7 +343,7 @@ export default function TournamentsPage() {
     const handleCreateTournament = async (e: React.FormEvent) => {
         e.preventDefault();
         setCreateLoading(true);
-        
+
         try {
             // Format dates for API
             const formattedData = {
@@ -357,11 +357,11 @@ export default function TournamentsPage() {
             };
 
             const newTournament = await tournamentApi.createTournament(formattedData);
-            
+
             // Refresh tournaments list
             const updatedTournaments = await tournamentApi.getTournaments();
             setTournaments(updatedTournaments);
-            
+
             // Reset form and close modal
             setCreateTournamentForm({
                 name: '',
@@ -377,7 +377,7 @@ export default function TournamentsPage() {
             setAddressSuggestions([]);
             setShowAddressSuggestions(false);
             setShowCreateModal(false);
-            
+
         } catch (error) {
             console.error('Error creating tournament:', error);
             setError('Failed to create tournament. Please try again.');
@@ -425,19 +425,18 @@ export default function TournamentsPage() {
             </div>
 
             <div className="flex gap-3">
-                <Link 
+                <Link
                     href={`/tournaments/${tournament.id}`}
                     className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors text-center"
                 >
                     View Details
                 </Link>
-                <button 
+                <button
                     onClick={() => handleRegistration(tournament)}
-                    className={`flex-1 py-2 px-4 rounded-lg transition-colors ${
-                        tournament.already_enrolled > 0
+                    className={`flex-1 py-2 px-4 rounded-lg transition-colors ${tournament.already_enrolled > 0
                             ? 'border border-red-600 text-red-600 hover:bg-red-50'
                             : 'border border-green-600 text-green-600 hover:bg-green-50'
-                    }`}
+                        }`}
                 >
                     {tournament.already_enrolled > 0 ? 'Unregister' : 'Register'}
                 </button>
@@ -489,11 +488,10 @@ export default function TournamentsPage() {
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                                activeTab === tab
+                            className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === tab
                                     ? 'bg-green-600 text-white'
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
+                                }`}
                         >
                             {tab}
                         </button>
@@ -580,13 +578,13 @@ export default function TournamentsPage() {
 
                             {/* Action Buttons */}
                             <div className="space-y-3">
-                                <button 
-                                    onClick={() => {/* Apply filters is already applied automatically */}}
+                                <button
+                                    onClick={() => {/* Apply filters is already applied automatically */ }}
                                     className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors"
                                 >
                                     Apply Filters
                                 </button>
-                                <button 
+                                <button
                                     onClick={resetFilters}
                                     className="w-full border border-gray-300 text-gray-700 hover:bg-gray-50 py-2 px-4 rounded-lg transition-colors"
                                 >
@@ -606,7 +604,7 @@ export default function TournamentsPage() {
                             <div className="text-center py-12">
                                 <div className="text-red-500 text-lg mb-2">Error</div>
                                 <p className="text-gray-500">{error}</p>
-                                <button 
+                                <button
                                     onClick={() => window.location.reload()}
                                     className="mt-4 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors"
                                 >
@@ -694,18 +692,17 @@ export default function TournamentsPage() {
                                     <label className="block text-sm font-medium text-gray-700 mb-3">
                                         Select Team for {selectedTournament.format} Tournament *
                                     </label>
-                                    
+
                                     {teams.length > 0 ? (
                                         <div className="space-y-2 max-h-48 overflow-y-auto">
                                             {teams.map((team) => (
                                                 <div
                                                     key={team.team_id}
                                                     onClick={() => setSelectedTeamId(team.team_id)}
-                                                    className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                                                        selectedTeamId === team.team_id
+                                                    className={`p-3 rounded-lg border cursor-pointer transition-colors ${selectedTeamId === team.team_id
                                                             ? 'border-green-600 bg-green-50'
                                                             : 'border-gray-200 hover:border-gray-300'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
@@ -721,11 +718,10 @@ export default function TournamentsPage() {
                                                             <h5 className="font-medium text-gray-900 truncate">{team.name}</h5>
                                                             <p className="text-xs text-gray-500">{team.member_count || 0} members</p>
                                                         </div>
-                                                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                                                            selectedTeamId === team.team_id
+                                                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${selectedTeamId === team.team_id
                                                                 ? 'border-green-600 bg-green-600'
                                                                 : 'border-gray-300'
-                                                        }`}>
+                                                            }`}>
                                                             {selectedTeamId === team.team_id && (
                                                                 <div className="w-2 h-2 bg-white rounded-full"></div>
                                                             )}
@@ -763,7 +759,7 @@ export default function TournamentsPage() {
                                 <button
                                     onClick={handleConfirmRegistration}
                                     disabled={
-                                        registrationLoading || 
+                                        registrationLoading ||
                                         (selectedTournament.format !== 'Singles' && !selectedTeamId)
                                     }
                                     className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -825,11 +821,10 @@ export default function TournamentsPage() {
                                             key={format}
                                             type="button"
                                             onClick={() => handleFormatChange(format)}
-                                            className={`p-3 rounded-lg border text-center transition-colors ${
-                                                createTournamentForm.format === format
+                                            className={`p-3 rounded-lg border text-center transition-colors ${createTournamentForm.format === format
                                                     ? 'border-green-600 bg-green-50 text-green-700'
                                                     : 'border-gray-300 hover:border-gray-400'
-                                            }`}
+                                                }`}
                                         >
                                             <div className="font-medium">{format}</div>
                                             <div className="text-xs text-gray-500">
