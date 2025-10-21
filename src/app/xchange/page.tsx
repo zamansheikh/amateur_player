@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, MapPin, Star, Clock, Tag, ShoppingCart, Users, Package, Zap, Shirt, Target, Wrench, Trophy, DollarSign, User, Shield } from 'lucide-react';
+import { Search, Star, Tag, ShoppingCart, Users, Package, Zap, Shirt, Target, Wrench, Trophy,  User, Shield } from 'lucide-react';
 import Image from 'next/image';
 
 interface Product {

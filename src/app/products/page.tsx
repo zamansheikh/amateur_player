@@ -6,14 +6,10 @@ import {
   Package,
   Plus,
   Search,
-  Filter,
-  Edit3,
   Trash2,
   Eye,
   Star,
-  DollarSign,
   TrendingUp,
-  TrendingDown,
   AlertTriangle,
   CheckCircle,
   XCircle,
@@ -24,12 +20,8 @@ import {
   Shirt,
   Trophy,
   Tag,
-  Camera,
-  Percent,
-  MoreVertical,
   Copy,
   Archive,
-  RefreshCw,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -62,7 +54,7 @@ interface Product {
 
 export default function ProductsPage() {
   const { user } = useAuth();
-  
+
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -243,11 +235,11 @@ export default function ProductsPage() {
   useEffect(() => {
     let filtered = products.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           product.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           product.description.toLowerCase().includes(searchTerm.toLowerCase());
+        product.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
       const matchesStatus = statusFilter === 'all' || product.status === statusFilter;
-      
+
       return matchesSearch && matchesCategory && matchesStatus;
     });
 
@@ -269,8 +261,8 @@ export default function ProductsPage() {
   }, [products, searchTerm, selectedCategory, statusFilter, sortBy]);
 
   const handleSelectProduct = (productId: number) => {
-    setSelectedProducts(prev => 
-      prev.includes(productId) 
+    setSelectedProducts(prev =>
+      prev.includes(productId)
         ? prev.filter(id => id !== productId)
         : [...prev, productId]
     );
@@ -401,7 +393,7 @@ export default function ProductsPage() {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
             </div>
-            
+
             <div className="flex items-center gap-4">
               <select
                 value={selectedCategory}
@@ -499,7 +491,7 @@ export default function ProductsPage() {
               {filteredProducts.map((product) => {
                 const stockStatus = getStockStatus(product);
                 const CategoryIcon = getCategoryIcon(product.category);
-                
+
                 return (
                   <div
                     key={product.id}
@@ -513,7 +505,7 @@ export default function ProductsPage() {
                           <p className="text-sm font-medium">{product.brand}</p>
                         </div>
                       </div>
-                      
+
                       {/* Badges */}
                       <div className="absolute top-3 left-3 flex flex-col gap-2">
                         {product.featured && (
@@ -525,7 +517,7 @@ export default function ProductsPage() {
                           {product.status.toUpperCase()}
                         </span>
                       </div>
-                      
+
                       <div className="absolute top-3 right-3">
                         <input
                           type="checkbox"
@@ -554,7 +546,7 @@ export default function ProductsPage() {
                       </div>
 
                       <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{product.name}</h3>
-                      
+
                       <div className="flex items-center gap-2 mb-2">
                         <stockStatus.icon className={`w-4 h-4 ${stockStatus.color}`} />
                         <span className={`text-sm ${stockStatus.color}`}>{stockStatus.text}</span>

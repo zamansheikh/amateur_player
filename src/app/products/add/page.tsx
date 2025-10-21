@@ -6,9 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   Save,
   X,
-  Upload,
   Plus,
-  Minus,
   DollarSign,
   Package,
   Tag,
@@ -17,7 +15,6 @@ import {
   Percent,
   Star,
   Eye,
-  AlertTriangle,
   CheckCircle,
   Target,
   Zap,

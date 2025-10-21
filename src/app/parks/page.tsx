@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, MapPin, Star, Clock, Tag, Filter, Gift, Users, Ticket, TreePine, Building, Coffee, Dumbbell, Utensils } from 'lucide-react';
+import { Search, MapPin, Star, Clock, Tag,  Gift,TreePine, Building, Coffee, Dumbbell, Utensils } from 'lucide-react';
 import Image from 'next/image';
 
 interface Perk {
