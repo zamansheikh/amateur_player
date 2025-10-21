@@ -477,7 +477,7 @@ export default function TeamsPage() {
                                             <span className="text-yellow-500 text-2xl">📨</span>
                                         </div>
                                         <p className="text-gray-500 font-medium">No pending invitations</p>
-                                        <p className="text-gray-400 text-sm">You'll see team invitations here when someone invites you!</p>
+                                        <p className="text-gray-400 text-sm">You&apos;ll see team invitations here when someone invites you!</p>
                                     </div>
                                 )}
                             </div>

@@ -41,8 +41,17 @@ export interface FeedPost {
                 profile_pic_url: string;
             };
             text: string;
-            pics: any[];
-            replies: any[];
+            pics: string[];
+            replies: Array<{
+                reply_id: number;
+                user: {
+                    user_id: number;
+                    name: string;
+                    profile_pic_url: string;
+                };
+                text: string;
+                pics: string[];
+            }>;
         }>;
     }];
     caption: string;
@@ -59,7 +68,12 @@ export interface FeedPost {
             perc: number;
         }>;
     } | null;
-    event: any;
+    event: {
+        id: number;
+        title: string;
+        date: string;
+        location?: string;
+    } | null;
     tags: string[];
     is_liked_by_me: boolean;
 }
@@ -103,8 +117,17 @@ export interface UserPost {
                 profile_pic_url: string;
             };
             text: string;
-            pics: any[];
-            replies: any[];
+            pics: string[];
+            replies: Array<{
+                reply_id: number;
+                user: {
+                    user_id: number;
+                    name: string;
+                    profile_pic_url: string;
+                };
+                text: string;
+                pics: string[];
+            }>;
         }>;
     }];
     caption: string;
@@ -121,7 +144,12 @@ export interface UserPost {
             perc: number;
         }>;
     } | null;
-    event: any;
+    event: {
+        id: number;
+        title: string;
+        date: string;
+        location?: string;
+    } | null;
     tags: string[];
     is_liked_by_me: boolean;
 }
@@ -135,7 +163,7 @@ export interface Comment {
         profile_pic_url: string;
     };
     text: string;
-    pics: any[];
+    pics: string[];
     replies: Reply[];
 }
 
@@ -147,5 +175,5 @@ export interface Reply {
         profile_pic_url: string;
     };
     text: string;
-    pics: any[];
+    pics: string[];
 }

@@ -84,7 +84,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                             onClick={handleCreatePostClick}
                             className="w-full min-h-[80px] p-4 text-gray-500 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors flex items-center text-lg"
                         >
-                            What's on your mind, {user?.first_name || user?.name?.split(' ')[0] || 'Bob'}?
+                            What&apos;s on your mind, {user?.first_name || user?.name?.split(' ')[0] || 'Bob'}?
                         </div>
                     </div>
                 </div>

@@ -89,7 +89,7 @@ export default function EditProfilePage() {
                 // Refresh user data in AuthContext
                 await refreshUser();
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error uploading cover photo:', error);
             setError('Failed to upload cover photo. Please try again.');
         } finally {
@@ -136,7 +136,7 @@ export default function EditProfilePage() {
                 // Refresh user data in AuthContext
                 await refreshUser();
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error uploading image:', error);
             setError('Failed to upload image. Please try again.');
         } finally {
@@ -164,9 +164,10 @@ export default function EditProfilePage() {
                     router.push('/profile');
                 }, 2000);
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error updating profile:', error);
-            setError(error.response?.data?.message || 'Failed to update profile. Please try again.');
+            const err = error as { response?: { data?: { message?: string } } };
+            setError(err.response?.data?.message || 'Failed to update profile. Please try again.');
         } finally {
             setIsLoading(false);
         }

@@ -119,17 +119,31 @@ interface FeedPost {
       user: {
         user_id: number;
         name: string;
-        profile_picture_url: string;
+        profile_pic_url: string;
       };
       text: string;
-      pics: any[];
-      replies: any[];
+      pics: string[];
+      replies: Array<{
+        reply_id: number;
+        user: {
+          user_id: number;
+          name: string;
+          profile_pic_url: string;
+        };
+        text: string;
+        pics: string[];
+      }>;
     }>;
   };
   caption: string;
   media: string[];
   poll: PollContent | null;
-  event: any;
+  event: {
+    id: number;
+    title: string;
+    date: string;
+    location?: string;
+  } | null;
   tags: string[];
   is_liked_by_me: boolean;
 }
@@ -164,11 +178,11 @@ export default function PlayerProfilePage() {
         // Fetch posts only after profile is successfully loaded
         await fetchPosts(response.data?.user_id);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error fetching player:", err);
 
       // Handle 401 errors specifically for pro routes (when not authenticated)
-      if (err.response?.status === 401) {
+      if ((err as { response?: { status?: number } }).response?.status === 401) {
         setError("This profile requires authentication to view full details");
       } else {
         setError("Failed to load player profile");

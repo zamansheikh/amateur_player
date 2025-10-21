@@ -120,13 +120,13 @@ export default function MessagesPage() {
       const response = await api.get('/api/chat/rooms');
       
       // Combine private and group conversations
-      const privateRooms: Conversation[] = response.data.private.map((room: any) => ({
+      const privateRooms: Conversation[] = response.data.private.map((room: { id: number; name: string; avatar?: string; lastMessage?: string; lastMessageTime?: string }) => ({
         ...room,
         type: 'private' as const,
         unreadCount: 0 // We'll implement this later
       }));
       
-      const groupRooms: Conversation[] = response.data.group.map((room: any) => ({
+      const groupRooms: Conversation[] = response.data.group.map((room: { id: number; name: string; avatar?: string; lastMessage?: string; lastMessageTime?: string }) => ({
         ...room,
         type: 'group' as const,
         unreadCount: 0 // We'll implement this later

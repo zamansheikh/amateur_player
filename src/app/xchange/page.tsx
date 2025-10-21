@@ -629,7 +629,7 @@ export default function XchangePage() {
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Join the Xchange Community</h2>
             <p className="text-gray-600 mb-6 max-w-3xl mx-auto">
-              Whether you're looking to upgrade your equipment or sell items you no longer need, 
+              Whether you&apos;re looking to upgrade your equipment or sell items you no longer need, 
               Xchange connects you with passionate bowlers, professionals, and trusted manufacturers.
             </p>
           </div>

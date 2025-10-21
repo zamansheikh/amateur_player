@@ -136,7 +136,7 @@ export default function EditProductPage() {
     loadProduct();
   }, [productId]);
 
-  const handleInputChange = (field: keyof Product, value: any) => {
+  const handleInputChange = (field: keyof Product, value: string | number | string[] | boolean | { [key: string]: string }) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
@@ -272,7 +272,7 @@ export default function EditProductPage() {
             <AlertTriangle className="w-8 h-8 text-red-600" />
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">Product Not Found</h3>
-          <p className="text-gray-600 mb-4">The product you're looking for doesn't exist.</p>
+          <p className="text-gray-600 mb-4">The product you&apos;re looking for doesn&apos;t exist.</p>
           <Link
             href="/products"
             className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
@@ -324,7 +324,7 @@ export default function EditProductPage() {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => setActiveTab(tab.id as 'edit' | 'analytics')}
                 className={`flex items-center gap-2 px-1 py-2 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === tab.id
                     ? 'border-green-600 text-green-600'
@@ -768,7 +768,7 @@ export default function EditProductPage() {
                 <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                 <h4 className="text-lg font-medium text-gray-900 mb-2">Detailed Analytics Coming Soon</h4>
                 <p className="text-gray-600">
-                  We're working on comprehensive analytics including conversion rates, traffic sources, and performance trends.
+                  We&apos;re working on comprehensive analytics including conversion rates, traffic sources, and performance trends.
                 </p>
               </div>
             </div>

@@ -89,7 +89,7 @@ export default function AddProductPage() {
     { value: 'fair', label: 'Fair', description: 'Noticeable wear but usable' },
   ];
 
-  const handleInputChange = (field: keyof ProductForm, value: any) => {
+  const handleInputChange = (field: keyof ProductForm, value: string | number | string[] | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));

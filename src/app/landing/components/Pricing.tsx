@@ -53,7 +53,7 @@ const Pricing: React.FC = () => {
       <SectionTitle subTitle="Pricing" />
       <div className="text-center space-y-4 sm:space-y-6">
         <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold">
-          Choose <span className="text-green-600">the Plan That's</span> <br />
+          Choose <span className="text-green-600">the Plan That&apos;s</span> <br />
           Right for You
         </h1>
         <p className="text-base sm:text-lg md:text-xl text-gray-600">

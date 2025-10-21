@@ -262,7 +262,7 @@ export default function EventsPage() {
                 ].map((view) => (
                   <button
                     key={view.mode}
-                    onClick={() => setViewMode(view.mode as any)}
+                    onClick={() => setViewMode(view.mode as 'month' | 'week' | 'day')}
                     className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                       viewMode === view.mode
                         ? 'bg-white text-green-600 shadow-sm'

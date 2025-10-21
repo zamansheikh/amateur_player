@@ -271,12 +271,8 @@ export default function FeedSidebar() {
                     </button>
                 </div>
                 <div className="space-y-3">
-                    <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                        <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                            <Gift className="w-4 h-4 text-white" />
-                        </div>
                         <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-900 text-sm">Mario's Italian Kitchen</p>
+                            <p className="font-medium text-gray-900 text-sm">Mario&apos;s Italian Kitchen</p>
                             <p className="text-xs text-green-600 font-medium">25% OFF with BOWLERS25</p>
                         </div>
                         <div className="flex items-center gap-1">
@@ -284,8 +280,19 @@ export default function FeedSidebar() {
                             <span className="text-xs">4.8</span>
                         </div>
                     </div>
-                    
-                    <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                        <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                            <Trophy className="w-4 h-4 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="font-medium text-gray-900 text-sm">Pro Shop Gear</p>
+                            <p className="text-xs text-green-600 font-medium">Buy 2 Get 1 Free on Bowling Tape</p>
+                        </div>
+                        <div className="flex items-center gap-1">
+                            <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                            <span className="text-xs">4.9</span>
+                        </div>                    <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
                         <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                             <Gift className="w-4 h-4 text-white" />
                         </div>
@@ -303,7 +310,7 @@ export default function FeedSidebar() {
 
             {/* What's happening Section */}
             <div className="bg-white rounded-xl p-4 shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">What's happening</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">What&apos;s happening</h3>
                 <div className="space-y-3">
                     {trendingTopics.map((topic, index) => (
                         <div key={index} className="cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors">

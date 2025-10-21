@@ -320,7 +320,7 @@ export default function FeedbackPage() {
                                 <li>• Be specific and detailed in your descriptions</li>
                                 <li>• For bugs: include steps to reproduce the issue</li>
                                 <li>• For suggestions: explain the benefit and use case</li>
-                                <li>• Check if your issue hasn't been reported before</li>
+                                <li>• Check if your issue hasn&apos;t been reported before</li>
                             </ul>
                         </div>
                     </div>
@@ -338,7 +338,7 @@ export default function FeedbackPage() {
                                     <div className="bg-white rounded-lg shadow-sm p-8 text-center">
                                         <History className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                                         <h3 className="text-lg font-medium text-gray-900 mb-2">No Feedback Yet</h3>
-                                        <p className="text-gray-500">You haven't submitted any feedback yet. Switch to the Submit tab to share your thoughts!</p>
+                                        <p className="text-gray-500">You haven&apos;t submitted any feedback yet. Switch to the Submit tab to share your thoughts!</p>
                                     </div>
                                 ) : (
                                     Object.entries(userFeedback).map(([feedbackType, feedbacks]) => (

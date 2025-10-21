@@ -19,24 +19,6 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
     // Determine if we're in a flexible height context (feed) or fixed height context (grid)
     const isFlexibleHeight = !!maxHeight;
 
-    if (!media || media.length === 0) {
-        if (isFlexibleHeight) {
-            return null; // Don't show placeholder in feed context
-        }
-        return (
-            <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-md">
-                <div className="text-center text-gray-400">
-                    <div className="w-8 h-8 mx-auto mb-2 opacity-30">
-                        <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-                        </svg>
-                    </div>
-                    <p className="text-xs">No media</p>
-                </div>
-            </div>
-        );
-    }
-
     // Helper function to check if a media URL is a video
     const isVideo = (url: string): boolean => {
         return url.toLowerCase().includes('.mp4') || 
@@ -59,12 +41,12 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
     }, []);
 
     const nextMedia = useCallback(() => {
-        setCurrentMediaIndex((prev) => (prev + 1) % media.length);
-    }, [media.length]);
+        setCurrentMediaIndex((prev) => (prev + 1) % (media?.length || 1));
+    }, [media]);
 
     const prevMedia = useCallback(() => {
-        setCurrentMediaIndex((prev) => (prev - 1 + media.length) % media.length);
-    }, [media.length]);
+        setCurrentMediaIndex((prev) => (prev - 1 + (media?.length || 1)) % (media?.length || 1));
+    }, [media]);
 
     // Keyboard navigation
     useEffect(() => {
@@ -76,17 +58,35 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
                     closeLightbox();
                     break;
                 case 'ArrowLeft':
-                    if (media.length > 1) prevMedia();
+                    if (media && media.length > 1) prevMedia();
                     break;
                 case 'ArrowRight':
-                    if (media.length > 1) nextMedia();
+                    if (media && media.length > 1) nextMedia();
                     break;
             }
         };
 
         document.addEventListener('keydown', handleKeyPress);
         return () => document.removeEventListener('keydown', handleKeyPress);
-    }, [lightboxOpen, closeLightbox, nextMedia, prevMedia, media.length]);
+    }, [lightboxOpen, closeLightbox, nextMedia, prevMedia, media]);
+
+    if (!media || media.length === 0) {
+        if (isFlexibleHeight) {
+            return null; // Don't show placeholder in feed context
+        }
+        return (
+            <div className="w-full h-full flex items-center justify-center bg-gray-100 rounded-md">
+                <div className="text-center text-gray-400">
+                    <div className="w-8 h-8 mx-auto mb-2 opacity-30">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                        </svg>
+                    </div>
+                    <p className="text-xs">No media</p>
+                </div>
+            </div>
+        );
+    }
 
     // Touch/swipe navigation
     const minSwipeDistance = 50;

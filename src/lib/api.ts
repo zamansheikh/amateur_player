@@ -91,7 +91,7 @@ export const userApi = {
         return response.data;
     },
 
-    updateProfile: async (data: any) => {
+    updateProfile: async (data: Record<string, unknown>) => {
         const response = await api.put('/api/user/profile', data);
         return response.data;
     },

@@ -80,14 +80,15 @@ export default function SignUpPage() {
             await userApi.sendVerificationCode(email);
             setCodeSent(true);
             setError('');
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error sending verification code:', error);
+            const err = error as { response?: { status?: number; data?: { message?: string } } };
             
-            if (error.response?.status === 409) {
+            if (err.response?.status === 409) {
                 setIsEmailVerified(true);
                 setError('');
             } else {
-                setError(error.response?.data?.message || 'Failed to send verification code. Please try again.');
+                setError(err.response?.data?.message || 'Failed to send verification code. Please try again.');
             }
         } finally {
             setIsSendingCode(false);
@@ -107,9 +108,10 @@ export default function SignUpPage() {
             await userApi.verifyEmail(email, verificationCode);
             setIsEmailVerified(true);
             setError('');
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error verifying email:', error);
-            setError(error.response?.data?.message || 'Invalid verification code. Please try again.');
+            const err = error as { response?: { data?: { message?: string } } };
+            setError(err.response?.data?.message || 'Invalid verification code. Please try again.');
         } finally {
             setIsVerifyingCode(false);
         }
@@ -367,13 +369,13 @@ export default function SignUpPage() {
                                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-4">
                                     <div className="text-sm text-blue-800">
                                         <p className="font-medium">Parent/Guardian Information Required</p>
-                                        <p>Since you are under 18, we need your parent or guardian's information for account verification and safety purposes.</p>
+                                        <p>Since you are under 18, we need your parent or guardian&apos;s information for account verification and safety purposes.</p>
                                     </div>
                                     
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
                                             <label htmlFor="parentFirstName" className="block text-sm font-medium text-gray-700">
-                                                Parent's First Name
+                                                Parent&apos;s First Name
                                             </label>
                                             <input
                                                 id="parentFirstName"
@@ -388,7 +390,7 @@ export default function SignUpPage() {
                                         </div>
                                         <div>
                                             <label htmlFor="parentLastName" className="block text-sm font-medium text-gray-700">
-                                                Parent's Last Name
+                                                Parent&apos;s Last Name
                                             </label>
                                             <input
                                                 id="parentLastName"
@@ -405,7 +407,7 @@ export default function SignUpPage() {
                                     
                                     <div>
                                         <label htmlFor="parentEmail" className="block text-sm font-medium text-gray-700">
-                                            Parent's Email Address
+                                            Parent&apos;s Email Address
                                         </label>
                                         <input
                                             id="parentEmail"

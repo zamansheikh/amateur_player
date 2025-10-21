@@ -42,11 +42,20 @@ interface UserPost {
       user: {
         user_id: number;
         name: string;
-        profile_picture_url: string;
+        profile_pic_url: string;
       };
       text: string;
-      pics: any[];
-      replies: any[];
+      pics: string[];
+      replies: Array<{
+        reply_id: number;
+        user: {
+          user_id: number;
+          name: string;
+          profile_pic_url: string;
+        };
+        text: string;
+        pics: string[];
+      }>;
     }>;
   };
   caption: string;
@@ -63,7 +72,12 @@ interface UserPost {
       perc: number;
     }>;
   } | null;
-  event: any;
+  event: {
+    id: number;
+    title: string;
+    date: string;
+    location?: string;
+  } | null;
   tags: string[];
   is_liked_by_me: boolean;
 }

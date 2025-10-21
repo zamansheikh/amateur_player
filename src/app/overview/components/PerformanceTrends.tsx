@@ -50,14 +50,14 @@ const formatDate = (date: string, range: string) => {
 };
 
 // Custom Tooltip
-const CustomTooltip = ({ active, payload, label, range }: any) => {
+const CustomTooltip = ({ active, payload, label, range }: { active?: boolean; payload?: Array<{ payload: { score: number; date: string } }>; label?: string; range?: string }) => {
   if (active && payload?.length) {
     const { score, date } = payload[0].payload;
     return (
       <div className="bg-white p-2 rounded-md border text-sm shadow">
         <p className="font-medium text-gray-700">{label}</p>
         <p className="text-gray-600">Score: {score}</p>
-        <p className="text-gray-500">Date: {formatDate(date, range)}</p>
+        <p className="text-gray-500">Date: {formatDate(date, range || 'week')}</p>
       </div>
     );
   }
@@ -79,7 +79,7 @@ const PerformanceTrends = () => {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-lg font-semibold text-gray-800">Performance Trends</h1>
         <select
-          onChange={(e) => setRange(e.target.value as any)}
+          onChange={(e) => setRange(e.target.value as 'weekly' | 'monthly' | 'yearly')}
           value={range}
           className="border border-gray-300 rounded-md text-sm px-3 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-[#8BC342]"
         >

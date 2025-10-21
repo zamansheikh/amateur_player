@@ -45,11 +45,20 @@ interface UserPost {
             user: {
                 user_id: number;
                 name: string;
-                profile_picture_url: string;
+                profile_pic_url: string;
             };
             text: string;
-            pics: any[];
-            replies: any[];
+            pics: string[];
+            replies: Array<{
+                reply_id: number;
+                user: {
+                    user_id: number;
+                    name: string;
+                    profile_pic_url: string;
+                };
+                text: string;
+                pics: string[];
+            }>;
         }>;
     };
     caption: string;
@@ -66,7 +75,12 @@ interface UserPost {
             perc: number;
         }>;
     } | null;
-    event: any;
+    event: {
+        id: number;
+        title: string;
+        date: string;
+        location?: string;
+    } | null;
     tags: string[];
     is_liked_by_me: boolean;
 }
@@ -139,9 +153,12 @@ export default function ProfilePage() {
             // Show success message
             alert('Statistics updated successfully!');
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error updating stats:', error);
-            alert(`Failed to update statistics: ${error.response?.data?.message || error.message}`);
+            const errorMessage = error instanceof Error 
+                ? error.message 
+                : (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Unknown error';
+            alert(`Failed to update statistics: ${errorMessage}`);
         } finally {
             setIsUpdatingStats(false);
         }

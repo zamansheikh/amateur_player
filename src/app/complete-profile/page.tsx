@@ -25,6 +25,33 @@ export default function CompleteProfilePage() {
     const { user, isLoading: authLoading, refreshUser } = useAuth();
     const router = useRouter();
     const [currentStep, setCurrentStep] = useState(1);
+    
+    // Step 1: Bowling Style & Membership
+    const [bowlingStyle, setBowlingStyle] = useState(''); // 'one-handed' or 'two-handed'
+    const [average, setAverage] = useState('');
+    const [division, setDivision] = useState(''); // 'senior', 'mens', 'womens'
+    const [isPBACardHolder, setIsPBACardHolder] = useState(false);
+    const [pbaCardNumber, setPbaCardNumber] = useState('');
+    const [isUSBCMember, setIsUSBCMember] = useState(false);
+    const [usbcMemberNumber, setUSBCMemberNumber] = useState('');
+    
+    // Step 2: Address Info
+    const [zipCode, setZipCode] = useState('');
+    const [city, setCity] = useState('');
+    const [state, setState] = useState('');
+    
+    // Step 3: Favorite Brands
+    const [selectedBrands, setSelectedBrands] = useState({
+        balls: [] as number[],
+        shoes: [] as number[],
+        accessories: [] as number[],
+        apparels: [] as number[]
+    });
+    
+    const [brands, setBrands] = useState<BrandsResponse | null>(null);
+    const [brandsLoading, setBrandsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
 
     // Redirect to signin if not authenticated
     useEffect(() => {
@@ -66,47 +93,6 @@ export default function CompleteProfilePage() {
         }
     }, []);
 
-    // Show loading while checking authentication
-    if (authLoading) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-xl text-green-600">Loading...</div>
-            </div>
-        );
-    }
-
-    // Don't render anything if user is not authenticated (will redirect)
-    if (!user || !user.authenticated) {
-        return null;
-    }
-    
-    // Step 1: Bowling Style & Membership
-    const [bowlingStyle, setBowlingStyle] = useState(''); // 'one-handed' or 'two-handed'
-    const [average, setAverage] = useState('');
-    const [division, setDivision] = useState(''); // 'senior', 'mens', 'womens'
-    const [isPBACardHolder, setIsPBACardHolder] = useState(false);
-    const [pbaCardNumber, setPbaCardNumber] = useState('');
-    const [isUSBCMember, setIsUSBCMember] = useState(false);
-    const [usbcMemberNumber, setUSBCMemberNumber] = useState('');
-    
-    // Step 2: Address Info
-    const [zipCode, setZipCode] = useState('');
-    const [city, setCity] = useState('');
-    const [state, setState] = useState('');
-    
-    // Step 3: Favorite Brands
-    const [selectedBrands, setSelectedBrands] = useState({
-        balls: [] as number[],
-        shoes: [] as number[],
-        accessories: [] as number[],
-        apparels: [] as number[]
-    });
-    
-    const [brands, setBrands] = useState<BrandsResponse | null>(null);
-    const [brandsLoading, setBrandsLoading] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
-
     // Fetch brands data
     useEffect(() => {
         const fetchBrands = async () => {
@@ -128,6 +114,20 @@ export default function CompleteProfilePage() {
             fetchBrands();
         }
     }, [currentStep]);
+
+    // Show loading while checking authentication
+    if (authLoading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-xl text-green-600">Loading...</div>
+            </div>
+        );
+    }
+
+    // Don't render anything if user is not authenticated (will redirect)
+    if (!user || !user.authenticated) {
+        return null;
+    }
 
     const handleBrandToggle = (category: keyof typeof selectedBrands, brandId: number) => {
         setSelectedBrands(prev => ({
@@ -393,7 +393,7 @@ export default function CompleteProfilePage() {
                                             onChange={(e) => setDivision(e.target.value)}
                                             className="border-gray-300 text-green-600 focus:ring-green-500"
                                         />
-                                        <span className="text-sm text-gray-700">Men's</span>
+                                        <span className="text-sm text-gray-700">Men&apos;s</span>
                                     </label>
                                     <label className="flex items-center space-x-3 cursor-pointer">
                                         <input
@@ -404,7 +404,7 @@ export default function CompleteProfilePage() {
                                             onChange={(e) => setDivision(e.target.value)}
                                             className="border-gray-300 text-green-600 focus:ring-green-500"
                                         />
-                                        <span className="text-sm text-gray-700">Women's</span>
+                                        <span className="text-sm text-gray-700">Women&apos;s</span>
                                     </label>
                                 </div>
                             </div>
@@ -529,7 +529,7 @@ export default function CompleteProfilePage() {
                     {currentStep === 3 && (
                         <div className="space-y-6">
                             <h3 className="text-lg font-medium text-gray-900 text-center">Choose Your Favorite Brands</h3>
-                            <p className="text-sm text-gray-600 text-center">Select brands you're interested in (optional). Your profile will be saved when you complete this step.</p>
+                            <p className="text-sm text-gray-600 text-center">Select brands you&apos;re interested in (optional). Your profile will be saved when you complete this step.</p>
                             
                             {brandsLoading ? (
                                 <div className="flex justify-center py-8">

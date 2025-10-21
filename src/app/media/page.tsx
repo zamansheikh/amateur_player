@@ -145,7 +145,7 @@ export default function MediaPage() {
                         </div>
                         <div className="p-6 text-white">
                             <h4 className="text-xl font-bold mb-2">Championship Highlights</h4>
-                            <p className="text-gray-300">Experience the best strikes, spares, and incredible shots from professional bowling's biggest stage.</p>
+                            <p className="text-gray-300">Experience the best strikes, spares, and incredible shots from professional bowling&apos;s biggest stage.</p>
                         </div>
                     </div>
                 </div>

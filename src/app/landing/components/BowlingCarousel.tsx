@@ -120,7 +120,7 @@ const BowlingCarousel: React.FC = () => {
     acc.current = carouselPlayers[index];
     acc.next = carouselPlayers[(index + 1) % carouselPlayers.length];
     return acc;
-  }, {} as any));
+  }, { prev: carouselPlayers[carouselPlayers.length - 1], current: carouselPlayers[0], next: carouselPlayers[1] }));
 
   // Auto-slide functionality - slides every 2.5 seconds
   useEffect(() => {

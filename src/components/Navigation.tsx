@@ -121,7 +121,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
                                         href="/signup"
                                         className="text-green-400 hover:text-green-300 text-sm mt-3 transition-colors"
                                     >
-                                        Don't have an account? Sign up
+                                        Don&apos;t have an account? Sign up
                                     </Link>
                                 </div>
                             </div>

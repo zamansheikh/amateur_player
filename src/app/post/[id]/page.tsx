@@ -48,17 +48,42 @@ interface FeedPost {
       user: {
         user_id: number;
         name: string;
-        profile_picture_url: string;
+        profile_pic_url: string;
       };
       text: string;
-      pics: any[];
-      replies: any[];
+      pics: string[];
+      replies: Array<{
+        reply_id: number;
+        user: {
+          user_id: number;
+          name: string;
+          profile_pic_url: string;
+        };
+        text: string;
+        pics: string[];
+      }>;
     }>;
   };
   caption: string;
   media: string[];
-  poll: any;
-  event: any;
+  poll: {
+    id: number;
+    uid: string;
+    title: string;
+    poll_type: string;
+    options: Array<{
+      option_id: number;
+      content: string;
+      vote: number;
+      perc: number;
+    }>;
+  } | null;
+  event: {
+    id: number;
+    title: string;
+    date: string;
+    location?: string;
+  } | null;
   tags: string[];
   is_liked_by_me: boolean;
 }
@@ -86,7 +111,7 @@ export default function PostDetailPage() {
       setError(null);
       const response = await api.get(`/api/post/${postId}`);
       setPost(response.data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error fetching post:", err);
       setError("Failed to load post");
     } finally {
@@ -303,7 +328,7 @@ export default function PostDetailPage() {
                 <div key={comment.comment_id} className="space-y-3">
                   <div className="flex items-start gap-3">
                     <img
-                      src={comment.user.profile_picture_url}
+                      src={comment.user.profile_pic_url}
                       alt={comment.user.name}
                       className="w-8 h-8 rounded-full object-cover cursor-pointer"
                       onClick={() => handleUserClick(comment.user.user_id)}
@@ -332,7 +357,7 @@ export default function PostDetailPage() {
                   {/* Replies */}
                   {comment.replies.length > 0 && (
                     <div className="ml-11 space-y-3">
-                      {comment.replies.map((reply: any, replyIndex: number) => (
+                      {comment.replies.map((reply: { reply_id: number; user: { user_id: number; name: string; profile_picture_url?: string }; text: string; pics: string[] }, replyIndex: number) => (
                         <div key={replyIndex} className="flex items-start gap-3">
                           <img
                             src={reply.user?.profile_picture_url || '/default-avatar.png'}
