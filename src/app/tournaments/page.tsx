@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Search, MapPin, Calendar, Users, DollarSign, Clock, X, Plus } from 'lucide-react';
 import { Tournament } from '@/types';
 import { tournamentApi, teamsApi } from '@/lib/api';
@@ -25,6 +25,13 @@ interface CreateTournamentForm {
     format: 'Singles' | 'Doubles' | 'Teams';
     participants_count: number;
     access_type: string;
+}
+
+interface MapboxFeature {
+    id: string;
+    place_name: string;
+    center: [number, number];
+    text: string;
 }
 
 interface Team {
@@ -63,9 +70,103 @@ export default function TournamentsPage() {
         participants_count: 1,
         access_type: 'Open'
     });
+    
+    // Mapbox address autocomplete states
+    const [addressSuggestions, setAddressSuggestions] = useState<MapboxFeature[]>([]);
+    const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
+    const [addressSearchQuery, setAddressSearchQuery] = useState('');
+    const addressInputRef = useRef<HTMLTextAreaElement>(null);
+    const suggestionsRef = useRef<HTMLDivElement>(null);
+    const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     const tabs = ['All Tournament', 'Registered', 'Available'];
     const { user } = useAuth();
+
+    // Mapbox Geocoding API search function
+    const searchAddress = async (query: string) => {
+        if (!query.trim()) {
+            setAddressSuggestions([]);
+            return;
+        }
+
+        const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+        if (!mapboxToken) {
+            console.error('Mapbox access token is not configured');
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&types=address,place&limit=5`
+            );
+            const data = await response.json();
+            
+            if (data.features) {
+                setAddressSuggestions(data.features);
+                setShowAddressSuggestions(true);
+            }
+        } catch (error) {
+            console.error('Error fetching address suggestions:', error);
+        }
+    };
+
+    // Handle address input change with debounce
+    const handleAddressChange = (value: string) => {
+        setAddressSearchQuery(value);
+        setCreateTournamentForm(prev => ({
+            ...prev,
+            address: value
+        }));
+
+        // Clear existing timer
+        if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+        }
+
+        // Set new timer for debounced search
+        debounceTimerRef.current = setTimeout(() => {
+            searchAddress(value);
+        }, 300); // 300ms debounce
+    };
+
+    // Handle suggestion selection
+    const handleSelectAddress = (suggestion: MapboxFeature) => {
+        setCreateTournamentForm(prev => ({
+            ...prev,
+            address: suggestion.place_name
+        }));
+        setAddressSearchQuery(suggestion.place_name);
+        setShowAddressSuggestions(false);
+        setAddressSuggestions([]);
+    };
+
+    // Close suggestions when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                suggestionsRef.current &&
+                !suggestionsRef.current.contains(event.target as Node) &&
+                addressInputRef.current &&
+                !addressInputRef.current.contains(event.target as Node)
+            ) {
+                setShowAddressSuggestions(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    // Cleanup debounce timer on unmount
+    useEffect(() => {
+        return () => {
+            if (debounceTimerRef.current) {
+                clearTimeout(debounceTimerRef.current);
+            }
+        };
+    }, []);
 
     // Fetch tournaments from API
     useEffect(() => {
@@ -272,6 +373,9 @@ export default function TournamentsPage() {
                 participants_count: 1,
                 access_type: 'Open'
             });
+            setAddressSearchQuery('');
+            setAddressSuggestions([]);
+            setShowAddressSuggestions(false);
             setShowCreateModal(false);
             
         } catch (error) {
@@ -679,7 +783,12 @@ export default function TournamentsPage() {
                         <div className="flex items-center justify-between p-6 border-b">
                             <h3 className="text-xl font-semibold text-gray-900">Create New Tournament</h3>
                             <button
-                                onClick={() => setShowCreateModal(false)}
+                                onClick={() => {
+                                    setShowCreateModal(false);
+                                    setAddressSearchQuery('');
+                                    setAddressSuggestions([]);
+                                    setShowAddressSuggestions(false);
+                                }}
                                 className="text-gray-400 hover:text-gray-600 transition-colors"
                             >
                                 <X className="w-6 h-6" />
@@ -808,20 +917,55 @@ export default function TournamentsPage() {
                             </div>
 
                             {/* Address */}
-                            <div>
+                            <div className="relative">
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Venue Address
                                 </label>
-                                <textarea
-                                    rows={3}
-                                    value={createTournamentForm.address}
-                                    onChange={(e) => setCreateTournamentForm(prev => ({
-                                        ...prev,
-                                        address: e.target.value
-                                    }))}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
-                                    placeholder="Enter venue address (optional)"
-                                />
+                                <div className="relative">
+                                    <textarea
+                                        ref={addressInputRef}
+                                        rows={3}
+                                        value={createTournamentForm.address}
+                                        onChange={(e) => handleAddressChange(e.target.value)}
+                                        onFocus={() => {
+                                            if (addressSuggestions.length > 0) {
+                                                setShowAddressSuggestions(true);
+                                            }
+                                        }}
+                                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
+                                        placeholder="Start typing address (e.g., 123 Main St, New York)"
+                                    />
+                                    <MapPin className="absolute right-3 top-3 w-5 h-5 text-gray-400" />
+                                </div>
+
+                                {/* Address Suggestions Dropdown */}
+                                {showAddressSuggestions && addressSuggestions.length > 0 && (
+                                    <div
+                                        ref={suggestionsRef}
+                                        className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                                    >
+                                        {addressSuggestions.map((suggestion) => (
+                                            <button
+                                                key={suggestion.id}
+                                                type="button"
+                                                onClick={() => handleSelectAddress(suggestion)}
+                                                className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0 transition-colors"
+                                            >
+                                                <div className="flex items-start gap-3">
+                                                    <MapPin className="w-4 h-4 text-green-600 mt-1 flex-shrink-0" />
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="text-sm font-medium text-gray-900 truncate">
+                                                            {suggestion.text}
+                                                        </div>
+                                                        <div className="text-xs text-gray-500 mt-0.5">
+                                                            {suggestion.place_name}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
                             {/* Access Type */}
@@ -846,7 +990,12 @@ export default function TournamentsPage() {
                             <div className="flex gap-3 pt-4 border-t">
                                 <button
                                     type="button"
-                                    onClick={() => setShowCreateModal(false)}
+                                    onClick={() => {
+                                        setShowCreateModal(false);
+                                        setAddressSearchQuery('');
+                                        setAddressSuggestions([]);
+                                        setShowAddressSuggestions(false);
+                                    }}
                                     className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                                     disabled={createLoading}
                                 >
