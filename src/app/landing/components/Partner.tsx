@@ -13,6 +13,7 @@ const PartnerCard: React.FC<{ image: string; name: string; index: number }> = ({
           alt={`${name} logo`}
           width={80}
           height={80}
+          unoptimized
           className="object-contain"
           onError={() => setImageError(true)}
         />

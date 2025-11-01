@@ -40,6 +40,7 @@ const About: React.FC = () => {
               alt="Bowling Excellence"
               width={500}
               height={400}
+              unoptimized
               className="w-full h-auto object-cover"
             />
           </div>
@@ -53,6 +54,7 @@ const About: React.FC = () => {
               alt="Strike Analytics"
               width={500}
               height={400}
+              unoptimized
               className="w-full h-auto object-cover"
             />
           </div>

@@ -55,6 +55,7 @@ export default function SignInPage() {
                             width={48}
                             height={48}
                             className="rounded-lg"
+                            unoptimized
                         />
                         <span className="text-2xl font-bold text-gray-900">Bowlers Network</span>
                     </div>

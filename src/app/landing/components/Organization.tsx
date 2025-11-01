@@ -14,6 +14,7 @@ const CompanyCard: React.FC<{ image: string; name: string; icon: string; index: 
           width={80}
           height={80}
           className="object-contain"
+          unoptimized
           onError={() => setImageError(true)}
         />
       ) : (

@@ -55,21 +55,21 @@ export default function SelectYourRole() {
 
   const handleContinue = () => {
     if (selectedRole) {
-        if (selectedRole === 'amateur') {
-            router.push(`/signin?role=${selectedRole}`);
-        } else if (selectedRole === 'pro-player') {
-            // Redirect to another website in the same tab
-            window.location.href = 'https://bowlersnet.vercel.app/signin';
-        }
-            
-        else if (selectedRole === 'bowling-center') {
-            //Show a message that this role is not available yet
-            alert('This role is not available yet. Please select another role.');
-        }
-        else if (selectedRole === 'manufacturer') {
-            //Show a message that this role is not available yet
-            alert('This role is not available yet. Please select another role.');
-        }
+      if (selectedRole === 'amateur') {
+        router.push(`/signin?role=${selectedRole}`);
+      } else if (selectedRole === 'pro-player') {
+        // Redirect to another website in the same tab
+        window.location.href = 'https://bowlersnet.vercel.app/signin';
+      }
+
+      else if (selectedRole === 'bowling-center') {
+        //Show a message that this role is not available yet
+        alert('This role is not available yet. Please select another role.');
+      }
+      else if (selectedRole === 'manufacturer') {
+        //Show a message that this role is not available yet
+        alert('This role is not available yet. Please select another role.');
+      }
     }
   };
 
@@ -85,6 +85,7 @@ export default function SelectYourRole() {
               width={80}
               height={80}
               className="w-20 h-20"
+              unoptimized
             />
           </Link>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -100,28 +101,25 @@ export default function SelectYourRole() {
               <div
                 key={role.id}
                 onClick={() => setSelectedRole(role.id)}
-                className={`relative cursor-pointer transition-all duration-300 ease-in-out hover:scale-105 ${
-                  isSelected
+                className={`relative cursor-pointer transition-all duration-300 ease-in-out hover:scale-105 ${isSelected
                     ? 'transform scale-105'
                     : ''
-                }`}
+                  }`}
               >
                 {/* Badge */}
                 <div className="absolute -top-3 left-6 z-10">
-                  <span className={`px-3 py-1 text-sm font-medium rounded-full shadow-sm ${
-                    role.badge === 'Free' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                  }`}>
+                  <span className={`px-3 py-1 text-sm font-medium rounded-full shadow-sm ${role.badge === 'Free' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                    }`}>
                     {role.badge}
                   </span>
                 </div>
 
                 {/* Card */}
                 <div
-                  className={`relative p-6 rounded-xl border-2 transition-all duration-300 ${
-                    isSelected
+                  className={`relative p-6 rounded-xl border-2 transition-all duration-300 ${isSelected
                       ? 'border-green-500 text-white shadow-lg'
                       : 'border-gray-200 bg-white text-gray-900 hover:border-gray-300 shadow-sm'
-                  }`}
+                    }`}
                   style={isSelected ? {
                     background: 'linear-gradient(134deg, #425D1F 0%, #8BC342 100%)'
                   } : {}}
@@ -137,27 +135,24 @@ export default function SelectYourRole() {
                         onChange={() => setSelectedRole(role.id)}
                         className="sr-only"
                       />
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                        isSelected
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected
                           ? 'border-white bg-white'
                           : 'border-gray-300 bg-white'
-                      }`}>
+                        }`}>
                         {isSelected && (
                           <div className="w-2 h-2 rounded-full bg-green-600"></div>
                         )}
                       </div>
                     </div>
-                    <h2 className={`text-xl font-semibold ${
-                      isSelected ? 'text-white' : 'text-gray-900'
-                    }`}>
+                    <h2 className={`text-xl font-semibold ${isSelected ? 'text-white' : 'text-gray-900'
+                      }`}>
                       {role.title}
                     </h2>
                   </div>
 
                   {/* Description */}
-                  <p className={`text-sm leading-relaxed ${
-                    isSelected ? 'text-green-100' : 'text-gray-600'
-                  }`}>
+                  <p className={`text-sm leading-relaxed ${isSelected ? 'text-green-100' : 'text-gray-600'
+                    }`}>
                     {role.description}
                   </p>
                 </div>
