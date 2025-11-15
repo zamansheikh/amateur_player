@@ -8,6 +8,7 @@ import { api } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import PlayerCard from '@/app/landing/components/PlayerCard';
 import PlayerCardV2 from '@/app/landing/components/PlayerCardV2';
+import PlayerCardV3 from '@/app/landing/components/PlayerCardV3';
 
 interface ProPlayer {
     user_id: number;
@@ -60,7 +61,7 @@ export default function ProPlayersPage() {
     const [proPlayers, setProPlayers] = useState<ProPlayer[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [useNewDesign, setUseNewDesign] = useState(false);
+    const [cardVersion, setCardVersion] = useState<'v1' | 'v2' | 'v3'>('v3');
     const [followingStates, setFollowingStates] = useState<{ [key: number]: boolean }>({});
     const [followLoading, setFollowLoading] = useState<{ [key: number]: boolean }>({});
 
@@ -102,14 +103,14 @@ export default function ProPlayersPage() {
                 setLoading(true);
                 const response = await api.get('/api/user/pro-player-public-profile');
                 setProPlayers(response.data);
-                
+
                 // Initialize following states based on API response
                 const followStates: { [key: number]: boolean } = {};
                 response.data.forEach((player: ProPlayer) => {
                     followStates[player.user_id] = player.is_followed || false;
                 });
                 setFollowingStates(followStates);
-                
+
                 setError(null);
             } catch (err) {
                 console.error('Error fetching pro players:', err);
@@ -125,7 +126,7 @@ export default function ProPlayersPage() {
     // Handle follow/unfollow functionality
     const handleFollow = async (player: ProPlayer, e: React.MouseEvent) => {
         e.stopPropagation(); // Prevent card click navigation
-        
+
         if (!user) {
             router.push('/signin');
             return;
@@ -135,7 +136,7 @@ export default function ProPlayersPage() {
 
         try {
             setFollowLoading(prev => ({ ...prev, [player.user_id]: true }));
-            
+
             const response = await api.post('/api/user/follow', {
                 user_id: player.user_id
             });
@@ -146,12 +147,12 @@ export default function ProPlayersPage() {
                     ...prev,
                     [player.user_id]: !prev[player.user_id]
                 }));
-                
+
                 // Update the player data in the list
-                setProPlayers(prev => prev.map(p => 
-                    p.user_id === player.user_id 
-                        ? { 
-                            ...p, 
+                setProPlayers(prev => prev.map(p =>
+                    p.user_id === player.user_id
+                        ? {
+                            ...p,
                             is_followed: !p.is_followed,
                             follower_count: p.is_followed ? p.follower_count - 1 : p.follower_count + 1
                         }
@@ -226,29 +227,36 @@ export default function ProPlayersPage() {
                                 <span>Verified Profiles</span>
                             </div>
                         </div>
-                        
+
                         {/* Card Design Toggle */}
                         <div className="mt-8 flex items-center justify-center">
                             <div className="bg-white rounded-lg p-1 shadow-md border">
                                 <button
-                                    onClick={() => setUseNewDesign(false)}
-                                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                                        !useNewDesign
-                                            ? 'bg-green-600 text-white shadow-sm'
-                                            : 'text-gray-600 hover:text-gray-900'
-                                    }`}
+                                    onClick={() => setCardVersion('v3')}
+                                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${cardVersion === 'v3'
+                                        ? 'bg-green-600 text-white shadow-sm'
+                                        : 'text-gray-600 hover:text-gray-900'
+                                        }`}
                                 >
-                                    Classic Design
+                                    V3 Design (Flutter)
                                 </button>
                                 <button
-                                    onClick={() => setUseNewDesign(true)}
-                                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                                        useNewDesign
-                                            ? 'bg-green-600 text-white shadow-sm'
-                                            : 'text-gray-600 hover:text-gray-900'
-                                    }`}
+                                    onClick={() => setCardVersion('v1')}
+                                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${cardVersion === 'v1'
+                                        ? 'bg-green-600 text-white shadow-sm'
+                                        : 'text-gray-600 hover:text-gray-900'
+                                        }`}
                                 >
-                                    New Design V2
+                                    V1 Design
+                                </button>
+                                <button
+                                    onClick={() => setCardVersion('v2')}
+                                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${cardVersion === 'v2'
+                                        ? 'bg-green-600 text-white shadow-sm'
+                                        : 'text-gray-600 hover:text-gray-900'
+                                        }`}
+                                >
+                                    V2 Design
                                 </button>
                             </div>
                         </div>
@@ -266,8 +274,42 @@ export default function ProPlayersPage() {
                             const themeV2 = cardThemesV2[index % cardThemesV2.length];
                             return (
                                 <div key={player.user_id} className="transform hover:scale-105 transition-transform duration-200">
-                                    {useNewDesign ? (
-                                        <PlayerCardV2 
+                                    {cardVersion === 'v3' ? (
+                                        <PlayerCardV3
+                                            player={{
+                                                user_id: player.user_id,
+                                                username: player.username,
+                                                name: player.name,
+                                                profile_picture_url: player.profile_picture_url,
+                                                level: player.level,
+                                                xp: player.xp || 0,
+                                                is_followed: player.is_followed,
+                                                follower_count: player.follower_count || 0,
+                                                stats: {
+                                                    high_game: player.stats?.high_game || 0,
+                                                    high_series: player.stats?.high_series || 0,
+                                                    average_score: player.stats?.average_score || 0,
+                                                },
+                                                engagement: {
+                                                    views: player.engagement?.views || 0,
+                                                    likes: player.engagement?.likes || 0,
+                                                    comments: player.engagement?.comments || 0,
+                                                },
+                                                favorite_brands: player.favorite_brands || [],
+                                            }}
+                                            onTap={() => handleCardClick(player)}
+                                            onFollow={() => {
+                                                const event = { stopPropagation: () => { } } as React.MouseEvent;
+                                                handleFollow(player, event);
+                                            }}
+                                            onCollect={() => console.log('Collect clicked for', player.name)}
+                                            primaryColor={themeV2.primaryColor}
+                                            secondaryColor={themeV2.secondaryColor}
+                                            accentColor={themeV2.accentColor}
+                                            isLoading={followLoading[player.user_id] || false}
+                                        />
+                                    ) : cardVersion === 'v2' ? (
+                                        <PlayerCardV2
                                             imageUrl={player.profile_picture_url}
                                             level={player.level}
                                             name={player.name}
@@ -288,14 +330,14 @@ export default function ProPlayersPage() {
                                             username={player.username}
                                             isFollowed={player.is_followed}
                                             onFollow={() => {
-                                                const event = { stopPropagation: () => {} } as React.MouseEvent;
+                                                const event = { stopPropagation: () => { } } as React.MouseEvent;
                                                 handleFollow(player, event);
                                             }}
                                             onCardClick={() => handleCardClick(player)}
                                             isFollowLoading={followLoading[player.user_id] || false}
                                         />
                                     ) : (
-                                        <PlayerCard 
+                                        <PlayerCard
                                             imageUrl={player.profile_picture_url}
                                             level={player.level}
                                             name={player.name}
@@ -316,7 +358,7 @@ export default function ProPlayersPage() {
                                             username={player.username}
                                             isFollowed={player.is_followed}
                                             onFollow={() => {
-                                                const event = { stopPropagation: () => {} } as React.MouseEvent;
+                                                const event = { stopPropagation: () => { } } as React.MouseEvent;
                                                 handleFollow(player, event);
                                             }}
                                             onCardClick={() => handleCardClick(player)}
@@ -351,7 +393,7 @@ export default function ProPlayersPage() {
                     <div className="absolute bottom-20 left-1/4 w-12 h-12 bg-green-600 rounded-full"></div>
                     <div className="absolute bottom-32 right-1/3 w-24 h-24 bg-green-400 rounded-full"></div>
                 </div>
-                
+
                 <div className="relative max-w-6xl mx-auto px-4">
                     {/* Main Heading */}
                     <div className="text-center mb-16">
