@@ -98,6 +98,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
                                         alt="Bowlers Network Logo"
                                         width={40}
                                         height={40}
+                                        unoptimized
                                         className="rounded"
                                     />
                                     <span className="text-xl font-bold text-white">Bowlersnetwork</span>
@@ -172,6 +173,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
                                             alt="Bowlers Network Logo"
                                             width={32}
                                             height={32}
+                                            unoptimized
                                             className="rounded"
                                         />
                                         <span className="text-xl font-bold">
@@ -218,6 +220,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
                                         alt="Bowlers Network Logo"
                                         width={40}
                                         height={40}
+                                        unoptimized
                                         className="rounded"
                                     />
                                     <span className="text-xl font-bold text-white">Bowlersnetwork</span>
