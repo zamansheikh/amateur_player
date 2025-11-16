@@ -414,6 +414,7 @@ export default function FeedPostCard({
                 <Image
                   src="/icons/like_icon.svg"
                   alt="Unlike"
+                  unoptimized
                   width={24}
                   height={24}
                 />
@@ -421,6 +422,7 @@ export default function FeedPostCard({
                 <Image
                   src="/icons/not_like_icon.svg"
                   alt="Like"
+                  unoptimized
                   width={24}
                   height={24}
                 />
@@ -433,6 +435,7 @@ export default function FeedPostCard({
               <Image
                 src="/icons/comment_icon.svg"
                 alt="Comment"
+                unoptimized
                 width={24}
                 height={24}
               />
@@ -447,6 +450,7 @@ export default function FeedPostCard({
             <Image
               src="/icons/share_icon.svg"
               alt="Share"
+              unoptimized
               width={24}
               height={24}
             />
