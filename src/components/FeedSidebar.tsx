@@ -259,7 +259,7 @@ export default function FeedSidebar() {
             </div>
 
             {/* Featured Partners */}
-            <div className="bg-white rounded-xl p-4 shadow-sm">
+            {/* <div className="bg-white rounded-xl p-4 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold text-gray-900">Featured Partners</h3>
                     <button
@@ -305,7 +305,7 @@ export default function FeedSidebar() {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> */}
 
             {/* What's happening Section */}
             <div className="bg-white rounded-xl p-4 shadow-sm">
