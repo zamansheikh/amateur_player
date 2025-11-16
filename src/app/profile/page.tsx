@@ -148,6 +148,36 @@ export default function ProfilePage() {
     const userAge = userInfoForm.age > 0 ? userInfoForm.age : (user?.age || 0);
     const isUnder18 = userAge > 0 && userAge < 18;
 
+    // Helper function to check if bowling statistics are incomplete
+    const isGameStatsIncomplete = () => {
+        return !user?.stats?.average_score ||
+            !user?.stats?.high_game ||
+            !user?.stats?.high_series ||
+            !user?.stats?.experience ||
+            !user?.handedness ||
+            !user?.thumb_style;
+    };
+
+    // Helper function to check if personal information is incomplete
+    const isUserInfoIncomplete = () => {
+        return !user?.first_name ||
+            !user?.last_name ||
+            !user?.email ||
+            !user?.age ||
+            !user?.gender ||
+            !user?.address_str ||
+            !user?.home_center;
+    };
+
+    // Helper function to check if sponsors/brands are incomplete
+    const isSponsorsIncomplete = () => {
+        if (user?.is_pro) {
+            return !user?.sponsors || user.sponsors.length === 0;
+        } else {
+            return !user?.favorite_brands || user.favorite_brands.length === 0;
+        }
+    };
+
     // USBC fields (shown based on age)
     const [isEditingUSBC, setIsEditingUSBC] = useState(false);
     const [isUpdatingUSBC, setIsUpdatingUSBC] = useState(false);
@@ -629,12 +659,20 @@ export default function ProfilePage() {
                         </div>
 
                         {/* ===== GROUP 1: GAME STATS ===== */}
-                        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                        <div className="bg-white rounded-lg shadow-sm overflow-hidden border-l-4 border-l-yellow-400">
                             <button
                                 onClick={() => toggleGroup('gameStats')}
                                 className="w-full flex justify-between items-center p-6 hover:bg-gray-50 transition-colors"
                             >
-                                <h3 className="text-lg font-semibold text-gray-900">Bowling Statistics</h3>
+                                <div className="flex items-center gap-3">
+                                    <h3 className="text-lg font-semibold text-gray-900">Bowling Statistics</h3>
+                                    {isGameStatsIncomplete() && (
+                                        <div className="flex items-center gap-2 bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">
+                                            <AlertCircle className="w-4 h-4" />
+                                            <span>Incomplete</span>
+                                        </div>
+                                    )}
+                                </div>
                                 {expandedGroups.gameStats ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                             </button>
                             {expandedGroups.gameStats && (
@@ -764,12 +802,20 @@ export default function ProfilePage() {
                         </div>
 
                         {/* ===== GROUP 2: USER INFO ===== */}
-                        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                        <div className="bg-white rounded-lg shadow-sm overflow-hidden border-l-4 border-l-yellow-400">
                             <button
                                 onClick={() => toggleGroup('userInfo')}
                                 className="w-full flex justify-between items-center p-6 hover:bg-gray-50 transition-colors"
                             >
-                                <h3 className="text-lg font-semibold text-gray-900">Personal Information</h3>
+                                <div className="flex items-center gap-3">
+                                    <h3 className="text-lg font-semibold text-gray-900">Personal Information</h3>
+                                    {isUserInfoIncomplete() && (
+                                        <div className="flex items-center gap-2 bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">
+                                            <AlertCircle className="w-4 h-4" />
+                                            <span>Incomplete</span>
+                                        </div>
+                                    )}
+                                </div>
                                 {expandedGroups.userInfo ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                             </button>
                             {expandedGroups.userInfo && (
@@ -990,12 +1036,20 @@ export default function ProfilePage() {
                         </div>
 
                         {/* ===== GROUP 3: FAV BRANDS ===== */}
-                        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                        <div className="bg-white rounded-lg shadow-sm overflow-hidden border-l-4 border-l-yellow-400">
                             <button
                                 onClick={() => toggleGroup('favBrands')}
                                 className="w-full flex justify-between items-center p-6 hover:bg-gray-50 transition-colors"
                             >
-                                <h3 className="text-lg font-semibold text-gray-900">{user?.is_pro ? "Sponsors" : "Favorite Brands"}</h3>
+                                <div className="flex items-center gap-3">
+                                    <h3 className="text-lg font-semibold text-gray-900">{user?.is_pro ? "Sponsors" : "Favorite Brands"}</h3>
+                                    {isSponsorsIncomplete() && (
+                                        <div className="flex items-center gap-2 bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">
+                                            <AlertCircle className="w-4 h-4" />
+                                            <span>Incomplete</span>
+                                        </div>
+                                    )}
+                                </div>
                                 {expandedGroups.favBrands ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                             </button>
                             {expandedGroups.favBrands && (
