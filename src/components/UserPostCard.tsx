@@ -381,6 +381,7 @@ export default function UserPostCard({
                 <Image
                   src="/icons/like_icon.svg"
                   alt="Unlike"
+                  unoptimized
                   width={20}
                   height={20}
                 />
@@ -388,6 +389,7 @@ export default function UserPostCard({
                 <Image
                   src="/icons/not_like_icon.svg"
                   alt="Like"
+                  unoptimized
                   width={20}
                   height={20}
                 />
@@ -400,6 +402,7 @@ export default function UserPostCard({
               <Image
                 src="/icons/comment_icon.svg"
                 alt="Comment"
+                unoptimized
                 width={20}
                 height={20}
               />
@@ -408,6 +411,7 @@ export default function UserPostCard({
               <Image
                 src="/icons/share_icon.svg"
                 alt="Share"
+                unoptimized
                 width={20}
                 height={20}
               />
