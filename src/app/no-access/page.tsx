@@ -16,6 +16,7 @@ export default function NoAccessPage() {
                         alt="Bowlers Network Logo"
                         width={60}
                         height={60}
+                        unoptimized
                         className="object-contain"
                     />
                 </div>
