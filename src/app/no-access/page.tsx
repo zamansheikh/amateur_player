@@ -37,47 +37,6 @@ export default function NoAccessPage() {
                     </p>
                 </div>
 
-                {/* Decorative Elements */}
-                <div className="py-8">
-                    <div className="inline-block p-8 bg-gray-800/50 rounded-lg border border-gray-700">
-                        <div className="text-6xl">🎳</div>
-                    </div>
-                </div>
-
-                {/* Features Coming Soon */}
-                <div className="space-y-3 text-left bg-gray-800/30 p-6 rounded-lg border border-gray-700">
-                    <p className="text-gray-300 font-semibold mb-3">Coming Soon:</p>
-                    <ul className="space-y-2 text-gray-400">
-                        <li className="flex items-center gap-2">
-                            <span className="text-green-400">✓</span>
-                            <span>Connect with bowlers worldwide</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                            <span className="text-green-400">✓</span>
-                            <span>Track your bowling stats</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                            <span className="text-green-400">✓</span>
-                            <span>Join tournaments & leagues</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                            <span className="text-green-400">✓</span>
-                            <span>Discover premium gear</span>
-                        </li>
-                    </ul>
-                </div>
-
-                {/* Contact Info */}
-                <div className="space-y-2 text-gray-400 text-sm">
-                    <p>For early access requests or inquiries, please contact:</p>
-                    <a
-                        href="mailto:contact@bowlersnetwork.com"
-                        className="text-green-400 hover:text-green-300 font-semibold transition-colors"
-                    >
-                        contact@bowlersnetwork.com
-                    </a>
-                </div>
-
                 {/* Footer */}
                 <div className="pt-4 text-gray-500 text-xs">
                     <p>Bowlers Network • Beta Launch 2025</p>
