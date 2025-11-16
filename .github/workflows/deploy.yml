@@ -23,6 +23,7 @@ jobs:
             export PATH=\$PATH:/root/.bun/bin &&  # Existing for Bun
             export PATH=/root/.nvm/versions/node/v20.19.5/bin:\$PATH &&  # Add this for Node 20 (replace with your path)
             cd /var/www/amateur_player &&
+            git stash &&
             GIT_SSH_COMMAND=\"ssh -i ~/.ssh/id_ed25519_deploy\" git pull origin main &&
             bun install &&
             bun run build &&
