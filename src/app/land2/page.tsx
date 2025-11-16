@@ -48,7 +48,7 @@ export default function Landing2Page() {
             {/* Hero Section */}
             <section className="relative h-screen flex items-start overflow-hidden">
                 {/* Right Side: Image (50% width, full height) */}
-                <div className="absolute right-0 top-0 w-1/2 h-full">
+                <div className="absolute right-0 top-0 w-1/2 h-[700px]">
                     <Image
                         src="/land2/hero_section.jpg"
                         alt="Hero Section Background"
@@ -88,6 +88,106 @@ export default function Landing2Page() {
                         <span className="w-2.5 h-2.5 bg-white rounded-full"></span>
                         REGISTER NOW
                     </button>
+                </div>
+            </section>
+
+            {/* Built for Every Bowler Section */}
+            <section className="py-16 px-8 bg-white">
+                <div className="max-w-7xl mx-auto">
+                    {/* Section Content */}
+                    <div className="flex items-start gap-12">
+                        {/* Left: Images Grid */}
+                        <div className="flex-1">
+                            <div className="grid grid-cols-3 gap-4" style={{ gridTemplateRows: 'auto auto' }}>
+                                {/* Item 1: Amateurs (top-left) */}
+                                <div className="row-span-1">
+                                    <div className="rounded-t-2xl overflow-hidden h-64">
+                                        <Image
+                                            src="/land2/amateurs.jpg"
+                                            alt="Amateurs"
+                                            width={200}
+                                            height={260}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                    <div className="rounded-b-1xl text-white text-center py-2 font-bold text-sm" style={{ backgroundColor: '#86D864' }}>
+                                        Amateurs
+                                    </div>
+                                </div>
+
+                                {/* Item 3: Middle Unknown (top-center, tall) */}
+                                <div className="row-span-2">
+                                    <div className="rounded-2xl overflow-hidden h-148">
+                                        <Image
+                                            src="/land2/middle_unknown.jpg"
+                                            alt="Experience"
+                                            width={200}
+                                            height={400}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Item 4: Centers (top-right) */}
+                                <div className="row-span-1">
+                                    <div className="rounded-t-2xl overflow-hidden h-64">
+                                        <Image
+                                            src="/land2/centers.jpg"
+                                            alt="Centers"
+                                            width={200}
+                                            height={260}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                    <div className="rounded-b-1xl text-white text-center py-2 font-bold text-sm" style={{ backgroundColor: '#86D864' }}>
+                                        Centers
+                                    </div>
+                                </div>
+
+                                {/* Item 2: Pros (bottom-left) */}
+                                <div className="row-span-1">
+                                    <div className="rounded-t-2xl overflow-hidden h-64">
+                                        <Image
+                                            src="/land2/pros.jpg"
+                                            alt="Pros"
+                                            width={200}
+                                            height={260}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                    <div className="rounded-b-1xl text-white text-center py-2 font-bold text-sm" style={{ backgroundColor: '#86D864' }}>
+                                        Pros
+                                    </div>
+                                </div>
+
+                                {/* Item 5: Shops (bottom-right) */}
+                                <div className="row-span-1">
+                                    <div className="rounded-t-2xl overflow-hidden h-64">
+                                        <Image
+                                            src="/land2/shops.jpg"
+                                            alt="Shops"
+                                            width={200}
+                                            height={260}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                    <div className="rounded-b-1xl text-white text-center py-2 font-bold text-sm" style={{ backgroundColor: '#86D864' }}>
+                                        Shops
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right: Text Content */}
+                        <div className="flex-1 flex flex-col justify-start pt-4">
+                            <h2 className="text-6xl font-black leading-tight text-black mb-8">
+                                Built for<br />Every<br />Bowler
+                            </h2>
+                            <p className="text-base font-semibold text-gray-800 leading-relaxed">
+                                Whether you're rolling your first ball, chasing a pro title, running a center, or stocking the shelves — Bowlers Network connects the whole bowling world.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>
