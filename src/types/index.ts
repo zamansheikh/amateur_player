@@ -74,20 +74,8 @@ export interface AuthContextType {
     user: User | null;
     isLoading: boolean;
     signin: (username: string, password: string) => Promise<{ success: boolean; profileComplete?: boolean }>;
-    signup: (userData: {
-        basicInfo: {
-            username: string;
-            first_name: string;
-            last_name: string;
-            email: string;
-            password: string;
-            birth_date?: string;
-            parent_first_name?: string;
-            parent_last_name?: string;
-            parent_email?: string;
-        };
-        brandIDs: number[];
-    }) => Promise<boolean>;
+    privateLogin: (privateKey: string) => Promise<{ success: boolean; error?: string }>;
+    signup: (userData: any) => Promise<boolean>;
     signout: () => void;
     refreshUser: () => Promise<void>;
 }

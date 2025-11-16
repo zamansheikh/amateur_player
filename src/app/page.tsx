@@ -14,8 +14,8 @@ export default function RootPage() {
                 // Redirect authenticated users to the home page
                 router.replace('/home');
             } else {
-                // Redirect non-authenticated users to the landing page
-                router.replace('/landing');
+                // Redirect non-authenticated users to the no-access page (beta launch)
+                router.replace('/no-access');
             }
         }
     }, [user, isLoading, router]);
@@ -26,3 +26,4 @@ export default function RootPage() {
         </div>
     );
 }
+

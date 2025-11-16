@@ -72,9 +72,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setUser(userData);
 
                 // Return success and profile completion status
-                return { 
-                    success: true, 
-                    profileComplete: userProfile.is_complete 
+                return {
+                    success: true,
+                    profileComplete: userProfile.is_complete
                 };
             }
 
@@ -87,12 +87,82 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
+    const privateLogin = async (privateKey: string): Promise<{ success: boolean; error?: string }> => {
+        try {
+            setIsLoading(true);
+            console.log('Starting private login with key:', privateKey);
+
+            // Call private login API with the private key
+            const response = await fetch('/api/private-login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    private_key: privateKey
+                })
+            });
+
+            console.log('Private login response status:', response.status);
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Private login error response:', errorData);
+                return {
+                    success: false,
+                    error: errorData.error || 'Authentication failed'
+                };
+            }
+
+            const loginResponse = await response.json();
+            console.log('Private login response:', loginResponse);
+
+            if (loginResponse && loginResponse.access_token) {
+                const { access_token } = loginResponse;
+                console.log('Access token received, storing...');
+
+                // Store token in both localStorage and cookies
+                localStorage.setItem('access_token', access_token);
+                setCookie('access_token', access_token, 7);
+
+                // Fetch full user profile immediately (same as signin)
+                const userProfile = await userApi.getProfile();
+
+                const userData: User = {
+                    ...userProfile,
+                    authenticated: true,
+                    access_token: access_token
+                };
+
+                localStorage.setItem('user', JSON.stringify(userData));
+                setUser(userData);
+
+                console.log('Private login successful, user authenticated');
+                return { success: true };
+            }
+
+            console.error('No access_token in response');
+            return {
+                success: false,
+                error: 'Invalid response from server'
+            };
+        } catch (error) {
+            console.error('Private login error:', error);
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : 'An error occurred'
+            };
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const signout = () => {
         localStorage.removeItem('access_token');
         localStorage.removeItem('user');
         deleteCookie('access_token');
         setUser(null);
-        router.push('/signin');
+        router.push('/no-access');
     };
 
     const signup = async (userData: {
@@ -163,7 +233,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, isLoading, signin, signup, signout, refreshUser }}>
+        <AuthContext.Provider value={{ user, isLoading, signin, privateLogin, signup, signout, refreshUser }}>
             {children}
         </AuthContext.Provider>
     );

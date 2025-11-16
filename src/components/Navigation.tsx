@@ -60,14 +60,17 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const { user, signout, isLoading } = useAuth();
 
-    // Public routes that don't require authentication
-    const publicRoutes = ['/signin', '/signup', '/landing', '/landing/page', '/land2', '/select-your-role', '/complete-profile'];
+    // Public routes that don't require authentication (SIGNIN AND SIGNUP REMOVED)
+    const publicRoutes = ['/landing', '/landing/page', '/land2', '/select-your-role', '/complete-profile', '/no-access'];
 
     // Check if it's a pro player public route
     const isProPlayerRoute = pathname.startsWith('/pro/');
 
+    // Check if it's a private access route (for beta launch)
+    const isPrivateAccessRoute = pathname.startsWith('/private-access/');
+
     // Combined public route check
-    const isPublicRoute = publicRoutes.includes(pathname) || isProPlayerRoute;
+    const isPublicRoute = publicRoutes.includes(pathname) || isProPlayerRoute || isPrivateAccessRoute;
 
     // Landing page route - show only the landing page without navigation
     if (pathname === '/landing' || pathname === '/landing/page') {
@@ -152,8 +155,8 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
         // If authenticated user visits pro route, continue to full navigation (fall through)
     }
 
-    // Authentication pages - show without navigation
-    if (publicRoutes.includes(pathname)) {
+    // Authentication pages and private access - show without navigation
+    if (publicRoutes.includes(pathname) || isPrivateAccessRoute) {
         return <>{children}</>;
     }
 

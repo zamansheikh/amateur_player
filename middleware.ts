@@ -4,30 +4,33 @@ export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Public routes that don't require authentication
-    const publicRoutes = ['/signin','/select-your-role', '/signup', '/landing', '/'];
-    
+    const publicRoutes = ['/landing', '/', '/no-access'];
+
     // Pro player routes are also public (for viewing pro profiles without login)
     const isProPlayerRoute = pathname.startsWith('/pro/');
 
+    // Private access routes are public (for beta launch access)
+    const isPrivateAccessRoute = pathname.startsWith('/private-access/');
+
     // Check if the current path is a public route
-    const isPublicRoute = publicRoutes.includes(pathname) || isProPlayerRoute;
+    const isPublicRoute = publicRoutes.includes(pathname) || isProPlayerRoute || isPrivateAccessRoute;
 
     // Get the access token from cookies or headers
     const token = request.cookies.get('access_token')?.value ||
         request.headers.get('authorization')?.replace('Bearer ', '');
 
-    // If it's a public route and user is authenticated, don't redirect (allow access)
+    // If it's a public route and user is authenticated (except private-access), don't redirect (allow access)
     if (publicRoutes.includes(pathname) && token && pathname !== '/') {
         return NextResponse.redirect(new URL('/home', request.url));
     }
 
-    // If it's a protected route and user is not authenticated, redirect to signin
+    // If it's a protected route and user is not authenticated, redirect to no-access
     if (!isPublicRoute && !token) {
         // For client-side navigation, we'll let the AuthContext handle this
         // But for direct URL access, we redirect here
         const isDirectAccess = !request.headers.get('referer');
         if (isDirectAccess) {
-            return NextResponse.redirect(new URL('/signin', request.url));
+            return NextResponse.redirect(new URL('/no-access', request.url));
         }
     }
 
