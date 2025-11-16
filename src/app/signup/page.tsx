@@ -33,6 +33,11 @@ export default function SignUpPage() {
     const [parentLastName, setParentLastName] = useState('');
     const [parentEmail, setParentEmail] = useState('');
 
+    // Conditional fields based on age
+    const [isYouth, setIsYouth] = useState(false);
+    const [isCoach, setIsCoach] = useState(false);
+    const [usbcCardNumber, setUsbcCardNumber] = useState('');
+
     // Step 2: Email Verification
     const [verificationCode, setVerificationCode] = useState('');
     const [isEmailVerified, setIsEmailVerified] = useState(false);
@@ -224,6 +229,23 @@ export default function SignUpPage() {
 
             const success = await signup(userData);
             if (success) {
+                // After successful signup, call the user info API with conditional data
+                try {
+                    const userInfoPayload = {
+                        ...(isUnder18 && { is_youth: isYouth }),
+                        ...(userAge >= 18 && { is_coach: isCoach }),
+                        ...(usbcCardNumber && { usbc_card_number: usbcCardNumber })
+                    };
+
+                    // Only call if there's data to send
+                    if (Object.keys(userInfoPayload).length > 0) {
+                        await userApi.updateUserInfo(userInfoPayload);
+                    }
+                } catch (err) {
+                    console.error('Error updating user info:', err);
+                    // Don't fail the signup process if user info update fails
+                }
+
                 setUserCreated(true);
                 router.push('/');
             } else {
@@ -432,21 +454,61 @@ export default function SignUpPage() {
                             {birthDate && userAge > 0 && (
                                 <div className="space-y-3">
                                     {userAge < 18 ? (
-                                        <label className="flex items-center space-x-3 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                                            />
-                                            <span className="text-sm text-gray-700">I am a USBC youth bowler</span>
-                                        </label>
+                                        <>
+                                            <label className="flex items-center space-x-3 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isYouth}
+                                                    onChange={(e) => setIsYouth(e.target.checked)}
+                                                    className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                                                />
+                                                <span className="text-sm text-gray-700">I am a USBC youth bowler</span>
+                                            </label>
+                                            {isYouth && (
+                                                <div>
+                                                    <label htmlFor="usbcCardNumber" className="block text-sm font-medium text-gray-700 mt-2">
+                                                        USBC Card Number (Optional)
+                                                    </label>
+                                                    <input
+                                                        id="usbcCardNumber"
+                                                        name="usbcCardNumber"
+                                                        type="text"
+                                                        value={usbcCardNumber}
+                                                        onChange={(e) => setUsbcCardNumber(e.target.value)}
+                                                        className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                                                        placeholder="Enter your USBC card number"
+                                                    />
+                                                </div>
+                                            )}
+                                        </>
                                     ) : (
-                                        <label className="flex items-center space-x-3 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                                            />
-                                            <span className="text-sm text-gray-700">I am a USBC youth coach</span>
-                                        </label>
+                                        <>
+                                            <label className="flex items-center space-x-3 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isCoach}
+                                                    onChange={(e) => setIsCoach(e.target.checked)}
+                                                    className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                                                />
+                                                <span className="text-sm text-gray-700">I am a USBC youth coach</span>
+                                            </label>
+                                            {isCoach && (
+                                                <div>
+                                                    <label htmlFor="usbcCardNumber" className="block text-sm font-medium text-gray-700 mt-2">
+                                                        USBC Card Number (Optional)
+                                                    </label>
+                                                    <input
+                                                        id="usbcCardNumber"
+                                                        name="usbcCardNumber"
+                                                        type="text"
+                                                        value={usbcCardNumber}
+                                                        onChange={(e) => setUsbcCardNumber(e.target.value)}
+                                                        className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
+                                                        placeholder="Enter your USBC card number"
+                                                    />
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                 </div>
                             )}

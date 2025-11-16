@@ -120,6 +120,11 @@ export const userApi = {
     updateFavoriteBrands: async (brandIDs: number[]) => {
         const response = await api.patch('/api/user/brands/favorites', { brandIDs });
         return response.data;
+    },
+
+    updateUserInfo: async (data: Record<string, unknown>) => {
+        const response = await api.post('/api/user/info', data);
+        return response.data;
     }
 };
 
