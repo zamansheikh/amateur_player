@@ -161,7 +161,7 @@ export default function FeedSidebar() {
             </div>
 
             {/* Who to Follow Section */}
-            <div className="bg-white rounded-xl p-4 shadow-sm">
+            {/* <div className="bg-white rounded-xl p-4 shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Who to Follow</h3>
                 <div className="space-y-3">
                     {suggestedUsers.slice(0, 5).map((user) => (
@@ -217,7 +217,7 @@ export default function FeedSidebar() {
                 <button className="w-full text-green-600 hover:text-green-700 text-sm font-medium mt-4">
                     Show more
                 </button>
-            </div>
+            </div> */}
 
             {/* Upcoming Events Section */}
             <div className="bg-white rounded-xl p-4 shadow-sm">
