@@ -20,6 +20,21 @@ export interface User {
     stats: UserStats;
     favorite_brands?: FavoriteBrand[];
     sponsors?: Sponsor[];
+    // Personal Information
+    age?: number;
+    gender?: string;
+    // Playing Style
+    handedness?: string;
+    thumb_style?: string;
+    // Location Information
+    address_str?: string;
+    lat?: number | string;
+    long?: number | string;
+    home_center?: string;
+    // USBC Information
+    is_youth?: boolean;
+    is_coach?: boolean;
+    usbc_card_number?: string;
 }
 
 export interface FavoriteBrand {

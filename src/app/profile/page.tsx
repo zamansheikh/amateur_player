@@ -1,13 +1,20 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { Edit, Users, Eye } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Edit, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { api } from '@/lib/api';
+import { api, userApi } from '@/lib/api';
 import UserPostCard from '@/components/UserPostCard';
 import CreatePost from '@/components/CreatePost';
+
+interface MapboxFeature {
+    id: string;
+    place_name: string;
+    center: [number, number];
+    text: string;
+}
 
 interface UserPost {
     metadata: {
@@ -91,14 +98,169 @@ export default function ProfilePage() {
     const [posts, setPosts] = useState<UserPost[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [isEditingStats, setIsEditingStats] = useState(false);
-    const [isUpdatingStats, setIsUpdatingStats] = useState(false);
-    const [statsForm, setStatsForm] = useState({
+
+    // ===== GROUP 1: GAME STATS =====
+    const [isEditingGameStats, setIsEditingGameStats] = useState(false);
+    const [isUpdatingGameStats, setIsUpdatingGameStats] = useState(false);
+    const [gameStatsForm, setGameStatsForm] = useState({
         average_score: 0,
         high_game: 0,
         high_series: 0,
-        experience: 0
+        experience: 0,
+        handedness: '',
+        thumb_style: ''
     });
+
+    // ===== GROUP 2: USER INFO =====
+    const [isEditingUserInfo, setIsEditingUserInfo] = useState(false);
+    const [isUpdatingUserInfo, setIsUpdatingUserInfo] = useState(false);
+    const [userInfoForm, setUserInfoForm] = useState({
+        first_name: '',
+        last_name: '',
+        email: '',
+        username: '',
+        age: 0,
+        gender: '',
+        address_str: '',
+        home_center: ''
+    });
+
+    // Address and center suggestion states
+    const [addressSuggestions, setAddressSuggestions] = useState<MapboxFeature[]>([]);
+    const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
+    const [addressSearchQuery, setAddressSearchQuery] = useState('');
+    const [homeCenterSearch, setHomeCenterSearch] = useState('');
+    const [showCenterSuggestions, setShowCenterSuggestions] = useState(false);
+    const suggestionsRef = useRef<HTMLDivElement>(null);
+    const centerSuggestionsRef = useRef<HTMLDivElement>(null);
+    const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Mock bowling centers data
+    const mockBowlingCenters = [
+        { id: 1, name: 'Stone Lane Bowling Center', city: 'Los Angeles', state: 'CA', lat: 34.0522, long: -118.2437 },
+        { id: 2, name: 'AMF Bowl Pasadena', city: 'Pasadena', state: 'CA', lat: 34.1478, long: -118.1445 },
+        { id: 3, name: 'Lucky Strike Lanes', city: 'Hollywood', state: 'CA', lat: 34.1028, long: -118.3259 },
+        { id: 4, name: 'Bowling Barn', city: 'Santa Monica', state: 'CA', lat: 34.0195, long: -118.4912 },
+        { id: 5, name: 'The Bowling Alley', city: 'Downtown LA', state: 'CA', lat: 34.0522, long: -118.2451 }
+    ];
+
+    // Age-based conditional fields
+    const userAge = userInfoForm.age > 0 ? userInfoForm.age : (user?.age || 0);
+    const isUnder18 = userAge > 0 && userAge < 18;
+
+    // USBC fields (shown based on age)
+    const [isEditingUSBC, setIsEditingUSBC] = useState(false);
+    const [isUpdatingUSBC, setIsUpdatingUSBC] = useState(false);
+    const [usbcForm, setUsbcForm] = useState({
+        is_youth: false,
+        is_coach: false,
+        usbc_card_number: ''
+    });
+
+    // ===== GROUP 3: FAV BRANDS =====
+    // (Read-only, no editing needed here)
+
+    // UI State
+    const [expandedGroups, setExpandedGroups] = useState({
+        gameStats: true,
+        userInfo: false,
+        favBrands: false
+    });
+    const [successMessage, setSuccessMessage] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
+
+    // Brand selection state
+    const [isEditingBrands, setIsEditingBrands] = useState(false);
+    const [isUpdatingBrands, setIsUpdatingBrands] = useState(false);
+    const [selectedBrands, setSelectedBrands] = useState({
+        balls: [] as number[],
+        shoes: [] as number[],
+        accessories: [] as number[],
+        apparels: [] as number[]
+    });
+    const [brands, setBrands] = useState<{
+        Balls: Array<{ brand_id: number; formal_name: string; logo_url: string }>;
+        Shoes: Array<{ brand_id: number; formal_name: string; logo_url: string }>;
+        Accessories: Array<{ brand_id: number; formal_name: string; logo_url: string }>;
+        Apparels: Array<{ brand_id: number; formal_name: string; logo_url: string }>;
+    } | null>(null);
+    const [brandsLoading, setBrandsLoading] = useState(false);
+
+    // Mapbox Geocoding API search function
+    const searchAddress = async (query: string) => {
+        if (!query.trim()) {
+            setAddressSuggestions([]);
+            return;
+        }
+
+        const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+        if (!mapboxToken) {
+            console.error('Mapbox access token is not configured');
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&types=address,place&limit=5`
+            );
+            const data = await response.json();
+
+            if (data.features) {
+                setAddressSuggestions(data.features);
+                setShowAddressSuggestions(true);
+            }
+        } catch (error) {
+            console.error('Error fetching address suggestions:', error);
+        }
+    };
+
+    // Handle address input change with debounce
+    const handleAddressChange = (value: string) => {
+        setAddressSearchQuery(value);
+        setUserInfoForm(prev => ({ ...prev, address_str: value }));
+
+        if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+        }
+
+        debounceTimerRef.current = setTimeout(() => {
+            searchAddress(value);
+        }, 300);
+    };
+
+    // Handle address suggestion selection
+    const handleSelectAddress = (suggestion: MapboxFeature) => {
+        setUserInfoForm(prev => ({
+            ...prev,
+            address_str: suggestion.place_name
+        }));
+        setAddressSearchQuery(suggestion.place_name);
+        setShowAddressSuggestions(false);
+        setAddressSuggestions([]);
+    };
+
+    // Close suggestions when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                suggestionsRef.current &&
+                !suggestionsRef.current.contains(event.target as Node)
+            ) {
+                setShowAddressSuggestions(false);
+            }
+            if (
+                centerSuggestionsRef.current &&
+                !centerSuggestionsRef.current.contains(event.target as Node)
+            ) {
+                setShowCenterSuggestions(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const fetchUserPosts = async () => {
         try {
@@ -114,60 +276,250 @@ export default function ProfilePage() {
         }
     };
 
+    const loadBrands = async () => {
+        try {
+            setBrandsLoading(true);
+            const response = await api.get('/api/brands');
+            setBrands(response.data);
+        } catch (error) {
+            console.error('Error loading brands:', error);
+        } finally {
+            setBrandsLoading(false);
+        }
+    };
+
     useEffect(() => {
         fetchUserPosts();
 
-        // Initialize stats form with user data
-        if (user?.stats) {
-            setStatsForm({
-                average_score: user.stats.average_score || 0,
-                high_game: user.stats.high_game || 0,
-                high_series: user.stats.high_series || 0,
-                experience: user.stats.experience || 0
+        // Initialize all forms with user data
+        if (user) {
+            // Combine all into 3 groups
+            setGameStatsForm({
+                average_score: user.stats?.average_score || 0,
+                high_game: user.stats?.high_game || 0,
+                high_series: user.stats?.high_series || 0,
+                experience: user.stats?.experience || 0,
+                handedness: user.handedness || '',
+                thumb_style: user.thumb_style || ''
+            });
+
+            setUserInfoForm({
+                first_name: user.first_name || '',
+                last_name: user.last_name || '',
+                email: user.email || '',
+                username: user.username || '',
+                age: user.age || 0,
+                gender: user.gender || '',
+                address_str: user.address_str || '',
+                home_center: user.home_center || ''
+            });
+
+            // Set home center search to match home_center
+            setHomeCenterSearch(user.home_center || '');
+            setAddressSearchQuery(user.address_str || '');
+
+            setUsbcForm({
+                is_youth: user.is_youth || false,
+                is_coach: user.is_coach || false,
+                usbc_card_number: user.usbc_card_number || ''
             });
         }
     }, [user]);
 
-    const handleStatsUpdate = async () => {
-        try {
-            setIsUpdatingStats(true);
+    // Load brands when user starts editing
+    useEffect(() => {
+        if (isEditingBrands && !brands) {
+            loadBrands();
+        }
 
-            const payload = {
-                average_score: parseFloat(statsForm.average_score.toString()),
-                high_game: parseInt(statsForm.high_game.toString()),
-                high_series: parseInt(statsForm.high_series.toString()),
-                experience: parseInt(statsForm.experience.toString())
+        // Initialize selectedBrands from user's favorite_brands
+        if (isEditingBrands && user?.favorite_brands) {
+            const newSelectedBrands = {
+                balls: [] as number[],
+                shoes: [] as number[],
+                accessories: [] as number[],
+                apparels: [] as number[]
             };
 
-            console.log('Updating stats with payload:', payload);
+            user.favorite_brands.forEach(brand => {
+                const categoryKey = (brand.brandType?.toLowerCase() || 'balls') as keyof typeof newSelectedBrands;
+                if (categoryKey in newSelectedBrands) {
+                    newSelectedBrands[categoryKey].push(brand.brand_id);
+                }
+            });
 
-            await api.post('api/user/stats/game-stats', payload);
+            setSelectedBrands(newSelectedBrands);
+        }
+    }, [isEditingBrands, brands, user?.favorite_brands]);
 
-            // Refresh user data to get updated stats
+    // ===== GAME STATS HANDLERS =====
+    const handleGameStatsFormChange = (field: string, value: string | boolean) => {
+        setGameStatsForm(prev => ({
+            ...prev,
+            [field]: typeof value === 'boolean' ? value :
+                (field === 'average_score' || field === 'high_game' || field === 'high_series' || field === 'experience') ?
+                    (field === 'average_score' ? parseFloat(value) || 0 : parseInt(value) || 0) :
+                    value
+        }));
+    }; const handleGameStatsUpdate = async () => {
+        try {
+            setIsUpdatingGameStats(true);
+            setErrorMessage('');
+
+            // Update stats
+            const statsPayload = {
+                average_score: parseFloat(gameStatsForm.average_score.toString()),
+                high_game: parseInt(gameStatsForm.high_game.toString()),
+                high_series: parseInt(gameStatsForm.high_series.toString()),
+                experience: parseInt(gameStatsForm.experience.toString())
+            };
+
+            await api.post('api/user/stats/game-stats', statsPayload);
+
+            // Update playing style
+            if (gameStatsForm.handedness && gameStatsForm.thumb_style) {
+                const stylePayload = {
+                    handedness: gameStatsForm.handedness,
+                    thumb_style: gameStatsForm.thumb_style
+                };
+                await userApi.updateUserInfo(stylePayload);
+            }
+
             await refreshUser();
-
-            // Update user context or refetch user data
-            // You might want to refresh the user data here
-            setIsEditingStats(false);
-
-            // Show success message
-            alert('Statistics updated successfully!');
-
+            setIsEditingGameStats(false);
+            setSuccessMessage('Game stats updated successfully!');
+            setTimeout(() => setSuccessMessage(''), 3000);
         } catch (error: unknown) {
-            console.error('Error updating stats:', error);
-            const errorMessage = error instanceof Error
-                ? error.message
-                : (error as { response?: { data?: { message?: string } } }).response?.data?.message || 'Unknown error';
-            alert(`Failed to update statistics: ${errorMessage}`);
+            console.error('Error updating game stats:', error);
+            const errorMsg = error instanceof Error ? error.message : 'Failed to update game stats';
+            setErrorMessage(errorMsg);
         } finally {
-            setIsUpdatingStats(false);
+            setIsUpdatingGameStats(false);
         }
     };
 
-    const handleStatsFormChange = (field: string, value: string) => {
-        setStatsForm(prev => ({
+    // ===== USER INFO HANDLERS =====
+    const handleUserInfoFormChange = (field: string, value: string | boolean) => {
+        setUserInfoForm(prev => ({
             ...prev,
-            [field]: value === '' ? 0 : parseFloat(value) || 0
+            [field]: field === 'age' && typeof value === 'string' ? parseInt(value) || 0 : value
+        }));
+    };
+
+    const handleUserInfoUpdate = async () => {
+        try {
+            setIsUpdatingUserInfo(true);
+            setErrorMessage('');
+
+            const payload = {
+                first_name: userInfoForm.first_name,
+                last_name: userInfoForm.last_name,
+                email: userInfoForm.email,
+                username: userInfoForm.username,
+                age: userInfoForm.age,
+                gender: userInfoForm.gender,
+                address_str: userInfoForm.address_str,
+                home_center: userInfoForm.home_center
+            };
+
+            await api.put('/api/user/profile', payload);
+
+            // Save location info too
+            if (userInfoForm.address_str || userInfoForm.home_center) {
+                await userApi.updateUserInfo({
+                    address_str: userInfoForm.address_str,
+                    home_center: userInfoForm.home_center
+                });
+            }
+
+            await refreshUser();
+            setIsEditingUserInfo(false);
+            setSuccessMessage('User information updated successfully!');
+            setTimeout(() => setSuccessMessage(''), 3000);
+        } catch (error: unknown) {
+            console.error('Error updating user info:', error);
+            const errorMsg = error instanceof Error ? error.message : 'Failed to update user information';
+            setErrorMessage(errorMsg);
+        } finally {
+            setIsUpdatingUserInfo(false);
+        }
+    };
+
+    // ===== USBC HANDLERS (Conditional based on age) =====
+    const handleUSBCFormChange = (field: string, value: string | boolean) => {
+        setUsbcForm(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
+
+    const handleUSBCUpdate = async () => {
+        try {
+            setIsUpdatingUSBC(true);
+            setErrorMessage('');
+
+            const payload = {
+                is_youth: usbcForm.is_youth,
+                is_coach: usbcForm.is_coach,
+                ...(usbcForm.usbc_card_number && { usbc_card_number: usbcForm.usbc_card_number })
+            };
+
+            await userApi.updateUserInfo(payload);
+            await refreshUser();
+            setIsEditingUSBC(false);
+            setSuccessMessage('USBC information updated successfully!');
+            setTimeout(() => setSuccessMessage(''), 3000);
+        } catch (error: unknown) {
+            console.error('Error updating USBC info:', error);
+            const errorMsg = error instanceof Error ? error.message : 'Failed to update USBC information';
+            setErrorMessage(errorMsg);
+        } finally {
+            setIsUpdatingUSBC(false);
+        }
+    };
+
+    const handleBrandToggle = (category: keyof typeof selectedBrands, brandId: number) => {
+        setSelectedBrands(prev => ({
+            ...prev,
+            [category]: prev[category].includes(brandId)
+                ? prev[category].filter(id => id !== brandId)
+                : [...prev[category], brandId]
+        }));
+    };
+
+    const handleBrandsUpdate = async () => {
+        try {
+            setIsUpdatingBrands(true);
+            setErrorMessage('');
+
+            // Flatten all selected brand IDs into a single array
+            const allBrandIDs = [
+                ...selectedBrands.balls,
+                ...selectedBrands.shoes,
+                ...selectedBrands.accessories,
+                ...selectedBrands.apparels
+            ];
+
+            // Call the API to update favorite brands
+            await userApi.updateFavoriteBrands(allBrandIDs);
+
+            await refreshUser();
+            setIsEditingBrands(false);
+            setSuccessMessage('Favorite brands updated successfully!');
+            setTimeout(() => setSuccessMessage(''), 3000);
+        } catch (error: unknown) {
+            console.error('Error updating brands:', error);
+            const errorMsg = error instanceof Error ? error.message : 'Failed to update favorite brands';
+            setErrorMessage(errorMsg);
+        } finally {
+            setIsUpdatingBrands(false);
+        }
+    };
+
+    const toggleGroup = (group: keyof typeof expandedGroups) => {
+        setExpandedGroups(prev => ({
+            ...prev,
+            [group]: !prev[group]
         }));
     };
 
@@ -227,7 +579,21 @@ export default function ProfilePage() {
                     </div>
 
                     {/* Profile Sidebar */}
-                    <div className="lg:col-span-1">
+                    <div className="lg:col-span-1 space-y-4">
+                        {/* Success/Error Messages */}
+                        {successMessage && (
+                            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm flex items-start gap-2">
+                                <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                                <p>{successMessage}</p>
+                            </div>
+                        )}
+                        {errorMessage && (
+                            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-start gap-2">
+                                <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                                <p>{errorMessage}</p>
+                            </div>
+                        )}
+
                         <div className="bg-white rounded-lg shadow-sm p-6">
                             {/* Profile Header */}
                             <div className="text-center mb-6">
@@ -242,9 +608,10 @@ export default function ProfilePage() {
                                 <p className="text-green-600 font-medium">{user?.is_pro ? "Pro Player" : "Amateur Player"}</p>
                                 <button
                                     onClick={() => router.push('/profile/edit')}
-                                    className="text-green-600 text-sm hover:underline"
+                                    className="text-green-600 text-sm hover:underline flex items-center justify-center gap-1 mx-auto mt-2"
                                 >
-                                    Edit Profile
+                                    <Edit className="w-4 h-4" />
+                                    Edit Photos & Basic
                                 </button>
                             </div>
 
@@ -259,165 +626,594 @@ export default function ProfilePage() {
                                     <div className="text-sm text-gray-600">XP</div>
                                 </div>
                             </div>
+                        </div>
 
-                            {/* Bowling Statistics */}
-                            <div className="mb-6">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="text-lg font-semibold text-gray-900">Bowling Statistics</h3>
-                                    <button
-                                        onClick={() => setIsEditingStats(!isEditingStats)}
-                                        className="text-green-600 text-sm hover:underline"
-                                    >
-                                        {isEditingStats ? 'Cancel' : 'Edit'}
-                                    </button>
-                                </div>
-
-                                {isEditingStats ? (
-                                    /* Edit Form */
-                                    <div className="space-y-4">
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Average Score
-                                            </label>
-                                            <input
-                                                type="number"
-                                                step="0.1"
-                                                value={statsForm.average_score}
-                                                onChange={(e) => handleStatsFormChange('average_score', e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                disabled={isUpdatingStats}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                High Game
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={statsForm.high_game}
-                                                onChange={(e) => handleStatsFormChange('high_game', e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                disabled={isUpdatingStats}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                High Series
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={statsForm.high_series}
-                                                onChange={(e) => handleStatsFormChange('high_series', e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                disabled={isUpdatingStats}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                                Experience (years)
-                                            </label>
-                                            <input
-                                                type="number"
-                                                value={statsForm.experience}
-                                                onChange={(e) => handleStatsFormChange('experience', e.target.value)}
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                disabled={isUpdatingStats}
-                                            />
-                                        </div>
-
-                                        <button
-                                            onClick={handleStatsUpdate}
-                                            disabled={isUpdatingStats}
-                                            className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg transition-colors"
-                                        >
-                                            {isUpdatingStats ? 'Updating...' : 'Update Statistics'}
-                                        </button>
-                                    </div>
-                                ) : (
-                                    /* Display Mode */
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-gray-600">Avg. Score:</span>
-                                            <span className="font-medium">{user?.stats?.average_score !== undefined ? Math.round(user.stats.average_score) : 'N/A'}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-gray-600">High Game:</span>
-                                            <span className="font-medium">{user?.stats?.high_game !== undefined ? user.stats.high_game : 'N/A'}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-gray-600">High Series:</span>
-                                            <span className="font-medium">{user?.stats?.high_series !== undefined ? user.stats.high_series : 'N/A'}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-gray-600">Experience (yrs):</span>
-                                            <span className="font-medium">{user?.stats?.experience !== undefined ? user.stats.experience : 'N/A'}</span>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Favorite Brands - Only for Non-Pro Players */}
-                            <div className="mb-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                                    {user?.is_pro ? "Sponsors" : "Favorite Brands"}
-                                </h3>
-                                {user?.is_pro && user?.sponsors && user.sponsors.length > 0 ? (
-                                    <div className="space-y-3">
-                                        {user.sponsors.map((sponsor) => (
-                                            <div key={sponsor.brand_id} className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
-                                                <Image
-                                                    src={sponsor.logo_url}
-                                                    alt={`${sponsor.formal_name} logo`}
-                                                    width={32}
-                                                    height={32}
-                                                    className="object-contain"
+                        {/* ===== GROUP 1: GAME STATS ===== */}
+                        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                            <button
+                                onClick={() => toggleGroup('gameStats')}
+                                className="w-full flex justify-between items-center p-6 hover:bg-gray-50 transition-colors"
+                            >
+                                <h3 className="text-lg font-semibold text-gray-900">Bowling Statistics</h3>
+                                {expandedGroups.gameStats ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                            </button>
+                            {expandedGroups.gameStats && (
+                                <div className="border-t px-6 pb-6">
+                                    {isEditingGameStats ? (
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Average Score</label>
+                                                <input
+                                                    type="number"
+                                                    step="0.1"
+                                                    value={gameStatsForm.average_score}
+                                                    onChange={(e) => handleGameStatsFormChange('average_score', e.target.value)}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                    disabled={isUpdatingGameStats}
                                                 />
-                                                <span className="text-sm text-gray-700 flex-1">{sponsor.formal_name}</span>
                                             </div>
-                                        ))}
-                                    </div>
-                                ) : !user?.is_pro && user?.favorite_brands && user.favorite_brands.length > 0 ? (
-                                    <div className="space-y-3">
-                                        {/* Group brands by type */}
-                                        {['Balls', 'Shoes', 'Accessories', 'Apparels'].map((brandType) => {
-                                            const brandsOfType = user.favorite_brands?.filter(brand => brand.brandType === brandType) || [];
-                                            if (brandsOfType.length === 0) return null;
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">High Game</label>
+                                                <input
+                                                    type="number"
+                                                    value={gameStatsForm.high_game}
+                                                    onChange={(e) => handleGameStatsFormChange('high_game', e.target.value)}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                    disabled={isUpdatingGameStats}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">High Series</label>
+                                                <input
+                                                    type="number"
+                                                    value={gameStatsForm.high_series}
+                                                    onChange={(e) => handleGameStatsFormChange('high_series', e.target.value)}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                    disabled={isUpdatingGameStats}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Experience (years)</label>
+                                                <input
+                                                    type="number"
+                                                    value={gameStatsForm.experience}
+                                                    onChange={(e) => handleGameStatsFormChange('experience', e.target.value)}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                    disabled={isUpdatingGameStats}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">Handedness</label>
+                                                <select
+                                                    value={gameStatsForm.handedness}
+                                                    onChange={(e) => handleGameStatsFormChange('handedness', e.target.value)}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                    disabled={isUpdatingGameStats}
+                                                >
+                                                    <option value="">Select</option>
+                                                    <option value="right">Right</option>
+                                                    <option value="left">Left</option>
+                                                    <option value="both">Both</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">Thumb Style</label>
+                                                <select
+                                                    value={gameStatsForm.thumb_style}
+                                                    onChange={(e) => handleGameStatsFormChange('thumb_style', e.target.value)}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                    disabled={isUpdatingGameStats}
+                                                >
+                                                    <option value="">Select</option>
+                                                    <option value="thumb">Thumb</option>
+                                                    <option value="no-thumb">No Thumb</option>
+                                                </select>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => setIsEditingGameStats(false)}
+                                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    onClick={handleGameStatsUpdate}
+                                                    disabled={isUpdatingGameStats}
+                                                    className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white font-medium py-2 px-3 rounded-lg transition-colors"
+                                                >
+                                                    {isUpdatingGameStats ? 'Saving...' : 'Save'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-600">Avg. Score:</span>
+                                                <span className="font-medium">{user?.stats?.average_score !== undefined ? Math.round(user.stats.average_score) : 'N/A'}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-600">High Game:</span>
+                                                <span className="font-medium">{user?.stats?.high_game !== undefined ? user.stats.high_game : 'N/A'}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-600">High Series:</span>
+                                                <span className="font-medium">{user?.stats?.high_series !== undefined ? user.stats.high_series : 'N/A'}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-600">Experience (yrs):</span>
+                                                <span className="font-medium">{user?.stats?.experience !== undefined ? user.stats.experience : 'N/A'}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-600">Handedness:</span>
+                                                <span className="font-medium capitalize">{user?.handedness || 'Not set'}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-600">Thumb Style:</span>
+                                                <span className="font-medium capitalize">{user?.thumb_style?.replace('-', ' ') || 'Not set'}</span>
+                                            </div>
+                                            <button
+                                                onClick={() => setIsEditingGameStats(true)}
+                                                className="w-full mt-4 text-green-600 text-sm hover:underline"
+                                            >
+                                                Edit
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
 
-                                            return (
-                                                <div key={brandType}>
-                                                    <h4 className="text-sm font-medium text-gray-700 mb-2">{brandType}</h4>
-                                                    <div className="grid grid-cols-1 gap-2">
-                                                        {brandsOfType.map((brand) => (
-                                                            <div key={brand.brand_id} className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
-                                                                <Image
-                                                                    src={brand.logo_url}
-                                                                    alt={`${brand.formal_name} logo`}
-                                                                    width={32}
-                                                                    height={32}
-                                                                    className="object-contain"
-                                                                />
-                                                                <span className="text-sm text-gray-700 flex-1">{brand.formal_name}</span>
-                                                            </div>
-                                                        ))}
-                                                    </div>
+                        {/* ===== GROUP 2: USER INFO ===== */}
+                        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                            <button
+                                onClick={() => toggleGroup('userInfo')}
+                                className="w-full flex justify-between items-center p-6 hover:bg-gray-50 transition-colors"
+                            >
+                                <h3 className="text-lg font-semibold text-gray-900">Personal Information</h3>
+                                {expandedGroups.userInfo ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                            </button>
+                            {expandedGroups.userInfo && (
+                                <div className="border-t px-6 pb-6">
+                                    {isEditingUserInfo ? (
+                                        <div className="space-y-4">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                                                    <input
+                                                        type="text"
+                                                        value={userInfoForm.first_name}
+                                                        onChange={(e) => handleUserInfoFormChange('first_name', e.target.value)}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                        disabled={isUpdatingUserInfo}
+                                                    />
                                                 </div>
-                                            );
-                                        })}
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-6 bg-gray-50 rounded-lg">
-                                        <p className="text-gray-500 text-sm">
-                                            {user?.is_pro ? "No sponsors yet" : "No favorite brands selected"}
-                                        </p>
-                                        <p className="text-gray-400 text-xs mt-1">
-                                            {user?.is_pro ? "Add sponsors to your profile" : "Update your preferences in settings"}
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                                                    <input
+                                                        type="text"
+                                                        value={userInfoForm.last_name}
+                                                        onChange={(e) => handleUserInfoFormChange('last_name', e.target.value)}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                        disabled={isUpdatingUserInfo}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                                <input
+                                                    type="email"
+                                                    value={userInfoForm.email}
+                                                    onChange={(e) => handleUserInfoFormChange('email', e.target.value)}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                    disabled={isUpdatingUserInfo}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                                                <input
+                                                    type="text"
+                                                    value={userInfoForm.username}
+                                                    onChange={(e) => handleUserInfoFormChange('username', e.target.value)}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                    disabled={isUpdatingUserInfo}
+                                                />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Age</label>
+                                                    <input
+                                                        type="number"
+                                                        value={userInfoForm.age}
+                                                        onChange={(e) => handleUserInfoFormChange('age', e.target.value)}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                        disabled={isUpdatingUserInfo}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                                                    <select
+                                                        value={userInfoForm.gender}
+                                                        onChange={(e) => handleUserInfoFormChange('gender', e.target.value)}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                        disabled={isUpdatingUserInfo}
+                                                    >
+                                                        <option value="">Select</option>
+                                                        <option value="male">Male</option>
+                                                        <option value="female">Female</option>
+                                                        <option value="other">Other</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                                                <div className="relative">
+                                                    <input
+                                                        type="text"
+                                                        value={userInfoForm.address_str}
+                                                        onChange={(e) => handleAddressChange(e.target.value)}
+                                                        onFocus={() => userInfoForm.address_str && setShowAddressSuggestions(true)}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                        disabled={isUpdatingUserInfo}
+                                                        placeholder="Enter your address"
+                                                        autoComplete="off"
+                                                    />
+                                                    {showAddressSuggestions && addressSuggestions.length > 0 && (
+                                                        <div
+                                                            ref={suggestionsRef}
+                                                            className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto"
+                                                        >
+                                                            {addressSuggestions.map((suggestion) => (
+                                                                <div
+                                                                    key={suggestion.id}
+                                                                    onClick={() => handleSelectAddress(suggestion)}
+                                                                    className="px-4 py-3 hover:bg-green-50 cursor-pointer border-b last:border-b-0"
+                                                                >
+                                                                    <div className="text-sm text-gray-900">{suggestion.place_name}</div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Home Bowling Center</label>
+                                                <div className="relative">
+                                                    <input
+                                                        type="text"
+                                                        value={homeCenterSearch}
+                                                        onChange={(e) => {
+                                                            setHomeCenterSearch(e.target.value);
+                                                            setShowCenterSuggestions(e.target.value.length > 0);
+                                                        }}
+                                                        onFocus={() => setShowCenterSuggestions(true)}
+                                                        onBlur={() => setTimeout(() => setShowCenterSuggestions(false), 200)}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                        disabled={isUpdatingUserInfo}
+                                                        placeholder="Search or select a bowling center"
+                                                        autoComplete="off"
+                                                    />
+                                                    {showCenterSuggestions && (
+                                                        <div
+                                                            ref={centerSuggestionsRef}
+                                                            className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto"
+                                                        >
+                                                            {mockBowlingCenters
+                                                                .filter(center =>
+                                                                    center.name.toLowerCase().includes(homeCenterSearch.toLowerCase()) ||
+                                                                    center.city.toLowerCase().includes(homeCenterSearch.toLowerCase())
+                                                                )
+                                                                .map((center) => (
+                                                                    <div
+                                                                        key={center.id}
+                                                                        onClick={() => {
+                                                                            setUserInfoForm(prev => ({
+                                                                                ...prev,
+                                                                                home_center: center.name
+                                                                            }));
+                                                                            setHomeCenterSearch(center.name);
+                                                                            setShowCenterSuggestions(false);
+                                                                        }}
+                                                                        className="px-4 py-3 hover:bg-green-50 cursor-pointer border-b last:border-b-0"
+                                                                    >
+                                                                        <div className="text-sm font-medium text-gray-900">{center.name}</div>
+                                                                        <div className="text-xs text-gray-500">{center.city}, {center.state}</div>
+                                                                    </div>
+                                                                ))}
+                                                            {mockBowlingCenters.filter(center =>
+                                                                center.name.toLowerCase().includes(homeCenterSearch.toLowerCase()) ||
+                                                                center.city.toLowerCase().includes(homeCenterSearch.toLowerCase())
+                                                            ).length === 0 && homeCenterSearch && (
+                                                                    <div className="px-4 py-3 text-sm text-gray-500">
+                                                                        No bowling centers found. You can still enter a custom name.
+                                                                    </div>
+                                                                )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => setIsEditingUserInfo(false)}
+                                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    onClick={handleUserInfoUpdate}
+                                                    disabled={isUpdatingUserInfo}
+                                                    className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white font-medium py-2 px-3 rounded-lg transition-colors"
+                                                >
+                                                    {isUpdatingUserInfo ? 'Saving...' : 'Save'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-600">Name:</span>
+                                                <span className="font-medium">{user?.first_name} {user?.last_name}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-600">Email:</span>
+                                                <span className="font-medium text-sm">{user?.email || 'N/A'}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-600">Username:</span>
+                                                <span className="font-medium">{user?.username || 'N/A'}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-600">Age:</span>
+                                                <span className="font-medium">{user?.age || 'N/A'}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-600">Gender:</span>
+                                                <span className="font-medium capitalize">{user?.gender || 'N/A'}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-600">Address:</span>
+                                                <span className="font-medium text-sm">{user?.address_str || 'Not set'}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-600">Home Center:</span>
+                                                <span className="font-medium">{user?.home_center || 'Not set'}</span>
+                                            </div>
+                                            <button
+                                                onClick={() => setIsEditingUserInfo(true)}
+                                                className="w-full mt-4 text-green-600 text-sm hover:underline"
+                                            >
+                                                Edit
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* ===== GROUP 3: FAV BRANDS ===== */}
+                        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                            <button
+                                onClick={() => toggleGroup('favBrands')}
+                                className="w-full flex justify-between items-center p-6 hover:bg-gray-50 transition-colors"
+                            >
+                                <h3 className="text-lg font-semibold text-gray-900">{user?.is_pro ? "Sponsors" : "Favorite Brands"}</h3>
+                                {expandedGroups.favBrands ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                            </button>
+                            {expandedGroups.favBrands && (
+                                <div className="border-t px-6 pb-6">
+                                    {user?.is_pro ? (
+                                        <div>
+                                            {user?.sponsors && user.sponsors.length > 0 ? (
+                                                <div className="space-y-3">
+                                                    {user.sponsors.map((sponsor) => (
+                                                        <div key={sponsor.brand_id} className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
+                                                            <Image
+                                                                src={sponsor.logo_url}
+                                                                alt={`${sponsor.formal_name} logo`}
+                                                                width={32}
+                                                                height={32}
+                                                                className="object-contain"
+                                                            />
+                                                            <span className="text-sm text-gray-700 flex-1">{sponsor.formal_name}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <div className="text-center py-6 bg-gray-50 rounded-lg">
+                                                    <p className="text-gray-500 text-sm">No sponsors yet</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : isEditingBrands ? (
+                                        <div className="space-y-6">
+                                            {brandsLoading ? (
+                                                <div className="flex justify-center py-8">
+                                                    <div className="text-gray-500">Loading brands...</div>
+                                                </div>
+                                            ) : brands ? (
+                                                <>
+                                                    {/* Ball Brands */}
+                                                    {brands.Balls && brands.Balls.length > 0 && (
+                                                        <div>
+                                                            <h4 className="text-sm font-medium text-gray-800 mb-3">Ball Brands</h4>
+                                                            <div className="grid grid-cols-1 gap-3">
+                                                                {brands.Balls.map((brand) => (
+                                                                    <label key={brand.brand_id} className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg border hover:bg-gray-50 transition-colors">
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            checked={selectedBrands.balls.includes(brand.brand_id)}
+                                                                            onChange={() => handleBrandToggle('balls', brand.brand_id)}
+                                                                            disabled={isUpdatingBrands}
+                                                                            className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                                                                        />
+                                                                        <Image
+                                                                            src={brand.logo_url}
+                                                                            alt={`${brand.formal_name} logo`}
+                                                                            width={32}
+                                                                            height={32}
+                                                                            className="object-contain"
+                                                                        />
+                                                                        <span className="text-sm text-gray-700 flex-1">{brand.formal_name}</span>
+                                                                    </label>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Shoes */}
+                                                    {brands.Shoes && brands.Shoes.length > 0 && (
+                                                        <div>
+                                                            <h4 className="text-sm font-medium text-gray-800 mb-3">Shoes</h4>
+                                                            <div className="grid grid-cols-1 gap-3">
+                                                                {brands.Shoes.map((brand) => (
+                                                                    <label key={brand.brand_id} className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg border hover:bg-gray-50 transition-colors">
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            checked={selectedBrands.shoes.includes(brand.brand_id)}
+                                                                            onChange={() => handleBrandToggle('shoes', brand.brand_id)}
+                                                                            disabled={isUpdatingBrands}
+                                                                            className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                                                                        />
+                                                                        <Image
+                                                                            src={brand.logo_url}
+                                                                            alt={`${brand.formal_name} logo`}
+                                                                            width={32}
+                                                                            height={32}
+                                                                            className="object-contain"
+                                                                        />
+                                                                        <span className="text-sm text-gray-700 flex-1">{brand.formal_name}</span>
+                                                                    </label>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Accessories */}
+                                                    {brands.Accessories && brands.Accessories.length > 0 && (
+                                                        <div>
+                                                            <h4 className="text-sm font-medium text-gray-800 mb-3">Accessories</h4>
+                                                            <div className="grid grid-cols-1 gap-3">
+                                                                {brands.Accessories.map((brand) => (
+                                                                    <label key={brand.brand_id} className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg border hover:bg-gray-50 transition-colors">
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            checked={selectedBrands.accessories.includes(brand.brand_id)}
+                                                                            onChange={() => handleBrandToggle('accessories', brand.brand_id)}
+                                                                            disabled={isUpdatingBrands}
+                                                                            className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                                                                        />
+                                                                        <Image
+                                                                            src={brand.logo_url}
+                                                                            alt={`${brand.formal_name} logo`}
+                                                                            width={32}
+                                                                            height={32}
+                                                                            className="object-contain"
+                                                                        />
+                                                                        <span className="text-sm text-gray-700 flex-1">{brand.formal_name}</span>
+                                                                    </label>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Apparel */}
+                                                    {brands.Apparels && brands.Apparels.length > 0 && (
+                                                        <div>
+                                                            <h4 className="text-sm font-medium text-gray-800 mb-3">Apparel</h4>
+                                                            <div className="grid grid-cols-1 gap-3">
+                                                                {brands.Apparels.map((brand) => (
+                                                                    <label key={brand.brand_id} className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg border hover:bg-gray-50 transition-colors">
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            checked={selectedBrands.apparels.includes(brand.brand_id)}
+                                                                            onChange={() => handleBrandToggle('apparels', brand.brand_id)}
+                                                                            disabled={isUpdatingBrands}
+                                                                            className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                                                                        />
+                                                                        <Image
+                                                                            src={brand.logo_url}
+                                                                            alt={`${brand.formal_name} logo`}
+                                                                            width={32}
+                                                                            height={32}
+                                                                            className="object-contain"
+                                                                        />
+                                                                        <span className="text-sm text-gray-700 flex-1">{brand.formal_name}</span>
+                                                                    </label>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <div className="text-center py-8">
+                                                    <p className="text-gray-500">Failed to load brands</p>
+                                                </div>
+                                            )}
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => setIsEditingBrands(false)}
+                                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    onClick={handleBrandsUpdate}
+                                                    disabled={isUpdatingBrands}
+                                                    className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white font-medium py-2 px-3 rounded-lg transition-colors"
+                                                >
+                                                    {isUpdatingBrands ? 'Saving...' : 'Save Brands'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            {user?.favorite_brands && user.favorite_brands.length > 0 ? (
+                                                <>
+                                                    {['Balls', 'Shoes', 'Accessories', 'Apparels'].map((brandType) => {
+                                                        const brandsOfType = user.favorite_brands?.filter(brand => brand.brandType === brandType) || [];
+                                                        if (brandsOfType.length === 0) return null;
+
+                                                        return (
+                                                            <div key={brandType}>
+                                                                <h4 className="text-sm font-medium text-gray-700 mb-2">{brandType}</h4>
+                                                                <div className="grid grid-cols-1 gap-2">
+                                                                    {brandsOfType.map((brand) => (
+                                                                        <div key={brand.brand_id} className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
+                                                                            <Image
+                                                                                src={brand.logo_url}
+                                                                                alt={`${brand.formal_name} logo`}
+                                                                                width={32}
+                                                                                height={32}
+                                                                                className="object-contain"
+                                                                            />
+                                                                            <span className="text-sm text-gray-700 flex-1">{brand.formal_name}</span>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                    <button
+                                                        onClick={() => setIsEditingBrands(true)}
+                                                        className="w-full mt-4 text-green-600 text-sm hover:underline"
+                                                    >
+                                                        Edit Brands
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <div className="text-center py-6 bg-gray-50 rounded-lg">
+                                                    <p className="text-gray-500 text-sm">No favorite brands selected</p>
+                                                    <button
+                                                        onClick={() => setIsEditingBrands(true)}
+                                                        className="text-green-600 text-sm hover:underline mt-2"
+                                                    >
+                                                        Add Brands
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
