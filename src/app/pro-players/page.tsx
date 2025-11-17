@@ -6,8 +6,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
-import PlayerCard from '@/app/landing/components/PlayerCard';
-import PlayerCardV2 from '@/app/landing/components/PlayerCardV2';
 import PlayerCardV3 from '@/app/landing/components/PlayerCardV3';
 
 interface ProPlayer {
@@ -61,28 +59,11 @@ export default function ProPlayersPage() {
     const [proPlayers, setProPlayers] = useState<ProPlayer[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [cardVersion, setCardVersion] = useState<'v1' | 'v2' | 'v3'>('v3');
     const [followingStates, setFollowingStates] = useState<{ [key: number]: boolean }>({});
     const [followLoading, setFollowLoading] = useState<{ [key: number]: boolean }>({});
 
-    // Define different card themes for variety (V1)
-    const cardThemes = [
-        { borderColor: "#EE2E55", backgroundColor: "white", pathColor: "#EE2E55" },
-        { borderColor: "#3B82F6", backgroundColor: "rgba(59, 130, 246, 0.08)", pathColor: "#1E40AF" },
-        { borderColor: "#10B981", backgroundColor: "rgba(16, 185, 129, 0.08)", pathColor: "#047857" },
-        { borderColor: "#F59E0B", backgroundColor: "rgba(245, 158, 11, 0.08)", pathColor: "#D97706" },
-        { borderColor: "#8B5CF6", backgroundColor: "rgba(139, 92, 246, 0.08)", pathColor: "#7C3AED" },
-        { borderColor: "#EF4444", backgroundColor: "rgba(239, 68, 68, 0.08)", pathColor: "#DC2626" },
-        { borderColor: "#06B6D4", backgroundColor: "rgba(6, 182, 212, 0.08)", pathColor: "#0891B2" },
-        { borderColor: "#84CC16", backgroundColor: "rgba(132, 204, 22, 0.08)", pathColor: "#65A30D" },
-        { borderColor: "#F97316", backgroundColor: "rgba(249, 115, 22, 0.08)", pathColor: "#EA580C" },
-        { borderColor: "#EC4899", backgroundColor: "rgba(236, 72, 153, 0.08)", pathColor: "#DB2777" },
-        { borderColor: "#14B8A6", backgroundColor: "rgba(20, 184, 166, 0.08)", pathColor: "#0F766E" },
-        { borderColor: "#A855F7", backgroundColor: "rgba(168, 85, 247, 0.08)", pathColor: "#9333EA" },
-    ];
-
-    // Define V2 color themes
-    const cardThemesV2 = [
+    // Define V3 color themes
+    const cardThemesV3 = [
         { primaryColor: "#8BC342", secondaryColor: "#385019", accentColor: "#75B11D" },
         { primaryColor: "#3B82F6", secondaryColor: "#1E3A8A", accentColor: "#60A5FA" },
         { primaryColor: "#8B5CF6", secondaryColor: "#4C1D95", accentColor: "#A78BFA" },
@@ -227,39 +208,6 @@ export default function ProPlayersPage() {
                                 <span>Verified Profiles</span>
                             </div>
                         </div>
-
-                        {/* Card Design Toggle */}
-                        <div className="mt-8 flex items-center justify-center">
-                            <div className="bg-white rounded-lg p-1 shadow-md border">
-                                <button
-                                    onClick={() => setCardVersion('v3')}
-                                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${cardVersion === 'v3'
-                                        ? 'bg-green-600 text-white shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
-                                        }`}
-                                >
-                                    V3 Design (Flutter)
-                                </button>
-                                <button
-                                    onClick={() => setCardVersion('v1')}
-                                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${cardVersion === 'v1'
-                                        ? 'bg-green-600 text-white shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
-                                        }`}
-                                >
-                                    V1 Design
-                                </button>
-                                <button
-                                    onClick={() => setCardVersion('v2')}
-                                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${cardVersion === 'v2'
-                                        ? 'bg-green-600 text-white shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
-                                        }`}
-                                >
-                                    V2 Design
-                                </button>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -270,101 +218,42 @@ export default function ProPlayersPage() {
                     {/* Players Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
                         {proPlayers.map((player, index) => {
-                            const theme = cardThemes[index % cardThemes.length];
-                            const themeV2 = cardThemesV2[index % cardThemesV2.length];
+                            const themeV3 = cardThemesV3[index % cardThemesV3.length];
                             return (
                                 <div key={player.user_id} className="transform hover:scale-105 transition-transform duration-200">
-                                    {cardVersion === 'v3' ? (
-                                        <PlayerCardV3
-                                            player={{
-                                                user_id: player.user_id,
-                                                username: player.username,
-                                                name: player.name,
-                                                profile_picture_url: player.profile_picture_url,
-                                                level: player.level,
-                                                xp: player.xp || 0,
-                                                is_followed: player.is_followed,
-                                                follower_count: player.follower_count || 0,
-                                                stats: {
-                                                    high_game: player.stats?.high_game || 0,
-                                                    high_series: player.stats?.high_series || 0,
-                                                    average_score: player.stats?.average_score || 0,
-                                                },
-                                                engagement: {
-                                                    views: player.engagement?.views || 0,
-                                                    likes: player.engagement?.likes || 0,
-                                                    comments: player.engagement?.comments || 0,
-                                                },
-                                                favorite_brands: player.favorite_brands || [],
-                                            }}
-                                            onTap={() => handleCardClick(player)}
-                                            onFollow={() => {
-                                                const event = { stopPropagation: () => { } } as React.MouseEvent;
-                                                handleFollow(player, event);
-                                            }}
-                                            onCollect={() => console.log('Collect clicked for', player.name)}
-                                            primaryColor={themeV2.primaryColor}
-                                            secondaryColor={themeV2.secondaryColor}
-                                            accentColor={themeV2.accentColor}
-                                            isLoading={followLoading[player.user_id] || false}
-                                        />
-                                    ) : cardVersion === 'v2' ? (
-                                        <PlayerCardV2
-                                            imageUrl={player.profile_picture_url}
-                                            level={player.level}
-                                            name={player.name}
-                                            stats={{
-                                                average: player.stats?.average_score || 0,
-                                                highGame: player.stats?.high_game || 0,
-                                                highSeries: player.stats?.high_series || 0,
-                                                experience: player.stats?.experience || 0,
-                                                Xp: player.xp || 0,
-                                                follower: player.follower_count || 0,
-                                            }}
-                                            primaryColor={themeV2.primaryColor}
-                                            secondaryColor={themeV2.secondaryColor}
-                                            accentColor={themeV2.accentColor}
-                                            width={320}
-                                            height={480}
-                                            playerId={player.user_id}
-                                            username={player.username}
-                                            isFollowed={player.is_followed}
-                                            onFollow={() => {
-                                                const event = { stopPropagation: () => { } } as React.MouseEvent;
-                                                handleFollow(player, event);
-                                            }}
-                                            onCardClick={() => handleCardClick(player)}
-                                            isFollowLoading={followLoading[player.user_id] || false}
-                                        />
-                                    ) : (
-                                        <PlayerCard
-                                            imageUrl={player.profile_picture_url}
-                                            level={player.level}
-                                            name={player.name}
-                                            stats={{
-                                                average: player.stats?.average_score || 0,
-                                                highGame: player.stats?.high_game || 0,
-                                                highSeries: player.stats?.high_series || 0,
-                                                experience: player.stats?.experience || 0,
-                                                Xp: player.xp || 0,
-                                                follower: player.follower_count || 0,
-                                            }}
-                                            borderColor={theme.borderColor}
-                                            backgroundColor={theme.backgroundColor}
-                                            pathColor={theme.pathColor}
-                                            width={320}
-                                            height={480}
-                                            playerId={player.user_id}
-                                            username={player.username}
-                                            isFollowed={player.is_followed}
-                                            onFollow={() => {
-                                                const event = { stopPropagation: () => { } } as React.MouseEvent;
-                                                handleFollow(player, event);
-                                            }}
-                                            onCardClick={() => handleCardClick(player)}
-                                            isFollowLoading={followLoading[player.user_id] || false}
-                                        />
-                                    )}
+                                    <PlayerCardV3
+                                        player={{
+                                            user_id: player.user_id,
+                                            username: player.username,
+                                            name: player.name,
+                                            profile_picture_url: player.profile_picture_url,
+                                            level: player.level,
+                                            xp: player.xp || 0,
+                                            is_followed: player.is_followed,
+                                            follower_count: player.follower_count || 0,
+                                            stats: {
+                                                high_game: player.stats?.high_game || 0,
+                                                high_series: player.stats?.high_series || 0,
+                                                average_score: player.stats?.average_score || 0,
+                                            },
+                                            engagement: {
+                                                views: player.engagement?.views || 0,
+                                                likes: player.engagement?.likes || 0,
+                                                comments: player.engagement?.comments || 0,
+                                            },
+                                            favorite_brands: player.favorite_brands || [],
+                                        }}
+                                        onTap={() => handleCardClick(player)}
+                                        onFollow={() => {
+                                            const event = { stopPropagation: () => { } } as React.MouseEvent;
+                                            handleFollow(player, event);
+                                        }}
+                                        onCollect={() => console.log('Collect clicked for', player.name)}
+                                        primaryColor={themeV3.primaryColor}
+                                        secondaryColor={themeV3.secondaryColor}
+                                        accentColor={themeV3.accentColor}
+                                        isLoading={followLoading[player.user_id] || false}
+                                    />
                                 </div>
                             );
                         })}

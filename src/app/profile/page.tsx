@@ -122,7 +122,9 @@ export default function ProfilePage() {
         age: 0,
         gender: '',
         address_str: '',
-        home_center: ''
+        home_center: '',
+        handedness: '',
+        thumb_style: ''
     });
 
     // Address and center suggestion states
@@ -341,7 +343,9 @@ export default function ProfilePage() {
                 age: user.age || 0,
                 gender: user.gender || '',
                 address_str: user.address_str || '',
-                home_center: user.home_center || ''
+                home_center: user.home_center || '',
+                handedness: user.handedness || '',
+                thumb_style: user.thumb_style || ''
             });
 
             // Set home center search to match home_center
@@ -720,33 +724,6 @@ export default function ProfilePage() {
                                                     disabled={isUpdatingGameStats}
                                                 />
                                             </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">Handedness</label>
-                                                <select
-                                                    value={gameStatsForm.handedness}
-                                                    onChange={(e) => handleGameStatsFormChange('handedness', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                    disabled={isUpdatingGameStats}
-                                                >
-                                                    <option value="">Select</option>
-                                                    <option value="right">Right</option>
-                                                    <option value="left">Left</option>
-                                                    <option value="both">Both</option>
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">Thumb Style</label>
-                                                <select
-                                                    value={gameStatsForm.thumb_style}
-                                                    onChange={(e) => handleGameStatsFormChange('thumb_style', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                    disabled={isUpdatingGameStats}
-                                                >
-                                                    <option value="">Select</option>
-                                                    <option value="thumb">Thumb</option>
-                                                    <option value="no-thumb">No Thumb</option>
-                                                </select>
-                                            </div>
                                             <div className="flex gap-2">
                                                 <button
                                                     onClick={() => setIsEditingGameStats(false)}
@@ -780,14 +757,6 @@ export default function ProfilePage() {
                                             <div className="flex justify-between items-center">
                                                 <span className="text-gray-600">Experience (yrs):</span>
                                                 <span className="font-medium">{user?.stats?.experience !== undefined ? user.stats.experience : 'N/A'}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-gray-600">Handedness:</span>
-                                                <span className="font-medium capitalize">{user?.handedness || 'Not set'}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-gray-600">Thumb Style:</span>
-                                                <span className="font-medium capitalize">{user?.thumb_style?.replace('-', ' ') || 'Not set'}</span>
                                             </div>
                                             <button
                                                 onClick={() => setIsEditingGameStats(true)}
@@ -921,6 +890,35 @@ export default function ProfilePage() {
                                                     )}
                                                 </div>
                                             </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Handedness</label>
+                                                    <select
+                                                        value={userInfoForm.handedness || ''}
+                                                        onChange={(e) => handleUserInfoFormChange('handedness', e.target.value)}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                        disabled={isUpdatingUserInfo}
+                                                    >
+                                                        <option value="">Select</option>
+                                                        <option value="right">Right</option>
+                                                        <option value="left">Left</option>
+                                                        <option value="both">Both</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Thumb Style</label>
+                                                    <select
+                                                        value={userInfoForm.thumb_style || ''}
+                                                        onChange={(e) => handleUserInfoFormChange('thumb_style', e.target.value)}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                        disabled={isUpdatingUserInfo}
+                                                    >
+                                                        <option value="">Select</option>
+                                                        <option value="thumb">Thumb</option>
+                                                        <option value="no-thumb">No Thumb</option>
+                                                    </select>
+                                                </div>
+                                            </div>
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Home Bowling Center</label>
                                                 <div className="relative">
@@ -1022,6 +1020,14 @@ export default function ProfilePage() {
                                             <div className="flex justify-between items-center">
                                                 <span className="text-gray-600">Home Center:</span>
                                                 <span className="font-medium">{user?.home_center || 'Not set'}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-600">Handedness:</span>
+                                                <span className="font-medium capitalize">{user?.handedness || 'Not set'}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-gray-600">Thumb Style:</span>
+                                                <span className="font-medium capitalize">{user?.thumb_style?.replace('-', ' ') || 'Not set'}</span>
                                             </div>
                                             <button
                                                 onClick={() => setIsEditingUserInfo(true)}
