@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { api, userApi } from '@/lib/api';
+import { Brand } from '@/types';
 import UserPostCard from '@/components/UserPostCard';
 import CreatePost from '@/components/CreatePost';
 
@@ -147,7 +148,7 @@ export default function ProfilePage() {
     ];
 
     // Age-based conditional fields
-    const userAge = userInfoForm.age > 0 ? userInfoForm.age : (user?.age || 0);
+    const userAge = userInfoForm.age > 0 ? userInfoForm.age : (user?.info?.age || 0);
     const isUnder18 = userAge > 0 && userAge < 18;
 
     // Helper function to check if bowling statistics are incomplete
@@ -156,8 +157,8 @@ export default function ProfilePage() {
             !user?.stats?.high_game ||
             !user?.stats?.high_series ||
             !user?.stats?.experience ||
-            !user?.handedness ||
-            !user?.thumb_style;
+            !user?.info?.handedness ||
+            !user?.info?.thumb_style;
     };
 
     // Helper function to check if personal information is incomplete
@@ -165,10 +166,10 @@ export default function ProfilePage() {
         return !user?.first_name ||
             !user?.last_name ||
             !user?.email ||
-            !user?.age ||
-            !user?.gender ||
-            !user?.address_str ||
-            !user?.home_center;
+            !user?.info?.age ||
+            !user?.info?.gender ||
+            !user?.info?.address_str ||
+            !user?.info?.home_center;
     };
 
     // Helper function to check if sponsors/brands are incomplete
@@ -331,8 +332,8 @@ export default function ProfilePage() {
                 high_game: user.stats?.high_game || 0,
                 high_series: user.stats?.high_series || 0,
                 experience: user.stats?.experience || 0,
-                handedness: user.handedness || '',
-                thumb_style: user.thumb_style || ''
+                handedness: user.info?.handedness || '',
+                thumb_style: user.info?.thumb_style || ''
             });
 
             setUserInfoForm({
@@ -340,22 +341,22 @@ export default function ProfilePage() {
                 last_name: user.last_name || '',
                 email: user.email || '',
                 username: user.username || '',
-                age: user.age || 0,
-                gender: user.gender || '',
-                address_str: user.address_str || '',
-                home_center: user.home_center || '',
-                handedness: user.handedness || '',
-                thumb_style: user.thumb_style || ''
+                age: user.info?.age || 0,
+                gender: user.info?.gender || '',
+                address_str: user.info?.address_str || '',
+                home_center: user.info?.home_center || '',
+                handedness: user.info?.handedness || '',
+                thumb_style: user.info?.thumb_style || ''
             });
 
             // Set home center search to match home_center
-            setHomeCenterSearch(user.home_center || '');
-            setAddressSearchQuery(user.address_str || '');
+            setHomeCenterSearch(user.info?.home_center || '');
+            setAddressSearchQuery(user.info?.address_str || '');
 
             setUsbcForm({
-                is_youth: user.is_youth || false,
-                is_coach: user.is_coach || false,
-                usbc_card_number: user.usbc_card_number || ''
+                is_youth: user.info?.is_youth || false,
+                is_coach: user.info?.is_coach || false,
+                usbc_card_number: user.info?.usbcCardNumber || ''
             });
         }
     }, [user]);
@@ -375,7 +376,7 @@ export default function ProfilePage() {
                 apparels: [] as number[]
             };
 
-            user.favorite_brands.forEach(brand => {
+            user.favorite_brands.forEach((brand: Brand) => {
                 const categoryKey = (brand.brandType?.toLowerCase() || 'balls') as keyof typeof newSelectedBrands;
                 if (categoryKey in newSelectedBrands) {
                     newSelectedBrands[categoryKey].push(brand.brand_id);
@@ -947,27 +948,27 @@ export default function ProfilePage() {
                                         <div className="space-y-3">
                                             <div className="flex justify-between items-center">
                                                 <span className="text-gray-600">Age:</span>
-                                                <span className="font-medium">{user?.age || 'N/A'}</span>
+                                                <span className="font-medium">{user?.info?.age || 'N/A'}</span>
                                             </div>
                                             <div className="flex justify-between items-center">
                                                 <span className="text-gray-600">Gender:</span>
-                                                <span className="font-medium capitalize">{user?.gender || 'N/A'}</span>
+                                                <span className="font-medium capitalize">{user?.info?.gender || 'N/A'}</span>
                                             </div>
                                             <div className="flex justify-between items-center">
                                                 <span className="text-gray-600">Address:</span>
-                                                <span className="font-medium text-sm">{user?.address_str || 'Not set'}</span>
+                                                <span className="font-medium text-sm">{user?.info?.address_str || 'Not set'}</span>
                                             </div>
                                             <div className="flex justify-between items-center">
                                                 <span className="text-gray-600">Home Center:</span>
-                                                <span className="font-medium">{user?.home_center || 'Not set'}</span>
+                                                <span className="font-medium">{user?.info?.home_center || 'Not set'}</span>
                                             </div>
                                             <div className="flex justify-between items-center">
                                                 <span className="text-gray-600">Handedness:</span>
-                                                <span className="font-medium capitalize">{user?.handedness || 'Not set'}</span>
+                                                <span className="font-medium capitalize">{user?.info?.handedness || 'Not set'}</span>
                                             </div>
                                             <div className="flex justify-between items-center">
                                                 <span className="text-gray-600">Thumb Style:</span>
-                                                <span className="font-medium capitalize">{user?.thumb_style?.replace('-', ' ') || 'Not set'}</span>
+                                                <span className="font-medium capitalize">{user?.info?.thumb_style?.replace('-', ' ') || 'Not set'}</span>
                                             </div>
                                             <button
                                                 onClick={() => setIsEditingUserInfo(true)}
@@ -1004,7 +1005,7 @@ export default function ProfilePage() {
                                         <div>
                                             {user?.sponsors && user.sponsors.length > 0 ? (
                                                 <div className="space-y-3">
-                                                    {user.sponsors.map((sponsor) => (
+                                                    {user.sponsors.map((sponsor: Brand) => (
                                                         <div key={sponsor.brand_id} className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
                                                             <Image
                                                                 src={sponsor.logo_url}
@@ -1169,14 +1170,14 @@ export default function ProfilePage() {
                                             {user?.favorite_brands && user.favorite_brands.length > 0 ? (
                                                 <>
                                                     {['Balls', 'Shoes', 'Accessories', 'Apparels'].map((brandType) => {
-                                                        const brandsOfType = user.favorite_brands?.filter(brand => brand.brandType === brandType) || [];
+                                                        const brandsOfType = user.favorite_brands?.filter((brand: Brand) => brand.brandType === brandType) || [];
                                                         if (brandsOfType.length === 0) return null;
 
                                                         return (
                                                             <div key={brandType}>
                                                                 <h4 className="text-sm font-medium text-gray-700 mb-2">{brandType}</h4>
                                                                 <div className="grid grid-cols-1 gap-2">
-                                                                    {brandsOfType.map((brand) => (
+                                                                    {brandsOfType.map((brand: Brand) => (
                                                                         <div key={brand.brand_id} className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
                                                                             <Image
                                                                                 src={brand.logo_url}
