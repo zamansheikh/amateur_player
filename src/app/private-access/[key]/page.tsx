@@ -62,17 +62,6 @@ export default function PrivateAccessPage() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center px-4">
             <div className="max-w-md w-full text-center space-y-8">
-                {/* Logo */}
-                <div className="flex justify-center">
-                    <Image
-                        src="/logo/logo_for_dark.png"
-                        alt="Bowlers Network Logo"
-                        width={60}
-                        height={60}
-                        className="object-contain"
-                    />
-                </div>
-
                 {/* Main Content */}
                 {loading ? (
                     <div className="space-y-4">
