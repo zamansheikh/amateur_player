@@ -23,7 +23,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
     const [uploadProgress, setUploadProgress] = useState(0);
     const [postingStep, setPostingStep] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
-    
+
     // Poll-related state
     const [isPollMode, setIsPollMode] = useState(false);
     const [pollTitle, setPollTitle] = useState('');
@@ -41,7 +41,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
         const hashtagRegex = /#(\w+)/g;
         const matches = text.match(hashtagRegex);
         if (!matches) return [];
-        
+
         const tags = matches.map(tag => tag.substring(1));
         return [...new Set(tags)];
     };
@@ -117,8 +117,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
     // Validate poll data
     const isPollValid = (): boolean => {
         if (!isPollMode) return true;
-        return pollTitle.trim().length > 0 && 
-               pollOptions.filter(option => option.trim().length > 0).length >= 2;
+        return pollTitle.trim().length > 0 &&
+            pollOptions.filter(option => option.trim().length > 0).length >= 2;
     };
 
     // Helper function to check if a file is a video
@@ -133,7 +133,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         // Validation: Check if there's content or valid poll
         if (isPollMode) {
             if (!isPollValid() || isPosting) return;
@@ -145,18 +145,18 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
             setIsPosting(true);
             setUploadProgress(0);
             setPostingStep('Preparing your post...');
-            
+
             // Simulate initial progress
             setUploadProgress(10);
-            
+
             // Get all tags (from hashtags and manual tags)
             const allTags = getAllTags();
-            
+
             if (isPollMode) {
                 // Create poll post with JSON payload
                 setPostingStep('Creating your poll...');
                 setUploadProgress(50);
-                
+
                 const pollPayload = {
                     caption: postText.trim(),
                     tags: allTags,
@@ -175,18 +175,18 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
             } else {
                 // Create regular post with FormData (for media uploads)
                 const formData = new FormData();
-                
+
                 // Add caption (can be empty if there are media files)
                 formData.append('caption', postText.trim() || '');
-                
+
                 // Add all tags
                 allTags.forEach(tag => {
                     formData.append('tags', tag);
                 });
-                
+
                 setPostingStep('Uploading media files...');
                 setUploadProgress(30);
-                
+
                 // Add media files
                 selectedFiles.forEach(file => {
                     formData.append('media', file);
@@ -208,10 +208,10 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                     }
                 });
             }
-            
+
             setUploadProgress(100);
             setPostingStep(isPollMode ? 'Poll created successfully!' : 'Post created successfully!');
-            
+
             // Reset form
             setPostText('');
             setSelectedFiles([]);
@@ -222,21 +222,21 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
             setPollType('Single');
             setIsPollMode(false);
             setShowSuccess(true);
-            
+
             if (onPostCreated) {
                 onPostCreated();
             }
-            
+
             // Close modal after successful post with a short delay to show success
             setTimeout(() => {
                 handleClose();
             }, 1500);
-            
+
         } catch (error) {
             console.error('Error creating post:', error);
             setPostingStep(`Failed to create ${isPollMode ? 'poll' : 'post'}. Please try again.`);
             setUploadProgress(0);
-            
+
             // Reset posting state after showing error
             setTimeout(() => {
                 setIsPosting(false);
@@ -265,31 +265,29 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div 
-                className={`bg-white rounded-[20px] shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ${
-                    selectedFiles.length > 0 
-                        ? 'w-full max-w-2xl max-h-[85vh]' 
+            <div
+                className={`bg-white rounded-[20px] shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ${selectedFiles.length > 0
+                        ? 'w-full max-w-2xl max-h-[85vh]'
                         : isPollMode
                             ? 'w-[488px] max-h-[90vh]'
                             : 'w-[488px] max-h-[762px]'
-                }`}
+                    }`}
             >
                 {/* Modal Header */}
                 <div className="h-[56px] flex items-center justify-between px-4 border-b border-gray-200 flex-shrink-0">
                     <h2 className="text-xl font-semibold text-gray-900">
-                        {isPosting ? 
-                            (isPollMode ? 'Creating Poll...' : 'Creating Post...') : 
+                        {isPosting ?
+                            (isPollMode ? 'Creating Poll...' : 'Creating Post...') :
                             (isPollMode ? 'Create Poll' : 'Create Post')
                         }
                     </h2>
                     <button
                         onClick={handleClose}
                         disabled={isPosting}
-                        className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                            isPosting 
-                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                        className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isPosting
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                 : 'hover:bg-gray-100 text-gray-600'
-                        }`}
+                            }`}
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -311,10 +309,10 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                                 <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                                 <span className="text-sm font-medium text-blue-900">{postingStep}</span>
                             </div>
-                            
+
                             {/* Progress Bar */}
                             <div className="w-full bg-blue-100 rounded-full h-2 overflow-hidden">
-                                <div 
+                                <div
                                     className="bg-blue-600 h-full rounded-full transition-all duration-300 ease-out"
                                     style={{ width: `${uploadProgress}%` }}
                                 ></div>
@@ -355,15 +353,14 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                                     <textarea
                                         value={postText}
                                         onChange={(e) => setPostText(e.target.value)}
-                                        placeholder={isPollMode 
-                                            ? "Write a caption for your poll... (optional)" 
-                                            : selectedFiles.length > 0 
-                                                ? "Write a caption... (optional)" 
+                                        placeholder={isPollMode
+                                            ? "Write a caption for your poll... (optional)"
+                                            : selectedFiles.length > 0
+                                                ? "Write a caption... (optional)"
                                                 : "What's on your mind? Share your thoughts with the bowling community! 🎳"
                                         }
-                                        className={`w-full h-20 p-3 text-gray-800 placeholder-gray-400 border-0 resize-none focus:outline-none text-base ${
-                                            isPosting ? 'bg-gray-50 cursor-not-allowed' : ''
-                                        }`}
+                                        className={`w-full h-20 p-3 text-gray-800 placeholder-gray-400 border-0 resize-none focus:outline-none text-base ${isPosting ? 'bg-gray-50 cursor-not-allowed' : ''
+                                            }`}
                                         disabled={isPosting}
                                     />
                                 </div>
@@ -375,7 +372,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                                             <BarChart3 className="w-5 h-5 text-blue-600" />
                                             <h4 className="font-medium text-gray-900">Create Poll</h4>
                                         </div>
-                                        
+
                                         {/* Poll Title */}
                                         <div className="mb-3">
                                             <input
@@ -384,9 +381,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                                                 onChange={(e) => setPollTitle(e.target.value)}
                                                 placeholder="Ask a question..."
                                                 disabled={isPosting}
-                                                className={`w-full p-3 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${
-                                                    isPosting ? 'bg-gray-50 cursor-not-allowed' : 'bg-white'
-                                                }`}
+                                                className={`w-full p-3 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${isPosting ? 'bg-gray-50 cursor-not-allowed' : 'bg-white'
+                                                    }`}
                                             />
                                         </div>
 
@@ -434,9 +430,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                                                                 onChange={(e) => updatePollOption(index, e.target.value)}
                                                                 placeholder={`Option ${index + 1}`}
                                                                 disabled={isPosting}
-                                                                className={`w-full p-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${
-                                                                    isPosting ? 'bg-gray-50 cursor-not-allowed' : 'bg-white'
-                                                                }`}
+                                                                className={`w-full p-2 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm ${isPosting ? 'bg-gray-50 cursor-not-allowed' : 'bg-white'
+                                                                    }`}
                                                             />
                                                         </div>
                                                         {pollOptions.length > 2 && (
@@ -452,7 +447,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                                                     </div>
                                                 ))}
                                             </div>
-                                            
+
                                             {/* Add Option Button */}
                                             {pollOptions.length < 5 && (
                                                 <button
@@ -487,7 +482,7 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                                         <div className="flex flex-wrap gap-2">
                                             <span className="text-sm text-gray-500">Tags:</span>
                                             {getAllTags().map((tag, index) => (
-                                                <span 
+                                                <span
                                                     key={index}
                                                     className="text-sm bg-green-100 text-green-700 px-2 py-1 rounded-full flex items-center gap-1"
                                                 >
@@ -516,9 +511,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                                         onKeyDown={addTag}
                                         placeholder="Add tags (press Enter to add)"
                                         disabled={isPosting}
-                                        className={`w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm ${
-                                            isPosting ? 'bg-gray-50 cursor-not-allowed' : ''
-                                        }`}
+                                        className={`w-full p-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm ${isPosting ? 'bg-gray-50 cursor-not-allowed' : ''
+                                            }`}
                                     />
                                 </div>
 
@@ -528,12 +522,11 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                                         <h5 className="text-sm font-medium text-gray-900 mb-2">
                                             Selected Media ({selectedFiles.length})
                                         </h5>
-                                        <div className={`grid gap-2 ${
-                                            selectedFiles.length === 1 ? 'grid-cols-1' :
-                                            selectedFiles.length === 2 ? 'grid-cols-2' :
-                                            selectedFiles.length === 3 ? 'grid-cols-3' :
-                                            'grid-cols-4'
-                                        } max-h-32 overflow-y-auto p-1`}>
+                                        <div className={`grid gap-2 ${selectedFiles.length === 1 ? 'grid-cols-1' :
+                                                selectedFiles.length === 2 ? 'grid-cols-2' :
+                                                    selectedFiles.length === 3 ? 'grid-cols-3' :
+                                                        'grid-cols-4'
+                                            } max-h-32 overflow-y-auto p-1`}>
                                             {selectedFiles.map((file, index) => (
                                                 <div key={index} className="relative group" style={{ aspectRatio: '1/1', height: '120px' }}>
                                                     {isVideo(file) ? (
@@ -591,15 +584,13 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                                             type="button"
                                             onClick={togglePollMode}
                                             disabled={isPosting}
-                                            className={`flex items-center gap-2 p-2 border rounded-lg transition-colors ${
-                                                isPollMode 
+                                            className={`flex items-center gap-2 p-2 border rounded-lg transition-colors ${isPollMode
                                                     ? 'border-blue-500 bg-blue-50 text-blue-700'
                                                     : 'border-gray-200 hover:bg-gray-50'
-                                            } ${isPosting ? 'cursor-not-allowed' : ''}`}
+                                                } ${isPosting ? 'cursor-not-allowed' : ''}`}
                                         >
-                                            <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${
-                                                isPollMode ? 'bg-blue-200' : 'bg-blue-100'
-                                            }`}>
+                                            <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${isPollMode ? 'bg-blue-200' : 'bg-blue-100'
+                                                }`}>
                                                 <BarChart3 className={`w-4 h-4 ${isPollMode ? 'text-blue-700' : 'text-blue-600'}`} />
                                             </div>
                                             <span className="text-xs text-gray-700">
@@ -610,9 +601,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                                         <button
                                             type="button"
                                             disabled={isPosting}
-                                            className={`flex items-center gap-2 p-2 border border-gray-200 rounded-lg transition-colors ${
-                                                isPosting ? 'cursor-not-allowed' : 'hover:bg-gray-50'
-                                            }`}
+                                            className={`flex items-center gap-2 p-2 border border-gray-200 rounded-lg transition-colors ${isPosting ? 'cursor-not-allowed' : 'hover:bg-gray-50'
+                                                }`}
                                         >
                                             <div className="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center">
                                                 <div className="w-4 h-4 bg-green-600 rounded flex items-center justify-center">
@@ -626,13 +616,12 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                                             type="button"
                                             onClick={() => !isPosting && !isPollMode && fileInputRef.current?.click()}
                                             disabled={isPosting || isPollMode}
-                                            className={`flex items-center gap-2 p-2 border border-gray-200 rounded-lg transition-colors ${
-                                                isPollMode 
+                                            className={`flex items-center gap-2 p-2 border border-gray-200 rounded-lg transition-colors ${isPollMode
                                                     ? 'opacity-50 cursor-not-allowed bg-gray-50'
-                                                    : isPosting 
-                                                        ? 'cursor-not-allowed' 
+                                                    : isPosting
+                                                        ? 'cursor-not-allowed'
                                                         : 'hover:bg-gray-50'
-                                            }`}
+                                                }`}
                                         >
                                             <div className="w-6 h-6 bg-purple-100 rounded-lg flex items-center justify-center">
                                                 <Image className="w-4 h-4 text-purple-600" />
@@ -643,9 +632,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                                         <button
                                             type="button"
                                             disabled={isPosting}
-                                            className={`flex items-center gap-2 p-2 border border-gray-200 rounded-lg transition-colors ${
-                                                isPosting ? 'cursor-not-allowed' : 'hover:bg-gray-50'
-                                            }`}
+                                            className={`flex items-center gap-2 p-2 border border-gray-200 rounded-lg transition-colors ${isPosting ? 'cursor-not-allowed' : 'hover:bg-gray-50'
+                                                }`}
                                         >
                                             <div className="w-6 h-6 bg-yellow-100 rounded-lg flex items-center justify-center">
                                                 <span className="text-yellow-600 font-bold text-xs">GIF</span>
@@ -659,16 +647,15 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                                 <button
                                     type="submit"
                                     disabled={
-                                        isPosting || 
+                                        isPosting ||
                                         (isPollMode ? !isPollValid() : (!postText.trim() && selectedFiles.length === 0))
                                     }
-                                    className={`w-full h-10 font-medium rounded-full transition-all duration-200 flex items-center justify-center gap-2 ${
-                                        isPosting
+                                    className={`w-full h-10 font-medium rounded-full transition-all duration-200 flex items-center justify-center gap-2 ${isPosting
                                             ? 'bg-gray-400 cursor-not-allowed text-gray-600'
                                             : (isPollMode ? !isPollValid() : (!postText.trim() && selectedFiles.length === 0))
                                                 ? 'bg-gray-300 cursor-not-allowed text-gray-500'
                                                 : 'bg-green-500 hover:bg-green-600 text-white'
-                                    }`}
+                                        }`}
                                     style={!isPosting && (
                                         isPollMode ? isPollValid() : (postText.trim() || selectedFiles.length > 0)
                                     ) ? { backgroundColor: '#8BC342' } : {}}
@@ -676,8 +663,8 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                                     {isPosting && (
                                         <div className="w-4 h-4 border-2 border-gray-600 border-t-transparent rounded-full animate-spin"></div>
                                     )}
-                                    {isPosting 
-                                        ? (isPollMode ? 'Creating Poll...' : 'Creating Post...') 
+                                    {isPosting
+                                        ? (isPollMode ? 'Creating Poll...' : 'Creating Post...')
                                         : (isPollMode ? 'Create Poll' : 'Post')
                                     }
                                 </button>
