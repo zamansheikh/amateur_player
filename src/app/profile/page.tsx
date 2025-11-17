@@ -453,18 +453,12 @@ export default function ProfilePage() {
                 age: userInfoForm.age,
                 gender: userInfoForm.gender,
                 address_str: userInfoForm.address_str,
-                home_center: userInfoForm.home_center
+                home_center: userInfoForm.home_center,
+                handedness: userInfoForm.handedness,
+                thumb_style: userInfoForm.thumb_style
             };
 
-            await api.put('/api/user/profile', payload);
-
-            // Save location info too
-            if (userInfoForm.address_str || userInfoForm.home_center) {
-                await userApi.updateUserInfo({
-                    address_str: userInfoForm.address_str,
-                    home_center: userInfoForm.home_center
-                });
-            }
+            await api.post('/api/user/info', payload);
 
             await refreshUser();
             setIsEditingUserInfo(false);
