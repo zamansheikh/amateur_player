@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Home, BarChart3, MessageCircle, Settings, Package, Menu, CalendarDays, X, LogOut, Users, Trophy, Target, MessageSquare, Play, Gift, ShoppingCart } from 'lucide-react';
+import { Home, BarChart3, MessageCircle, Settings, Package, Menu, CalendarDays, X, LogOut, Users, Trophy, Target, MessageSquare, Play, Gift, ShoppingCart, Zap } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import GlobalHeader from '@/components/GlobalHeader';
@@ -42,6 +42,7 @@ function ProfileCompletionCheck({ children }: { children: React.ReactNode }) {
 const navigation = [
     { name: 'Newsfeed', href: '/home', icon: Home },
     { name: 'Pro Players', href: '/pro-players', icon: Trophy },
+    { name: 'Trading Cards', href: '/trading-cards', icon: Zap },
     { name: 'Overview', href: '/overview', icon: BarChart3 },
     { name: 'Events', href: '/events', icon: CalendarDays },
     { name: 'Media', href: '/media', icon: Play },
