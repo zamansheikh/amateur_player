@@ -120,12 +120,20 @@ export default function ProfilePage() {
         last_name: '',
         email: '',
         username: '',
-        age: 0,
+        dob: '',
         gender: '',
         address_str: '',
+        lat: '',
+        long: '',
         home_center: '',
         handedness: '',
-        thumb_style: ''
+        thumb_style: '',
+        is_youth: false,
+        is_coach: false,
+        usbcCardNumber: '',
+        parentFirstName: '',
+        parentLastName: '',
+        parentEmail: ''
     });
 
     // Address and center suggestion states
@@ -147,9 +155,22 @@ export default function ProfilePage() {
         { id: 5, name: 'The Bowling Alley', city: 'Downtown LA', state: 'CA', lat: 34.0522, long: -118.2451 }
     ];
 
-    // Age-based conditional fields
-    const userAge = userInfoForm.age > 0 ? userInfoForm.age : (user?.info?.age || 0);
-    const isUnder18 = userAge > 0 && userAge < 18;
+    // Calculate age from DOB
+    const calculateAge = (dobString: string): number => {
+        if (!dobString) return 0;
+        const dob = new Date(dobString);
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const monthDiff = today.getMonth() - dob.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+            age--;
+        }
+        return age;
+    };
+
+    const userAge = userInfoForm.dob ? calculateAge(userInfoForm.dob) : 0;
+    const is13to18 = userAge >= 13 && userAge < 18;
+    const is18Plus = userAge >= 18;
 
     // Helper function to check if bowling statistics are incomplete
     const isGameStatsIncomplete = () => {
@@ -166,10 +187,12 @@ export default function ProfilePage() {
         return !user?.first_name ||
             !user?.last_name ||
             !user?.email ||
-            !user?.info?.age ||
+            !user?.info?.dob ||
             !user?.info?.gender ||
             !user?.info?.address_str ||
-            !user?.info?.home_center;
+            !user?.info?.home_center ||
+            !user?.info?.handedness ||
+            !user?.info?.thumb_style;
     };
 
     // Helper function to check if sponsors/brands are incomplete
@@ -181,14 +204,7 @@ export default function ProfilePage() {
         }
     };
 
-    // USBC fields (shown based on age)
-    const [isEditingUSBC, setIsEditingUSBC] = useState(false);
-    const [isUpdatingUSBC, setIsUpdatingUSBC] = useState(false);
-    const [usbcForm, setUsbcForm] = useState({
-        is_youth: false,
-        is_coach: false,
-        usbc_card_number: ''
-    });
+
 
     // ===== GROUP 3: FAV BRANDS =====
     // (Read-only, no editing needed here)
@@ -341,23 +357,25 @@ export default function ProfilePage() {
                 last_name: user.last_name || '',
                 email: user.email || '',
                 username: user.username || '',
-                age: user.info?.age || 0,
+                dob: user.info?.dob || '',
                 gender: user.info?.gender || '',
                 address_str: user.info?.address_str || '',
+                lat: user.info?.lat || '',
+                long: user.info?.long || '',
                 home_center: user.info?.home_center || '',
                 handedness: user.info?.handedness || '',
-                thumb_style: user.info?.thumb_style || ''
+                thumb_style: user.info?.thumb_style || '',
+                is_youth: user.info?.is_youth || false,
+                is_coach: user.info?.is_coach || false,
+                usbcCardNumber: user.info?.usbcCardNumber || '',
+                parentFirstName: user.info?.parentFirstName || '',
+                parentLastName: user.info?.parentLastName || '',
+                parentEmail: user.info?.parentEmail || ''
             });
 
             // Set home center search to match home_center
             setHomeCenterSearch(user.info?.home_center || '');
             setAddressSearchQuery(user.info?.address_str || '');
-
-            setUsbcForm({
-                is_youth: user.info?.is_youth || false,
-                is_coach: user.info?.is_coach || false,
-                usbc_card_number: user.info?.usbcCardNumber || ''
-            });
         }
     }, [user]);
 
@@ -434,10 +452,10 @@ export default function ProfilePage() {
     };
 
     // ===== USER INFO HANDLERS =====
-    const handleUserInfoFormChange = (field: string, value: string | boolean) => {
+    const handleUserInfoFormChange = (field: string, value: string | boolean | number) => {
         setUserInfoForm(prev => ({
             ...prev,
-            [field]: field === 'age' && typeof value === 'string' ? parseInt(value) || 0 : value
+            [field]: value
         }));
     };
 
@@ -446,17 +464,22 @@ export default function ProfilePage() {
             setIsUpdatingUserInfo(true);
             setErrorMessage('');
 
-            const payload = {
-                first_name: userInfoForm.first_name,
-                last_name: userInfoForm.last_name,
-                email: userInfoForm.email,
-                username: userInfoForm.username,
-                age: userInfoForm.age,
+            // Prepare the payload
+            const payload: any = {
+                dob: userInfoForm.dob,
                 gender: userInfoForm.gender,
                 address_str: userInfoForm.address_str,
+                lat: userInfoForm.lat,
+                long: userInfoForm.long,
                 home_center: userInfoForm.home_center,
                 handedness: userInfoForm.handedness,
-                thumb_style: userInfoForm.thumb_style
+                thumb_style: userInfoForm.thumb_style,
+                is_youth: is13to18, // Auto-set based on age
+                is_coach: is18Plus && userInfoForm.is_coach ? userInfoForm.is_coach : false,
+                usbcCardNumber: is18Plus && userInfoForm.is_coach ? userInfoForm.usbcCardNumber : '',
+                parentFirstName: is13to18 ? userInfoForm.parentFirstName : '',
+                parentLastName: is13to18 ? userInfoForm.parentLastName : '',
+                parentEmail: is13to18 ? userInfoForm.parentEmail : ''
             };
 
             await api.post('/api/user/info', payload);
@@ -471,39 +494,6 @@ export default function ProfilePage() {
             setErrorMessage(errorMsg);
         } finally {
             setIsUpdatingUserInfo(false);
-        }
-    };
-
-    // ===== USBC HANDLERS (Conditional based on age) =====
-    const handleUSBCFormChange = (field: string, value: string | boolean) => {
-        setUsbcForm(prev => ({
-            ...prev,
-            [field]: value
-        }));
-    };
-
-    const handleUSBCUpdate = async () => {
-        try {
-            setIsUpdatingUSBC(true);
-            setErrorMessage('');
-
-            const payload = {
-                is_youth: usbcForm.is_youth,
-                is_coach: usbcForm.is_coach,
-                ...(usbcForm.usbc_card_number && { usbc_card_number: usbcForm.usbc_card_number })
-            };
-
-            await userApi.updateUserInfo(payload);
-            await refreshUser();
-            setIsEditingUSBC(false);
-            setSuccessMessage('USBC information updated successfully!');
-            setTimeout(() => setSuccessMessage(''), 3000);
-        } catch (error: unknown) {
-            console.error('Error updating USBC info:', error);
-            const errorMsg = error instanceof Error ? error.message : 'Failed to update USBC information';
-            setErrorMessage(errorMsg);
-        } finally {
-            setIsUpdatingUSBC(false);
         }
     };
 
@@ -786,32 +776,43 @@ export default function ProfilePage() {
                                 <div className="border-t px-6 pb-6">
                                     {isEditingUserInfo ? (
                                         <div className="space-y-4">
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Age</label>
-                                                    <input
-                                                        type="number"
-                                                        value={userInfoForm.age}
-                                                        onChange={(e) => handleUserInfoFormChange('age', e.target.value)}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                        disabled={isUpdatingUserInfo}
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
-                                                    <select
-                                                        value={userInfoForm.gender}
-                                                        onChange={(e) => handleUserInfoFormChange('gender', e.target.value)}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                        disabled={isUpdatingUserInfo}
-                                                    >
-                                                        <option value="">Select</option>
-                                                        <option value="male">Male</option>
-                                                        <option value="female">Female</option>
-                                                        <option value="other">Other</option>
-                                                    </select>
-                                                </div>
+                                            {/* Date of Birth */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                                                <input
+                                                    type="date"
+                                                    value={userInfoForm.dob ? userInfoForm.dob.split('T')[0] : ''}
+                                                    onChange={(e) => {
+                                                        const dateStr = e.target.value;
+                                                        if (dateStr) {
+                                                            const isoString = new Date(dateStr).toISOString();
+                                                            handleUserInfoFormChange('dob', isoString);
+                                                        }
+                                                    }}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                    disabled={isUpdatingUserInfo}
+                                                />
+                                                {userAge > 0 && (
+                                                    <p className="mt-1 text-sm text-gray-600">Age: {userAge} years old</p>
+                                                )}
                                             </div>
+
+                                            {/* Gender */}
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                                                <select
+                                                    value={userInfoForm.gender}
+                                                    onChange={(e) => handleUserInfoFormChange('gender', e.target.value)}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                    disabled={isUpdatingUserInfo}
+                                                >
+                                                    <option value="">Select</option>
+                                                    <option value="male">Male</option>
+                                                    <option value="female">Female</option>
+                                                    <option value="other">Other</option>
+                                                </select>
+                                            </div>
+                                            {/* Address with Mapbox */}
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
                                                 <div className="relative">
@@ -833,7 +834,17 @@ export default function ProfilePage() {
                                                             {addressSuggestions.map((suggestion) => (
                                                                 <div
                                                                     key={suggestion.id}
-                                                                    onClick={() => handleSelectAddress(suggestion)}
+                                                                    onClick={() => {
+                                                                        setUserInfoForm(prev => ({
+                                                                            ...prev,
+                                                                            address_str: suggestion.place_name,
+                                                                            lat: suggestion.center[1].toString(),
+                                                                            long: suggestion.center[0].toString()
+                                                                        }));
+                                                                        setAddressSearchQuery(suggestion.place_name);
+                                                                        setShowAddressSuggestions(false);
+                                                                        setAddressSuggestions([]);
+                                                                    }}
                                                                     className="px-4 py-3 hover:bg-green-50 cursor-pointer border-b last:border-b-0"
                                                                 >
                                                                     <div className="text-sm text-gray-900">{suggestion.place_name}</div>
@@ -842,6 +853,7 @@ export default function ProfilePage() {
                                                         </div>
                                                     )}
                                                 </div>
+                                                <p className="mt-1 text-xs text-gray-500">Location will be saved automatically</p>
                                             </div>
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div>
@@ -928,7 +940,84 @@ export default function ProfilePage() {
                                                     )}
                                                 </div>
                                             </div>
-                                            <div className="flex gap-2">
+
+                                            {/* Parent Information (for ages 13-18) */}
+                                            {is13to18 && (
+                                                <div className="border-t-2 border-yellow-300 pt-4 mt-4">
+                                                    <h4 className="text-sm font-semibold text-gray-800 mb-3 bg-yellow-50 p-2 rounded">Parent/Guardian Information</h4>
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-gray-700 mb-1">Parent First Name</label>
+                                                            <input
+                                                                type="text"
+                                                                value={userInfoForm.parentFirstName}
+                                                                onChange={(e) => handleUserInfoFormChange('parentFirstName', e.target.value)}
+                                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                                disabled={isUpdatingUserInfo}
+                                                                placeholder="First name"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-gray-700 mb-1">Parent Last Name</label>
+                                                            <input
+                                                                type="text"
+                                                                value={userInfoForm.parentLastName}
+                                                                onChange={(e) => handleUserInfoFormChange('parentLastName', e.target.value)}
+                                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                                disabled={isUpdatingUserInfo}
+                                                                placeholder="Last name"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-700 mb-1 mt-3">Parent Email</label>
+                                                        <input
+                                                            type="email"
+                                                            value={userInfoForm.parentEmail}
+                                                            onChange={(e) => handleUserInfoFormChange('parentEmail', e.target.value)}
+                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                            disabled={isUpdatingUserInfo}
+                                                            placeholder="Parent email"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Coach & USBC Information (for ages 18+) */}
+                                            {is18Plus && (
+                                                <div className="border-t-2 border-blue-300 pt-4 mt-4">
+                                                    <h4 className="text-sm font-semibold text-gray-800 mb-3 bg-blue-50 p-2 rounded">Professional Information</h4>
+                                                    <div className="flex items-center gap-2 mb-3">
+                                                        <input
+                                                            type="checkbox"
+                                                            id="is_coach"
+                                                            checked={userInfoForm.is_coach}
+                                                            onChange={(e) => handleUserInfoFormChange('is_coach', e.target.checked)}
+                                                            className="w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                                                            disabled={isUpdatingUserInfo}
+                                                        />
+                                                        <label htmlFor="is_coach" className="text-sm font-medium text-gray-700 cursor-pointer">
+                                                            Are you a coach?
+                                                        </label>
+                                                    </div>
+
+                                                    {userInfoForm.is_coach && (
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-gray-700 mb-1">USBC Card Number</label>
+                                                            <input
+                                                                type="text"
+                                                                value={userInfoForm.usbcCardNumber}
+                                                                onChange={(e) => handleUserInfoFormChange('usbcCardNumber', e.target.value)}
+                                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
+                                                                disabled={isUpdatingUserInfo}
+                                                                placeholder="Enter USBC card number"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            <div className="flex gap-2 mt-4">
                                                 <button
                                                     onClick={() => setIsEditingUserInfo(false)}
                                                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
@@ -947,8 +1036,8 @@ export default function ProfilePage() {
                                     ) : (
                                         <div className="space-y-3">
                                             <div className="flex justify-between items-center">
-                                                <span className="text-gray-600">Age:</span>
-                                                <span className="font-medium">{user?.info?.age || 'N/A'}</span>
+                                                <span className="text-gray-600">Date of Birth:</span>
+                                                <span className="font-medium">{user?.info?.dob ? new Date(user.info.dob).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A'} (Age: {calculateAge(user?.info?.dob || '')})</span>
                                             </div>
                                             <div className="flex justify-between items-center">
                                                 <span className="text-gray-600">Gender:</span>
@@ -970,6 +1059,21 @@ export default function ProfilePage() {
                                                 <span className="text-gray-600">Thumb Style:</span>
                                                 <span className="font-medium capitalize">{user?.info?.thumb_style?.replace('-', ' ') || 'Not set'}</span>
                                             </div>
+                                            {user?.info?.is_youth && (
+                                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-3">
+                                                    <h4 className="text-sm font-semibold text-yellow-800 mb-2">Parent/Guardian Information</h4>
+                                                    <div className="space-y-1 text-sm text-yellow-700">
+                                                        <p><span className="font-medium">Name:</span> {user.info.parentFirstName} {user.info.parentLastName}</p>
+                                                        <p><span className="font-medium">Email:</span> {user.info.parentEmail}</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {user?.info?.is_coach && (
+                                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-3">
+                                                    <h4 className="text-sm font-semibold text-blue-800 mb-2">Coach Information</h4>
+                                                    <p className="text-sm text-blue-700"><span className="font-medium">USBC Card:</span> {user.info.usbcCardNumber || 'Not provided'}</p>
+                                                </div>
+                                            )}
                                             <button
                                                 onClick={() => setIsEditingUserInfo(true)}
                                                 className="w-full mt-4 text-green-600 text-sm hover:underline"
