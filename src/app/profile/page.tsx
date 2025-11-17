@@ -787,48 +787,6 @@ export default function ProfilePage() {
                                         <div className="space-y-4">
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                                                    <input
-                                                        type="text"
-                                                        value={userInfoForm.first_name}
-                                                        onChange={(e) => handleUserInfoFormChange('first_name', e.target.value)}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                        disabled={isUpdatingUserInfo}
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                                                    <input
-                                                        type="text"
-                                                        value={userInfoForm.last_name}
-                                                        onChange={(e) => handleUserInfoFormChange('last_name', e.target.value)}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                        disabled={isUpdatingUserInfo}
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                                <input
-                                                    type="email"
-                                                    value={userInfoForm.email}
-                                                    onChange={(e) => handleUserInfoFormChange('email', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                    disabled={isUpdatingUserInfo}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
-                                                <input
-                                                    type="text"
-                                                    value={userInfoForm.username}
-                                                    onChange={(e) => handleUserInfoFormChange('username', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                    disabled={isUpdatingUserInfo}
-                                                />
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div>
                                                     <label className="block text-sm font-medium text-gray-700 mb-1">Age</label>
                                                     <input
                                                         type="number"
@@ -987,18 +945,6 @@ export default function ProfilePage() {
                                         </div>
                                     ) : (
                                         <div className="space-y-3">
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-gray-600">Name:</span>
-                                                <span className="font-medium">{user?.first_name} {user?.last_name}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-gray-600">Email:</span>
-                                                <span className="font-medium text-sm">{user?.email || 'N/A'}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-gray-600">Username:</span>
-                                                <span className="font-medium">{user?.username || 'N/A'}</span>
-                                            </div>
                                             <div className="flex justify-between items-center">
                                                 <span className="text-gray-600">Age:</span>
                                                 <span className="font-medium">{user?.age || 'N/A'}</span>

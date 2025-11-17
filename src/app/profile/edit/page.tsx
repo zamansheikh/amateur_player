@@ -328,9 +328,11 @@ export default function EditProfilePage() {
                                 name="username"
                                 value={formData.username}
                                 onChange={handleInputChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                required
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 bg-gray-100 cursor-not-allowed"
+                                disabled={true}
+                                title="Username cannot be changed"
                             />
+                            <p className="text-xs text-gray-500 mt-1">Username cannot be changed</p>
                         </div>
 
                         <div>
