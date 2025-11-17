@@ -58,6 +58,43 @@ export interface User {
     access_token?: string;
 }
 
+export interface Tournament {
+    id: number;
+    name: string;
+    start_date: string;
+    reg_deadline: string;
+    format: string;
+    reg_fee: number;
+    address?: string;
+    description?: string;
+    max_participants?: number;
+    prize_pool?: number;
+    access_type?: string;
+    already_enrolled?: number;
+}
+
+export interface TournamentTeam {
+    display_name: string;
+    profile_picture: string;
+    players: Array<{
+        user_id: number;
+        name: string;
+        profile_picture_url: string;
+        level: number;
+    }>;
+}
+
+export interface MetricCardProps {
+    title: string;
+    value: string | number;
+    icon: React.ComponentType<{ className?: string }>;
+    color?: 'green' | 'blue' | 'red';
+    trend?: {
+        value: number;
+        isPositive: boolean;
+    };
+}
+
 export interface AuthContextType {
     user: User | null;
     isLoading: boolean;

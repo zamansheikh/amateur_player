@@ -27,7 +27,7 @@ export default function EventCard({ tournament }: EventCardProps) {
     };
 
     const isUpcoming = new Date(tournament.reg_deadline) > new Date();
-    const isRegistered = tournament.already_enrolled > 0;
+    const isRegistered = (tournament.already_enrolled ?? 0) > 0;
 
     return (
         <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-all duration-200 hover:border-green-200">

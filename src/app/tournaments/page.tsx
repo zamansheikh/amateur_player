@@ -259,10 +259,10 @@ export default function TournamentsPage() {
         // Filter by tab
         if (activeTab === 'Registered') {
             // Show tournaments where user is already enrolled
-            filtered = filtered.filter(tournament => tournament.already_enrolled > 0);
+            filtered = filtered.filter(tournament => (tournament.already_enrolled ?? 0) > 0);
         } else if (activeTab === 'Available') {
             // Show tournaments where user is not enrolled
-            filtered = filtered.filter(tournament => tournament.already_enrolled === 0);
+            filtered = filtered.filter(tournament => (tournament.already_enrolled ?? 0) === 0);
         }
         // 'All Tournament' shows all tournaments
 
@@ -284,7 +284,7 @@ export default function TournamentsPage() {
     const filteredTournaments = getFilteredTournaments();
 
     const handleRegistration = async (tournament: Tournament) => {
-        if (tournament.already_enrolled > 0) {
+        if ((tournament.already_enrolled ?? 0) > 0) {
             // Handle unregistration
             try {
                 await tournamentApi.unregisterFromTournament(tournament.id);
@@ -416,7 +416,7 @@ export default function TournamentsPage() {
         <div key={tournament.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
             <div className="flex justify-between items-start mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">{tournament.name}</h3>
-                {tournament.already_enrolled > 0 && (
+                {(tournament.already_enrolled ?? 0) > 0 && (
                     <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
                         Registered
                     </span>
@@ -459,12 +459,12 @@ export default function TournamentsPage() {
                 </Link>
                 <button
                     onClick={() => handleRegistration(tournament)}
-                    className={`flex-1 py-2 px-4 rounded-lg transition-colors ${tournament.already_enrolled > 0
+                    className={`flex-1 py-2 px-4 rounded-lg transition-colors ${(tournament.already_enrolled ?? 0) > 0
                         ? 'border border-red-600 text-red-600 hover:bg-red-50'
                         : 'border border-green-600 text-green-600 hover:bg-green-50'
                         }`}
                 >
-                    {tournament.already_enrolled > 0 ? 'Unregister' : 'Register'}
+                    {(tournament.already_enrolled ?? 0) > 0 ? 'Unregister' : 'Register'}
                 </button>
             </div>
         </div>

@@ -12,7 +12,7 @@ export default function TournamentDetailsPage() {
     const params = useParams();
     const router = useRouter();
     const tournamentId = params.id as string;
-    
+
     const [tournament, setTournament] = useState<Tournament | null>(null);
     const [teams, setTeams] = useState<TournamentTeam[]>([]);
     const [loading, setLoading] = useState(true);
@@ -23,11 +23,11 @@ export default function TournamentDetailsPage() {
         const fetchTournamentAndTeams = async () => {
             try {
                 setLoading(true);
-                
+
                 // Fetch all tournaments to find the specific one
                 const allTournaments = await tournamentApi.getTournaments();
                 const foundTournament = allTournaments.find((t: Tournament) => t.id.toString() === tournamentId);
-                
+
                 if (foundTournament) {
                     setTournament(foundTournament);
                 } else {
@@ -63,9 +63,9 @@ export default function TournamentDetailsPage() {
 
     const handleRegistration = async () => {
         if (!tournament) return;
-        
+
         try {
-            if (tournament.already_enrolled > 0) {
+            if ((tournament.already_enrolled ?? 0) > 0) {
                 await tournamentApi.unregisterFromTournament(tournament.id);
                 setTournament(prev => prev ? { ...prev, already_enrolled: 0 } : null);
             } else {
@@ -93,7 +93,7 @@ export default function TournamentDetailsPage() {
                 <div className="text-center">
                     <div className="text-red-500 text-lg mb-2">Error</div>
                     <p className="text-gray-500 mb-4">{error || 'Tournament not found'}</p>
-                    <button 
+                    <button
                         onClick={() => router.back()}
                         className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition-colors"
                     >
@@ -119,7 +119,7 @@ export default function TournamentDetailsPage() {
                         <h1 className="text-2xl font-semibold text-gray-900">{tournament.name}</h1>
                         <p className="text-sm text-gray-600 mt-1">Tournament Details</p>
                     </div>
-                    {tournament.already_enrolled > 0 && (
+                    {(tournament.already_enrolled ?? 0) > 0 && (
                         <span className="bg-green-500 text-white px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
                             <Trophy className="w-4 h-4" />
                             Registered
@@ -135,7 +135,7 @@ export default function TournamentDetailsPage() {
                         {/* Main Info Card */}
                         <div className="bg-white rounded-lg border border-gray-200 p-6">
                             <h2 className="text-xl font-semibold text-gray-900 mb-6">Tournament Information</h2>
-                            
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-3">
@@ -149,7 +149,7 @@ export default function TournamentDetailsPage() {
                                             </p>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                                             <Users className="w-5 h-5 text-blue-600" />
@@ -214,7 +214,7 @@ export default function TournamentDetailsPage() {
                             <h2 className="text-xl font-semibold text-gray-900 mb-6">
                                 Registered {tournament.format === 'Singles' ? 'Players' : 'Teams'}
                             </h2>
-                            
+
                             {teamsLoading ? (
                                 <div className="text-center py-8">
                                     <div className="text-gray-500">Loading registered participants...</div>
@@ -238,7 +238,7 @@ export default function TournamentDetailsPage() {
                                                     <p className="text-sm text-gray-600">{team.players.length} player(s)</p>
                                                 </div>
                                             </div>
-                                            
+
                                             {team.players.length > 0 && (
                                                 <div className="space-y-2">
                                                     <p className="text-sm font-medium text-gray-700">Team Members:</p>
@@ -279,7 +279,7 @@ export default function TournamentDetailsPage() {
                     <div className="lg:col-span-1">
                         <div className="bg-white rounded-lg border border-gray-200 p-6 sticky top-6">
                             <h3 className="text-lg font-semibold text-gray-900 mb-4">Tournament Registration</h3>
-                            
+
                             <div className="space-y-4 mb-6">
                                 <div className="flex justify-between items-center">
                                     <span className="text-sm text-gray-600">Registration Fee</span>
@@ -291,12 +291,11 @@ export default function TournamentDetailsPage() {
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span className="text-sm text-gray-600">Status</span>
-                                    <span className={`text-sm font-medium ${
-                                        tournament.already_enrolled > 0 
-                                            ? 'text-green-600' 
-                                            : 'text-blue-600'
-                                    }`}>
-                                        {tournament.already_enrolled > 0 ? 'Registered' : 'Open'}
+                                    <span className={`text-sm font-medium ${(tournament.already_enrolled ?? 0) > 0
+                                        ? 'text-green-600'
+                                        : 'text-blue-600'
+                                        }`}>
+                                        {(tournament.already_enrolled ?? 0) > 0 ? 'Registered' : 'Open'}
                                     </span>
                                 </div>
                             </div>
@@ -304,13 +303,12 @@ export default function TournamentDetailsPage() {
                             <div className="border-t pt-4">
                                 <button
                                     onClick={handleRegistration}
-                                    className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
-                                        tournament.already_enrolled > 0
-                                            ? 'border-2 border-red-600 text-red-600 hover:bg-red-50'
-                                            : 'bg-green-600 hover:bg-green-700 text-white'
-                                    }`}
+                                    className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${(tournament.already_enrolled ?? 0) > 0
+                                        ? 'border-2 border-red-600 text-red-600 hover:bg-red-50'
+                                        : 'bg-green-600 hover:bg-green-700 text-white'
+                                        }`}
                                 >
-                                    {tournament.already_enrolled > 0 ? 'Unregister from Tournament' : 'Register for Tournament'}
+                                    {(tournament.already_enrolled ?? 0) > 0 ? 'Unregister from Tournament' : 'Register for Tournament'}
                                 </button>
                             </div>
 
