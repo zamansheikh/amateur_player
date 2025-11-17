@@ -213,7 +213,7 @@ export default function ProfilePage() {
     const [expandedGroups, setExpandedGroups] = useState({
         gameStats: true,
         userInfo: false,
-        favBrands: false
+        favBrands: true
     });
     const [successMessage, setSuccessMessage] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
@@ -785,12 +785,26 @@ export default function ProfilePage() {
                                                     onChange={(e) => {
                                                         const dateStr = e.target.value;
                                                         if (dateStr) {
-                                                            const isoString = new Date(dateStr).toISOString();
-                                                            handleUserInfoFormChange('dob', isoString);
+                                                            const selectedDate = new Date(dateStr);
+                                                            const today = new Date();
+                                                            let age = today.getFullYear() - selectedDate.getFullYear();
+                                                            const monthDiff = today.getMonth() - selectedDate.getMonth();
+                                                            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < selectedDate.getDate())) {
+                                                                age--;
+                                                            }
+
+                                                            // Only allow if user is 13 or older
+                                                            if (age >= 13) {
+                                                                const isoString = selectedDate.toISOString();
+                                                                handleUserInfoFormChange('dob', isoString);
+                                                            } else {
+                                                                alert('Users must be at least 13 years old to use this platform.');
+                                                            }
                                                         }
                                                     }}
                                                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
                                                     disabled={isUpdatingUserInfo}
+                                                    max={new Date(new Date().getFullYear() - 13, new Date().getMonth(), new Date().getDate()).toISOString().split('T')[0]}
                                                 />
                                                 {userAge > 0 && (
                                                     <p className="mt-1 text-sm text-gray-600">Age: {userAge} years old</p>
