@@ -106,13 +106,13 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
                                         unoptimized
                                         className="rounded"
                                     />
-                                    <span className="text-xl font-bold text-white">Bowlersnetwork</span>
+                                    <span className="text-xl font-bold text-white">BowlersNetwork</span>
                                 </div>
 
                                 {/* Welcome Message */}
                                 <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
                                     <div className="mb-6">
-                                        <h3 className="text-white text-lg font-semibold mb-2">Welcome to Bowlersnetwork</h3>
+                                        <h3 className="text-white text-lg font-semibold mb-2">Welcome to BowlersNetwork</h3>
                                         <p className="text-gray-300 text-sm">Login for full access to connect with players, view exclusive content, and join the community.</p>
                                     </div>
 
@@ -136,7 +136,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
 
                     {/* Mobile header for public pro routes */}
                     <div className="lg:hidden border-b border-gray-800 px-4 py-3 flex items-center justify-between" style={{ backgroundColor: '#111B05' }}>
-                        <span className="text-lg font-bold text-white">Bowlersnetwork</span>
+                        <span className="text-lg font-bold text-white">BowlersNetwork</span>
                         <Link
                             href="/signin"
                             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
@@ -275,7 +275,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
                                         unoptimized
                                         className="rounded"
                                     />
-                                    <span className="text-xl font-bold text-white">Bowlersnetwork</span>
+                                    <span className="text-xl font-bold text-white">BowlersNetwork</span>
                                 </div>
 
                                 {/* Navigation */}
@@ -361,7 +361,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
                             <button onClick={() => setSidebarOpen(true)} className="p-2 text-gray-300 hover:text-white">
                                 <Menu className="w-6 h-6" />
                             </button>
-                            <span className="text-lg font-bold text-white">Bowlersnetwork</span>
+                            <span className="text-lg font-bold text-white">BowlersNetwork</span>
                             <button
                                 onClick={signout}
                                 className="p-2 text-gray-300 hover:text-red-400 transition-colors"
