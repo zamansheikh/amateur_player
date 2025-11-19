@@ -170,8 +170,8 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
                     {sidebarOpen && (
                         <div className="fixed inset-0 z-40 lg:hidden">
                             <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-                            <div className="relative flex flex-col w-64 h-full bg-gray-900 shadow-xl">
-                                <div className="flex items-center justify-between px-4 py-4 border-b border-gray-700">
+                            <div className="relative flex flex-col w-64 h-full bg-gray-900 shadow-xl overflow-y-auto">
+                                <div className="flex items-center justify-between px-4 py-4 border-b border-gray-700 flex-shrink-0">
                                     <div className="flex items-center gap-3">
                                         <Image
                                             src="/logo/logo_for_dark.png"

@@ -237,9 +237,9 @@ export default function TeamsPage() {
     };
 
     return (
-        <div className="p-6 bg-gray-50 min-h-screen">
+        <div className="p-3 md:p-6 bg-gray-50 min-h-screen">
             {/* Header */}
-            <div className="mb-6 relative h-48 rounded-2xl overflow-hidden shadow-lg">
+            <div className="mb-4 md:mb-6 relative h-32 md:h-48 rounded-2xl overflow-hidden shadow-lg">
                 {/* Gradient background */}
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-400"></div>
                 {/* Overlay */}
@@ -248,20 +248,20 @@ export default function TeamsPage() {
                 <div className="absolute top-0 left-0 w-64 h-64 bg-blue-500 opacity-20 transform -skew-x-12 -translate-x-20 -translate-y-20"></div>
                 <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-400 opacity-20 transform skew-x-12 translate-x-20 -translate-y-20"></div>
                 {/* Content */}
-                <div className="relative z-10 flex items-center justify-between h-full px-8">
-                    <div>
-                        <h1 className="text-2xl font-bold text-white">My Teams</h1>
-                        <p className="text-gray-100 text-sm mt-1">
+                <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between h-full px-4 md:px-8 py-3 md:py-0">
+                    <div className="mb-2 md:mb-0">
+                        <h1 className="text-xl md:text-2xl font-bold text-white">My Teams</h1>
+                        <p className="text-gray-100 text-xs md:text-sm mt-0.5 md:mt-1 hidden md:block">
                             Communications from bowling centers, manufacturers, and BowlersNetwork
                         </p>
                     </div>
-                    <div className="flex items-center gap-4">
-                        <div className="relative">
+                    <div className="flex items-center gap-2 md:gap-4 w-full md:w-auto">
+                        <div className="relative flex-1 md:flex-initial md:w-64">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-300 w-4 h-4" />
                             <input
                                 type="text"
                                 placeholder="Search teams..."
-                                className="pl-10 pr-4 py-2 border border-transparent rounded-lg text-sm focus:ring-2 focus:ring-cyan-300 focus:border-transparent w-64 bg-white bg-opacity-90 text-gray-900 placeholder-gray-500"
+                                className="w-full pl-10 pr-3 py-1.5 md:py-2 border border-transparent rounded-lg text-xs md:text-sm focus:ring-2 focus:ring-cyan-300 focus:border-transparent bg-white bg-opacity-90 text-gray-900 placeholder-gray-500"
                             />
                         </div>
                     </div>
@@ -301,8 +301,8 @@ export default function TeamsPage() {
                             <button
                                 onClick={() => setActiveTab('teams')}
                                 className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors ${activeTab === 'teams'
-                                        ? 'border-green-500 text-green-600'
-                                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                                    ? 'border-green-500 text-green-600'
+                                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
                                     }`}
                             >
                                 Teams ({teams.length})
@@ -310,8 +310,8 @@ export default function TeamsPage() {
                             <button
                                 onClick={() => setActiveTab('pending')}
                                 className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors ${activeTab === 'pending'
-                                        ? 'border-green-500 text-green-600'
-                                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                                    ? 'border-green-500 text-green-600'
+                                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
                                     }`}
                             >
                                 Pending ({invitations.received.length})
@@ -319,8 +319,8 @@ export default function TeamsPage() {
                             <button
                                 onClick={() => setActiveTab('sent')}
                                 className={`whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors ${activeTab === 'sent'
-                                        ? 'border-green-500 text-green-600'
-                                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                                    ? 'border-green-500 text-green-600'
+                                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
                                     }`}
                             >
                                 Sent ({invitations.sent.length})
@@ -338,60 +338,61 @@ export default function TeamsPage() {
                                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
                                     </div>
                                 ) : teams.length > 0 ? (
-                                    <div className="space-y-4">
+                                    <div className="space-y-3">
                                         {teams.map((team) => (
-                                            <div key={team.team_id} className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors">
-                                                <div className="flex items-center justify-between">
+                                            <div key={team.team_id} className="bg-gray-50 rounded-lg p-3 md:p-4 hover:bg-gray-100 transition-colors">
+                                                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4">
                                                     <div
-                                                        className="flex items-center gap-4 flex-1 cursor-pointer"
+                                                        className="flex items-center gap-3 md:gap-4 flex-1 cursor-pointer"
                                                         onClick={() => router.push(`/teams/${team.team_id}`)}
                                                     >
-                                                        <div className="w-12 h-12 rounded-full overflow-hidden">
+                                                        <div className="w-10 md:w-12 h-10 md:h-12 rounded-full flex-shrink-0 overflow-hidden">
                                                             {team.logo_url ? (
                                                                 <img src={team.logo_url} alt={team.name} className="w-full h-full object-cover" />
                                                             ) : (
                                                                 <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                                                                    <span className="text-gray-500 text-lg">👥</span>
+                                                                    <span className="text-gray-500 text-sm md:text-lg">👥</span>
                                                                 </div>
                                                             )}
                                                         </div>
-                                                        <div>
-                                                            <h3 className="text-lg font-semibold text-gray-900 hover:text-green-600 transition-colors">{team.name}</h3>
-                                                            <div className="flex items-center gap-4 text-sm text-gray-500">
-                                                                <span className="text-blue-600">{team.member_count || 0} Members</span>
-                                                                <span>Created {team.created_at}</span>
+                                                        <div className="min-w-0">
+                                                            <h3 className="text-base md:text-lg font-semibold text-gray-900 hover:text-green-600 transition-colors truncate">{team.name}</h3>
+                                                            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs md:text-sm text-gray-500">
+                                                                <span className="text-blue-600 font-medium">{team.member_count || 0} Members</span>
+                                                                <span className="hidden sm:inline">•</span>
+                                                                <span className="hidden sm:inline">Created {team.created_at}</span>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-2">
+                                                    <div className="flex items-center gap-2 md:gap-2">
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 handleTeamChat(team);
                                                             }}
-                                                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+                                                            className="px-2 md:px-3 py-1.5 md:py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs md:text-sm font-medium rounded-lg transition-colors flex items-center gap-1 md:gap-2 whitespace-nowrap"
                                                         >
-                                                            <MessageCircle className="w-4 h-4" />
-                                                            Chat
+                                                            <MessageCircle className="w-3 md:w-4 h-3 md:h-4" />
+                                                            <span className="hidden sm:inline">Chat</span>
                                                         </button>
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 handleManageTeam(team);
                                                             }}
-                                                            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+                                                            className="px-2 md:px-3 py-1.5 md:py-2 bg-green-600 hover:bg-green-700 text-white text-xs md:text-sm font-medium rounded-lg transition-colors flex items-center gap-1 md:gap-2 whitespace-nowrap"
                                                         >
                                                             <span>⚙️</span>
-                                                            Manage
+                                                            <span className="hidden sm:inline">Manage</span>
                                                         </button>
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 handleDeleteTeam(team.team_id);
                                                             }}
-                                                            className="w-10 h-10 bg-gray-100 hover:bg-red-100 rounded-full flex items-center justify-center transition-colors group"
+                                                            className="w-9 md:w-10 h-9 md:h-10 bg-gray-100 hover:bg-red-100 rounded-full flex items-center justify-center transition-colors group flex-shrink-0"
                                                         >
-                                                            <span className="text-gray-600 group-hover:text-red-600 text-lg">🗑️</span>
+                                                            <span className="text-gray-600 group-hover:text-red-600 text-base md:text-lg">🗑️</span>
                                                         </button>
                                                     </div>
                                                 </div>

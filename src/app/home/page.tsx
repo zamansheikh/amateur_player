@@ -119,9 +119,9 @@ export default function HomePage() {
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-100">
-                <div className="max-w-6xl mx-auto px-6 py-6">
-                    <div className="flex gap-8">
-                        <div className="flex-1 max-w-2xl">
+                <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 py-4 md:py-6">
+                    <div className="flex flex-col lg:flex-row gap-4 md:gap-8">
+                        <div className="w-full lg:flex-1 lg:max-w-4xl">
                             <div className="flex items-center justify-center py-12">
                                 <div className="text-center">
                                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
@@ -141,9 +141,9 @@ export default function HomePage() {
     if (error) {
         return (
             <div className="min-h-screen bg-gray-100">
-                <div className="max-w-6xl mx-auto px-6 py-6">
-                    <div className="flex gap-8">
-                        <div className="flex-1 max-w-2xl">
+                <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 py-4 md:py-6">
+                    <div className="flex flex-col lg:flex-row gap-4 md:gap-8">
+                        <div className="w-full lg:flex-1 lg:max-w-4xl">
                             <div className="flex items-center justify-center py-12">
                                 <div className="text-center">
                                     <p className="text-red-600 mb-4">{error}</p>
@@ -167,15 +167,15 @@ export default function HomePage() {
 
     return (
         <div className="min-h-screen bg-gray-100">
-            <div className="max-w-6xl mx-auto px-6 py-6">
-                <div className="flex gap-8">
+            <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 py-4 md:py-6">
+                <div className="flex flex-col lg:flex-row gap-4 md:gap-8">
                     {/* Main Content */}
-                    <div className="flex-1 max-w-4xl">
+                    <div className="w-full lg:flex-1 lg:max-w-4xl">
                         {/* Create Post Section */}
                         <CreatePost onPostCreated={fetchFeed} />
 
                         {/* Posts Feed */}
-                        <div className="space-y-6">
+                        <div className="space-y-4 md:space-y-6">
                             {posts.length === 0 ? (
                                 <div className="text-center py-12">
                                     <p className="text-gray-500 text-lg mb-2">No posts yet</p>

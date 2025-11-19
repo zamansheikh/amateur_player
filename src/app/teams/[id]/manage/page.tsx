@@ -198,9 +198,9 @@ export default function TeamManagePage() {
         <div className="min-h-screen bg-gray-50">
             {/* Header */}
             <div className="bg-white border-b border-gray-200">
-                <div className="max-w-7xl mx-auto px-6 py-4">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
+                <div className="max-w-7xl mx-auto px-3 md:px-6 py-3 md:py-4">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                        <div className="flex items-center gap-3 md:gap-4 min-w-0">
                             <button
                                 onClick={() => router.push('/teams')}
                                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -208,7 +208,7 @@ export default function TeamManagePage() {
                                 <ArrowLeft className="w-5 h-5 text-gray-600" />
                             </button>
                             <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-full overflow-hidden">
+                                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden">
                                     {team.logo_url ? (
                                         <img src={team.logo_url} alt={team.name} className="w-full h-full object-cover" />
                                     ) : (
@@ -225,27 +225,29 @@ export default function TeamManagePage() {
                                 </div>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-col sm:flex-row gap-2 md:gap-3 w-full md:w-auto md:justify-end">
                             <button
+                                aria-label="Open team chat"
                                 onClick={handleTeamChat}
-                                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 transition-colors"
+                                className="w-full sm:w-auto px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 transition-colors text-sm md:text-base"
                             >
                                 <MessageCircle className="w-4 h-4" />
-                                Open Chat
+                                <span className="hidden sm:inline">Open Chat</span>
                             </button>
                             <button
+                                aria-label="Delete team"
                                 onClick={handleDeleteTeam}
-                                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center gap-2 transition-colors"
+                                className="w-full sm:w-auto px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg flex items-center gap-2 transition-colors text-sm md:text-base"
                             >
                                 <Trash2 className="w-4 h-4" />
-                                Delete Team
+                                <span className="hidden sm:inline">Delete Team</span>
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-6 py-8">
+            <div className="max-w-7xl mx-auto px-3 md:px-6 py-8">
                 {/* Members Management */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                     <div className="flex items-center justify-between mb-6">
@@ -263,7 +265,7 @@ export default function TeamManagePage() {
                     {showInviteSection && (
                         <div className="mb-6 p-4 bg-gray-50 rounded-lg">
                             <h4 className="font-medium text-gray-900 mb-3">Invite New Members</h4>
-                            
+
                             {/* Search */}
                             <div className="relative mb-3">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -336,42 +338,42 @@ export default function TeamManagePage() {
                     )}
 
                     {/* Current Members */}
-                    <div className="space-y-3">
-                                {team.members.members.map((member) => (
-                                    <div key={member.member_id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-                                        <div className="w-12 h-12 rounded-full overflow-hidden">
-                                            {member.member.profile_picture_url ? (
-                                                <img src={member.member.profile_picture_url} alt={member.member.name} className="w-full h-full object-cover" />
-                                            ) : (
-                                                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                                                    <span className="text-gray-500 text-lg">👤</span>
-                                                </div>
-                                            )}
+                    <div className="space-y-3 pr-6">
+                        {team.members.members.map((member) => (
+                            <div key={member.member_id} className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg overflow-hidden">
+                                <div className="w-12 h-12 rounded-full overflow-hidden">
+                                    {member.member.profile_picture_url ? (
+                                        <img src={member.member.profile_picture_url} alt={member.member.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                                            <span className="text-gray-500 text-lg">👤</span>
                                         </div>
-                                        <div className="flex-1">
-                                            <h4 className="font-semibold text-gray-900">{member.member.name}</h4>
-                                            <p className="text-sm text-gray-600">@{member.member.username}</p>
-                                            <p className="text-xs text-gray-500">{member.member.email}</p>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            {member.is_creator && (
-                                                <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Creator</span>
-                                            )}
-                                            <button
-                                                onClick={() => handleMemberChat(member.member.username)}
-                                                className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                                                title="Start conversation"
-                                            >
-                                                <MessageCircle className="w-4 h-4" />
-                                            </button>
-                                            <div 
-                                                className="w-4 h-4 rounded-full border-2 border-gray-300"
-                                                style={{ backgroundColor: member.member.card_theme }}
-                                                title="Card Theme"
-                                            ></div>
-                                        </div>
-                                    </div>
-                                ))}
+                                    )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <h4 className="font-semibold text-gray-900">{member.member.name}</h4>
+                                    <p className="text-sm text-gray-600">@{member.member.username}</p>
+                                    <p className="text-xs text-gray-500">{member.member.email}</p>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    {member.is_creator && (
+                                        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Creator</span>
+                                    )}
+                                    <button
+                                        onClick={() => handleMemberChat(member.member.username)}
+                                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                                        title="Start conversation"
+                                    >
+                                        <MessageCircle className="w-4 h-4" />
+                                    </button>
+                                    <div
+                                        className="w-3 h-3 md:w-4 md:h-4 rounded-full border-2 border-gray-300"
+                                        style={{ backgroundColor: member.member.card_theme }}
+                                        title="Card Theme"
+                                    ></div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>

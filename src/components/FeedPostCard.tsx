@@ -274,29 +274,29 @@ export default function FeedPostCard({
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-200">
       {/* Post Header */}
-      <div className="p-6 pb-4">
-        <div className="flex items-center justify-between mb-4">
+      <div className="p-3 md:p-6 pb-2 md:pb-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-3 mb-3 md:mb-4">
           <div
-            className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
+            className="flex items-center gap-2 md:gap-3 cursor-pointer hover:bg-gray-50 p-1 md:p-2 rounded-lg transition-colors flex-shrink-0"
             onClick={handleUserClick}
           >
             <img
               src={post.author.profile_picture_url}
               alt={post.author.name}
-              className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100"
+              className="w-10 md:w-12 h-10 md:h-12 rounded-full object-cover ring-2 ring-gray-100 flex-shrink-0"
             />
-            <div>
-              <h3 className="font-semibold text-gray-900 text-base">
+            <div className="min-w-0">
+              <h3 className="font-semibold text-gray-900 text-sm md:text-base truncate">
                 {post.author.name}
               </h3>
-              <p className="text-sm text-gray-500">{post.metadata.created}</p>
+              <p className="text-xs md:text-sm text-gray-500 truncate">{post.metadata.created}</p>
             </div>
           </div>
           {!post.author.viewer_is_author && (
             <button
-              className={`border px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${post.author.is_following
-                  ? "border-gray-300 text-gray-600 hover:bg-gray-50"
-                  : "border-green-600 text-green-600 hover:bg-green-50 hover:border-green-700"
+              className={`border px-3 md:px-4 py-1 md:py-1.5 rounded-full text-xs md:text-sm font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0 ${post.author.is_following
+                ? "border-gray-300 text-gray-600 hover:bg-gray-50"
+                : "border-green-600 text-green-600 hover:bg-green-50 hover:border-green-700"
                 }`}
               onClick={handleFollow}
             >
@@ -306,9 +306,9 @@ export default function FeedPostCard({
         </div>
 
         {/* Post Content - Clickable */}
-        <div className="mb-4 cursor-pointer" onClick={handlePostClick}>
+        <div className="mb-3 md:mb-4 cursor-pointer" onClick={handlePostClick}>
           {post.caption && (
-            <p className="text-gray-800 leading-relaxed text-[15px] line-height-6">
+            <p className="text-gray-800 leading-relaxed text-sm md:text-[15px] line-height-6 break-words">
               {renderTextWithTags(post.caption, post.tags)}
             </p>
           )}
@@ -316,11 +316,11 @@ export default function FeedPostCard({
 
         {/* Poll Content */}
         {localPost.poll && (
-          <div className="mb-4 bg-gray-50 rounded-lg p-4 border border-gray-200">
-            <h4 className="text-lg font-semibold text-gray-900 mb-3">
+          <div className="mb-3 md:mb-4 bg-gray-50 rounded-lg p-3 md:p-4 border border-gray-200">
+            <h4 className="text-base md:text-lg font-semibold text-gray-900 mb-2 md:mb-3 break-words">
               📊 {localPost.poll.title}
             </h4>
-            <div className="space-y-3">
+            <div className="space-y-2 md:space-y-3">
               {localPost.poll.options.map((option) => {
                 const totalVotes = localPost.poll!.options.reduce((sum, opt) => sum + opt.vote, 0);
                 const percentage = totalVotes > 0 ? (option.vote / totalVotes) * 100 : 0;
@@ -331,11 +331,11 @@ export default function FeedPostCard({
                     <button
                       onClick={() => handlePollVote(option.option_id)}
                       disabled={isVoting || selectedPollOption !== null}
-                      className={`w-full text-left p-3 rounded-lg border transition-all duration-200 relative overflow-hidden ${isSelected
-                          ? 'border-green-500 bg-green-50 text-green-700'
-                          : selectedPollOption !== null || totalVotes > 0
-                            ? 'border-gray-300 bg-white text-gray-700 cursor-default'
-                            : 'border-gray-300 bg-white text-gray-700 hover:border-green-400 hover:bg-green-50'
+                      className={`w-full text-left p-2 md:p-3 rounded-lg border transition-all duration-200 relative overflow-hidden ${isSelected
+                        ? 'border-green-500 bg-green-50 text-green-700'
+                        : selectedPollOption !== null || totalVotes > 0
+                          ? 'border-gray-300 bg-white text-gray-700 cursor-default'
+                          : 'border-gray-300 bg-white text-gray-700 hover:border-green-400 hover:bg-green-50'
                         } ${isVoting ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                       {/* Progress bar background */}
@@ -348,14 +348,14 @@ export default function FeedPostCard({
                       )}
 
                       {/* Option content */}
-                      <div className="relative flex items-center justify-between">
-                        <span className="font-medium">{option.content}</span>
+                      <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
+                        <span className="font-medium text-xs md:text-sm break-words">{option.content}</span>
                         {(selectedPollOption !== null || totalVotes > 0) && (
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600">
+                          <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
+                            <span className="text-xs md:text-sm text-gray-600 whitespace-nowrap">
                               {option.vote} vote{option.vote !== 1 ? 's' : ''}
                             </span>
-                            <span className="text-sm font-bold text-gray-800">
+                            <span className="text-xs md:text-sm font-bold text-gray-800 whitespace-nowrap">
                               {percentage.toFixed(1)}%
                             </span>
                           </div>
@@ -368,14 +368,14 @@ export default function FeedPostCard({
             </div>
 
             {/* Poll info */}
-            <div className="mt-3 pt-3 border-t border-gray-200">
-              <div className="flex items-center justify-between text-sm text-gray-600">
-                <span>
+            <div className="mt-2 md:mt-3 pt-2 md:pt-3 border-t border-gray-200">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs md:text-sm text-gray-600">
+                <span className="whitespace-nowrap">
                   {localPost.poll.options.reduce((sum, opt) => sum + opt.vote, 0)} total vote
                   {localPost.poll.options.reduce((sum, opt) => sum + opt.vote, 0) !== 1 ? 's' : ''}
                 </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                <span className="flex items-center gap-1 whitespace-nowrap">
+                  <span className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></span>
                   {localPost.poll.poll_type} Choice
                 </span>
               </div>
@@ -399,15 +399,15 @@ export default function FeedPostCard({
       </div>
 
       {/* Post Actions */}
-      <div className="px-6 py-4 border-t border-gray-50 bg-gray-50/30">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1">
+      <div className="px-3 md:px-6 py-3 md:py-4 border-t border-gray-50 bg-gray-50/30">
+        <div className="flex items-center justify-between gap-2 md:gap-4">
+          <div className="flex items-center gap-2">
             <button
               onClick={handleLike}
               disabled={isLiking}
-              className={`transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${localPost.is_liked_by_me
-                  ? "text-red-500 hover:text-red-600"
-                  : "text-green-400 hover:text-red-500"
+              className={`transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0 ${localPost.is_liked_by_me
+                ? "text-red-500 hover:text-red-600"
+                : "text-green-400 hover:text-red-500"
                 }`}
             >
               {localPost.is_liked_by_me ? (
@@ -415,46 +415,55 @@ export default function FeedPostCard({
                   src="/icons/like_icon.svg"
                   alt="Unlike"
                   unoptimized
-                  width={24}
-                  height={24}
+                  width={20}
+                  height={20}
+                  className="md:w-6 md:h-6"
                 />
               ) : (
                 <Image
                   src="/icons/not_like_icon.svg"
                   alt="Like"
                   unoptimized
-                  width={24}
-                  height={24}
+                  width={20}
+                  height={20}
+                  className="md:w-6 md:h-6"
                 />
               )}
             </button>
             <button
               onClick={handlePostClick}
-              className="flex items-center gap-2 text-gray-600 hover:text-green-500 transition-colors duration-200"
+              className="flex items-center gap-1 md:gap-2 text-gray-600 hover:text-green-500 transition-colors duration-200"
             >
               <Image
                 src="/icons/comment_icon.svg"
                 alt="Comment"
                 unoptimized
-                width={24}
-                height={24}
+                width={20}
+                height={20}
+                className="md:w-6 md:h-6 flex-shrink-0"
               />
-              <span className="text-sm font-medium">{localLikes} Likes</span>
-              <span className="text-sm font-medium">
+              <span className="text-xs md:text-sm font-medium whitespace-nowrap">{localLikes} Likes</span>
+            </button>
+            <button
+              onClick={handlePostClick}
+              className="flex items-center gap-1 md:gap-2 text-gray-600 hover:text-green-500 transition-colors duration-200"
+            >
+              <span className="text-xs md:text-sm font-medium whitespace-nowrap">
                 {post.metadata.total_comments} Comment
                 {post.metadata.total_comments !== 1 ? "s" : ""}
               </span>
             </button>
           </div>
-          <button className="flex items-center gap-2 text-gray-600 hover:text-green-500 transition-colors duration-200">
+          <button className="flex items-center gap-1 md:gap-2 text-gray-600 hover:text-green-500 transition-colors duration-200 flex-shrink-0">
             <Image
               src="/icons/share_icon.svg"
               alt="Share"
               unoptimized
-              width={24}
-              height={24}
+              width={20}
+              height={20}
+              className="md:w-6 md:h-6 flex-shrink-0"
             />
-            <span className="text-sm font-medium">Share</span>
+            <span className="text-xs md:text-sm font-medium hidden sm:inline">Share</span>
           </button>
         </div>
       </div>

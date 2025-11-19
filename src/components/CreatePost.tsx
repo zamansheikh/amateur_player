@@ -39,50 +39,53 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
 
     return (
         <>
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-                {/* Action Buttons Row */}
-                <div className="flex items-center gap-6 mb-6">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6 mb-4 md:mb-6">
+                {/* Action Buttons Row - Icons only on mobile, full buttons on desktop */}
+                <div className="flex items-center justify-between sm:justify-start sm:gap-3 md:gap-6 mb-6">
+                    {/* Create Post Button */}
                     <button
                         onClick={handleCreatePostClick}
-                        className="flex items-center gap-3 text-gray-600 hover:text-blue-600 transition-colors"
+                        className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 text-gray-600 hover:text-blue-600 transition-colors flex-1 sm:flex-initial"
                     >
-                        <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+                        <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
                             <div className="w-5 h-5 bg-blue-600 rounded-sm flex items-center justify-center">
                                 <div className="w-3 h-2 bg-white rounded-sm"></div>
                             </div>
                         </div>
-                        <span className="font-medium">Create Post</span>
+                        <span className="font-medium text-sm md:text-base hidden sm:inline">Create Post</span>
                     </button>
 
+                    {/* Add Photos/Videos Button */}
                     <button
                         onClick={handlePhotoVideoClick}
-                        className="flex items-center gap-3 text-gray-600 hover:text-red-600 transition-colors"
+                        className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 text-gray-600 hover:text-red-600 transition-colors flex-1 sm:flex-initial"
                     >
-                        <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center">
+                        <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center flex-shrink-0">
                             <ImageIcon className="w-5 h-5 text-red-600" />
                         </div>
-                        <span className="font-medium">Add Photos/Videos</span>
+                        <span className="font-medium text-sm md:text-base hidden sm:inline">Add Photos/Videos</span>
                     </button>
 
-                    <button className="flex items-center gap-3 text-gray-600 hover:text-green-600 transition-colors">
-                        <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center">
+                    {/* Attach Link Button */}
+                    <button className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 text-gray-600 hover:text-green-600 transition-colors flex-1 sm:flex-initial">
+                        <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0">
                             <Link2 className="w-5 h-5 text-green-600" />
                         </div>
-                        <span className="font-medium">Attach Link</span>
+                        <span className="font-medium text-sm md:text-base hidden sm:inline">Attach Link</span>
                     </button>
                 </div>
 
                 {/* Main Post Input Area */}
-                <div className="flex items-start gap-4 mb-4">
+                <div className="flex items-start gap-3 md:gap-4 mb-4">
                     <img
                         src={user?.profile_picture_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Bob"}
                         alt="Profile"
-                        className="w-12 h-12 rounded-full object-cover"
+                        className="w-10 md:w-12 h-10 md:h-12 rounded-full object-cover flex-shrink-0"
                     />
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                         <div
                             onClick={handleCreatePostClick}
-                            className="w-full min-h-[80px] p-4 text-gray-500 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors flex items-center text-lg"
+                            className="w-full min-h-[60px] md:min-h-[80px] p-3 md:p-4 text-gray-500 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors flex items-center text-sm md:text-lg"
                         >
                             What&apos;s on your mind, {user?.first_name || user?.name?.split(' ')[0] || 'Bob'}?
                         </div>
@@ -90,10 +93,10 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                 </div>
 
                 {/* Bottom Action Bar */}
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-gray-100">
                     <div className="flex items-center gap-2">
                         <Globe className="w-4 h-4 text-gray-600" />
-                        <span className="text-gray-600 font-medium">Public</span>
+                        <span className="text-gray-600 font-medium text-sm">Public</span>
                         <ChevronDown className="w-4 h-4 text-gray-600" />
                     </div>
 

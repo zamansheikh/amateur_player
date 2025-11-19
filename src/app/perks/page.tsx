@@ -143,7 +143,7 @@ export default function PerksPage() {
   const filteredPerks = mockPerks.filter(perk => {
     const matchesCategory = selectedCategory === 'all' || perk.category === selectedCategory;
     const matchesSearch = perk.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         perk.description.toLowerCase().includes(searchTerm.toLowerCase());
+      perk.description.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -172,27 +172,27 @@ export default function PerksPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-gradient-to-r from-[#8BC342] to-[#6fa332] text-white">
-        <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="max-w-7xl mx-auto px-3 md:px-4 py-6 md:py-10">
           <div className="text-center">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-                <Gift className="w-8 h-8 text-white" />
+            <div className="flex flex-col md:flex-row md:items-center md:justify-center gap-2 md:gap-3 mb-3 md:mb-4">
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto md:mx-0">
+                <Gift className="w-6 h-6 md:w-8 md:h-8 text-white" />
               </div>
               <div>
-                <h1 className="text-4xl font-bold">Bowlers Network Partners</h1>
-                <p className="text-xl text-white/90 mt-2">Exclusive discounts and offers for our community</p>
+                <h1 className="text-2xl md:text-4xl font-bold">Perks</h1>
+                <p className="text-xs md:text-lg text-white/90 mt-1">Exclusive member discounts</p>
               </div>
             </div>
-            <div className="bg-white/10 rounded-lg p-4 max-w-2xl mx-auto">
-              <p className="text-lg">
-                Save money at your favorite local spots! Our partners offer exclusive discounts to Bowlers Network members.
+            <div className="bg-white/10 rounded-lg p-3 md:p-4 max-w-2xl mx-auto">
+              <p className="text-xs md:text-base">
+                Save at your favorite local spots! Exclusive discounts for Bowlers Network members.
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-3 md:px-4 py-4 md:py-8">
         {/* Search and Filter Section */}
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
           <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
@@ -228,11 +228,10 @@ export default function PerksPage() {
               <button
                 key={category.id}
                 onClick={() => setSelectedCategory(category.id)}
-                className={`p-4 rounded-lg border-2 transition-all duration-200 ${
-                  selectedCategory === category.id
+                className={`p-4 rounded-lg border-2 transition-all duration-200 ${selectedCategory === category.id
                     ? 'border-green-500 bg-green-50 text-green-700'
                     : 'border-gray-200 bg-white hover:border-green-300 hover:bg-green-50'
-                }`}
+                  }`}
               >
                 <div className="flex flex-col items-center">
                   <IconComponent className="w-8 h-8 mb-2" />

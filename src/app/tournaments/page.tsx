@@ -413,53 +413,53 @@ export default function TournamentsPage() {
     };
 
     const renderTournamentCard = (tournament: Tournament) => (
-        <div key={tournament.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
-            <div className="flex justify-between items-start mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">{tournament.name}</h3>
+        <div key={tournament.id} className="bg-white rounded-lg border border-gray-200 p-3 md:p-6 hover:shadow-md transition-shadow">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-2 md:gap-4 mb-3 md:mb-4">
+                <h3 className="text-base md:text-lg font-semibold text-gray-900 flex-1">{tournament.name}</h3>
                 {(tournament.already_enrolled ?? 0) > 0 && (
-                    <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                    <span className="bg-green-500 text-white px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-medium whitespace-nowrap">
                         Registered
                     </span>
                 )}
             </div>
 
-            <div className="space-y-3 mb-6">
-                <div className="flex items-center gap-2 text-gray-600">
-                    <MapPin className="w-4 h-4" />
-                    <span className="text-sm">{tournament.address || 'Location TBD'}</span>
+            <div className="space-y-2 md:space-y-3 mb-4 md:mb-6">
+                <div className="flex items-start md:items-center gap-2 text-gray-600">
+                    <MapPin className="w-3 md:w-4 h-3 md:h-4 flex-shrink-0 mt-0.5 md:mt-0" />
+                    <span className="text-xs md:text-sm">{tournament.address || 'Location TBD'}</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
-                    <Calendar className="w-4 h-4" />
-                    <span className="text-sm">
+                    <Calendar className="w-3 md:w-4 h-3 md:h-4 flex-shrink-0" />
+                    <span className="text-xs md:text-sm">
                         {format(new Date(tournament.start_date), 'MMM dd, yyyy')}
                     </span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
-                    <DollarSign className="w-4 h-4" />
-                    <span className="text-sm">${tournament.reg_fee}</span>
+                    <DollarSign className="w-3 md:w-4 h-3 md:h-4 flex-shrink-0" />
+                    <span className="text-xs md:text-sm font-medium">${tournament.reg_fee}</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
-                    <Users className="w-4 h-4" />
-                    <span className="text-sm">{tournament.format}</span>
+                    <Users className="w-3 md:w-4 h-3 md:h-4 flex-shrink-0" />
+                    <span className="text-xs md:text-sm">{tournament.format}</span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
-                    <Clock className="w-4 h-4" />
-                    <span className="text-sm">
-                        Register by {format(new Date(tournament.reg_deadline), 'MMM dd, yyyy')}
+                    <Clock className="w-3 md:w-4 h-3 md:h-4 flex-shrink-0" />
+                    <span className="text-xs md:text-sm">
+                        Reg by {format(new Date(tournament.reg_deadline), 'MMM dd')}
                     </span>
                 </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col md:flex-row gap-2 md:gap-3">
                 <Link
                     href={`/tournaments/${tournament.id}`}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg transition-colors text-center"
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-3 md:px-4 rounded-lg transition-colors text-center text-xs md:text-sm font-medium"
                 >
                     View Details
                 </Link>
                 <button
                     onClick={() => handleRegistration(tournament)}
-                    className={`flex-1 py-2 px-4 rounded-lg transition-colors ${(tournament.already_enrolled ?? 0) > 0
+                    className={`flex-1 py-2 px-3 md:px-4 rounded-lg transition-colors text-xs md:text-sm font-medium ${(tournament.already_enrolled ?? 0) > 0
                         ? 'border border-red-600 text-red-600 hover:bg-red-50'
                         : 'border border-green-600 text-green-600 hover:bg-green-50'
                         }`}
@@ -473,48 +473,41 @@ export default function TournamentsPage() {
     return (
         <div className="min-h-screen bg-gray-50">
             {/* Header */}
-            <div className="bg-white border-b border-gray-200 px-6 py-4">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-semibold text-gray-900">Tournaments</h1>
-                        <p className="text-sm text-gray-600 mt-1">
+            <div className="bg-white border-b border-gray-200 px-3 md:px-6 py-3 md:py-4">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0">
+                    <div className="min-w-0">
+                        <h1 className="text-2xl font-semibold text-gray-900 truncate">Tournaments</h1>
+                        <p className="text-sm text-gray-600 mt-1 hidden md:block">
                             Browse and register for bowling tournaments
                         </p>
                     </div>
-                    <div className="flex items-center gap-4">
-                        {/* <button
-                            onClick={() => setShowCreateModal(true)}
-                            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
-                        >
-                            <Plus className="w-4 h-4" />
-                            Create Tournament
-                        </button> */}
-                        <div className="relative">
+                    <div className="flex items-center gap-4 w-full md:w-auto">
+                        <div className="relative w-full md:w-72 lg:w-96">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                             <input
                                 type="text"
                                 placeholder="Search tournaments..."
-                                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                             />
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="px-6 py-6">
+            <div className="px-3 md:px-6 py-4 md:py-6">
                 {/* Page Title */}
-                <div className="mb-6">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-2">Tournaments</h2>
-                    <p className="text-gray-600">Browse and register for bowling tournaments in your area</p>
+                <div className="mb-4 md:mb-6">
+                    <h2 className="text-lg md:text-xl font-semibold text-gray-900 mb-1 md:mb-2 hidden md:block">Tournaments</h2>
+                    <p className="text-xs md:text-sm text-gray-600 hidden md:block">Browse and register for bowling tournaments in your area</p>
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-1 mb-6">
+                <div className="flex gap-1 md:gap-2 mb-4 md:mb-6 overflow-x-auto">
                     {tabs.map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === tab
+                            className={`px-3 md:px-4 py-1.5 md:py-2 rounded-lg font-medium transition-colors text-xs md:text-sm whitespace-nowrap ${activeTab === tab
                                 ? 'bg-green-600 text-white'
                                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                 }`}
@@ -524,9 +517,9 @@ export default function TournamentsPage() {
                     ))}
                 </div>
 
-                <div className="flex gap-6">
+                <div className="flex gap-4 md:gap-6">
                     {/* Filters Sidebar */}
-                    <div className="w-80 flex-shrink-0">
+                    <div className="hidden md:block md:w-80 flex-shrink-0">
                         <div className="bg-white rounded-lg border border-gray-200 p-6">
                             <h3 className="text-lg font-semibold text-gray-900 mb-6">Filters</h3>
 

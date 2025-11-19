@@ -439,8 +439,8 @@ export default function XchangePage() {
         {/* Action Button */}
         <button
           className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${product.inStock
-              ? 'bg-green-600 text-white hover:bg-green-700'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            ? 'bg-green-600 text-white hover:bg-green-700'
+            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}
           disabled={!product.inStock}
         >
@@ -454,21 +454,21 @@ export default function XchangePage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-gradient-to-r from-[#8BC342] to-[#6fa332] text-white">
-        <div className="max-w-7xl mx-auto px-4 py-16">
+        <div className="max-w-7xl mx-auto px-3 md:px-4 py-6 md:py-12">
           <div className="text-center">
-            <div className="flex items-center justify-center gap-4 mb-6">
-              <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
-                <ShoppingCart className="w-10 h-10 text-white" />
+            <div className="flex flex-col md:flex-row md:items-center md:justify-center gap-2 md:gap-4 mb-3 md:mb-6">
+              <div className="w-14 h-14 md:w-20 md:h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto md:mx-0">
+                <ShoppingCart className="w-7 h-7 md:w-10 md:h-10 text-white" />
               </div>
-              <div className="text-left">
-                <h1 className="text-5xl font-bold mb-2">Xchange</h1>
-                <p className="text-xl text-white/90">Buy & Sell Bowling Equipment within the Community</p>
+              <div>
+                <h1 className="text-3xl md:text-5xl font-bold mb-1 md:mb-2">Xchange</h1>
+                <p className="text-xs md:text-lg text-white/90">Buy & Sell Bowling Equipment</p>
               </div>
             </div>
-            <div className="bg-white/10 rounded-lg p-6 max-w-4xl mx-auto">
-              <p className="text-lg leading-relaxed">
+            <div className="bg-white/10 rounded-lg p-3 md:p-6 max-w-4xl mx-auto">
+              <p className="text-xs md:text-base leading-relaxed">
                 Connect with amateur players, pros, and manufacturers to buy and sell quality bowling equipment.
-                From beginner gear to professional tournament equipment - find everything you need to improve your game!
+                From beginner gear to professional tournament equipment - find everything you need!
               </p>
             </div>
           </div>
@@ -476,7 +476,7 @@ export default function XchangePage() {
       </div>
 
       {/* Search and Filter Section */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-3 md:px-4 py-4 md:py-8">
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between mb-4">
             <div className="flex-1 relative min-w-0">

@@ -245,16 +245,16 @@ export default function EventsPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-3 md:px-4 py-3 md:py-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-0">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Events Calendar</h1>
-              <p className="text-gray-600 mt-1">
+              <h1 className="text-xl md:text-2xl font-bold text-gray-900">Events Calendar</h1>
+              <p className="text-xs md:text-sm text-gray-600 mt-1 hidden md:block">
                 Track all tournaments, leagues, and special events in one place
               </p>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+            <div className="flex items-center gap-2 md:gap-4">
+              <div className="flex items-center gap-1 md:gap-2 bg-gray-100 rounded-lg p-1.5 md:p-1">
                 {[
                   { mode: 'month', label: 'Month', icon: CalendarDays },
                   { mode: 'week', label: 'Week', icon: Calendar },
@@ -263,19 +263,19 @@ export default function EventsPage() {
                   <button
                     key={view.mode}
                     onClick={() => setViewMode(view.mode as 'month' | 'week' | 'day')}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${viewMode === view.mode
-                        ? 'bg-white text-green-600 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
+                    className={`flex items-center justify-center gap-1 md:gap-2 px-3 md:px-4 py-2 md:py-2.5 rounded-md text-xs md:text-sm font-medium transition-colors ${viewMode === view.mode
+                      ? 'bg-white text-green-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
                       }`}
                   >
-                    <view.icon className="w-4 h-4" />
-                    {view.label}
+                    <view.icon className="w-4 h-4 md:w-5 md:h-5" />
+                    <span className="hidden md:inline">{view.label}</span>
                   </button>
                 ))}
               </div>
-              <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors">
-                <Plus className="w-5 h-5" />
-                Add Event
+              <button className="bg-green-600 hover:bg-green-700 text-white px-3 md:px-5 py-2 md:py-2.5 rounded-lg font-medium flex items-center gap-1.5 md:gap-2 transition-colors text-xs md:text-sm">
+                <Plus className="w-5 h-5 md:w-6 md:h-6" />
+                <span className="hidden sm:inline">Add Event</span>
               </button>
             </div>
           </div>
@@ -283,7 +283,7 @@ export default function EventsPage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-3 md:px-4 py-4 md:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Calendar Section */}
           <div className="lg:col-span-2">
@@ -343,8 +343,8 @@ export default function EventsPage() {
                       key={index}
                       onClick={() => selectDate(day)}
                       className={`min-h-[100px] p-2 border border-gray-100 cursor-pointer transition-all ${day.isCurrentMonth
-                          ? 'bg-white hover:bg-gray-50'
-                          : 'bg-gray-50 text-gray-400'
+                        ? 'bg-white hover:bg-gray-50'
+                        : 'bg-gray-50 text-gray-400'
                         } ${day.isToday
                           ? 'ring-2 ring-green-500 ring-inset'
                           : ''
@@ -355,7 +355,7 @@ export default function EventsPage() {
                     >
                       <div className="flex items-center justify-between mb-1">
                         <span className={`text-sm font-medium ${day.isToday ? 'text-green-600' :
-                            day.isCurrentMonth ? 'text-gray-900' : 'text-gray-400'
+                          day.isCurrentMonth ? 'text-gray-900' : 'text-gray-400'
                           }`}>
                           {day.date}
                         </span>
@@ -510,9 +510,9 @@ export default function EventsPage() {
 
                         <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200">
                           <span className={`px-2 py-1 text-xs font-medium rounded-full ${event.status === 'upcoming' ? 'bg-blue-100 text-blue-800' :
-                              event.status === 'ongoing' ? 'bg-green-100 text-green-800' :
-                                event.status === 'completed' ? 'bg-gray-100 text-gray-800' :
-                                  'bg-red-100 text-red-800'
+                            event.status === 'ongoing' ? 'bg-green-100 text-green-800' :
+                              event.status === 'completed' ? 'bg-gray-100 text-gray-800' :
+                                'bg-red-100 text-red-800'
                             }`}>
                             {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
                           </span>
