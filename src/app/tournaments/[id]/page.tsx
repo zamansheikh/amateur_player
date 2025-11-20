@@ -292,8 +292,8 @@ export default function TournamentDetailsPage() {
                                 <div className="flex justify-between items-center">
                                     <span className="text-sm text-gray-600">Status</span>
                                     <span className={`text-sm font-medium ${(tournament.already_enrolled ?? 0) > 0
-                                        ? 'text-green-600'
-                                        : 'text-blue-600'
+                                            ? 'text-green-600'
+                                            : 'text-blue-600'
                                         }`}>
                                         {(tournament.already_enrolled ?? 0) > 0 ? 'Registered' : 'Open'}
                                     </span>
@@ -304,8 +304,8 @@ export default function TournamentDetailsPage() {
                                 <button
                                     onClick={handleRegistration}
                                     className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${(tournament.already_enrolled ?? 0) > 0
-                                        ? 'border-2 border-red-600 text-red-600 hover:bg-red-50'
-                                        : 'bg-green-600 hover:bg-green-700 text-white'
+                                            ? 'border-2 border-red-600 text-red-600 hover:bg-red-50'
+                                            : 'bg-green-600 hover:bg-green-700 text-white'
                                         }`}
                                 >
                                     {(tournament.already_enrolled ?? 0) > 0 ? 'Unregister from Tournament' : 'Register for Tournament'}
