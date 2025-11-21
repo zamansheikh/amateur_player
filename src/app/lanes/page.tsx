@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MessageCircle, Plus, Award, ArrowLeft, Send, ChevronUp, ChevronDown } from 'lucide-react';
+import Link from 'next/link';
+import { MessageCircle, Plus, Award, Send, ChevronUp, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
 import Image from 'next/image';
@@ -57,7 +58,6 @@ export default function LanesPage() {
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState<'about' | 'discussions' | 'new'>('about');
     const [discussions, setDiscussions] = useState<Discussion[]>([]);
-    const [selectedDiscussion, setSelectedDiscussion] = useState<Discussion | null>(null);
     const [topics, setTopics] = useState<Topic[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -69,10 +69,6 @@ export default function LanesPage() {
         description: ''
     });
 
-    // Form state for new opinion
-    const [newOpinion, setNewOpinion] = useState('');
-    const [postingOpinion, setPostingOpinion] = useState(false);
-
     // Fetch discussions
     const fetchDiscussions = async () => {
         try {
@@ -83,21 +79,6 @@ export default function LanesPage() {
         } catch (err) {
             console.error('Error fetching discussions:', err);
             setError('Failed to load discussions');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Fetch discussion details
-    const fetchDiscussionDetails = async (uid: string) => {
-        try {
-            setLoading(true);
-            const response = await api.get(`/api/lanes/discussions/details/${uid}`);
-            setSelectedDiscussion(response.data);
-            setError(null);
-        } catch (err) {
-            console.error('Error fetching discussion details:', err);
-            setError('Failed to load discussion details');
         } finally {
             setLoading(false);
         }
@@ -119,7 +100,7 @@ export default function LanesPage() {
         fetchTopics();
     }, []);
 
-    // Handle vote
+    // Handle vote for discussion list only
     const handleVote = async (nodeType: 'discussion' | 'opinion', nodeId: number, isUpvote: boolean) => {
         try {
             const response = await api.post('/api/lanes/discussions/vote', {
@@ -140,59 +121,9 @@ export default function LanesPage() {
                         }
                         : d
                 ));
-
-                // Update selected discussion if viewing details
-                if (selectedDiscussion && selectedDiscussion.discussion_id === nodeId) {
-                    setSelectedDiscussion({
-                        ...selectedDiscussion,
-                        point_str: response.data.point_str,
-                        viewer_vote: isUpvote,
-                        point: parseInt(response.data.point_str.replace(/[+\-\s]/g, ''))
-                    });
-                }
-            } else {
-                // Update opinion in selected discussion
-                if (selectedDiscussion) {
-                    setSelectedDiscussion({
-                        ...selectedDiscussion,
-                        opinions: selectedDiscussion.opinions.map(o =>
-                            o.opinion_id === nodeId
-                                ? {
-                                    ...o,
-                                    point_str: response.data.point_str,
-                                    viewer_vote: isUpvote,
-                                    point: parseInt(response.data.point_str.replace(/[+\-\s]/g, ''))
-                                }
-                                : o
-                        )
-                    });
-                }
             }
         } catch (err) {
             console.error('Error voting:', err);
-        }
-    };
-
-    // Handle post opinion
-    const handlePostOpinion = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!newOpinion.trim() || !selectedDiscussion) return;
-
-        try {
-            setPostingOpinion(true);
-            await api.post(`/api/lanes/discussions/opinion/${selectedDiscussion.discussion_id}`, {
-                opinion: newOpinion
-            });
-
-            // Refresh discussion details
-            await fetchDiscussionDetails(selectedDiscussion.uid);
-            setNewOpinion('');
-            setError(null);
-        } catch (err) {
-            console.error('Error posting opinion:', err);
-            setError('Failed to post opinion');
-        } finally {
-            setPostingOpinion(false);
         }
     };
 
@@ -340,7 +271,7 @@ export default function LanesPage() {
                 )}
 
                 {/* Discussions Tab */}
-                {activeTab === 'discussions' && !selectedDiscussion && (
+                {activeTab === 'discussions' && (
                     <div className="space-y-3 sm:space-y-4 md:space-y-5">
                         {error && (
                             <div className="bg-red-50 border border-red-200 text-red-800 p-3 sm:p-4 rounded-lg text-sm sm:text-base">
@@ -365,69 +296,67 @@ export default function LanesPage() {
                             </div>
                         ) : (
                             discussions.map(discussion => (
-                                <div
-                                    key={discussion.discussion_id}
-                                    className="bg-white rounded-lg sm:rounded-xl shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-                                    onClick={() => fetchDiscussionDetails(discussion.uid)}
-                                >
+                                <div key={discussion.discussion_id} className="bg-white rounded-lg sm:rounded-xl shadow-md hover:shadow-lg transition-shadow">
                                     <div className="p-3 sm:p-4 md:p-6">
-                                        {/* Header */}
-                                        <div className="flex items-start justify-between mb-3 sm:mb-4 gap-2 sm:gap-3">
-                                            <div className="flex items-start gap-2 sm:gap-3 md:gap-4 flex-1 min-w-0">
-                                                {/* Avatar */}
-                                                <div className="flex-shrink-0">
-                                                    {discussion.author.profile_picture_url ? (
-                                                        <Image
-                                                            src={discussion.author.profile_picture_url}
-                                                            alt={discussion.author.name}
-                                                            width={48}
-                                                            height={48}
-                                                            className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full object-cover flex-shrink-0"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-[#8BC342] to-[#6fa332] flex items-center justify-center text-white font-bold text-xs sm:text-sm flex-shrink-0">
-                                                            {discussion.author.name.split(' ').map(n => n[0]).join('')}
+                                        {/* Header - clickable part */}
+                                        <Link href={`/lanes/${discussion.uid}`}>
+                                            <div className="flex items-start justify-between mb-4 sm:mb-5 gap-2 sm:gap-3 cursor-pointer">
+                                                <div className="flex items-start gap-2 sm:gap-3 md:gap-4 flex-1 min-w-0">
+                                                    {/* Avatar */}
+                                                    <div className="flex-shrink-0">
+                                                        {discussion.author.profile_picture_url ? (
+                                                            <Image
+                                                                src={discussion.author.profile_picture_url}
+                                                                alt={discussion.author.name}
+                                                                width={48}
+                                                                height={48}
+                                                                className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full object-cover flex-shrink-0"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-[#8BC342] to-[#6fa332] flex items-center justify-center text-white font-bold text-xs sm:text-sm flex-shrink-0">
+                                                                {discussion.author.name.split(' ').map(n => n[0]).join('')}
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Author info and title */}
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center gap-1 sm:gap-2 mb-2 sm:mb-3 flex-wrap">
+                                                            <h3 className="font-semibold text-gray-900 text-sm sm:text-base">{discussion.author.name}</h3>
+                                                            <span className="text-xs sm:text-sm text-gray-500">@{discussion.author.username}</span>
+                                                        </div>
+                                                        <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{discussion.title}</h2>
+                                                        <p className="text-gray-700 text-xs sm:text-sm md:text-base mb-2 sm:mb-3 line-clamp-3">{discussion.description}</p>
+                                                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                                                            <span>{discussion.created}</span>
+                                                            <span>•</span>
+                                                            <span>{discussion.opinions.length} {discussion.opinions.length === 1 ? 'opinion' : 'opinions'}</span>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Pro badge */}
+                                                    {discussion.is_upvoted_by_the_pros && (
+                                                        <div className="flex-shrink-0 flex items-center gap-1 bg-blue-50 px-2 sm:px-3 py-1 rounded-full">
+                                                            <Award className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />
+                                                            <span className="text-xs font-medium text-blue-600">Pro Voted</span>
                                                         </div>
                                                     )}
                                                 </div>
-
-                                                {/* Author info and title */}
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2 flex-wrap">
-                                                        <h3 className="font-semibold text-gray-900 text-sm sm:text-base">{discussion.author.name}</h3>
-                                                        <span className="text-xs sm:text-sm text-gray-500">@{discussion.author.username}</span>
-                                                    </div>
-                                                    <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 mb-1 sm:mb-2 line-clamp-2">{discussion.title}</h2>
-                                                    <p className="text-gray-700 text-xs sm:text-sm md:text-base mb-2 sm:mb-3 line-clamp-3">{discussion.description}</p>
-                                                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                                                        <span>{discussion.created}</span>
-                                                        <span>•</span>
-                                                        <span>{discussion.opinions.length} {discussion.opinions.length === 1 ? 'opinion' : 'opinions'}</span>
-                                                    </div>
-                                                </div>
-
-                                                {/* Pro badge */}
-                                                {discussion.is_upvoted_by_the_pros && (
-                                                    <div className="flex-shrink-0 flex items-center gap-1 bg-blue-50 px-2 sm:px-3 py-1 rounded-full">
-                                                        <Award className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />
-                                                        <span className="text-xs font-medium text-blue-600">Pro Voted</span>
-                                                    </div>
-                                                )}
                                             </div>
-                                        </div>
+                                        </Link>
 
-                                        {/* Footer with vote */}
-                                        <div className="flex items-center gap-3 pt-3 sm:pt-4 border-t" onClick={(e) => e.stopPropagation()}>
+                                        {/* Footer with vote - not inside Link */}
+                                        <div className="flex items-center gap-3 pt-4 sm:pt-5 border-t">
                                             {/* Voting buttons */}
-                                            <div className="flex items-center gap-1">
+                                            <div className="flex items-center gap-2">
                                                 <button
                                                     onClick={() => handleVote('discussion', discussion.discussion_id, true)}
-                                                    className={`p-1.5 rounded transition-colors ${discussion.viewer_vote === true
+                                                    className={`p-1.5 sm:p-2 rounded transition-colors ${discussion.viewer_vote === true
                                                         ? 'text-[#8BC342] bg-green-50'
                                                         : 'text-gray-400 hover:text-[#8BC342] hover:bg-green-50'
                                                         }`}
                                                 >
-                                                    <ChevronUp className="w-5 h-5" />
+                                                    <ChevronUp className="w-5 h-5 sm:w-6 sm:h-6" />
                                                 </button>
                                                 <span className={`text-sm font-semibold min-w-[2rem] text-center ${discussion.point_str.startsWith('+') ? 'text-[#8BC342]' :
                                                     discussion.point_str.startsWith('-') ? 'text-red-600' :
@@ -437,12 +366,12 @@ export default function LanesPage() {
                                                 </span>
                                                 <button
                                                     onClick={() => handleVote('discussion', discussion.discussion_id, false)}
-                                                    className={`p-1.5 rounded transition-colors ${discussion.viewer_vote === false
+                                                    className={`p-1.5 sm:p-2 rounded transition-colors ${discussion.viewer_vote === false
                                                         ? 'text-red-600 bg-red-50'
                                                         : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
                                                         }`}
                                                 >
-                                                    <ChevronDown className="w-5 h-5" />
+                                                    <ChevronDown className="w-5 h-5 sm:w-6 sm:h-6" />
                                                 </button>
                                             </div>
                                         </div>
@@ -450,180 +379,6 @@ export default function LanesPage() {
                                 </div>
                             ))
                         )}
-                    </div>
-                )}
-
-                {/* Discussion Detail View */}
-                {activeTab === 'discussions' && selectedDiscussion && (
-                    <div className="space-y-4">
-                        {/* Back button */}
-                        <button
-                            onClick={() => setSelectedDiscussion(null)}
-                            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-                        >
-                            <ArrowLeft className="w-5 h-5" />
-                            <span className="font-medium">Back to discussions</span>
-                        </button>
-
-                        {/* Discussion Card */}
-                        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 md:p-8">
-                            <div className="flex items-start gap-3 sm:gap-4 mb-4">
-                                {selectedDiscussion.author.profile_picture_url ? (
-                                    <Image
-                                        src={selectedDiscussion.author.profile_picture_url}
-                                        alt={selectedDiscussion.author.name}
-                                        width={48}
-                                        height={48}
-                                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover flex-shrink-0"
-                                    />
-                                ) : (
-                                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-[#8BC342] to-[#6fa332] flex items-center justify-center text-white font-bold flex-shrink-0">
-                                        {selectedDiscussion.author.name.split(' ').map(n => n[0]).join('')}
-                                    </div>
-                                )}
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <h3 className="font-semibold text-gray-900">{selectedDiscussion.author.name}</h3>
-                                        <span className="text-sm text-gray-500">@{selectedDiscussion.author.username}</span>
-                                        {selectedDiscussion.is_upvoted_by_the_pros && (
-                                            <div className="flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded-full">
-                                                <Award className="w-3 h-3 text-blue-600" />
-                                                <span className="text-xs font-medium text-blue-600">Pro Voted</span>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <p className="text-sm text-gray-500">{selectedDiscussion.created}</p>
-                                </div>
-                            </div>
-
-                            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-3">{selectedDiscussion.title}</h1>
-                            <p className="text-gray-700 text-base leading-relaxed mb-4">{selectedDiscussion.description}</p>
-
-                            {/* Voting */}
-                            <div className="flex items-center gap-2 pt-4 border-t">
-                                <button
-                                    onClick={() => handleVote('discussion', selectedDiscussion.discussion_id, true)}
-                                    className={`p-2 rounded transition-colors ${selectedDiscussion.viewer_vote === true
-                                        ? 'text-[#8BC342] bg-green-50'
-                                        : 'text-gray-400 hover:text-[#8BC342] hover:bg-green-50'
-                                        }`}
-                                >
-                                    <ChevronUp className="w-6 h-6" />
-                                </button>
-                                <span className={`text-base font-bold min-w-[3rem] text-center ${selectedDiscussion.point_str.startsWith('+') ? 'text-[#8BC342]' :
-                                    selectedDiscussion.point_str.startsWith('-') ? 'text-red-600' :
-                                        'text-gray-600'
-                                    }`}>
-                                    {selectedDiscussion.point_str}
-                                </span>
-                                <button
-                                    onClick={() => handleVote('discussion', selectedDiscussion.discussion_id, false)}
-                                    className={`p-2 rounded transition-colors ${selectedDiscussion.viewer_vote === false
-                                        ? 'text-red-600 bg-red-50'
-                                        : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
-                                        }`}
-                                >
-                                    <ChevronDown className="w-6 h-6" />
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Opinions Section */}
-                        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 md:p-8">
-                            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
-                                Opinions ({selectedDiscussion.opinions.length})
-                            </h3>
-
-                            {/* New Opinion Form */}
-                            <form onSubmit={handlePostOpinion} className="mb-6">
-                                <textarea
-                                    value={newOpinion}
-                                    onChange={(e) => setNewOpinion(e.target.value)}
-                                    placeholder="Share your opinion..."
-                                    rows={4}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent resize-none"
-                                />
-                                <div className="flex justify-end mt-2">
-                                    <button
-                                        type="submit"
-                                        disabled={!newOpinion.trim() || postingOpinion}
-                                        className="bg-[#8BC342] hover:bg-[#6fa332] disabled:bg-gray-400 text-white px-6 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2"
-                                    >
-                                        <Send className="w-4 h-4" />
-                                        {postingOpinion ? 'Posting...' : 'Post Opinion'}
-                                    </button>
-                                </div>
-                            </form>
-
-                            {/* Opinions List */}
-                            {selectedDiscussion.opinions.length === 0 ? (
-                                <p className="text-gray-500 text-center py-8">No opinions yet. Be the first to share your thoughts!</p>
-                            ) : (
-                                <div className="space-y-4">
-                                    {selectedDiscussion.opinions.map((opinion) => (
-                                        <div key={opinion.opinion_id} className="border-l-2 border-gray-200 pl-4 py-2">
-                                            <div className="flex items-start gap-3 mb-2">
-                                                {opinion.author.profile_picture_url ? (
-                                                    <Image
-                                                        src={opinion.author.profile_picture_url}
-                                                        alt={opinion.author.name}
-                                                        width={32}
-                                                        height={32}
-                                                        className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-                                                    />
-                                                ) : (
-                                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#8BC342] to-[#6fa332] flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
-                                                        {opinion.author.name.split(' ').map(n => n[0]).join('')}
-                                                    </div>
-                                                )}
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <span className="font-semibold text-sm text-gray-900">{opinion.author.name}</span>
-                                                        <span className="text-xs text-gray-500">@{opinion.author.username}</span>
-                                                        {opinion.is_upvoted_by_the_pros && (
-                                                            <div className="flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded-full">
-                                                                <Award className="w-3 h-3 text-blue-600" />
-                                                                <span className="text-xs font-medium text-blue-600">Pro</span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <p className="text-xs text-gray-500 mb-2">{opinion.created}</p>
-                                                    <p className="text-gray-700 text-sm leading-relaxed">{opinion.opinion}</p>
-
-                                                    {/* Opinion Voting */}
-                                                    <div className="flex items-center gap-2 mt-2">
-                                                        <button
-                                                            onClick={() => handleVote('opinion', opinion.opinion_id, true)}
-                                                            className={`p-1 rounded transition-colors ${opinion.viewer_vote === true
-                                                                ? 'text-[#8BC342] bg-green-50'
-                                                                : 'text-gray-400 hover:text-[#8BC342] hover:bg-green-50'
-                                                                }`}
-                                                        >
-                                                            <ChevronUp className="w-4 h-4" />
-                                                        </button>
-                                                        <span className={`text-xs font-semibold ${opinion.point_str.startsWith('+') ? 'text-[#8BC342]' :
-                                                            opinion.point_str.startsWith('-') ? 'text-red-600' :
-                                                                'text-gray-600'
-                                                            }`}>
-                                                            {opinion.point_str}
-                                                        </span>
-                                                        <button
-                                                            onClick={() => handleVote('opinion', opinion.opinion_id, false)}
-                                                            className={`p-1 rounded transition-colors ${opinion.viewer_vote === false
-                                                                ? 'text-red-600 bg-red-50'
-                                                                : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
-                                                                }`}
-                                                        >
-                                                            <ChevronDown className="w-4 h-4" />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
                     </div>
                 )}
 
