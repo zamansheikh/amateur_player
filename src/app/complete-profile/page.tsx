@@ -393,6 +393,7 @@ export default function CompleteProfilePage() {
                         <Image
                             src="/logo/logo.png"
                             alt="Amateur Player Logo"
+                            unoptimized
                             width={48}
                             height={48}
                             className="rounded-lg"
