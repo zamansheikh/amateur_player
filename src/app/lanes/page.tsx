@@ -336,9 +336,9 @@ export default function LanesPage() {
 
                                                     {/* Pro badge */}
                                                     {discussion.is_upvoted_by_the_pros && (
-                                                        <div className="flex-shrink-0 flex items-center gap-1 bg-blue-50 px-2 sm:px-3 py-1 rounded-full">
-                                                            <Award className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />
-                                                            <span className="text-xs font-medium text-blue-600">Pro Voted</span>
+                                                        <div className="flex-shrink-0 flex items-center gap-1 bg-green-50 px-2 sm:px-3 py-1 rounded-full">
+                                                            <Award className="w-3 h-3 sm:w-4 sm:h-4 text-[#8BC342]" />
+                                                            <span className="text-xs font-bold text-[#8BC342]">Pro Voted</span>
                                                         </div>
                                                     )}
                                                 </div>

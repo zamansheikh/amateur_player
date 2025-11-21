@@ -200,9 +200,9 @@ export default function DiscussionDetailPage() {
                                     <h3 className="font-semibold text-gray-900">{discussion.author.name}</h3>
                                     <span className="text-sm text-gray-500">@{discussion.author.username}</span>
                                     {discussion.is_upvoted_by_the_pros && (
-                                        <div className="flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded-full">
-                                            <Award className="w-3 h-3 text-blue-600" />
-                                            <span className="text-xs font-medium text-blue-600">Pro Voted</span>
+                                        <div className="flex items-center gap-1 bg-green-50 px-2 py-0.5 rounded-full">
+                                            <Award className="w-3 h-3 text-[#8BC342]" />
+                                            <span className="text-xs font-bold text-[#8BC342]">Pro Voted</span>
                                         </div>
                                     )}
                                 </div>
@@ -295,9 +295,9 @@ export default function DiscussionDetailPage() {
                                                     <span className="font-semibold text-sm text-gray-900">{opinion.author.name}</span>
                                                     <span className="text-xs text-gray-500">@{opinion.author.username}</span>
                                                     {opinion.is_upvoted_by_the_pros && (
-                                                        <div className="flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded-full">
-                                                            <Award className="w-3 h-3 text-blue-600" />
-                                                            <span className="text-xs font-medium text-blue-600">Pro</span>
+                                                        <div className="flex items-center gap-1 bg-green-50 px-2 py-0.5 rounded-full">
+                                                            <Award className="w-3 h-3 text-[#8BC342]" />
+                                                            <span className="text-xs font-bold text-[#8BC342]">Pro Voted</span>
                                                         </div>
                                                     )}
                                                 </div>
