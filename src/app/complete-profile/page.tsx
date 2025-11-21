@@ -420,14 +420,7 @@ export default function CompleteProfilePage() {
                         await handleNext();
                     }
                 }>
-                    {/* Welcome Message */}
-                    {currentStep === 1 && (
-                        <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg text-sm text-center">
-                            <p className="font-medium">👋 Welcome back!</p>
-                            <p>Please complete your profile to access the full Bowlers Network experience. This will only take a few minutes.</p>
-                        </div>
-                    )}
-
+                    
                     {/* Step 1: Playing Style & Bowling Preference */}
                     {currentStep === 1 && (
                         <div className="space-y-6">
