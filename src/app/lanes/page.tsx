@@ -1,0 +1,722 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { MessageCircle, Plus, Award, ArrowLeft, Send, ChevronUp, ChevronDown } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { api } from '@/lib/api';
+import Image from 'next/image';
+import { format } from 'date-fns';
+
+interface Topic {
+    id: number;
+    topic: string;
+    description: string;
+}
+
+interface Author {
+    user_id: number;
+    username: string;
+    name: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    profile_picture_url: string;
+}
+
+interface Opinion {
+    opinion_id: number;
+    opinion: string;
+    created: string;
+    edited: string;
+    is_edited: boolean;
+    is_upvoted_by_the_pros: boolean;
+    point: number;
+    point_str: string;
+    author: Author;
+    viewer_is_author: boolean;
+    viewer_vote: boolean | null;
+}
+
+interface Discussion {
+    discussion_id: number;
+    uid: string;
+    title: string;
+    description: string;
+    created: string;
+    edited: string;
+    is_upvoted_by_the_pros: boolean;
+    point: number;
+    point_str: string;
+    author: Author;
+    opinions: Opinion[];
+    viewer_is_author: boolean;
+    viewer_vote: boolean | null;
+}
+
+export default function LanesPage() {
+    const { user } = useAuth();
+    const [activeTab, setActiveTab] = useState<'about' | 'discussions' | 'new'>('about');
+    const [discussions, setDiscussions] = useState<Discussion[]>([]);
+    const [selectedDiscussion, setSelectedDiscussion] = useState<Discussion | null>(null);
+    const [topics, setTopics] = useState<Topic[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    // Form states for new discussion
+    const [newDiscussionForm, setNewDiscussionForm] = useState({
+        topic_id: '',
+        title: '',
+        description: ''
+    });
+
+    // Form state for new opinion
+    const [newOpinion, setNewOpinion] = useState('');
+    const [postingOpinion, setPostingOpinion] = useState(false);
+
+    // Fetch discussions
+    const fetchDiscussions = async () => {
+        try {
+            setLoading(true);
+            const response = await api.get('/api/lanes/discussions/feed');
+            setDiscussions(response.data || []);
+            setError(null);
+        } catch (err) {
+            console.error('Error fetching discussions:', err);
+            setError('Failed to load discussions');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Fetch discussion details
+    const fetchDiscussionDetails = async (uid: string) => {
+        try {
+            setLoading(true);
+            const response = await api.get(`/api/lanes/discussions/details/${uid}`);
+            setSelectedDiscussion(response.data);
+            setError(null);
+        } catch (err) {
+            console.error('Error fetching discussion details:', err);
+            setError('Failed to load discussion details');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Fetch topics
+    const fetchTopics = async () => {
+        try {
+            const response = await api.get('/api/lanes/discussions/topics');
+            setTopics(response.data || []);
+        } catch (err) {
+            console.error('Error fetching topics:', err);
+        }
+    };
+
+    // Initial load
+    useEffect(() => {
+        fetchDiscussions();
+        fetchTopics();
+    }, []);
+
+    // Handle vote
+    const handleVote = async (nodeType: 'discussion' | 'opinion', nodeId: number, isUpvote: boolean) => {
+        try {
+            const response = await api.post('/api/lanes/discussions/vote', {
+                node_type: nodeType,
+                node_id: nodeId,
+                is_upvote: isUpvote
+            });
+
+            if (nodeType === 'discussion') {
+                // Update discussion in list
+                setDiscussions(discussions.map(d =>
+                    d.discussion_id === nodeId
+                        ? {
+                            ...d,
+                            point_str: response.data.point_str,
+                            viewer_vote: isUpvote,
+                            point: parseInt(response.data.point_str.replace(/[+\-\s]/g, ''))
+                        }
+                        : d
+                ));
+
+                // Update selected discussion if viewing details
+                if (selectedDiscussion && selectedDiscussion.discussion_id === nodeId) {
+                    setSelectedDiscussion({
+                        ...selectedDiscussion,
+                        point_str: response.data.point_str,
+                        viewer_vote: isUpvote,
+                        point: parseInt(response.data.point_str.replace(/[+\-\s]/g, ''))
+                    });
+                }
+            } else {
+                // Update opinion in selected discussion
+                if (selectedDiscussion) {
+                    setSelectedDiscussion({
+                        ...selectedDiscussion,
+                        opinions: selectedDiscussion.opinions.map(o =>
+                            o.opinion_id === nodeId
+                                ? {
+                                    ...o,
+                                    point_str: response.data.point_str,
+                                    viewer_vote: isUpvote,
+                                    point: parseInt(response.data.point_str.replace(/[+\-\s]/g, ''))
+                                }
+                                : o
+                        )
+                    });
+                }
+            }
+        } catch (err) {
+            console.error('Error voting:', err);
+        }
+    };
+
+    // Handle post opinion
+    const handlePostOpinion = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newOpinion.trim() || !selectedDiscussion) return;
+
+        try {
+            setPostingOpinion(true);
+            await api.post(`/api/lanes/discussions/opinion/${selectedDiscussion.discussion_id}`, {
+                opinion: newOpinion
+            });
+
+            // Refresh discussion details
+            await fetchDiscussionDetails(selectedDiscussion.uid);
+            setNewOpinion('');
+            setError(null);
+        } catch (err) {
+            console.error('Error posting opinion:', err);
+            setError('Failed to post opinion');
+        } finally {
+            setPostingOpinion(false);
+        }
+    };
+
+    // Handle post new discussion
+    const handlePostDiscussion = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!newDiscussionForm.topic_id || !newDiscussionForm.title || !newDiscussionForm.description) {
+            setError('Please fill in all fields');
+            return;
+        }
+
+        try {
+            setLoading(true);
+            await api.post('/api/lanes/discussions', {
+                topic_id: parseInt(newDiscussionForm.topic_id),
+                title: newDiscussionForm.title,
+                description: newDiscussionForm.description
+            });
+
+            // Reset form
+            setNewDiscussionForm({
+                topic_id: '',
+                title: '',
+                description: ''
+            });
+
+            // Refresh discussions
+            await fetchDiscussions();
+
+            // Switch to discussions tab
+            setActiveTab('discussions');
+            setError(null);
+        } catch (err) {
+            console.error('Error posting discussion:', err);
+            setError('Failed to post discussion');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-gray-50">
+            {/* Geometric Header */}
+            <div className="relative h-28 sm:h-32 md:h-40 lg:h-48 overflow-hidden flex items-center">
+                {/* Gradient background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-[#8BC342] via-[#6fa332] to-[#8BC342]" />
+
+                {/* Overlay for depth */}
+                <div className="absolute inset-0 bg-black bg-opacity-20" />
+
+                {/* Geometric design elements - responsive */}
+                <div className="absolute top-0 left-0 w-48 sm:w-64 h-48 sm:h-64 bg-[#8BC342] opacity-20 transform -skew-x-12 -translate-x-16 sm:-translate-x-20 -translate-y-16 sm:-translate-y-20" />
+                <div className="absolute top-0 right-0 w-48 sm:w-64 h-48 sm:h-64 bg-[#6fa332] opacity-20 transform skew-x-12 translate-x-16 sm:translate-x-20 -translate-y-16 sm:-translate-y-20" />
+
+                {/* Content */}
+                <div className="relative z-10 flex items-center gap-3 sm:gap-4 md:gap-5 px-4 sm:px-6 md:px-8 w-full">
+                    {/* Icon */}
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center border-2 sm:border-3 border-white/40 flex-shrink-0 backdrop-blur-sm">
+                        <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" strokeWidth={1.5} />
+                    </div>
+
+                    {/* Text */}
+                    <div className="flex-1">
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight">
+                            Lanes
+                        </h1>
+                        <p className="text-sm sm:text-base text-white/80 mt-0.5 sm:mt-1 font-medium">
+                            Community discussions & insights
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Tabs */}
+            {/* Tabs Navigation */}
+            <div className="bg-white border-b sticky top-0 z-10">
+                <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+                    <div className="flex gap-1 sm:gap-2 md:gap-4 overflow-x-auto">
+                        <button
+                            onClick={() => setActiveTab('about')}
+                            className={`py-3 sm:py-4 px-3 sm:px-4 md:px-6 font-semibold text-sm sm:text-base border-b-3 transition-all whitespace-nowrap ${activeTab === 'about'
+                                ? 'text-[#8BC342] border-[#8BC342]'
+                                : 'text-gray-600 border-transparent hover:text-gray-900'
+                                }`}
+                        >
+                            About
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('discussions')}
+                            className={`py-3 sm:py-4 px-3 sm:px-4 md:px-6 font-semibold text-sm sm:text-base border-b-3 transition-all whitespace-nowrap ${activeTab === 'discussions'
+                                ? 'text-[#8BC342] border-[#8BC342]'
+                                : 'text-gray-600 border-transparent hover:text-gray-900'
+                                }`}
+                        >
+                            Discussions
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('new')}
+                            className={`py-3 sm:py-4 px-3 sm:px-4 md:px-6 font-semibold text-sm sm:text-base border-b-3 transition-all flex items-center gap-1.5 sm:gap-2 whitespace-nowrap ${activeTab === 'new'
+                                ? 'text-[#8BC342] border-[#8BC342]'
+                                : 'text-gray-600 border-transparent hover:text-gray-900'
+                                }`}
+                        >
+                            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                            New
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Content */}
+            <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 md:py-10">
+                {/* About Tab */}
+                {activeTab === 'about' && (
+                    <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 md:p-8 max-w-4xl">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 md:mb-6">Welcome to Lanes</h2>
+
+                        <div className="space-y-3 sm:space-y-4 md:space-y-6 text-gray-700 text-sm sm:text-base">
+                            <p className="text-gray-900 font-semibold">The home of focused, high-quality bowling conversations.</p>
+
+                            <p className="leading-relaxed">
+                                This is where amateurs and pros connect, share perspectives, debate big ideas, and explore the sport’s past, present, and future. Whether you're reflecting on your journey, questioning why bowling is underrated, or imagining what the next decade of the sport looks like — Lanes is where those discussions belong.
+                            </p>
+
+                            <p className="leading-relaxed">
+                                Join in, contribute meaningfully, and help shape the voice of the bowling community.
+                            </p>
+
+                            <div className="pt-4 border-t">
+                                <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mt-2 mb-3">Community Rules</h3>
+
+                                <ul className="list-disc list-inside space-y-2 text-gray-700 text-sm sm:text-base">
+                                    <li>Choose the right topic before posting — keep each discussion in its proper lane.</li>
+                                    <li>Stay relevant — all posts should contribute meaningfully to the chosen topic.</li>
+                                    <li>Respect everyone — amateurs and pros are both essential to this community.</li>
+                                    <li>No spam or self-promotion — keep the signal strong.</li>
+                                    <li>Keep discussions constructive — challenge ideas, not people.</li>
+                                    <li>Use clear titles — help others understand what your discussion is about at a glance.</li>
+                                    <li>Share real experiences and honest opinions — authenticity drives the best conversations.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Discussions Tab */}
+                {activeTab === 'discussions' && !selectedDiscussion && (
+                    <div className="space-y-3 sm:space-y-4 md:space-y-5">
+                        {error && (
+                            <div className="bg-red-50 border border-red-200 text-red-800 p-3 sm:p-4 rounded-lg text-sm sm:text-base">
+                                {error}
+                            </div>
+                        )}
+
+                        {loading ? (
+                            <div className="text-center py-8 sm:py-12 md:py-16">
+                                <p className="text-gray-600 text-sm sm:text-base">Loading discussions...</p>
+                            </div>
+                        ) : discussions.length === 0 ? (
+                            <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 md:p-12 text-center">
+                                <MessageCircle className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 text-gray-300 mx-auto mb-3 sm:mb-4" />
+                                <p className="text-gray-600 mb-4 text-sm sm:text-base md:text-lg">No discussions yet</p>
+                                <button
+                                    onClick={() => setActiveTab('new')}
+                                    className="bg-[#8BC342] hover:bg-[#6fa332] text-white px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-lg font-semibold text-sm sm:text-base transition-colors"
+                                >
+                                    Start a Discussion
+                                </button>
+                            </div>
+                        ) : (
+                            discussions.map(discussion => (
+                                <div
+                                    key={discussion.discussion_id}
+                                    className="bg-white rounded-lg sm:rounded-xl shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+                                    onClick={() => fetchDiscussionDetails(discussion.uid)}
+                                >
+                                    <div className="p-3 sm:p-4 md:p-6">
+                                        {/* Header */}
+                                        <div className="flex items-start justify-between mb-3 sm:mb-4 gap-2 sm:gap-3">
+                                            <div className="flex items-start gap-2 sm:gap-3 md:gap-4 flex-1 min-w-0">
+                                                {/* Avatar */}
+                                                <div className="flex-shrink-0">
+                                                    {discussion.author.profile_picture_url ? (
+                                                        <Image
+                                                            src={discussion.author.profile_picture_url}
+                                                            alt={discussion.author.name}
+                                                            width={48}
+                                                            height={48}
+                                                            className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full object-cover flex-shrink-0"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-[#8BC342] to-[#6fa332] flex items-center justify-center text-white font-bold text-xs sm:text-sm flex-shrink-0">
+                                                            {discussion.author.name.split(' ').map(n => n[0]).join('')}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Author info and title */}
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2 flex-wrap">
+                                                        <h3 className="font-semibold text-gray-900 text-sm sm:text-base">{discussion.author.name}</h3>
+                                                        <span className="text-xs sm:text-sm text-gray-500">@{discussion.author.username}</span>
+                                                    </div>
+                                                    <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 mb-1 sm:mb-2 line-clamp-2">{discussion.title}</h2>
+                                                    <p className="text-gray-700 text-xs sm:text-sm md:text-base mb-2 sm:mb-3 line-clamp-3">{discussion.description}</p>
+                                                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                                                        <span>{discussion.created}</span>
+                                                        <span>•</span>
+                                                        <span>{discussion.opinions.length} {discussion.opinions.length === 1 ? 'opinion' : 'opinions'}</span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Pro badge */}
+                                                {discussion.is_upvoted_by_the_pros && (
+                                                    <div className="flex-shrink-0 flex items-center gap-1 bg-blue-50 px-2 sm:px-3 py-1 rounded-full">
+                                                        <Award className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />
+                                                        <span className="text-xs font-medium text-blue-600">Pro Voted</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Footer with vote */}
+                                        <div className="flex items-center gap-3 pt-3 sm:pt-4 border-t" onClick={(e) => e.stopPropagation()}>
+                                            {/* Voting buttons */}
+                                            <div className="flex items-center gap-1">
+                                                <button
+                                                    onClick={() => handleVote('discussion', discussion.discussion_id, true)}
+                                                    className={`p-1.5 rounded transition-colors ${discussion.viewer_vote === true
+                                                        ? 'text-[#8BC342] bg-green-50'
+                                                        : 'text-gray-400 hover:text-[#8BC342] hover:bg-green-50'
+                                                        }`}
+                                                >
+                                                    <ChevronUp className="w-5 h-5" />
+                                                </button>
+                                                <span className={`text-sm font-semibold min-w-[2rem] text-center ${discussion.point_str.startsWith('+') ? 'text-[#8BC342]' :
+                                                    discussion.point_str.startsWith('-') ? 'text-red-600' :
+                                                        'text-gray-600'
+                                                    }`}>
+                                                    {discussion.point_str}
+                                                </span>
+                                                <button
+                                                    onClick={() => handleVote('discussion', discussion.discussion_id, false)}
+                                                    className={`p-1.5 rounded transition-colors ${discussion.viewer_vote === false
+                                                        ? 'text-red-600 bg-red-50'
+                                                        : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
+                                                        }`}
+                                                >
+                                                    <ChevronDown className="w-5 h-5" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                )}
+
+                {/* Discussion Detail View */}
+                {activeTab === 'discussions' && selectedDiscussion && (
+                    <div className="space-y-4">
+                        {/* Back button */}
+                        <button
+                            onClick={() => setSelectedDiscussion(null)}
+                            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                            <span className="font-medium">Back to discussions</span>
+                        </button>
+
+                        {/* Discussion Card */}
+                        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 md:p-8">
+                            <div className="flex items-start gap-3 sm:gap-4 mb-4">
+                                {selectedDiscussion.author.profile_picture_url ? (
+                                    <Image
+                                        src={selectedDiscussion.author.profile_picture_url}
+                                        alt={selectedDiscussion.author.name}
+                                        width={48}
+                                        height={48}
+                                        className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover flex-shrink-0"
+                                    />
+                                ) : (
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-[#8BC342] to-[#6fa332] flex items-center justify-center text-white font-bold flex-shrink-0">
+                                        {selectedDiscussion.author.name.split(' ').map(n => n[0]).join('')}
+                                    </div>
+                                )}
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <h3 className="font-semibold text-gray-900">{selectedDiscussion.author.name}</h3>
+                                        <span className="text-sm text-gray-500">@{selectedDiscussion.author.username}</span>
+                                        {selectedDiscussion.is_upvoted_by_the_pros && (
+                                            <div className="flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded-full">
+                                                <Award className="w-3 h-3 text-blue-600" />
+                                                <span className="text-xs font-medium text-blue-600">Pro Voted</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <p className="text-sm text-gray-500">{selectedDiscussion.created}</p>
+                                </div>
+                            </div>
+
+                            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-3">{selectedDiscussion.title}</h1>
+                            <p className="text-gray-700 text-base leading-relaxed mb-4">{selectedDiscussion.description}</p>
+
+                            {/* Voting */}
+                            <div className="flex items-center gap-2 pt-4 border-t">
+                                <button
+                                    onClick={() => handleVote('discussion', selectedDiscussion.discussion_id, true)}
+                                    className={`p-2 rounded transition-colors ${selectedDiscussion.viewer_vote === true
+                                        ? 'text-[#8BC342] bg-green-50'
+                                        : 'text-gray-400 hover:text-[#8BC342] hover:bg-green-50'
+                                        }`}
+                                >
+                                    <ChevronUp className="w-6 h-6" />
+                                </button>
+                                <span className={`text-base font-bold min-w-[3rem] text-center ${selectedDiscussion.point_str.startsWith('+') ? 'text-[#8BC342]' :
+                                    selectedDiscussion.point_str.startsWith('-') ? 'text-red-600' :
+                                        'text-gray-600'
+                                    }`}>
+                                    {selectedDiscussion.point_str}
+                                </span>
+                                <button
+                                    onClick={() => handleVote('discussion', selectedDiscussion.discussion_id, false)}
+                                    className={`p-2 rounded transition-colors ${selectedDiscussion.viewer_vote === false
+                                        ? 'text-red-600 bg-red-50'
+                                        : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
+                                        }`}
+                                >
+                                    <ChevronDown className="w-6 h-6" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Opinions Section */}
+                        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 md:p-8">
+                            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
+                                Opinions ({selectedDiscussion.opinions.length})
+                            </h3>
+
+                            {/* New Opinion Form */}
+                            <form onSubmit={handlePostOpinion} className="mb-6">
+                                <textarea
+                                    value={newOpinion}
+                                    onChange={(e) => setNewOpinion(e.target.value)}
+                                    placeholder="Share your opinion..."
+                                    rows={4}
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent resize-none"
+                                />
+                                <div className="flex justify-end mt-2">
+                                    <button
+                                        type="submit"
+                                        disabled={!newOpinion.trim() || postingOpinion}
+                                        className="bg-[#8BC342] hover:bg-[#6fa332] disabled:bg-gray-400 text-white px-6 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2"
+                                    >
+                                        <Send className="w-4 h-4" />
+                                        {postingOpinion ? 'Posting...' : 'Post Opinion'}
+                                    </button>
+                                </div>
+                            </form>
+
+                            {/* Opinions List */}
+                            {selectedDiscussion.opinions.length === 0 ? (
+                                <p className="text-gray-500 text-center py-8">No opinions yet. Be the first to share your thoughts!</p>
+                            ) : (
+                                <div className="space-y-4">
+                                    {selectedDiscussion.opinions.map((opinion) => (
+                                        <div key={opinion.opinion_id} className="border-l-2 border-gray-200 pl-4 py-2">
+                                            <div className="flex items-start gap-3 mb-2">
+                                                {opinion.author.profile_picture_url ? (
+                                                    <Image
+                                                        src={opinion.author.profile_picture_url}
+                                                        alt={opinion.author.name}
+                                                        width={32}
+                                                        height={32}
+                                                        className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                                                    />
+                                                ) : (
+                                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#8BC342] to-[#6fa332] flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                                                        {opinion.author.name.split(' ').map(n => n[0]).join('')}
+                                                    </div>
+                                                )}
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="font-semibold text-sm text-gray-900">{opinion.author.name}</span>
+                                                        <span className="text-xs text-gray-500">@{opinion.author.username}</span>
+                                                        {opinion.is_upvoted_by_the_pros && (
+                                                            <div className="flex items-center gap-1 bg-blue-50 px-2 py-0.5 rounded-full">
+                                                                <Award className="w-3 h-3 text-blue-600" />
+                                                                <span className="text-xs font-medium text-blue-600">Pro</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-xs text-gray-500 mb-2">{opinion.created}</p>
+                                                    <p className="text-gray-700 text-sm leading-relaxed">{opinion.opinion}</p>
+
+                                                    {/* Opinion Voting */}
+                                                    <div className="flex items-center gap-2 mt-2">
+                                                        <button
+                                                            onClick={() => handleVote('opinion', opinion.opinion_id, true)}
+                                                            className={`p-1 rounded transition-colors ${opinion.viewer_vote === true
+                                                                ? 'text-[#8BC342] bg-green-50'
+                                                                : 'text-gray-400 hover:text-[#8BC342] hover:bg-green-50'
+                                                                }`}
+                                                        >
+                                                            <ChevronUp className="w-4 h-4" />
+                                                        </button>
+                                                        <span className={`text-xs font-semibold ${opinion.point_str.startsWith('+') ? 'text-[#8BC342]' :
+                                                            opinion.point_str.startsWith('-') ? 'text-red-600' :
+                                                                'text-gray-600'
+                                                            }`}>
+                                                            {opinion.point_str}
+                                                        </span>
+                                                        <button
+                                                            onClick={() => handleVote('opinion', opinion.opinion_id, false)}
+                                                            className={`p-1 rounded transition-colors ${opinion.viewer_vote === false
+                                                                ? 'text-red-600 bg-red-50'
+                                                                : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
+                                                                }`}
+                                                        >
+                                                            <ChevronDown className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* New Discussion Tab */}
+                {activeTab === 'new' && (
+                    <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 md:p-8 max-w-3xl">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 sm:mb-6 md:mb-8">Start a New Discussion</h2>
+
+                        {error && (
+                            <div className="bg-red-50 border border-red-200 text-red-800 p-3 sm:p-4 rounded-lg mb-4 sm:mb-6 text-sm sm:text-base">{error}</div>
+                        )}
+
+                        <form onSubmit={handlePostDiscussion} className="space-y-4 sm:space-y-6 md:space-y-8">
+                            {/* Topic Selection */}
+                            <div>
+                                <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-2">Topic</label>
+                                <select
+                                    value={newDiscussionForm.topic_id}
+                                    onChange={(e) => setNewDiscussionForm({ ...newDiscussionForm, topic_id: e.target.value })}
+                                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent text-sm sm:text-base"
+                                    required
+                                >
+                                    <option value="">Select a topic...</option>
+                                    {topics.map(topic => (
+                                        <option key={topic.id} value={topic.id}>{topic.topic} - {topic.description}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Title */}
+                            <div>
+                                <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-2">
+                                    Discussion Title
+                                </label>
+                                <input
+                                    type="text"
+                                    value={newDiscussionForm.title}
+                                    onChange={(e) => setNewDiscussionForm({
+                                        ...newDiscussionForm,
+                                        title: e.target.value
+                                    })}
+                                    placeholder="What's your discussion about?"
+                                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent text-sm sm:text-base"
+                                    required
+                                />
+                            </div>
+
+                            {/* Description */}
+                            <div>
+                                <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-2">
+                                    Description
+                                </label>
+                                <textarea
+                                    value={newDiscussionForm.description}
+                                    onChange={(e) => setNewDiscussionForm({
+                                        ...newDiscussionForm,
+                                        description: e.target.value
+                                    })}
+                                    placeholder="Share your thoughts, questions, or insights..."
+                                    rows={6}
+                                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent text-sm sm:text-base resize-none"
+                                    required
+                                />
+                            </div>
+
+                            {/* Buttons */}
+                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="bg-[#8BC342] hover:bg-[#6fa332] disabled:bg-gray-400 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg font-semibold transition-colors text-sm sm:text-base"
+                                >
+                                    {loading ? 'Posting...' : 'Post Discussion'}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setNewDiscussionForm({
+                                            topic_id: '',
+                                            title: '',
+                                            description: ''
+                                        });
+                                        setActiveTab('discussions');
+                                    }}
+                                    className="bg-gray-200 hover:bg-gray-300 text-gray-900 px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg font-semibold transition-colors text-sm sm:text-base"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
