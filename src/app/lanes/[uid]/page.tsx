@@ -214,7 +214,7 @@ export default function DiscussionDetailPage() {
                         <p className="text-gray-700 text-base leading-relaxed mb-4">{discussion.description}</p>
 
                         {/* Voting */}
-                        <div className="flex items-center gap-2 pt-4 border-t">
+                        <div className="flex items-center gap-2 pt-4 border-t border-gray-200">
                             <button
                                 onClick={() => handleVote('discussion', discussion.discussion_id, true)}
                                 className={`p-2 rounded transition-colors ${discussion.viewer_vote === true

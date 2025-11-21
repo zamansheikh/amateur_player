@@ -200,7 +200,7 @@ export default function LanesPage() {
 
             {/* Tabs */}
             {/* Tabs Navigation */}
-            <div className="bg-white border-b sticky top-0 z-10">
+            <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
                 <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
                     <div className="flex gap-1 sm:gap-2 md:gap-4 overflow-x-auto">
                         <button
@@ -253,7 +253,7 @@ export default function LanesPage() {
                                 Join in, contribute meaningfully, and help shape the voice of the bowling community.
                             </p>
 
-                            <div className="pt-4 border-t">
+                            <div className="pt-4 border-t border-gray-200">
                                 <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mt-2 mb-3">Community Rules</h3>
 
                                 <ul className="list-disc list-inside space-y-2 text-gray-700 text-sm sm:text-base">
@@ -346,7 +346,7 @@ export default function LanesPage() {
                                         </Link>
 
                                         {/* Footer with vote - not inside Link */}
-                                        <div className="flex items-center gap-3 pt-4 sm:pt-5 border-t">
+                                        <div className="flex items-center gap-3 pt-4 sm:pt-5 border-t border-gray-200">
                                             {/* Voting buttons */}
                                             <div className="flex items-center gap-2">
                                                 <button
@@ -391,83 +391,111 @@ export default function LanesPage() {
                             <div className="bg-red-50 border border-red-200 text-red-800 p-3 sm:p-4 rounded-lg mb-4 sm:mb-6 text-sm sm:text-base">{error}</div>
                         )}
 
-                        <form onSubmit={handlePostDiscussion} className="space-y-4 sm:space-y-6 md:space-y-8">
-                            {/* Topic Selection */}
+                        <form onSubmit={handlePostDiscussion} className="space-y-6 sm:space-y-8 md:space-y-10">
+                            {/* Topic Selection with Cards */}
                             <div>
-                                <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-2">Topic</label>
-                                <select
-                                    value={newDiscussionForm.topic_id}
-                                    onChange={(e) => setNewDiscussionForm({ ...newDiscussionForm, topic_id: e.target.value })}
-                                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent text-sm sm:text-base"
-                                    required
-                                >
-                                    <option value="">Select a topic...</option>
-                                    {topics.map(topic => (
-                                        <option key={topic.id} value={topic.id}>{topic.topic} - {topic.description}</option>
-                                    ))}
-                                </select>
+                                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Select a Topic</h3>
+
+                                {topics.length === 0 ? (
+                                    <div className="text-center py-6 text-gray-500">Loading topics...</div>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8">
+                                        {topics.map(topic => (
+                                            <label
+                                                key={topic.id}
+                                                className={`p-4 sm:p-5 rounded-lg border-2 transition-all cursor-pointer ${newDiscussionForm.topic_id === String(topic.id)
+                                                    ? 'border-[#8BC342] bg-green-50'
+                                                    : 'border-gray-200 hover:border-gray-300'
+                                                    }`}
+                                            >
+                                                <div className="flex items-start gap-3">
+                                                    <input
+                                                        type="radio"
+                                                        name="topic"
+                                                        value={topic.id}
+                                                        checked={newDiscussionForm.topic_id === String(topic.id)}
+                                                        onChange={(e) => setNewDiscussionForm({
+                                                            ...newDiscussionForm,
+                                                            topic_id: e.target.value
+                                                        })}
+                                                        className="w-5 h-5 mt-1 flex-shrink-0 accent-[#8BC342] cursor-pointer"
+                                                    />
+                                                    <div className="flex-1">
+                                                        <h4 className="font-semibold text-gray-900 text-base sm:text-lg">{topic.topic}</h4>
+                                                        <p className="text-sm text-gray-600 mt-1 leading-relaxed">{topic.description}</p>
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
-                            {/* Title */}
-                            <div>
-                                <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-2">
-                                    Discussion Title
-                                </label>
-                                <input
-                                    type="text"
-                                    value={newDiscussionForm.title}
-                                    onChange={(e) => setNewDiscussionForm({
-                                        ...newDiscussionForm,
-                                        title: e.target.value
-                                    })}
-                                    placeholder="What's your discussion about?"
-                                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent text-sm sm:text-base"
-                                    required
-                                />
-                            </div>
+                            {/* Title and Description - shown after topic selection */}
+                            {newDiscussionForm.topic_id && (
+                                <>
+                                    {/* Title */}
+                                    <div>
+                                        <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-2">
+                                            Discussion Title
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={newDiscussionForm.title}
+                                            onChange={(e) => setNewDiscussionForm({
+                                                ...newDiscussionForm,
+                                                title: e.target.value
+                                            })}
+                                            placeholder="What's your discussion about?"
+                                            className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent text-sm sm:text-base"
+                                            required
+                                        />
+                                    </div>
 
-                            {/* Description */}
-                            <div>
-                                <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-2">
-                                    Description
-                                </label>
-                                <textarea
-                                    value={newDiscussionForm.description}
-                                    onChange={(e) => setNewDiscussionForm({
-                                        ...newDiscussionForm,
-                                        description: e.target.value
-                                    })}
-                                    placeholder="Share your thoughts, questions, or insights..."
-                                    rows={6}
-                                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent text-sm sm:text-base resize-none"
-                                    required
-                                />
-                            </div>
+                                    {/* Description */}
+                                    <div>
+                                        <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-2">
+                                            Description
+                                        </label>
+                                        <textarea
+                                            value={newDiscussionForm.description}
+                                            onChange={(e) => setNewDiscussionForm({
+                                                ...newDiscussionForm,
+                                                description: e.target.value
+                                            })}
+                                            placeholder="Share your thoughts, questions, or insights..."
+                                            rows={6}
+                                            className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent text-sm sm:text-base resize-none"
+                                            required
+                                        />
+                                    </div>
 
-                            {/* Buttons */}
-                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="bg-[#8BC342] hover:bg-[#6fa332] disabled:bg-gray-400 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg font-semibold transition-colors text-sm sm:text-base"
-                                >
-                                    {loading ? 'Posting...' : 'Post Discussion'}
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setNewDiscussionForm({
-                                            topic_id: '',
-                                            title: '',
-                                            description: ''
-                                        });
-                                        setActiveTab('discussions');
-                                    }}
-                                    className="bg-gray-200 hover:bg-gray-300 text-gray-900 px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg font-semibold transition-colors text-sm sm:text-base"
-                                >
-                                    Cancel
-                                </button>
-                            </div>
+                                    {/* Buttons */}
+                                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sm:pt-6 border-t border-gray-200">
+                                        <button
+                                            type="submit"
+                                            disabled={loading}
+                                            className="bg-[#8BC342] hover:bg-[#6fa332] disabled:bg-gray-400 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg font-semibold transition-colors text-sm sm:text-base"
+                                        >
+                                            {loading ? 'Posting...' : 'Post Discussion'}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setNewDiscussionForm({
+                                                    topic_id: '',
+                                                    title: '',
+                                                    description: ''
+                                                });
+                                                setActiveTab('discussions');
+                                            }}
+                                            className="bg-gray-200 hover:bg-gray-300 text-gray-900 px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg font-semibold transition-colors text-sm sm:text-base"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </>
+                            )}
                         </form>
                     </div>
                 )}
