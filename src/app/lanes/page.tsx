@@ -183,7 +183,7 @@ export default function LanesPage() {
                 <div className="relative z-10 flex items-center gap-3 sm:gap-4 md:gap-5 px-4 sm:px-6 md:px-8 w-full">
                     {/* Icon */}
                     <div className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center border-2 sm:border-3 border-white/40 flex-shrink-0 backdrop-blur-sm">
-                        <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-white" strokeWidth={1.5} />
+                        <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-[#8BC342]" strokeWidth={1.5} />
                     </div>
 
                     {/* Text */}
