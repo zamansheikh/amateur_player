@@ -84,8 +84,8 @@ export default function SelectYourRole() {
               alt="Logo"
               width={80}
               height={80}
-              className="w-20 h-20"
               unoptimized
+              className="w-20 h-20"
             />
           </Link>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">

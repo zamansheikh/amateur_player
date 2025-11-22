@@ -111,6 +111,7 @@ export default function MediaPage() {
                                 <Image
                                     src="/logo/logo_for_dark.png"
                                     alt="Bowlers Network"
+                                    unoptimized
                                     width={32}
                                     height={32}
                                     className="rounded"

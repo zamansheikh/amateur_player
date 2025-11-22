@@ -393,9 +393,9 @@ export default function CompleteProfilePage() {
                         <Image
                             src="/logo/logo.png"
                             alt="Amateur Player Logo"
-                            unoptimized
                             width={48}
                             height={48}
+                            unoptimized
                             className="rounded-lg"
                         />
                         <span className="text-2xl font-bold text-gray-900">Bowlers Network</span>

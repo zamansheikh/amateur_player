@@ -20,8 +20,8 @@ const LandingNavigation = () => {
                                 alt="BowlersNetwork Logo"
                                 width={32}
                                 height={32}
-                                className="rounded"
                                 unoptimized
+                                className="rounded"
                             />
                             <span className="text-xl font-bold">
                                 <span className="text-gray-900">Bowlers</span>
