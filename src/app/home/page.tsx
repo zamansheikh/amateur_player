@@ -35,7 +35,7 @@ interface FeedPost {
         likers: Array<{
             user_id: number;
             name: string;
-            profile_pic_url: string;
+            profile_picture_url: string;
         }>;
     };
     comments: {
@@ -45,7 +45,7 @@ interface FeedPost {
             user: {
                 user_id: number;
                 name: string;
-                profile_pic_url: string;
+                profile_picture_url: string;
             };
             text: string;
             pics: string[];
@@ -54,7 +54,7 @@ interface FeedPost {
                 user: {
                     user_id: number;
                     name: string;
-                    profile_pic_url: string;
+                    profile_picture_url: string;
                 };
                 text: string;
                 pics: string[];

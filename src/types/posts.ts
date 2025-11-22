@@ -19,7 +19,7 @@ export interface FeedPost {
     author: {
         user_id: number;
         name: string;
-        profile_pic_url: string;
+        profile_picture_url: string;
         is_following: boolean;
         viewer_is_author: boolean;
     };
@@ -28,7 +28,7 @@ export interface FeedPost {
         likers: Array<{
             user_id: number;
             name: string;
-            profile_pic_url: string;
+            profile_picture_url: string;
         }>;
     }];
     comments: [{
@@ -38,7 +38,7 @@ export interface FeedPost {
             user: {
                 user_id: number;
                 name: string;
-                profile_pic_url: string;
+                profile_picture_url: string;
             };
             text: string;
             pics: string[];
@@ -47,7 +47,7 @@ export interface FeedPost {
                 user: {
                     user_id: number;
                     name: string;
-                    profile_pic_url: string;
+                    profile_picture_url: string;
                 };
                 text: string;
                 pics: string[];
@@ -97,14 +97,14 @@ export interface UserPost {
     author: {
         user_id: number;
         name: string;
-        profile_pic_url: string;
+        profile_picture_url: string;
     };
     likes: [{
         total: number;
         likers: Array<{
             user_id: number;
             name: string;
-            profile_pic_url: string;
+            profile_picture_url: string;
         }>;
     }];
     comments: [{
@@ -114,7 +114,7 @@ export interface UserPost {
             user: {
                 user_id: number;
                 name: string;
-                profile_pic_url: string;
+                profile_picture_url: string;
             };
             text: string;
             pics: string[];
@@ -123,7 +123,7 @@ export interface UserPost {
                 user: {
                     user_id: number;
                     name: string;
-                    profile_pic_url: string;
+                    profile_picture_url: string;
                 };
                 text: string;
                 pics: string[];
@@ -160,7 +160,7 @@ export interface Comment {
     user: {
         user_id: number;
         name: string;
-        profile_pic_url: string;
+        profile_picture_url: string;
     };
     text: string;
     pics: string[];
@@ -172,7 +172,7 @@ export interface Reply {
     user: {
         user_id: number;
         name: string;
-        profile_pic_url: string;
+        profile_picture_url: string;
     };
     text: string;
     pics: string[];

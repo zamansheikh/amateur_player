@@ -43,7 +43,7 @@ interface UserPost {
         likers: Array<{
             user_id: number;
             name: string;
-            profile_pic_url: string;
+            profile_picture_url: string;
         }>;
     };
     comments: {
@@ -53,7 +53,7 @@ interface UserPost {
             user: {
                 user_id: number;
                 name: string;
-                profile_pic_url: string;
+                profile_picture_url: string;
             };
             text: string;
             pics: string[];
@@ -62,7 +62,7 @@ interface UserPost {
                 user: {
                     user_id: number;
                     name: string;
-                    profile_pic_url: string;
+                    profile_picture_url: string;
                 };
                 text: string;
                 pics: string[];

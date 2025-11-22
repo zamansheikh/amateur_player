@@ -32,7 +32,7 @@ interface UserPost {
     likers: Array<{
       user_id: number;
       name: string;
-      profile_pic_url: string;
+      profile_picture_url: string;
     }>;
   };
   comments: {
@@ -42,7 +42,7 @@ interface UserPost {
       user: {
         user_id: number;
         name: string;
-        profile_pic_url: string;
+        profile_picture_url: string;
       };
       text: string;
       pics: string[];
@@ -51,7 +51,7 @@ interface UserPost {
         user: {
           user_id: number;
           name: string;
-          profile_pic_url: string;
+          profile_picture_url: string;
         };
         text: string;
         pics: string[];
@@ -298,10 +298,10 @@ export default function UserPostCard({
                       onClick={() => handlePollVote(option.option_id)}
                       disabled={isVoting || selectedPollOption !== null}
                       className={`w-full text-left p-2 rounded-md border transition-all duration-200 relative overflow-hidden text-xs ${isSelected
-                          ? 'border-green-500 bg-green-50 text-green-700'
-                          : selectedPollOption !== null || totalVotes > 0
-                            ? 'border-gray-300 bg-white text-gray-700 cursor-default'
-                            : 'border-gray-300 bg-white text-gray-700 hover:border-green-400 hover:bg-green-50'
+                        ? 'border-green-500 bg-green-50 text-green-700'
+                        : selectedPollOption !== null || totalVotes > 0
+                          ? 'border-gray-300 bg-white text-gray-700 cursor-default'
+                          : 'border-gray-300 bg-white text-gray-700 hover:border-green-400 hover:bg-green-50'
                         } ${isVoting ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                       {/* Progress bar background */}
@@ -373,8 +373,8 @@ export default function UserPostCard({
               onClick={handleLike}
               disabled={isLiking}
               className={`transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${localPost.is_liked_by_me
-                  ? "text-red-500 hover:text-red-600"
-                  : "text-green-400 hover:text-red-500"
+                ? "text-red-500 hover:text-red-600"
+                : "text-green-400 hover:text-red-500"
                 }`}
             >
               {localPost.is_liked_by_me ? (

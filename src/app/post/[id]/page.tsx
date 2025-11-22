@@ -38,7 +38,7 @@ interface FeedPost {
     likers: Array<{
       user_id: number;
       name: string;
-      profile_pic_url: string;
+      profile_picture_url: string;
     }>;
   };
   comments: {
@@ -48,7 +48,7 @@ interface FeedPost {
       user: {
         user_id: number;
         name: string;
-        profile_pic_url: string;
+        profile_picture_url: string;
       };
       text: string;
       pics: string[];
@@ -57,7 +57,7 @@ interface FeedPost {
         user: {
           user_id: number;
           name: string;
-          profile_pic_url: string;
+          profile_picture_url: string;
         };
         text: string;
         pics: string[];
@@ -328,7 +328,7 @@ export default function PostDetailPage() {
                 <div key={comment.comment_id} className="space-y-3">
                   <div className="flex items-start gap-3">
                     <img
-                      src={comment.user.profile_pic_url}
+                      src={comment.user.profile_picture_url}
                       alt={comment.user.name}
                       className="w-8 h-8 rounded-full object-cover cursor-pointer"
                       onClick={() => handleUserClick(comment.user.user_id)}

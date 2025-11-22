@@ -12,7 +12,7 @@ import Link from 'next/link';
 interface SuggestedUser {
     user_id: number;
     name: string;
-    profile_pic_url: string;
+    profile_picture_url: string;
     is_following: boolean;
     role?: string;
 }
@@ -59,35 +59,35 @@ export default function FeedSidebar() {
             {
                 user_id: 1,
                 name: "Jennifer",
-                profile_pic_url: "/playercard1.png",
+                profile_picture_url: "/playercard1.png",
                 is_following: false,
                 role: "Pro Player"
             },
             {
                 user_id: 2,
                 name: "Jennifer",
-                profile_pic_url: "/playercard2.png",
+                profile_picture_url: "/playercard2.png",
                 is_following: false,
                 role: "Pro Player"
             },
             {
                 user_id: 3,
                 name: "Jennifer",
-                profile_pic_url: "/playercard3.png",
+                profile_picture_url: "/playercard3.png",
                 is_following: false,
                 role: "Pro Player"
             },
             {
                 user_id: 4,
                 name: "Jennifer",
-                profile_pic_url: "/playercard4.png",
+                profile_picture_url: "/playercard4.png",
                 is_following: false,
                 role: "Pro Player"
             },
             {
                 user_id: 5,
                 name: "Jennifer",
-                profile_pic_url: "/playercard1.png",
+                profile_picture_url: "/playercard1.png",
                 is_following: false,
                 role: "Pro Player"
             }
@@ -172,7 +172,7 @@ export default function FeedSidebar() {
                             >
                                 <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
                                     <img
-                                        src={user.profile_pic_url}
+                                        src={user.profile_picture_url}
                                         alt={user.name}
                                         className="w-full h-full object-cover"
                                         onError={(e) => {
