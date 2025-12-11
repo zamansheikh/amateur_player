@@ -60,45 +60,6 @@ export default function ProPlayersPage() {
                                 </p>
                             </div>
 
-                            {/* Timeline */}
-                            <div className="bg-gray-50 rounded-lg p-6 mb-8">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">What's Happening:</h3>
-                                <div className="space-y-4 text-left">
-                                    {/* Step 1 */}
-                                    <div className="flex gap-4">
-                                        <div className="flex-shrink-0 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
-                                            ✓
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-gray-900">Player profiles are being created</p>
-                                            <p className="text-sm text-gray-500">Professional players are joining the platform</p>
-                                        </div>
-                                    </div>
-
-                                    {/* Step 2 */}
-                                    <div className="flex gap-4">
-                                        <div className="flex-shrink-0 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
-                                            ✓
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-gray-900">Data is being collected</p>
-                                            <p className="text-sm text-gray-500">Gathering stats, achievements, and details</p>
-                                        </div>
-                                    </div>
-
-                                    {/* Step 3 */}
-                                    <div className="flex gap-4">
-                                        <div className="flex-shrink-0 w-8 h-8 bg-yellow-400 text-gray-900 rounded-full flex items-center justify-center font-bold text-sm">
-                                            ⏳
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-gray-900">Coming within a few days</p>
-                                            <p className="text-sm text-gray-500">We'll launch beautiful player cards with complete data</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
                             {/* How You Can Help */}
                             <div className="bg-green-50 rounded-lg p-6 mb-8 border border-green-200">
                                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Help Us Prepare:</h3>

@@ -60,45 +60,6 @@ export default function TradingCardsPage() {
                                 </p>
                             </div>
 
-                            {/* Timeline */}
-                            <div className="bg-gray-50 rounded-lg p-6 mb-8">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">What's Coming:</h3>
-                                <div className="space-y-4 text-left">
-                                    {/* Feature 1 */}
-                                    <div className="flex gap-4">
-                                        <div className="flex-shrink-0 w-8 h-8 bg-amber-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
-                                            ✓
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-gray-900">Collectible Player Cards</p>
-                                            <p className="text-sm text-gray-500">Beautifully designed cards featuring bowlers from the community</p>
-                                        </div>
-                                    </div>
-
-                                    {/* Feature 2 */}
-                                    <div className="flex gap-4">
-                                        <div className="flex-shrink-0 w-8 h-8 bg-amber-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
-                                            ✓
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-gray-900">Trading System</p>
-                                            <p className="text-sm text-gray-500">Trade cards with other players to complete your collection</p>
-                                        </div>
-                                    </div>
-
-                                    {/* Feature 3 */}
-                                    <div className="flex gap-4">
-                                        <div className="flex-shrink-0 w-8 h-8 bg-yellow-400 text-gray-900 rounded-full flex items-center justify-center font-bold text-sm">
-                                            ⏳
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-gray-900">Coming within a few weeks</p>
-                                            <p className="text-sm text-gray-500">Launch with full card collection, rarity levels, and trading features</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
                             {/* How You Can Help */}
                             <div className="bg-amber-50 rounded-lg p-6 mb-8 border border-amber-200">
                                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Get Ready:</h3>
