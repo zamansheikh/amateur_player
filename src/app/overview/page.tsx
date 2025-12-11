@@ -487,7 +487,7 @@ export default function OverviewPage() {
                 </div>
                 <div className="flex-1">
                   <div className="font-medium text-gray-900 text-sm">
-                    Downtown Lanes
+                    Downtown Chatter
                   </div>
                   <p className="text-xs text-gray-500 mb-1">
                     New tournament announced! Register by Friday.
@@ -502,7 +502,7 @@ export default function OverviewPage() {
                 </div>
                 <div className="flex-1">
                   <div className="font-medium text-gray-900 text-sm">
-                    Downtown Lanes
+                    Downtown Chatter
                   </div>
                   <p className="text-xs text-gray-500 mb-1">
                     New tournament announced! Register by Friday.
@@ -547,7 +547,7 @@ export default function OverviewPage() {
                   </span>
                 </div>
                 <p className="text-xs text-gray-500">
-                  Downtown Lanes • May 15, 2025
+                  Downtown Chatter • May 15, 2025
                 </p>
               </div>
 
@@ -587,7 +587,7 @@ export default function OverviewPage() {
                   </span>
                 </div>
                 <p className="text-xs text-gray-500">
-                  Elite Lanes • July 22, 2025
+                  Elite Chatter • July 22, 2025
                 </p>
               </div>
 

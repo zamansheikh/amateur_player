@@ -150,7 +150,7 @@ export default function ProfilePage() {
     const mockBowlingCenters = [
         { id: 1, name: 'Stone Lane Bowling Center', city: 'Los Angeles', state: 'CA', lat: 34.0522, long: -118.2437 },
         { id: 2, name: 'AMF Bowl Pasadena', city: 'Pasadena', state: 'CA', lat: 34.1478, long: -118.1445 },
-        { id: 3, name: 'Lucky Strike Lanes', city: 'Hollywood', state: 'CA', lat: 34.1028, long: -118.3259 },
+        { id: 3, name: 'Lucky Strike Chatter', city: 'Hollywood', state: 'CA', lat: 34.1028, long: -118.3259 },
         { id: 4, name: 'Bowling Barn', city: 'Santa Monica', state: 'CA', lat: 34.0195, long: -118.4912 },
         { id: 5, name: 'The Bowling Alley', city: 'Downtown LA', state: 'CA', lat: 34.0522, long: -118.2451 }
     ];

@@ -137,7 +137,7 @@ export default function ProductsPage() {
       originalPrice: 500,
       discountPercentage: 40,
       condition: 'good',
-      description: "Set of 5 house balls in excellent condition. Perfect for home lanes or smaller centers.",
+      description: "Set of 5 house balls in excellent condition. Perfect for home chatter or smaller centers.",
       images: ["/api/placeholder/400/400"],
       inStock: true,
       stockQuantity: 2,

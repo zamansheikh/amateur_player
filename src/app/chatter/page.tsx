@@ -54,7 +54,7 @@ interface Discussion {
     viewer_vote: boolean | null;
 }
 
-export default function LanesPage() {
+export default function ChatterPage() {
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState<'about' | 'discussions' | 'new'>('about');
     const [discussions, setDiscussions] = useState<Discussion[]>([]);
@@ -189,7 +189,7 @@ export default function LanesPage() {
                     {/* Text */}
                     <div className="flex-1">
                         <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight">
-                            Lanes
+                            Chatter
                         </h1>
                         <p className="text-sm sm:text-base text-white/80 mt-0.5 sm:mt-1 font-medium">
                             Community discussions & insights
@@ -240,13 +240,13 @@ export default function LanesPage() {
                 {/* About Tab */}
                 {activeTab === 'about' && (
                     <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 md:p-8 max-w-4xl">
-                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 md:mb-6">Welcome to Lanes</h2>
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 md:mb-6">Welcome to Chatter</h2>
 
                         <div className="space-y-3 sm:space-y-4 md:space-y-6 text-gray-700 text-sm sm:text-base">
                             <p className="text-gray-900 font-semibold">The home of focused, high-quality bowling conversations.</p>
 
                             <p className="leading-relaxed">
-                                This is where amateurs and pros connect, share perspectives, debate big ideas, and explore the sport’s past, present, and future. Whether you're reflecting on your journey, questioning why bowling is underrated, or imagining what the next decade of the sport looks like — Lanes is where those discussions belong.
+                                This is where amateurs and pros connect, share perspectives, debate big ideas, and explore the sport’s past, present, and future. Whether you're reflecting on your journey, questioning why bowling is underrated, or imagining what the next decade of the sport looks like — Chatter is where those discussions belong.
                             </p>
 
                             <p className="leading-relaxed">
@@ -299,7 +299,7 @@ export default function LanesPage() {
                                 <div key={discussion.discussion_id} className="bg-white rounded-lg sm:rounded-xl shadow-md hover:shadow-lg transition-shadow">
                                     <div className="p-3 sm:p-4 md:p-6">
                                         {/* Header - clickable part */}
-                                        <Link href={`/lanes/${discussion.uid}`}>
+                                        <Link href={`/chatter/${discussion.uid}`}>
                                             <div className="flex items-start justify-between mb-4 sm:mb-5 gap-2 sm:gap-3 cursor-pointer">
                                                 <div className="flex items-start gap-2 sm:gap-3 md:gap-4 flex-1 min-w-0">
                                                     {/* Avatar */}

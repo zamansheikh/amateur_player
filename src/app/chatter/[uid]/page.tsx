@@ -157,9 +157,9 @@ export default function DiscussionDetailPage() {
         return (
             <div className="min-h-screen bg-gray-50">
                 <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 md:py-10">
-                    <Link href="/lanes" className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-6">
+                    <Link href="/chatter" className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-6">
                         <ArrowLeft className="w-5 h-5" />
-                        <span className="font-medium">Back to Lanes</span>
+                        <span className="font-medium">Back to Chatter</span>
                     </Link>
                     <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg">
                         {error || 'Discussion not found'}
@@ -173,9 +173,9 @@ export default function DiscussionDetailPage() {
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-8 md:py-10">
                 {/* Back button */}
-                <Link href="/lanes" className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-6">
+                <Link href="/chatter" className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-6">
                     <ArrowLeft className="w-5 h-5" />
-                    <span className="font-medium">Back to Lanes</span>
+                    <span className="font-medium">Back to Chatter</span>
                 </Link>
 
                 <div className="space-y-4">

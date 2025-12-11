@@ -397,11 +397,11 @@ export default function Landing2Page() {
                 </div>
             </section>
 
-            {/* Beyond the Lanes — Build Your Brand Section */}
+            {/* Beyond the Chatter — Build Your Brand Section */}
             <section className="py-20 px-8 bg-gray-50">
                 <div className="max-w-7xl mx-auto text-center">
                     <h2 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4">
-                        Beyond the Lanes — Build Your Brand
+                        Beyond the Chatter — Build Your Brand
                     </h2>
                     <p className="text-lg text-gray-700 max-w-3xl mx-auto mb-12">
                         Turn every game, every fan interaction, and every sponsor connection into lasting value.
@@ -410,8 +410,8 @@ export default function Landing2Page() {
                     {/* Center Image */}
                     <div className="mb-16">
                         <Image
-                            src="/land2/beyond_the_lanes_section.png"
-                            alt="Beyond the Lanes"
+                            src="/land2/beyond_the_chatter_section.png"
+                            alt="Beyond the Chatter"
                             width={1000}
                             height={600}
                             className="w-full h-auto mx-auto rounded-2xl"

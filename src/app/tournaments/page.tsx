@@ -72,7 +72,7 @@ interface CreateTournamentForm {
 // Dummy Data
 const DUMMY_BOWLING_CENTERS: BowlingCenter[] = [
     { id: 1, name: "Strike Zone Bowling Center", address: "123 Main St", city: "Los Angeles", state: "CA" },
-    { id: 2, name: "Lucky Strike Lanes", address: "456 Oak Ave", city: "Chicago", state: "IL" },
+    { id: 2, name: "Lucky Strike Chatter", address: "456 Oak Ave", city: "Chicago", state: "IL" },
     { id: 3, name: "Sunset Bowling Alley", address: "789 Pine Rd", city: "Miami", state: "FL" },
     { id: 4, name: "Thunder Alley", address: "321 Maple Dr", city: "New York", state: "NY" },
     { id: 5, name: "Perfect Game Center", address: "654 Elm St", city: "Houston", state: "TX" },
