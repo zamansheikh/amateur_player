@@ -87,7 +87,7 @@ export const authApi = {
 // API functions
 export const userApi = {
     getProfile: async () => {
-        const response = await api.get('/api/user/profile');
+        const response = await api.get('/api/profile/minimal');
         return response.data;
     },
 

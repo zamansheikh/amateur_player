@@ -64,6 +64,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
                 const userData: User = {
                     ...userProfile,
+                    user_id: (userProfile as any).user_id || (userProfile as any).id,
+                    id: (userProfile as any).user_id || (userProfile as any).id,
                     authenticated: true,
                     access_token: access_token
                 };
@@ -74,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 // Return success and profile completion status
                 return {
                     success: true,
-                    profileComplete: userProfile.is_complete
+                    profileComplete: (userProfile as any).is_complete ?? true
                 };
             }
 
@@ -130,6 +132,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
                 const userData: User = {
                     ...userProfile,
+                    user_id: (userProfile as any).user_id || (userProfile as any).id,
+                    id: (userProfile as any).user_id || (userProfile as any).id,
                     authenticated: true,
                     access_token: access_token
                 };
@@ -221,6 +225,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const profileResponse = await userApi.getProfile();
             const userData: User = {
                 ...profileResponse,
+                user_id: (profileResponse as any).user_id || (profileResponse as any).id,
+                id: (profileResponse as any).user_id || (profileResponse as any).id,
                 authenticated: true,
                 access_token: token
             };
