@@ -87,8 +87,31 @@ export const authApi = {
 // API functions
 export const userApi = {
     getProfile: async () => {
-        const response = await api.get('/api/profile/minimal');
-        return response.data;
+        const response = await api.get('/api/profile/data');
+        const data = response.data;
+        // Transform nested response to flat User object
+        return {
+            user_id: data.user_id,
+            id: data.user_id,
+            username: data.username,
+            name: data.name,
+            first_name: data.first_name,
+            last_name: data.last_name,
+            email: data.contact_info?.email,
+            profile_picture_url: data.profile_media?.profile_picture_url,
+            cover_photo_url: data.profile_media?.cover_picture_url,
+            intro_video_url: data.profile_media?.intro_video_url,
+            is_pro: data.roles?.is_pro || false,
+            follower_count: data.follow_info?.follwers || 0,
+            following_count: data.follow_info?.followings || 0,
+            favorite_brands: data.favorite_brands || [],
+            bio: data.bio?.content,
+            gender: data.gender_data?.role,
+            birthdate: data.birthdate_data?.date,
+            age: data.birthdate_data?.age,
+            address_str: data.address_data?.address_str,
+            zipcode: data.address_data?.zipcode,
+        };
     },
 
     updateProfile: async (data: Record<string, unknown>) => {

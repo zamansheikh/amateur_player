@@ -66,6 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     ...userProfile,
                     user_id: (userProfile as any).user_id || (userProfile as any).id,
                     id: (userProfile as any).user_id || (userProfile as any).id,
+                    is_complete: (userProfile as any).is_complete ?? true,
                     authenticated: true,
                     access_token: access_token
                 };
@@ -134,6 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     ...userProfile,
                     user_id: (userProfile as any).user_id || (userProfile as any).id,
                     id: (userProfile as any).user_id || (userProfile as any).id,
+                    is_complete: (userProfile as any).is_complete ?? true,
                     authenticated: true,
                     access_token: access_token
                 };
@@ -227,6 +229,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 ...profileResponse,
                 user_id: (profileResponse as any).user_id || (profileResponse as any).id,
                 id: (profileResponse as any).user_id || (profileResponse as any).id,
+                is_complete: (profileResponse as any).is_complete ?? true,
                 authenticated: true,
                 access_token: token
             };

@@ -36,6 +36,7 @@ export interface UserStats {
 
 export interface User {
     user_id: number;
+    id?: number;
     username: string;
     name: string;
     first_name: string;
@@ -43,7 +44,7 @@ export interface User {
     email: string;
     profile_picture_url?: string;
     intro_video_url?: string;
-    cover_photo_url: string;
+    cover_photo_url?: string;
     xp?: number;
     level?: number;
     card_theme?: string;
@@ -51,11 +52,18 @@ export interface User {
     sponsors?: Brand[];
     info?: UserInfo;
     follower_count?: number;
+    following_count?: number;
     stats?: UserStats;
     favorite_brands?: Brand[];
     is_complete: boolean;
     authenticated?: boolean;
     access_token?: string;
+    bio?: string;
+    gender?: string;
+    birthdate?: string;
+    age?: number;
+    address_str?: string;
+    zipcode?: string;
 }
 
 export interface Tournament {
