@@ -119,6 +119,8 @@ export interface User {
     is_pro?: boolean;
     profile_picture_url?: string;
     cover_photo_url?: string;
+    follower_count?: number;
+    following_count?: number;
     level?: number;
     card_theme?: string;
     stats?: UserStats;
