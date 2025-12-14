@@ -89,28 +89,32 @@ export const userApi = {
     getProfile: async () => {
         const response = await api.get('/api/profile/data');
         const data = response.data;
-        // Transform nested response to flat User object
+        
+        // Return the data as is, but add legacy fields for compatibility
         return {
-            user_id: data.user_id,
+            ...data,
+            // Legacy fields mapping
             id: data.user_id,
-            username: data.username,
-            name: data.name,
-            first_name: data.first_name,
-            last_name: data.last_name,
-            email: data.contact_info?.email,
+            is_pro: data.roles?.is_pro || false,
             profile_picture_url: data.profile_media?.profile_picture_url,
             cover_photo_url: data.profile_media?.cover_picture_url,
             intro_video_url: data.profile_media?.intro_video_url,
-            is_pro: data.roles?.is_pro || false,
             follower_count: data.follow_info?.follwers || 0,
             following_count: data.follow_info?.followings || 0,
-            favorite_brands: data.favorite_brands || [],
-            bio: data.bio?.content,
-            gender: data.gender_data?.role,
-            birthdate: data.birthdate_data?.date,
-            age: data.birthdate_data?.age,
-            address_str: data.address_data?.address_str,
-            zipcode: data.address_data?.zipcode,
+            
+            // Map info object for components still using user.info
+            info: {
+                dob: data.birthdate_data?.date,
+                age: data.birthdate_data?.age,
+                gender: data.gender_data?.role,
+                address_str: data.address_data?.address_str,
+                zipcode: data.address_data?.zipcode,
+                home_center: data.home_center_data?.center?.name,
+                // Simple parsing for handedness
+                handedness: data.ball_handling_style?.description?.toLowerCase().includes('right') ? 'right' : 
+                           data.ball_handling_style?.description?.toLowerCase().includes('left') ? 'left' : '',
+                thumb_style: data.ball_handling_style?.description?.toLowerCase().includes('two handed') ? 'no-thumb' : 'thumb',
+            }
         };
     },
 

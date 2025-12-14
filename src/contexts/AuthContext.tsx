@@ -22,15 +22,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         // Check stored authentication on mount
-        const checkAuth = () => {
+        const checkAuth = async () => {
             try {
                 const storedToken = localStorage.getItem('access_token');
                 const storedUser = localStorage.getItem('user');
 
-                if (storedToken && storedUser) {
+                if (storedToken) {
+                    // If we have a token, try to fetch the latest profile data
+                    try {
+                        // Set token for api client (in case it wasn't set yet)
+                        // Note: api interceptor reads from localStorage, so just ensuring it's there is enough
+                        
+                        const userProfile = await userApi.getProfile();
+                        const userData: User = {
+                            ...userProfile,
+                            user_id: (userProfile as any).user_id || (userProfile as any).id,
+                            id: (userProfile as any).user_id || (userProfile as any).id,
+                            is_complete: (userProfile as any).is_complete ?? true,
+                            authenticated: true,
+                            access_token: storedToken
+                        };
+                        
+                        localStorage.setItem('user', JSON.stringify(userData));
+                        setUser(userData);
+                    } catch (apiError) {
+                        console.error('Error fetching profile on mount:', apiError);
+                        // Fallback to stored user if API fails
+                        if (storedUser) {
+                            const userData = JSON.parse(storedUser);
+                            if (userData.authenticated) {
+                                setUser({ ...userData, access_token: storedToken });
+                            }
+                        }
+                    }
+                } else if (storedUser) {
+                    // Fallback if only user data exists but no token (unlikely but possible)
                     const userData = JSON.parse(storedUser);
                     if (userData.authenticated) {
-                        setUser({ ...userData, access_token: storedToken });
+                        setUser(userData);
                     }
                 }
             } catch (error) {

@@ -3,6 +3,7 @@ export interface UserInfo {
     age?: number;
     gender?: string;
     address_str?: string;
+    zipcode?: string;
     lat?: string;
     long?: string;
     home_center?: string;
@@ -36,34 +37,92 @@ export interface UserStats {
 
 export interface User {
     user_id: number;
-    id?: number;
-    username: string;
     name: string;
     first_name: string;
     last_name: string;
+    username: string;
     email: string;
-    profile_picture_url?: string;
-    intro_video_url?: string;
-    cover_photo_url?: string;
-    xp?: number;
-    level?: number;
-    card_theme?: string;
-    is_pro: boolean;
-    sponsors?: Brand[];
-    info?: UserInfo;
-    follower_count?: number;
-    following_count?: number;
-    stats?: UserStats;
-    favorite_brands?: Brand[];
-    is_complete: boolean;
+    roles: {
+        is_pro: boolean;
+        is_center_admin: boolean;
+        is_tournament_director: boolean;
+    };
+    xp: number;
+    contact_info: {
+        email: string;
+        is_public: boolean;
+        is_added: boolean;
+    };
+    gender_data: {
+        role: string;
+        is_public: boolean;
+        is_added: boolean;
+    };
+    bio: {
+        content: string;
+        is_public: boolean;
+        is_added: boolean;
+    };
+    birthdate_data: {
+        date: string;
+        age: number;
+        is_public: boolean;
+        is_added: boolean;
+    };
+    address_data: {
+        address_str: string;
+        zipcode: string;
+        is_public: boolean;
+        is_added: boolean;
+    };
+    profile_media: {
+        profile_picture_url: string;
+        cover_picture_url: string;
+        intro_video_url: string;
+    };
+    home_center_data: {
+        center: {
+            id: number;
+            name: string;
+            logo: string;
+            lanes: number;
+            address_str: string;
+            lat: string;
+            long: string;
+            zipcode: string;
+            website_url: string;
+            email: string;
+            phone_number: string;
+            admin: any;
+        } | null;
+        is_public: boolean;
+        is_added: boolean;
+    };
+    ball_handling_style: {
+        description: string;
+        is_public: boolean;
+        is_added: boolean;
+    };
+    follow_info: {
+        follwers: number;
+        followings: number;
+    };
+    favorite_brands: Brand[];
+    
+    // Client-side auth fields
     authenticated?: boolean;
     access_token?: string;
-    bio?: string;
-    gender?: string;
-    birthdate?: string;
-    age?: number;
-    address_str?: string;
-    zipcode?: string;
+    is_complete?: boolean;
+    
+    // Legacy fields for compatibility (optional)
+    id?: number;
+    is_pro?: boolean;
+    profile_picture_url?: string;
+    cover_photo_url?: string;
+    level?: number;
+    card_theme?: string;
+    stats?: UserStats;
+    info?: UserInfo;
 }
 
 export interface Tournament {

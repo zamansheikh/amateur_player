@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { ArrowLeft, Camera, Upload, Image as ImageIcon } from 'lucide-react';
 import { api, userApi } from '@/lib/api';
+import { useCloudUpload } from '@/lib/useCloudUpload';
 
 export default function EditProfilePage() {
     const { user, refreshUser } = useAuth();
     const router = useRouter();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const coverFileInputRef = useRef<HTMLInputElement>(null);
+    const cloudUpload = useCloudUpload();
 
     const [formData, setFormData] = useState({
         first_name: '',
@@ -36,8 +38,8 @@ export default function EditProfilePage() {
                 email: user.email || '',
                 username: user.username || '',
                 name: user.name || '',
-                profile_picture_url: user.profile_picture_url || '',
-                cover_photo_url: user.cover_photo_url || ''
+                profile_picture_url: user.profile_media?.profile_picture_url || user.profile_picture_url || '',
+                cover_photo_url: user.profile_media?.cover_picture_url || user.cover_photo_url || ''
             });
         }
     }, [user]);
@@ -70,19 +72,23 @@ export default function EditProfilePage() {
         setError(null);
 
         try {
-            const formDataUpload = new FormData();
-            formDataUpload.append('image', file);
+            // Step 1: Upload to cloud storage
+            const uploadResult = await cloudUpload.uploadFile(file, 'cdn');
+            
+            if (!uploadResult.success) {
+                setError(`Failed to upload: ${uploadResult.error}`);
+                return;
+            }
 
-            const response = await api.post('/api/user/profile/upload-cover-photo/', formDataUpload, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
+            // Step 2: Update profile with cloud URL
+            const response = await api.post('/api/profile/media/cover-picture', { 
+                cover_picture_url: uploadResult.publicUrl 
             });
 
-            if (response.data && response.data.image_public_url) {
+            if (response.status === 200 || response.status === 201) {
                 setFormData(prev => ({
                     ...prev,
-                    cover_photo_url: response.data.image_public_url
+                    cover_photo_url: uploadResult.publicUrl || ''
                 }));
                 setSuccess('Cover photo updated successfully!');
 
@@ -117,19 +123,23 @@ export default function EditProfilePage() {
         setError(null);
 
         try {
-            const formDataUpload = new FormData();
-            formDataUpload.append('image', file);
+            // Step 1: Upload to cloud storage
+            const uploadResult = await cloudUpload.uploadFile(file, 'cdn');
+            
+            if (!uploadResult.success) {
+                setError(`Failed to upload: ${uploadResult.error}`);
+                return;
+            }
 
-            const response = await api.post('/api/user/profile/upload-profile-picture/', formDataUpload, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
+            // Step 2: Update profile with cloud URL
+            const response = await api.post('/api/profile/media/profile-picture', { 
+                profile_picture_url: uploadResult.publicUrl 
             });
 
-            if (response.data && response.data.image_public_url) {
+            if (response.status === 200 || response.status === 201) {
                 setFormData(prev => ({
                     ...prev,
-                    profile_picture_url: response.data.image_public_url
+                    profile_picture_url: uploadResult.publicUrl || ''
                 }));
                 setSuccess('Profile picture updated successfully!');
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { Edit, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
+import { Edit, ChevronDown, ChevronUp, AlertCircle, Lock, Globe } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -120,9 +120,11 @@ export default function ProfilePage() {
         last_name: '',
         email: '',
         username: '',
+        bio: '',
         dob: '',
         gender: '',
         address_str: '',
+        zipcode: '',
         lat: '',
         long: '',
         home_center: '',
@@ -134,6 +136,14 @@ export default function ProfilePage() {
         parentFirstName: '',
         parentLastName: '',
         parentEmail: ''
+    });
+
+    // Privacy settings state
+    const [privacySettings, setPrivacySettings] = useState({
+        bio: true,
+        gender: true,
+        birthdate: true,
+        address: false,
     });
 
     // Address and center suggestion states
@@ -172,6 +182,20 @@ export default function ProfilePage() {
     const is13to18 = userAge >= 13 && userAge < 18;
     const is18Plus = userAge >= 18;
 
+    // Privacy toggle helper functions
+    const getPrivacyIcon = (isPublic: boolean) => {
+        return isPublic ? <Globe className="w-3 h-3 text-blue-500" /> : <Lock className="w-3 h-3 text-gray-400" />;
+    };
+
+    const togglePrivacy = (field: keyof typeof privacySettings) => {
+        if (isEditingUserInfo) {
+            setPrivacySettings(prev => ({
+                ...prev,
+                [field]: !prev[field]
+            }));
+        }
+    };
+
     // Helper function to check if bowling statistics are incomplete
     const isGameStatsIncomplete = () => {
         return !user?.stats?.average_score ||
@@ -198,7 +222,8 @@ export default function ProfilePage() {
     // Helper function to check if sponsors/brands are incomplete
     const isSponsorsIncomplete = () => {
         if (user?.is_pro) {
-            return !user?.sponsors || user.sponsors.length === 0;
+            const sponsors = user?.favorite_brands?.filter(b => b.brandType === 'Business Sponsors') || [];
+            return sponsors.length === 0;
         } else {
             return !user?.favorite_brands || user.favorite_brands.length === 0;
         }
@@ -357,25 +382,36 @@ export default function ProfilePage() {
                 last_name: user.last_name || '',
                 email: user.email || '',
                 username: user.username || '',
-                dob: user.info?.dob || '',
-                gender: user.info?.gender || '',
-                address_str: user.info?.address_str || '',
-                lat: user.info?.lat || '',
-                long: user.info?.long || '',
-                home_center: user.info?.home_center || '',
-                handedness: user.info?.handedness || '',
-                thumb_style: user.info?.thumb_style || '',
-                is_youth: user.info?.is_youth || false,
-                is_coach: user.info?.is_coach || false,
-                usbcCardNumber: user.info?.usbcCardNumber || '',
-                parentFirstName: user.info?.parentFirstName || '',
-                parentLastName: user.info?.parentLastName || '',
-                parentEmail: user.info?.parentEmail || ''
+                bio: user.bio?.content || '',
+                dob: user.birthdate_data?.date || '',
+                gender: user.gender_data?.role || '',
+                address_str: user.address_data?.address_str || '',
+                zipcode: user.address_data?.zipcode || '',
+                lat: '',
+                long: '',
+                home_center: user.home_center_data?.center?.name || '',
+                handedness: user.ball_handling_style?.description?.toLowerCase().includes('right') ? 'right' : 
+                           user.ball_handling_style?.description?.toLowerCase().includes('left') ? 'left' : '',
+                thumb_style: user.ball_handling_style?.description?.toLowerCase().includes('two handed') ? 'no-thumb' : 'thumb',
+                is_youth: false,
+                is_coach: false,
+                usbcCardNumber: '',
+                parentFirstName: '',
+                parentLastName: '',
+                parentEmail: ''
             });
 
             // Set home center search to match home_center
-            setHomeCenterSearch(user.info?.home_center || '');
-            setAddressSearchQuery(user.info?.address_str || '');
+            setHomeCenterSearch(user.home_center_data?.center?.name || '');
+            setAddressSearchQuery(user.address_data?.address_str || '');
+
+            // Initialize privacy settings from API response
+            setPrivacySettings({
+                bio: user.bio?.is_public ?? true,
+                gender: user.gender_data?.is_public ?? true,
+                birthdate: user.birthdate_data?.is_public ?? true,
+                address: user.address_data?.is_public ?? false,
+            });
         }
     }, [user]);
 
@@ -464,7 +500,54 @@ export default function ProfilePage() {
             setIsUpdatingUserInfo(true);
             setErrorMessage('');
 
-            // Prepare the payload
+            // Update gender
+            if (userInfoForm.gender) {
+                await api.post(
+                    '/api/profile/gender',
+                    { 
+                        role: userInfoForm.gender, 
+                        is_public: privacySettings.gender 
+                    }
+                );
+            }
+
+            // Update bio
+            if (userInfoForm.bio !== undefined) {
+                await api.post(
+                    '/api/profile/bio',
+                    { 
+                        bio: userInfoForm.bio, 
+                        is_public: privacySettings.bio 
+                    }
+                );
+            }
+
+            // Update birthdate
+            if (userInfoForm.dob) {
+                await api.post(
+                    '/api/profile/birth-date',
+                    { 
+                        date: userInfoForm.dob, 
+                        is_public: privacySettings.birthdate 
+                    }
+                );
+            }
+
+            // Update address
+            if (userInfoForm.address_str) {
+                await api.post(
+                    '/api/profile/address',
+                    { 
+                        address_str: userInfoForm.address_str,
+                        zipcode: userInfoForm.zipcode || '',
+                        lat: userInfoForm.lat || '0',
+                        long: userInfoForm.long || '0',
+                        is_public: privacySettings.address 
+                    }
+                );
+            }
+
+            // Update other user info (existing API)
             const payload: any = {
                 dob: userInfoForm.dob,
                 gender: userInfoForm.gender,
@@ -474,7 +557,7 @@ export default function ProfilePage() {
                 home_center: userInfoForm.home_center,
                 handedness: userInfoForm.handedness,
                 thumb_style: userInfoForm.thumb_style,
-                is_youth: is13to18, // Auto-set based on age
+                is_youth: is13to18,
                 is_coach: is18Plus && userInfoForm.is_coach ? userInfoForm.is_coach : false,
                 usbcCardNumber: is18Plus && userInfoForm.is_coach ? userInfoForm.usbcCardNumber : '',
                 parentFirstName: is13to18 ? userInfoForm.parentFirstName : '',
@@ -602,13 +685,13 @@ export default function ProfilePage() {
                         {/* Success/Error Messages */}
                         {successMessage && (
                             <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm flex items-start gap-2">
-                                <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                                <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                                 <p>{successMessage}</p>
                             </div>
                         )}
                         {errorMessage && (
                             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-start gap-2">
-                                <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                                <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                                 <p>{errorMessage}</p>
                             </div>
                         )}
@@ -776,9 +859,41 @@ export default function ProfilePage() {
                                 <div className="border-t px-6 pb-6">
                                     {isEditingUserInfo ? (
                                         <div className="space-y-4">
+                                            {/* Bio */}
+                                            <div>
+                                                <div className="flex items-center justify-between mb-1">
+                                                    <label className="block text-sm font-medium text-gray-700">Bio</label>
+                                                    <button 
+                                                        onClick={() => togglePrivacy('bio')}
+                                                        className="hover:bg-gray-100 p-1 rounded transition flex items-center gap-1 text-xs text-gray-600"
+                                                        type="button"
+                                                    >
+                                                        {getPrivacyIcon(privacySettings.bio)}
+                                                        <span>{privacySettings.bio ? 'Public' : 'Private'}</span>
+                                                    </button>
+                                                </div>
+                                                <textarea
+                                                    value={userInfoForm.bio}
+                                                    onChange={(e) => handleUserInfoFormChange('bio', e.target.value)}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 min-h-[100px]"
+                                                    disabled={isUpdatingUserInfo}
+                                                    placeholder="Tell us about yourself..."
+                                                />
+                                            </div>
+
                                             {/* Date of Birth */}
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                                                <div className="flex items-center justify-between mb-1">
+                                                    <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
+                                                    <button 
+                                                        onClick={() => togglePrivacy('birthdate')}
+                                                        className="hover:bg-gray-100 p-1 rounded transition flex items-center gap-1 text-xs text-gray-600"
+                                                        type="button"
+                                                    >
+                                                        {getPrivacyIcon(privacySettings.birthdate)}
+                                                        <span>{privacySettings.birthdate ? 'Public' : 'Private'}</span>
+                                                    </button>
+                                                </div>
                                                 <input
                                                     type="date"
                                                     value={userInfoForm.dob ? userInfoForm.dob.split('T')[0] : ''}
@@ -813,7 +928,17 @@ export default function ProfilePage() {
 
                                             {/* Gender */}
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                                                <div className="flex items-center justify-between mb-1">
+                                                    <label className="block text-sm font-medium text-gray-700">Gender</label>
+                                                    <button 
+                                                        onClick={() => togglePrivacy('gender')}
+                                                        className="hover:bg-gray-100 p-1 rounded transition flex items-center gap-1 text-xs text-gray-600"
+                                                        type="button"
+                                                    >
+                                                        {getPrivacyIcon(privacySettings.gender)}
+                                                        <span>{privacySettings.gender ? 'Public' : 'Private'}</span>
+                                                    </button>
+                                                </div>
                                                 <select
                                                     value={userInfoForm.gender}
                                                     onChange={(e) => handleUserInfoFormChange('gender', e.target.value)}
@@ -821,14 +946,23 @@ export default function ProfilePage() {
                                                     disabled={isUpdatingUserInfo}
                                                 >
                                                     <option value="">Select</option>
-                                                    <option value="male">Male</option>
-                                                    <option value="female">Female</option>
-                                                    <option value="other">Other</option>
+                                                    <option value="Man">Man</option>
+                                                    <option value="Woman">Woman</option>
                                                 </select>
                                             </div>
                                             {/* Address with Mapbox */}
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                                                <div className="flex items-center justify-between mb-1">
+                                                    <label className="block text-sm font-medium text-gray-700">Address</label>
+                                                    <button 
+                                                        onClick={() => togglePrivacy('address')}
+                                                        className="hover:bg-gray-100 p-1 rounded transition flex items-center gap-1 text-xs text-gray-600"
+                                                        type="button"
+                                                    >
+                                                        {getPrivacyIcon(privacySettings.address)}
+                                                        <span>{privacySettings.address ? 'Public' : 'Private'}</span>
+                                                    </button>
+                                                </div>
                                                 <div className="relative">
                                                     <input
                                                         type="text"
@@ -1049,29 +1183,29 @@ export default function ProfilePage() {
                                         </div>
                                     ) : (
                                         <div className="space-y-3">
+                                            <div className="flex justify-between items-start">
+                                                <span className="text-gray-600 shrink-0 mr-4">Bio:</span>
+                                                <span className="font-medium text-right">{user?.bio?.content || 'No bio added'}</span>
+                                            </div>
                                             <div className="flex justify-between items-center">
                                                 <span className="text-gray-600">Date of Birth:</span>
-                                                <span className="font-medium">{user?.info?.dob ? new Date(user.info.dob).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A'} (Age: {calculateAge(user?.info?.dob || '')})</span>
+                                                <span className="font-medium">{user?.birthdate_data?.date ? new Date(user.birthdate_data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A'} (Age: {user?.birthdate_data?.age || 'N/A'})</span>
                                             </div>
                                             <div className="flex justify-between items-center">
                                                 <span className="text-gray-600">Gender:</span>
-                                                <span className="font-medium capitalize">{user?.info?.gender || 'N/A'}</span>
+                                                <span className="font-medium capitalize">{user?.gender_data?.role || 'N/A'}</span>
                                             </div>
                                             <div className="flex justify-between items-center">
                                                 <span className="text-gray-600">Address:</span>
-                                                <span className="font-medium text-sm">{user?.info?.address_str || 'Not set'}</span>
+                                                <span className="font-medium text-sm">{user?.address_data?.address_str || 'Not set'}</span>
                                             </div>
                                             <div className="flex justify-between items-center">
                                                 <span className="text-gray-600">Home Center:</span>
-                                                <span className="font-medium">{user?.info?.home_center || 'Not set'}</span>
+                                                <span className="font-medium">{user?.home_center_data?.center?.name || 'Not set'}</span>
                                             </div>
                                             <div className="flex justify-between items-center">
                                                 <span className="text-gray-600">Handedness:</span>
-                                                <span className="font-medium capitalize">{user?.info?.handedness || 'Not set'}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-gray-600">Thumb Style:</span>
-                                                <span className="font-medium capitalize">{user?.info?.thumb_style?.replace('-', ' ') || 'Not set'}</span>
+                                                <span className="font-medium capitalize">{user?.ball_handling_style?.description || 'Not set'}</span>
                                             </div>
                                             {user?.info?.is_youth && (
                                                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-3">
@@ -1121,9 +1255,9 @@ export default function ProfilePage() {
                                 <div className="border-t px-6 pb-6">
                                     {user?.is_pro ? (
                                         <div>
-                                            {user?.sponsors && user.sponsors.length > 0 ? (
+                                            {user?.favorite_brands && user.favorite_brands.filter(b => b.brandType === 'Business Sponsors').length > 0 ? (
                                                 <div className="space-y-3">
-                                                    {user.sponsors.map((sponsor: Brand) => (
+                                                    {user.favorite_brands.filter(b => b.brandType === 'Business Sponsors').map((sponsor: Brand) => (
                                                         <div key={sponsor.brand_id} className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
                                                             <Image
                                                                 src={sponsor.logo_url}
