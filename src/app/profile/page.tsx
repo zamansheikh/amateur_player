@@ -128,6 +128,7 @@ export default function ProfilePage() {
         lat: '',
         long: '',
         home_center: '',
+        home_center_id: 0,
         handedness: '',
         thumb_style: '',
         is_youth: false,
@@ -144,6 +145,8 @@ export default function ProfilePage() {
         gender: true,
         birthdate: true,
         address: false,
+        ballHandling: true,
+        homeCenter: true
     });
 
     // Address and center suggestion states
@@ -152,18 +155,40 @@ export default function ProfilePage() {
     const [addressSearchQuery, setAddressSearchQuery] = useState('');
     const [homeCenterSearch, setHomeCenterSearch] = useState('');
     const [showCenterSuggestions, setShowCenterSuggestions] = useState(false);
+    const [centerSuggestions, setCenterSuggestions] = useState<any[]>([]);
     const suggestionsRef = useRef<HTMLDivElement>(null);
     const centerSuggestionsRef = useRef<HTMLDivElement>(null);
     const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const centerDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Mock bowling centers data
-    const mockBowlingCenters = [
-        { id: 1, name: 'Stone Lane Bowling Center', city: 'Los Angeles', state: 'CA', lat: 34.0522, long: -118.2437 },
-        { id: 2, name: 'AMF Bowl Pasadena', city: 'Pasadena', state: 'CA', lat: 34.1478, long: -118.1445 },
-        { id: 3, name: 'Lucky Strike Chatter', city: 'Hollywood', state: 'CA', lat: 34.1028, long: -118.3259 },
-        { id: 4, name: 'Bowling Barn', city: 'Santa Monica', state: 'CA', lat: 34.0195, long: -118.4912 },
-        { id: 5, name: 'The Bowling Alley', city: 'Downtown LA', state: 'CA', lat: 34.0522, long: -118.2451 }
-    ];
+    // Search centers API
+    const searchCenters = async (query: string) => {
+        if (!query.trim() || query.length < 2) {
+            setCenterSuggestions([]);
+            return;
+        }
+
+        try {
+            const response = await api.get(`/api/centers?q=${encodeURIComponent(query)}`);
+            setCenterSuggestions(response.data || []);
+            setShowCenterSuggestions(true);
+        } catch (error) {
+            console.error('Error searching centers:', error);
+        }
+    };
+
+    // Handle center input change with debounce
+    const handleCenterSearchChange = (value: string) => {
+        setHomeCenterSearch(value);
+        
+        if (centerDebounceTimerRef.current) {
+            clearTimeout(centerDebounceTimerRef.current);
+        }
+
+        centerDebounceTimerRef.current = setTimeout(() => {
+            searchCenters(value);
+        }, 300);
+    };
 
     // Calculate age from DOB
     const calculateAge = (dobString: string): number => {
@@ -390,6 +415,7 @@ export default function ProfilePage() {
                 lat: '',
                 long: '',
                 home_center: user.home_center_data?.center?.name || '',
+                home_center_id: user.home_center_data?.center?.id || 0,
                 handedness: user.ball_handling_style?.description?.toLowerCase().includes('right') ? 'right' : 
                            user.ball_handling_style?.description?.toLowerCase().includes('left') ? 'left' : '',
                 thumb_style: user.ball_handling_style?.description?.toLowerCase().includes('two handed') ? 'no-thumb' : 'thumb',
@@ -411,6 +437,8 @@ export default function ProfilePage() {
                 gender: user.gender_data?.is_public ?? true,
                 birthdate: user.birthdate_data?.is_public ?? true,
                 address: user.address_data?.is_public ?? false,
+                ballHandling: user.ball_handling_style?.is_public ?? true,
+                homeCenter: user.home_center_data?.is_public ?? true
             });
         }
     }, [user]);
@@ -457,22 +485,13 @@ export default function ProfilePage() {
 
             // Update stats
             const statsPayload = {
-                average_score: parseFloat(gameStatsForm.average_score.toString()),
+                average: parseFloat(gameStatsForm.average_score.toString()),
                 high_game: parseInt(gameStatsForm.high_game.toString()),
                 high_series: parseInt(gameStatsForm.high_series.toString()),
                 experience: parseInt(gameStatsForm.experience.toString())
             };
 
-            await api.post('api/user/stats/game-stats', statsPayload);
-
-            // Update playing style
-            if (gameStatsForm.handedness && gameStatsForm.thumb_style) {
-                const stylePayload = {
-                    handedness: gameStatsForm.handedness,
-                    thumb_style: gameStatsForm.thumb_style
-                };
-                await userApi.updateUserInfo(stylePayload);
-            }
+            await api.post('/api/stats/bowling', statsPayload);
 
             await refreshUser();
             setIsEditingGameStats(false);
@@ -525,9 +544,9 @@ export default function ProfilePage() {
             // Update birthdate
             if (userInfoForm.dob) {
                 await api.post(
-                    '/api/profile/birth-date',
+                    '/api/profile/dob',
                     { 
-                        date: userInfoForm.dob, 
+                        dob: userInfoForm.dob, 
                         is_public: privacySettings.birthdate 
                     }
                 );
@@ -539,41 +558,38 @@ export default function ProfilePage() {
                     '/api/profile/address',
                     { 
                         address_str: userInfoForm.address_str,
-                        zipcode: userInfoForm.zipcode || '',
-                        lat: userInfoForm.lat || '0',
-                        long: userInfoForm.long || '0',
+                        zipcode: userInfoForm.zipcode,
                         is_public: privacySettings.address 
                     }
                 );
             }
 
-            // Update other user info (existing API)
-            const payload: any = {
-                dob: userInfoForm.dob,
-                gender: userInfoForm.gender,
-                address_str: userInfoForm.address_str,
-                lat: userInfoForm.lat,
-                long: userInfoForm.long,
-                home_center: userInfoForm.home_center,
-                handedness: userInfoForm.handedness,
-                thumb_style: userInfoForm.thumb_style,
-                is_youth: is13to18,
-                is_coach: is18Plus && userInfoForm.is_coach ? userInfoForm.is_coach : false,
-                usbcCardNumber: is18Plus && userInfoForm.is_coach ? userInfoForm.usbcCardNumber : '',
-                parentFirstName: is13to18 ? userInfoForm.parentFirstName : '',
-                parentLastName: is13to18 ? userInfoForm.parentLastName : '',
-                parentEmail: is13to18 ? userInfoForm.parentEmail : ''
-            };
+            // Update Ball Handling Style
+            if (userInfoForm.handedness || userInfoForm.thumb_style) {
+                const ballHandlingPayload = {
+                    handedness: userInfoForm.handedness ? userInfoForm.handedness.charAt(0).toUpperCase() + userInfoForm.handedness.slice(1) : '',
+                    ball_carry: userInfoForm.thumb_style === 'no-thumb' ? 'Two-Handed' : 'One-Handed',
+                    is_public: privacySettings.ballHandling
+                };
+                await api.post('/api/profile/ball-handling-style', ballHandlingPayload);
+            }
 
-            await api.post('/api/user/info', payload);
+            // Update Home Center
+            if (userInfoForm.home_center_id) {
+                const homeCenterPayload = {
+                    center_id: userInfoForm.home_center_id,
+                    is_public: privacySettings.homeCenter
+                };
+                await api.post('/api/profile/home-center', homeCenterPayload);
+            }
 
             await refreshUser();
             setIsEditingUserInfo(false);
-            setSuccessMessage('User information updated successfully!');
+            setSuccessMessage('Profile info updated successfully!');
             setTimeout(() => setSuccessMessage(''), 3000);
         } catch (error: unknown) {
             console.error('Error updating user info:', error);
-            const errorMsg = error instanceof Error ? error.message : 'Failed to update user information';
+            const errorMsg = error instanceof Error ? error.message : 'Failed to update user info';
             setErrorMessage(errorMsg);
         } finally {
             setIsUpdatingUserInfo(false);
@@ -1004,6 +1020,16 @@ export default function ProfilePage() {
                                                 <p className="mt-1 text-xs text-gray-500">Location will be saved automatically</p>
                                             </div>
                                             <div className="grid grid-cols-2 gap-4">
+                                                <div className="col-span-2 flex items-center justify-end mb-1">
+                                                    <button 
+                                                        onClick={() => togglePrivacy('ballHandling')}
+                                                        className="hover:bg-gray-100 p-1 rounded transition flex items-center gap-1 text-xs text-gray-600"
+                                                        type="button"
+                                                    >
+                                                        {getPrivacyIcon(privacySettings.ballHandling)}
+                                                        <span>{privacySettings.ballHandling ? 'Public' : 'Private'}</span>
+                                                    </button>
+                                                </div>
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-700 mb-1">Handedness</label>
                                                     <select
@@ -1033,57 +1059,57 @@ export default function ProfilePage() {
                                                 </div>
                                             </div>
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Home Bowling Center</label>
+                                                <div className="flex items-center justify-between mb-1">
+                                                    <label className="block text-sm font-medium text-gray-700">Home Bowling Center</label>
+                                                    <button 
+                                                        onClick={() => togglePrivacy('homeCenter')}
+                                                        className="hover:bg-gray-100 p-1 rounded transition flex items-center gap-1 text-xs text-gray-600"
+                                                        type="button"
+                                                    >
+                                                        {getPrivacyIcon(privacySettings.homeCenter)}
+                                                        <span>{privacySettings.homeCenter ? 'Public' : 'Private'}</span>
+                                                    </button>
+                                                </div>
                                                 <div className="relative">
                                                     <input
                                                         type="text"
                                                         value={homeCenterSearch}
-                                                        onChange={(e) => {
-                                                            setHomeCenterSearch(e.target.value);
-                                                            setShowCenterSuggestions(e.target.value.length > 0);
-                                                        }}
-                                                        onFocus={() => setShowCenterSuggestions(true)}
-                                                        onBlur={() => setTimeout(() => setShowCenterSuggestions(false), 200)}
+                                                        onChange={(e) => handleCenterSearchChange(e.target.value)}
+                                                        onFocus={() => homeCenterSearch && setShowCenterSuggestions(true)}
                                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
                                                         disabled={isUpdatingUserInfo}
-                                                        placeholder="Search or select a bowling center"
+                                                        placeholder="Search for a bowling center"
                                                         autoComplete="off"
                                                     />
-                                                    {showCenterSuggestions && (
+                                                    {showCenterSuggestions && centerSuggestions.length > 0 && (
                                                         <div
                                                             ref={centerSuggestionsRef}
                                                             className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto"
                                                         >
-                                                            {mockBowlingCenters
-                                                                .filter(center =>
-                                                                    center.name.toLowerCase().includes(homeCenterSearch.toLowerCase()) ||
-                                                                    center.city.toLowerCase().includes(homeCenterSearch.toLowerCase())
-                                                                )
-                                                                .map((center) => (
-                                                                    <div
-                                                                        key={center.id}
-                                                                        onClick={() => {
-                                                                            setUserInfoForm(prev => ({
-                                                                                ...prev,
-                                                                                home_center: center.name
-                                                                            }));
-                                                                            setHomeCenterSearch(center.name);
-                                                                            setShowCenterSuggestions(false);
-                                                                        }}
-                                                                        className="px-4 py-3 hover:bg-green-50 cursor-pointer border-b last:border-b-0"
-                                                                    >
-                                                                        <div className="text-sm font-medium text-gray-900">{center.name}</div>
-                                                                        <div className="text-xs text-gray-500">{center.city}, {center.state}</div>
-                                                                    </div>
-                                                                ))}
-                                                            {mockBowlingCenters.filter(center =>
-                                                                center.name.toLowerCase().includes(homeCenterSearch.toLowerCase()) ||
-                                                                center.city.toLowerCase().includes(homeCenterSearch.toLowerCase())
-                                                            ).length === 0 && homeCenterSearch && (
-                                                                    <div className="px-4 py-3 text-sm text-gray-500">
-                                                                        No bowling centers found. You can still enter a custom name.
-                                                                    </div>
-                                                                )}
+                                                            {centerSuggestions.map((center) => (
+                                                                <div
+                                                                    key={center.id}
+                                                                    onClick={() => {
+                                                                        setUserInfoForm(prev => ({
+                                                                            ...prev,
+                                                                            home_center: center.name,
+                                                                            home_center_id: center.id
+                                                                        }));
+                                                                        setHomeCenterSearch(center.name);
+                                                                        setShowCenterSuggestions(false);
+                                                                        setCenterSuggestions([]);
+                                                                    }}
+                                                                    className="px-4 py-3 hover:bg-green-50 cursor-pointer border-b last:border-b-0"
+                                                                >
+                                                                    <div className="text-sm font-medium text-gray-900">{center.name}</div>
+                                                                    <div className="text-xs text-gray-500">{center.city}, {center.state}</div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                    {showCenterSuggestions && centerSuggestions.length === 0 && homeCenterSearch.length >= 2 && (
+                                                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 px-4 py-3 text-sm text-gray-500">
+                                                            No bowling centers found.
                                                         </div>
                                                     )}
                                                 </div>
