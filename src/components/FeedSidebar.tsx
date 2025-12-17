@@ -308,7 +308,7 @@ export default function FeedSidebar() {
             </div> */}
 
             {/* What's happening Section */}
-            <div className="bg-white rounded-xl p-4 shadow-sm">
+            {/* <div className="bg-white rounded-xl p-4 shadow-sm">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">What&apos;s happening</h3>
                 <div className="space-y-3">
                     {trendingTopics.map((topic, index) => (
@@ -324,7 +324,7 @@ export default function FeedSidebar() {
                 <button className="w-full text-green-600 hover:text-green-700 text-sm font-medium mt-4">
                     Show more
                 </button>
-            </div>
+            </div> */}
 
         </div>
     );

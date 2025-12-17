@@ -143,7 +143,7 @@ export default function GlobalHeader() {
                                         title={sponsor.formal_name}
                                     >
                                         <Image
-                                            src={sponsor.logo_url}
+                                            src={sponsor.logo_url.trim()}
                                             alt={sponsor.formal_name}
                                             width={32}
                                             height={32}
@@ -171,7 +171,7 @@ export default function GlobalHeader() {
                                         title={sponsor.formal_name}
                                     >
                                         <Image
-                                            src={sponsor.logo_url}
+                                            src={sponsor.logo_url.trim()}
                                             alt={sponsor.formal_name}
                                             width={40}
                                             height={40}
