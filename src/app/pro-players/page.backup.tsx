@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import PlayerCard from '@/app/landing/components/PlayerCard';
 import PlayerCardV2 from '@/app/landing/components/PlayerCardV2';
 import PlayerCardV3 from '@/app/landing/components/PlayerCardV3';
+import PlayerCardV4 from '../landing/components/PlayerCardV4';
 
 interface ProPlayer {
     user_id: number;
@@ -275,39 +276,40 @@ export default function ProPlayersPage() {
                             return (
                                 <div key={player.user_id} className="transform hover:scale-105 transition-transform duration-200">
                                     {cardVersion === 'v3' ? (
-                                        <PlayerCardV3
-                                            player={{
-                                                user_id: player.user_id,
-                                                username: player.username,
-                                                name: player.name,
-                                                profile_picture_url: player.profile_picture_url,
-                                                level: player.level,
-                                                xp: player.xp || 0,
-                                                is_followed: player.is_followed,
-                                                follower_count: player.follower_count || 0,
-                                                stats: {
-                                                    high_game: player.stats?.high_game || 0,
-                                                    high_series: player.stats?.high_series || 0,
-                                                    average_score: player.stats?.average_score || 0,
-                                                },
-                                                engagement: {
-                                                    views: player.engagement?.views || 0,
-                                                    likes: player.engagement?.likes || 0,
-                                                    comments: player.engagement?.comments || 0,
-                                                },
-                                                favorite_brands: player.favorite_brands || [],
-                                            }}
-                                            onTap={() => handleCardClick(player)}
-                                            onFollow={() => {
-                                                const event = { stopPropagation: () => { } } as React.MouseEvent;
-                                                handleFollow(player, event);
-                                            }}
-                                            onCollect={() => console.log('Collect clicked for', player.name)}
-                                            primaryColor={themeV2.primaryColor}
-                                            secondaryColor={themeV2.secondaryColor}
-                                            accentColor={themeV2.accentColor}
-                                            isLoading={followLoading[player.user_id] || false}
-                                        />
+                                        <PlayerCardV4 />
+                                        // <PlayerCardV3
+                                        //     player={{
+                                        //         user_id: player.user_id,
+                                        //         username: player.username,
+                                        //         name: player.name,
+                                        //         profile_picture_url: player.profile_picture_url,
+                                        //         level: player.level,
+                                        //         xp: player.xp || 0,
+                                        //         is_followed: player.is_followed,
+                                        //         follower_count: player.follower_count || 0,
+                                        //         stats: {
+                                        //             high_game: player.stats?.high_game || 0,
+                                        //             high_series: player.stats?.high_series || 0,
+                                        //             average_score: player.stats?.average_score || 0,
+                                        //         },
+                                        //         engagement: {
+                                        //             views: player.engagement?.views || 0,
+                                        //             likes: player.engagement?.likes || 0,
+                                        //             comments: player.engagement?.comments || 0,
+                                        //         },
+                                        //         favorite_brands: player.favorite_brands || [],
+                                        //     }}
+                                        //     onTap={() => handleCardClick(player)}
+                                        //     onFollow={() => {
+                                        //         const event = { stopPropagation: () => { } } as React.MouseEvent;
+                                        //         handleFollow(player, event);
+                                        //     }}
+                                        //     onCollect={() => console.log('Collect clicked for', player.name)}
+                                        //     primaryColor={themeV2.primaryColor}
+                                        //     secondaryColor={themeV2.secondaryColor}
+                                        //     accentColor={themeV2.accentColor}
+                                        //     isLoading={followLoading[player.user_id] || false}
+                                        // />
                                     ) : cardVersion === 'v2' ? (
                                         <PlayerCardV2
                                             imageUrl={player.profile_picture_url}

@@ -208,7 +208,7 @@ export default function OverviewPage() {
             },
             weightedIndex: {
               percentage: 85,
-              freeUsers: user.follower_count || 0,
+              freeUsers: user.follow_info?.follwers || 0,
               premiumUsers: 0,
               engagement: user.xp || 0,
             },
