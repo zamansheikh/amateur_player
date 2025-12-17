@@ -71,30 +71,35 @@ export default function FeedPostCard({
   };
 
   const handleFollow = async () => {
-    if (isFollowing) return;
-
     try {
-      setIsFollowing(true);
+      // Toggle the follow state optimistically
+      const newFollowingState = !isFollowing;
+      setIsFollowing(newFollowingState);
+
+      // Call API - GET /api/follow/{user_id}
+      const response = await api.get(`/api/follow/${post.author.user_id}`);
+      const data = response.data;
+
+      // Update state based on actual API response
+      setIsFollowing(data.is_following);
+
+      // Update local post
       const updatedPost = {
         ...localPost,
         author: {
           ...localPost.author,
-          is_following: true,
+          is_following: data.is_following,
         },
       };
       setLocalPost(updatedPost);
 
-      await api.post("/api/user/follow", {
-        user_id: post.author.user_id,
-      });
-
       if (onPostChange) {
         onPostChange(updatedPost);
       }
-    } catch (error) {
-      console.error("Error following user:", error);
+    } catch (error: any) {
+      console.error("Error toggling follow:", error);
+      // Revert to original state on error
       setIsFollowing(post.author.is_following);
-      setLocalPost(post);
     }
   };
 
@@ -135,13 +140,13 @@ export default function FeedPostCard({
           </div>
           {post.author.is_followable && (
             <button
-              className={`border px-3 md:px-4 py-1 md:py-1.5 rounded-full text-xs md:text-sm font-medium transition-all duration-200 whitespace-nowrap shrink-0 ${post.author.is_following
+              className={`border px-3 md:px-4 py-1 md:py-1.5 rounded-full text-xs md:text-sm font-medium transition-all duration-200 whitespace-nowrap shrink-0 ${isFollowing
                 ? "border-gray-300 text-gray-600 hover:bg-gray-50"
                 : "border-green-600 text-green-600 hover:bg-green-50 hover:border-green-700"
                 }`}
               onClick={handleFollow}
             >
-              {post.author.is_following ? "Following" : "+ Follow"}
+              {isFollowing ? "Following" : "+ Follow"}
             </button>
           )}
         </div>
