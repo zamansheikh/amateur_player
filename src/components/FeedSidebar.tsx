@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, User, TrendingUp, Hash, Gift, Star, ArrowRight, Calendar, Trophy } from 'lucide-react';
+import { Search, User, TrendingUp, Hash, Gift, Star, ArrowRight, Calendar, Trophy, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { tournamentApi } from '@/lib/api';
 import { Tournament } from '@/types';
 import EventCard from './EventCard';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
+import axios from 'axios';
 
 interface SuggestedUser {
     user_id: number;
@@ -23,6 +25,24 @@ interface TrendingTopic {
     category: string;
 }
 
+interface UserProfile {
+    user_id: number;
+    name: string;
+    first_name: string;
+    last_name: string;
+    username: string;
+    email: string;
+    roles: {
+        is_pro: boolean;
+        is_center_admin: boolean;
+        is_tournament_director: boolean;
+    };
+    profile_picture_url: string;
+    is_followable: boolean;
+    is_following: boolean;
+    follower_count: number;
+}
+
 export default function FeedSidebar() {
     const [searchQuery, setSearchQuery] = useState('');
     const [suggestedUsers, setSuggestedUsers] = useState<SuggestedUser[]>([]);
@@ -30,7 +50,73 @@ export default function FeedSidebar() {
     const [followingUsers, setFollowingUsers] = useState<Set<number>>(new Set());
     const [tournaments, setTournaments] = useState<Tournament[]>([]);
     const [tournamentsLoading, setTournamentsLoading] = useState(true);
+    
+    // Search related state
+    const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
+    const [filteredUsers, setFilteredUsers] = useState<UserProfile[]>([]);
+    const [isSearchLoading, setIsSearchLoading] = useState(false);
+    const [showDropdown, setShowDropdown] = useState(false);
+    const searchRef = useRef<HTMLDivElement>(null);
+    
     const router = useRouter();
+    const { user } = useAuth();
+
+    // Fetch all users for search
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                setIsSearchLoading(true);
+                const response = await axios.get('https://test.bowlersnetwork.com/api/profile/all', {
+                    headers: {
+                        'Authorization': `Bearer ${user?.access_token}`,
+                    },
+                });
+                setAllUsers(response.data);
+            } catch (err) {
+                console.error('Error fetching users for search:', err);
+            } finally {
+                setIsSearchLoading(false);
+            }
+        };
+
+        if (user?.access_token) {
+            fetchUsers();
+        }
+    }, [user?.access_token]);
+
+    // Handle click outside to close dropdown
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+                setShowDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    // Filter users when search query changes
+    useEffect(() => {
+        if (!searchQuery.trim()) {
+            setFilteredUsers([]);
+            setShowDropdown(false);
+            return;
+        }
+
+        const query = searchQuery.toLowerCase();
+        const filtered = allUsers.filter(u => 
+            u.name.toLowerCase().includes(query) ||
+            u.username.toLowerCase().includes(query) ||
+            u.email.toLowerCase().includes(query) ||
+            u.user_id.toString().includes(query)
+        ).slice(0, 5); // Limit to 5 results
+        
+        setFilteredUsers(filtered);
+        setShowDropdown(true);
+    }, [searchQuery, allUsers]);
 
     // Mock data - replace with real API calls
     useEffect(() => {
@@ -134,9 +220,11 @@ export default function FeedSidebar() {
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
-        if (searchQuery.trim()) {
-            // Implement search functionality
-            console.log('Searching for:', searchQuery);
+        // If user presses enter and there are results, go to the first one
+        if (filteredUsers.length > 0) {
+            router.push(`/profile/${filteredUsers[0].username}`);
+            setShowDropdown(false);
+            setSearchQuery('');
         }
     };
 
@@ -144,20 +232,80 @@ export default function FeedSidebar() {
         router.push(`/player/${userId}`);
     };
 
+    const handleSearchResultClick = (username: string) => {
+        router.push(`/profile/${username}`);
+        setShowDropdown(false);
+        setSearchQuery('');
+    };
+
     return (
         <div className="w-80 space-y-6">
             {/* Search Bar */}
-            <div className="bg-white rounded-xl p-4 shadow-sm">
+            <div className="bg-white rounded-xl p-4 shadow-sm relative" ref={searchRef}>
                 <form onSubmit={handleSearch} className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                     <input
                         type="text"
-                        placeholder="Search"
+                        placeholder="Search users..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
+                        onFocus={() => searchQuery.trim() && setShowDropdown(true)}
                         className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     />
+                    {isSearchLoading && (
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                            <Loader2 className="w-4 h-4 animate-spin text-green-600" />
+                        </div>
+                    )}
                 </form>
+
+                {/* Search Dropdown */}
+                {showDropdown && searchQuery.trim() && (
+                    <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
+                        {filteredUsers.length > 0 ? (
+                            <div className="py-2">
+                                {filteredUsers.map((user) => (
+                                    <div
+                                        key={user.user_id}
+                                        onClick={() => handleSearchResultClick(user.username)}
+                                        className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-center gap-3 transition-colors"
+                                    >
+                                        <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+                                            {user.profile_picture_url ? (
+                                                <img
+                                                    src={user.profile_picture_url}
+                                                    alt={user.name}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center bg-green-100 text-green-600">
+                                                    <User className="w-5 h-5" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-1">
+                                                <p className="text-sm font-medium text-gray-900 truncate">
+                                                    {user.name}
+                                                </p>
+                                                {user.roles.is_pro && (
+                                                    <span className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                                                        PRO
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="text-xs text-gray-500 truncate">@{user.username}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="p-4 text-center text-gray-500 text-sm">
+                                No users found
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* Who to Follow Section */}
