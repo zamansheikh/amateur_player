@@ -669,7 +669,7 @@ export default function ProfilePage() {
                                             />
                                         </div>
                                         {user?.intro_video_url ? (
-                                            <div className="relative rounded-lg overflow-hidden bg-black aspect-video max-w-md">
+                                            <div className="relative rounded-lg overflow-hidden bg-black aspect-video w-full">
                                                 <video
                                                     src={user.intro_video_url}
                                                     controls
@@ -677,7 +677,7 @@ export default function ProfilePage() {
                                                 />
                                             </div>
                                         ) : (
-                                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center h-40 flex flex-col items-center justify-center max-w-md">
+                                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center h-40 flex flex-col items-center justify-center w-full">
                                                 <Video className="w-10 h-10 text-gray-400 mb-2" />
                                                 <p className="text-gray-600 text-sm mb-1">No intro video yet</p>
                                                 <p className="text-xs text-gray-500 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">Click "Upload" to add</p>
