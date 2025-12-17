@@ -1,219 +1,349 @@
 'use client';
 
-import { useAuth } from '@/contexts/AuthContext';
-import { Edit, ChevronDown, ChevronUp, AlertCircle, Lock, Globe } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { api, userApi } from '@/lib/api';
-import { Brand } from '@/types';
-import UserPostCard from '@/components/UserPostCard';
-import CreatePost from '@/components/CreatePost';
-
-interface MapboxFeature {
-    id: string;
-    place_name: string;
-    center: [number, number];
-    text: string;
-}
-
-interface UserPost {
-    metadata: {
-        id: number;
-        uid: string;
-        post_privacy: string;
-        total_likes: number;
-        total_comments: number;
-        created_at: string;
-        updated_at: string;
-        created: string;
-        last_update: string;
-        has_text: boolean;
-        has_media: boolean;
-        has_poll: boolean;
-        has_event: boolean;
-    };
-    author: {
-        user_id: number;
-        name: string;
-        profile_picture_url: string;
-    };
-    likes: {
-        total: number;
-        likers: Array<{
-            user_id: number;
-            name: string;
-            profile_picture_url: string;
-        }>;
-    };
-    comments: {
-        total: number;
-        comment_list: Array<{
-            comment_id: number;
-            user: {
-                user_id: number;
-                name: string;
-                profile_picture_url: string;
-            };
-            text: string;
-            pics: string[];
-            replies: Array<{
-                reply_id: number;
-                user: {
-                    user_id: number;
-                    name: string;
-                    profile_picture_url: string;
-                };
-                text: string;
-                pics: string[];
-            }>;
-        }>;
-    };
-    caption: string;
-    media: string[];
-    poll: {
-        id: number;
-        uid: string;
-        title: string;
-        poll_type: string;
-        options: Array<{
-            option_id: number;
-            content: string;
-            vote: number;
-            perc: number;
-        }>;
-    } | null;
-    event: {
-        id: number;
-        title: string;
-        date: string;
-        location?: string;
-    } | null;
-    tags: string[];
-    is_liked_by_me: boolean;
-}
+import { Camera, Play, MapPin, UserCheck, Heart, Share2, AlertCircle, X, Lock, Globe, Edit2, Mail, Shield, Video, ImageIcon, Upload, Loader, Search, ChevronDown, Dumbbell, Building2 } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useCloudUpload } from '@/lib/useCloudUpload';
+import { useMapboxGeocoding } from '@/lib/useMapboxGeocoding';
+import { GeocodingResult } from '@/lib/mapboxGeocodingService';
+import AddressModal from '@/components/AddressModal';
+import HomeCenterModal from '@/components/HomeCenterModal';
+import axios from 'axios';
 
 export default function ProfilePage() {
-    const { user, refreshUser } = useAuth();
-    const router = useRouter();
-    const [posts, setPosts] = useState<UserPost[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    // ===== GROUP 1: GAME STATS =====
-    const [isEditingGameStats, setIsEditingGameStats] = useState(false);
-    const [isUpdatingGameStats, setIsUpdatingGameStats] = useState(false);
-    const [gameStatsForm, setGameStatsForm] = useState({
-        average_score: 0,
+    const { user } = useAuth();
+    const profileUpload = useCloudUpload();
+    const coverUpload = useCloudUpload();
+    const videoUpload = useCloudUpload();
+    const { geocodeMultiple, results: addressSuggestions, isLoading: isGeocodingLoading } = useMapboxGeocoding();
+    
+    const [editMode, setEditMode] = useState({
+        bio: false,
+        gender: false,
+        birthdate: false,
+        address: false,
+        ballHandling: false
+    });
+    const [addressModalOpen, setAddressModalOpen] = useState(false);
+    const [homeCenterModalOpen, setHomeCenterModalOpen] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [uploadMessage, setUploadMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+    const [activeTab, setActiveTab] = useState<'info' | 'cards' | 'stats' | 'posts' | 'media'>('info');
+    const [bowlingStats, setBowlingStats] = useState({
+        average: 0,
         high_game: 0,
         high_series: 0,
-        experience: 0,
-        handedness: '',
-        thumb_style: ''
+        experience: 0
     });
+    const [editingStats, setEditingStats] = useState(false);
+    const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
+    const [addressSearchQuery, setAddressSearchQuery] = useState('');
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const coverFileInputRef = useRef<HTMLInputElement>(null);
+    const videoInputRef = useRef<HTMLInputElement>(null);
+    const addressDebounceTimer = useRef<NodeJS.Timeout | undefined>(undefined);
+    const addressSuggestionsRef = useRef<HTMLDivElement>(null);
 
-    // ===== GROUP 2: USER INFO =====
-    const [isEditingUserInfo, setIsEditingUserInfo] = useState(false);
-    const [isUpdatingUserInfo, setIsUpdatingUserInfo] = useState(false);
-    const [userInfoForm, setUserInfoForm] = useState({
-        first_name: '',
-        last_name: '',
-        email: '',
-        username: '',
+    const [formData, setFormData] = useState({
         bio: '',
-        dob: '',
         gender: '',
-        address_str: '',
+        birthdate: '',
+        address: '',
         zipcode: '',
-        lat: '',
-        long: '',
-        home_center: '',
-        home_center_id: 0,
+        latitude: '',
+        longitude: '',
         handedness: '',
-        thumb_style: '',
-        is_youth: false,
-        is_coach: false,
-        usbcCardNumber: '',
-        parentFirstName: '',
-        parentLastName: '',
-        parentEmail: ''
+        ball_carry: '',
     });
 
-    // Privacy settings state
     const [privacySettings, setPrivacySettings] = useState({
         bio: true,
         gender: true,
         birthdate: true,
         address: false,
-        ballHandling: true,
-        homeCenter: true
+        ballHandling: true
     });
 
-    // Address and center suggestion states
-    const [addressSuggestions, setAddressSuggestions] = useState<MapboxFeature[]>([]);
-    const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
-    const [addressSearchQuery, setAddressSearchQuery] = useState('');
-    const [homeCenterSearch, setHomeCenterSearch] = useState('');
-    const [showCenterSuggestions, setShowCenterSuggestions] = useState(false);
-    const [centerSuggestions, setCenterSuggestions] = useState<any[]>([]);
-    const suggestionsRef = useRef<HTMLDivElement>(null);
-    const centerSuggestionsRef = useRef<HTMLDivElement>(null);
-    const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
-    const centerDebounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const [expandedSections, setExpandedSections] = useState({
+        stats: false,
+        personal: false,
+        account: false
+    });
 
-    // Search centers API
-    const searchCenters = async (query: string) => {
-        if (!query.trim() || query.length < 2) {
-            setCenterSuggestions([]);
+    const toggleSection = (section: keyof typeof expandedSections) => {
+        setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+    };
+
+    // Load user data when component mounts
+    useEffect(() => {
+        if (user && user.authenticated) {
+            // Parse ball handling description if available
+            let handedness = '';
+            let ball_carry = '';
+            if (user.ball_handling_style?.description) {
+                const desc = user.ball_handling_style.description;
+                if (desc.includes('Righty')) handedness = 'Righty';
+                else if (desc.includes('Lefty')) handedness = 'Lefty';
+                
+                if (desc.includes('One handed')) ball_carry = 'One handed';
+                else if (desc.includes('Two handed')) ball_carry = 'Two handed';
+            }
+
+            setFormData(prev => ({
+                ...prev,
+                bio: user.bio?.content || '',
+                gender: user.gender_data?.role || '',
+                birthdate: user.birthdate_data?.date || '',
+                address: user.address_data?.address_str || '',
+                zipcode: user.address_data?.zipcode || '',
+                latitude: '',
+                longitude: '',
+                handedness: handedness,
+                ball_carry: ball_carry,
+            }));
+
+            setPrivacySettings(prev => ({
+                ...prev,
+                bio: user.bio?.is_public ?? true,
+                gender: user.gender_data?.is_public ?? true,
+                birthdate: user.birthdate_data?.is_public ?? true,
+                address: user.address_data?.is_public ?? false,
+                ballHandling: user.ball_handling_style?.is_public ?? true,
+            }));
+
+            // Fetch bowling stats
+            fetchBowlingStats();
+        }
+    }, [user]);
+
+    // Fetch bowling stats
+    const fetchBowlingStats = async () => {
+        if (!user || !user.authenticated) return;
+
+        try {
+            const baseUrl = 'https://test.bowlersnetwork.com';
+            const headers = {
+                'Authorization': `Bearer ${user.access_token}`,
+                'Content-Type': 'application/json',
+            };
+
+            const response = await axios.get(`${baseUrl}/api/stats/bowling`, { headers });
+            
+            if (response.data && response.data.bowling_stat) {
+                setBowlingStats(response.data.bowling_stat);
+            }
+        } catch (error) {
+            console.error('Error fetching bowling stats:', error);
+        }
+    };
+
+    const handleSaveField = async (field: 'bio' | 'gender' | 'birthdate' | 'address' | 'ballHandling') => {
+        if (!user || !user.authenticated) return;
+
+        setIsSaving(true);
+        try {
+            const baseUrl = 'https://test.bowlersnetwork.com';
+            const headers = {
+                'Authorization': `Bearer ${user.access_token}`,
+                'Content-Type': 'application/json',
+            };
+
+            if (field === 'bio') {
+                await axios.post(
+                    `${baseUrl}/api/profile/bio`,
+                    { 
+                        content: formData.bio, 
+                        is_public: privacySettings.bio 
+                    },
+                    { headers }
+                );
+            } else if (field === 'gender') {
+                await axios.post(
+                    `${baseUrl}/api/profile/gender`,
+                    { 
+                        role: formData.gender, 
+                        is_public: privacySettings.gender 
+                    },
+                    { headers }
+                );
+            } else if (field === 'ballHandling') {
+                await axios.post(
+                    `${baseUrl}/api/profile/ball-handling-style`,
+                    { 
+                        handedness: formData.handedness,
+                        ball_carry: formData.ball_carry,
+                        is_public: privacySettings.ballHandling 
+                    },
+                    { headers }
+                );
+            } else if (field === 'birthdate') {
+                await axios.post(
+                    `${baseUrl}/api/profile/birth-date`,
+                    { 
+                        date: formData.birthdate, 
+                        is_public: privacySettings.birthdate 
+                    },
+                    { headers }
+                );
+            } else if (field === 'address') {
+                await axios.post(
+                    `${baseUrl}/api/profile/address`,
+                    { 
+                        address_str: formData.address,
+                        zipcode: formData.zipcode || '',
+                        lat: formData.latitude || '0',
+                        long: formData.longitude || '0',
+                        is_public: privacySettings.address 
+                    },
+                    { headers }
+                );
+            }
+
+            setUploadMessage({ type: 'success', text: `${field.charAt(0).toUpperCase() + field.slice(1)} updated successfully!` });
+            setEditMode(prev => ({ ...prev, [field]: false }));
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } catch (error: any) {
+            console.error(`Error updating ${field}:`, error);
+            const errorMsg = error.response?.data?.message || `Failed to update ${field}`;
+            setUploadMessage({ type: 'error', text: errorMsg });
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const toggleEditMode = (field: keyof typeof editMode) => {
+        setEditMode(prev => ({ ...prev, [field]: !prev[field] }));
+    };
+
+    if (!user || !user.authenticated) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="text-xl text-red-600 mb-4">Please log in to access your profile</div>
+                    <a href="/signin" className="text-white px-4 py-2 rounded-lg inline-block" style={{ backgroundColor: '#8BC342' }}>
+                        Go to Sign In
+                    </a>
+                </div>
+            </div>
+        );
+    }
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'profile' | 'cover') => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            setUploadMessage({ type: 'error', text: 'Please select a valid image file' });
+            return;
+        }
+
+        // Validate file size (10MB for images)
+        if (file.size > 10 * 1024 * 1024) {
+            setUploadMessage({ type: 'error', text: 'Image size must be less than 10MB' });
+            return;
+        }
+
+        const uploadService = type === 'profile' ? profileUpload : coverUpload;
+        const apiEndpoint = type === 'profile' ? '/api/profile/media/profile-picture' : '/api/profile/media/cover-picture';
+        const urlField = type === 'profile' ? 'profile_picture_url' : 'cover_picture_url';
+
+        try {
+            // Step 1: Upload to cloud storage
+            const uploadResult = await uploadService.uploadFile(file, 'cdn');
+            
+            if (!uploadResult.success) {
+                setUploadMessage({ type: 'error', text: `Failed to upload: ${uploadResult.error}` });
+                return;
+            }
+
+            // Step 2: Update profile with cloud URL
+            const response = await axios.post(
+                `https://test.bowlersnetwork.com${apiEndpoint}`,
+                { [urlField]: uploadResult.publicUrl },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${user.access_token}`,
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+
+            if (response.status === 200 || response.status === 201) {
+                setUploadMessage({ type: 'success', text: `${type === 'profile' ? 'Profile picture' : 'Cover photo'} updated successfully!` });
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            }
+        } catch (error: any) {
+            console.error('Error updating profile media:', error);
+            const errorMsg = error.response?.data?.message || error.message || 'Failed to update';
+            setUploadMessage({ type: 'error', text: errorMsg });
+        } finally {
+            uploadService.reset();
+        }
+    };
+
+    const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validate file type
+        if (!file.type.startsWith('video/')) {
+            setUploadMessage({ type: 'error', text: 'Please select a valid video file' });
+            return;
+        }
+
+        // Validate file size (100MB for videos)
+        if (file.size > 100 * 1024 * 1024) {
+            setUploadMessage({ type: 'error', text: 'Video size must be less than 100MB' });
             return;
         }
 
         try {
-            const response = await api.get(`/api/centers?q=${encodeURIComponent(query)}`);
-            setCenterSuggestions(response.data || []);
-            setShowCenterSuggestions(true);
-        } catch (error) {
-            console.error('Error searching centers:', error);
+            // Step 1: Upload to cloud storage
+            const uploadResult = await videoUpload.uploadFile(file, 'cdn');
+            
+            if (!uploadResult.success) {
+                setUploadMessage({ type: 'error', text: `Failed to upload video: ${uploadResult.error}` });
+                return;
+            }
+
+            // Step 2: Update profile with video URL
+            const response = await axios.post(
+                'https://test.bowlersnetwork.com/api/profile/media/intro-video',
+                { intro_video_url: uploadResult.publicUrl },
+                {
+                    headers: {
+                        'Authorization': `Bearer ${user.access_token}`,
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+
+            if (response.status === 200 || response.status === 201) {
+                setUploadMessage({ type: 'success', text: 'Intro video updated successfully!' });
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            }
+        } catch (error: any) {
+            console.error('Error updating intro video:', error);
+            const errorMsg = error.response?.data?.message || error.message || 'Failed to update video';
+            setUploadMessage({ type: 'error', text: errorMsg });
+        } finally {
+            videoUpload.reset();
         }
     };
 
-    // Handle center input change with debounce
-    const handleCenterSearchChange = (value: string) => {
-        setHomeCenterSearch(value);
-        
-        if (centerDebounceTimerRef.current) {
-            clearTimeout(centerDebounceTimerRef.current);
-        }
-
-        centerDebounceTimerRef.current = setTimeout(() => {
-            searchCenters(value);
-        }, 300);
-    };
-
-    // Calculate age from DOB
-    const calculateAge = (dobString: string): number => {
-        if (!dobString) return 0;
-        const dob = new Date(dobString);
-        const today = new Date();
-        let age = today.getFullYear() - dob.getFullYear();
-        const monthDiff = today.getMonth() - dob.getMonth();
-        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
-            age--;
-        }
-        return age;
-    };
-
-    const userAge = userInfoForm.dob ? calculateAge(userInfoForm.dob) : 0;
-    const is13to18 = userAge >= 13 && userAge < 18;
-    const is18Plus = userAge >= 18;
-
-    // Privacy toggle helper functions
     const getPrivacyIcon = (isPublic: boolean) => {
         return isPublic ? <Globe className="w-3 h-3 text-blue-500" /> : <Lock className="w-3 h-3 text-gray-400" />;
     };
 
     const togglePrivacy = (field: keyof typeof privacySettings) => {
-        if (isEditingUserInfo) {
+        if (editMode[field as keyof typeof editMode]) {
             setPrivacySettings(prev => ({
                 ...prev,
                 [field]: !prev[field]
@@ -221,1282 +351,1001 @@ export default function ProfilePage() {
         }
     };
 
-    // Helper function to check if bowling statistics are incomplete
-    const isGameStatsIncomplete = () => {
-        return !user?.stats?.average_score ||
-            !user?.stats?.high_game ||
-            !user?.stats?.high_series ||
-            !user?.stats?.experience ||
-            !user?.info?.handedness ||
-            !user?.info?.thumb_style;
-    };
-
-    // Helper function to check if personal information is incomplete
-    const isUserInfoIncomplete = () => {
-        return !user?.first_name ||
-            !user?.last_name ||
-            !user?.email ||
-            !user?.info?.dob ||
-            !user?.info?.gender ||
-            !user?.info?.address_str ||
-            !user?.info?.home_center ||
-            !user?.info?.handedness ||
-            !user?.info?.thumb_style;
-    };
-
-    // Helper function to check if sponsors/brands are incomplete
-    const isSponsorsIncomplete = () => {
-        if (user?.is_pro) {
-            const sponsors = user?.favorite_brands?.filter(b => b.brandType === 'Business Sponsors') || [];
-            return sponsors.length === 0;
-        } else {
-            return !user?.favorite_brands || user.favorite_brands.length === 0;
+    // Address search with debounce
+    const handleAddressSearch = async (query: string) => {
+        setAddressSearchQuery(query);
+        
+        if (addressDebounceTimer.current) {
+            clearTimeout(addressDebounceTimer.current);
         }
-    };
 
-
-
-    // ===== GROUP 3: FAV BRANDS =====
-    // (Read-only, no editing needed here)
-
-    // UI State
-    const [expandedGroups, setExpandedGroups] = useState({
-        gameStats: true,
-        userInfo: false,
-        favBrands: true
-    });
-    const [successMessage, setSuccessMessage] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
-
-    // Brand selection state
-    const [isEditingBrands, setIsEditingBrands] = useState(false);
-    const [isUpdatingBrands, setIsUpdatingBrands] = useState(false);
-    const [selectedBrands, setSelectedBrands] = useState({
-        balls: [] as number[],
-        shoes: [] as number[],
-        accessories: [] as number[],
-        apparels: [] as number[]
-    });
-    const [brands, setBrands] = useState<{
-        Balls: Array<{ brand_id: number; formal_name: string; logo_url: string }>;
-        Shoes: Array<{ brand_id: number; formal_name: string; logo_url: string }>;
-        Accessories: Array<{ brand_id: number; formal_name: string; logo_url: string }>;
-        Apparels: Array<{ brand_id: number; formal_name: string; logo_url: string }>;
-    } | null>(null);
-    const [brandsLoading, setBrandsLoading] = useState(false);
-
-    // Mapbox Geocoding API search function
-    const searchAddress = async (query: string) => {
-        if (!query.trim()) {
-            setAddressSuggestions([]);
+        if (query.trim().length < 2) {
+            setShowAddressSuggestions(false);
             return;
         }
 
-        const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
-        if (!mapboxToken) {
-            console.error('Mapbox access token is not configured');
-            return;
-        }
-
-        try {
-            const response = await fetch(
-                `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxToken}&types=address,place&limit=5`
-            );
-            const data = await response.json();
-
-            if (data.features) {
-                setAddressSuggestions(data.features);
+        addressDebounceTimer.current = setTimeout(async () => {
+            const results = await geocodeMultiple(query, { 
+                types: ['address', 'place', 'postcode'],
+                limit: 5 
+            });
+            
+            if (results.length > 0) {
                 setShowAddressSuggestions(true);
             }
-        } catch (error) {
-            console.error('Error fetching address suggestions:', error);
-        }
-    };
-
-    // Handle address input change with debounce
-    const handleAddressChange = (value: string) => {
-        setAddressSearchQuery(value);
-        setUserInfoForm(prev => ({ ...prev, address_str: value }));
-
-        if (debounceTimerRef.current) {
-            clearTimeout(debounceTimerRef.current);
-        }
-
-        debounceTimerRef.current = setTimeout(() => {
-            searchAddress(value);
         }, 300);
     };
 
     // Handle address suggestion selection
-    const handleSelectAddress = (suggestion: MapboxFeature) => {
-        setUserInfoForm(prev => ({
+    const handleSelectAddress = (result: GeocodingResult) => {
+        setFormData(prev => ({
             ...prev,
-            address_str: suggestion.place_name
+            address: result.address || '',
+            zipcode: result.zipcode || '',
+            latitude: result.latitude?.toString() || '',
+            longitude: result.longitude?.toString() || ''
         }));
-        setAddressSearchQuery(suggestion.place_name);
+        setAddressSearchQuery(result.address || '');
         setShowAddressSuggestions(false);
-        setAddressSuggestions([]);
     };
 
     // Close suggestions when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (
-                suggestionsRef.current &&
-                !suggestionsRef.current.contains(event.target as Node)
+                addressSuggestionsRef.current &&
+                !addressSuggestionsRef.current.contains(event.target as Node)
             ) {
                 setShowAddressSuggestions(false);
-            }
-            if (
-                centerSuggestionsRef.current &&
-                !centerSuggestionsRef.current.contains(event.target as Node)
-            ) {
-                setShowCenterSuggestions(false);
             }
         };
 
         document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const fetchUserPosts = async () => {
-        try {
-            setLoading(true);
-            const response = await api.get('/api/user/posts');
-            setPosts(response.data.posts);
-            setError(null);
-        } catch (err) {
-            console.error('Error fetching user posts:', err);
-            setError('Failed to load posts');
-        } finally {
-            setLoading(false);
-        }
-    };
+    // Handle bowling stats save
+    const handleSaveBowlingStats = async () => {
+        if (!user || !user.authenticated) return;
 
-    const loadBrands = async () => {
+        setIsSaving(true);
         try {
-            setBrandsLoading(true);
-            const response = await api.get('/api/brands');
-            setBrands(response.data);
+            const baseUrl = 'https://test.bowlersnetwork.com';
+            const headers = {
+                'Authorization': `Bearer ${user.access_token}`,
+                'Content-Type': 'application/json',
+            };
+
+            await axios.post(
+                `${baseUrl}/api/stats/bowling`,
+                {
+                    average: parseFloat(bowlingStats.average.toString()),
+                    high_game: parseInt(bowlingStats.high_game.toString()),
+                    high_series: parseInt(bowlingStats.high_series.toString()),
+                    experience: parseInt(bowlingStats.experience.toString())
+                },
+                { headers }
+            );
+
+            setUploadMessage({ type: 'success', text: 'Bowling stats updated successfully!' });
+            setTimeout(() => setUploadMessage(null), 3000);
+            setEditingStats(false);
         } catch (error) {
-            console.error('Error loading brands:', error);
+            console.error('Error saving bowling stats:', error);
+            setUploadMessage({ type: 'error', text: 'Failed to update bowling stats. Please try again.' });
+            setTimeout(() => setUploadMessage(null), 5000);
         } finally {
-            setBrandsLoading(false);
+            setIsSaving(false);
         }
-    };
-
-    useEffect(() => {
-        fetchUserPosts();
-
-        // Initialize all forms with user data
-        if (user) {
-            // Combine all into 3 groups
-            setGameStatsForm({
-                average_score: user.stats?.average_score || 0,
-                high_game: user.stats?.high_game || 0,
-                high_series: user.stats?.high_series || 0,
-                experience: user.stats?.experience || 0,
-                handedness: user.info?.handedness || '',
-                thumb_style: user.info?.thumb_style || ''
-            });
-
-            setUserInfoForm({
-                first_name: user.first_name || '',
-                last_name: user.last_name || '',
-                email: user.email || '',
-                username: user.username || '',
-                bio: user.bio?.content || '',
-                dob: user.birthdate_data?.date || '',
-                gender: user.gender_data?.role || '',
-                address_str: user.address_data?.address_str || '',
-                zipcode: user.address_data?.zipcode || '',
-                lat: '',
-                long: '',
-                home_center: user.home_center_data?.center?.name || '',
-                home_center_id: user.home_center_data?.center?.id || 0,
-                handedness: user.ball_handling_style?.description?.toLowerCase().includes('right') ? 'right' : 
-                           user.ball_handling_style?.description?.toLowerCase().includes('left') ? 'left' : '',
-                thumb_style: user.ball_handling_style?.description?.toLowerCase().includes('two handed') ? 'no-thumb' : 'thumb',
-                is_youth: false,
-                is_coach: false,
-                usbcCardNumber: '',
-                parentFirstName: '',
-                parentLastName: '',
-                parentEmail: ''
-            });
-
-            // Set home center search to match home_center
-            setHomeCenterSearch(user.home_center_data?.center?.name || '');
-            setAddressSearchQuery(user.address_data?.address_str || '');
-
-            // Initialize privacy settings from API response
-            setPrivacySettings({
-                bio: user.bio?.is_public ?? true,
-                gender: user.gender_data?.is_public ?? true,
-                birthdate: user.birthdate_data?.is_public ?? true,
-                address: user.address_data?.is_public ?? false,
-                ballHandling: user.ball_handling_style?.is_public ?? true,
-                homeCenter: user.home_center_data?.is_public ?? true
-            });
-        }
-    }, [user]);
-
-    // Load brands when user starts editing
-    useEffect(() => {
-        if (isEditingBrands && !brands) {
-            loadBrands();
-        }
-
-        // Initialize selectedBrands from user's favorite_brands
-        if (isEditingBrands && user?.favorite_brands) {
-            const newSelectedBrands = {
-                balls: [] as number[],
-                shoes: [] as number[],
-                accessories: [] as number[],
-                apparels: [] as number[]
-            };
-
-            user.favorite_brands.forEach((brand: Brand) => {
-                const categoryKey = (brand.brandType?.toLowerCase() || 'balls') as keyof typeof newSelectedBrands;
-                if (categoryKey in newSelectedBrands) {
-                    newSelectedBrands[categoryKey].push(brand.brand_id);
-                }
-            });
-
-            setSelectedBrands(newSelectedBrands);
-        }
-    }, [isEditingBrands, brands, user?.favorite_brands]);
-
-    // ===== GAME STATS HANDLERS =====
-    const handleGameStatsFormChange = (field: string, value: string | boolean) => {
-        setGameStatsForm(prev => ({
-            ...prev,
-            [field]: typeof value === 'boolean' ? value :
-                (field === 'average_score' || field === 'high_game' || field === 'high_series' || field === 'experience') ?
-                    (field === 'average_score' ? parseFloat(value) || 0 : parseInt(value) || 0) :
-                    value
-        }));
-    }; const handleGameStatsUpdate = async () => {
-        try {
-            setIsUpdatingGameStats(true);
-            setErrorMessage('');
-
-            // Update stats
-            const statsPayload = {
-                average: parseFloat(gameStatsForm.average_score.toString()),
-                high_game: parseInt(gameStatsForm.high_game.toString()),
-                high_series: parseInt(gameStatsForm.high_series.toString()),
-                experience: parseInt(gameStatsForm.experience.toString())
-            };
-
-            await api.post('/api/stats/bowling', statsPayload);
-
-            await refreshUser();
-            setIsEditingGameStats(false);
-            setSuccessMessage('Game stats updated successfully!');
-            setTimeout(() => setSuccessMessage(''), 3000);
-        } catch (error: unknown) {
-            console.error('Error updating game stats:', error);
-            const errorMsg = error instanceof Error ? error.message : 'Failed to update game stats';
-            setErrorMessage(errorMsg);
-        } finally {
-            setIsUpdatingGameStats(false);
-        }
-    };
-
-    // ===== USER INFO HANDLERS =====
-    const handleUserInfoFormChange = (field: string, value: string | boolean | number) => {
-        setUserInfoForm(prev => ({
-            ...prev,
-            [field]: value
-        }));
-    };
-
-    const handleUserInfoUpdate = async () => {
-        try {
-            setIsUpdatingUserInfo(true);
-            setErrorMessage('');
-
-            // Update gender
-            if (userInfoForm.gender) {
-                await api.post(
-                    '/api/profile/gender',
-                    { 
-                        role: userInfoForm.gender, 
-                        is_public: privacySettings.gender 
-                    }
-                );
-            }
-
-            // Update bio
-            if (userInfoForm.bio !== undefined) {
-                await api.post(
-                    '/api/profile/bio',
-                    { 
-                        bio: userInfoForm.bio, 
-                        is_public: privacySettings.bio 
-                    }
-                );
-            }
-
-            // Update birthdate
-            if (userInfoForm.dob) {
-                await api.post(
-                    '/api/profile/dob',
-                    { 
-                        dob: userInfoForm.dob, 
-                        is_public: privacySettings.birthdate 
-                    }
-                );
-            }
-
-            // Update address
-            if (userInfoForm.address_str) {
-                await api.post(
-                    '/api/profile/address',
-                    { 
-                        address_str: userInfoForm.address_str,
-                        zipcode: userInfoForm.zipcode,
-                        is_public: privacySettings.address 
-                    }
-                );
-            }
-
-            // Update Ball Handling Style
-            if (userInfoForm.handedness || userInfoForm.thumb_style) {
-                const ballHandlingPayload = {
-                    handedness: userInfoForm.handedness ? userInfoForm.handedness.charAt(0).toUpperCase() + userInfoForm.handedness.slice(1) : '',
-                    ball_carry: userInfoForm.thumb_style === 'no-thumb' ? 'Two-Handed' : 'One-Handed',
-                    is_public: privacySettings.ballHandling
-                };
-                await api.post('/api/profile/ball-handling-style', ballHandlingPayload);
-            }
-
-            // Update Home Center
-            if (userInfoForm.home_center_id) {
-                const homeCenterPayload = {
-                    center_id: userInfoForm.home_center_id,
-                    is_public: privacySettings.homeCenter
-                };
-                await api.post('/api/profile/home-center', homeCenterPayload);
-            }
-
-            await refreshUser();
-            setIsEditingUserInfo(false);
-            setSuccessMessage('Profile info updated successfully!');
-            setTimeout(() => setSuccessMessage(''), 3000);
-        } catch (error: unknown) {
-            console.error('Error updating user info:', error);
-            const errorMsg = error instanceof Error ? error.message : 'Failed to update user info';
-            setErrorMessage(errorMsg);
-        } finally {
-            setIsUpdatingUserInfo(false);
-        }
-    };
-
-    const handleBrandToggle = (category: keyof typeof selectedBrands, brandId: number) => {
-        setSelectedBrands(prev => ({
-            ...prev,
-            [category]: prev[category].includes(brandId)
-                ? prev[category].filter(id => id !== brandId)
-                : [...prev[category], brandId]
-        }));
-    };
-
-    const handleBrandsUpdate = async () => {
-        try {
-            setIsUpdatingBrands(true);
-            setErrorMessage('');
-
-            // Flatten all selected brand IDs into a single array
-            const allBrandIDs = [
-                ...selectedBrands.balls,
-                ...selectedBrands.shoes,
-                ...selectedBrands.accessories,
-                ...selectedBrands.apparels
-            ];
-
-            // Call the API to update favorite brands
-            await userApi.updateFavoriteBrands(allBrandIDs);
-
-            await refreshUser();
-            setIsEditingBrands(false);
-            setSuccessMessage('Favorite brands updated successfully!');
-            setTimeout(() => setSuccessMessage(''), 3000);
-        } catch (error: unknown) {
-            console.error('Error updating brands:', error);
-            const errorMsg = error instanceof Error ? error.message : 'Failed to update favorite brands';
-            setErrorMessage(errorMsg);
-        } finally {
-            setIsUpdatingBrands(false);
-        }
-    };
-
-    const toggleGroup = (group: keyof typeof expandedGroups) => {
-        setExpandedGroups(prev => ({
-            ...prev,
-            [group]: !prev[group]
-        }));
-    };
-
-    const handlePostChange = (updatedPost: UserPost) => {
-        setPosts(prevPosts =>
-            prevPosts.map(post =>
-                post.metadata.id === updatedPost.metadata.id ? updatedPost : post
-            )
-        );
     };
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            <div className="max-w-6xl mx-auto px-6 py-6">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="min-h-screen bg-gray-50">
+            {/* Success/Error Message */}
+            {uploadMessage && (
+                <div className={`fixed top-4 right-4 px-6 py-3 rounded-lg text-white z-50 flex items-center gap-2 ${uploadMessage.type === 'success' ? 'bg-green-500' : 'bg-red-500'}`}>
+                    {uploadMessage.text}
+                </div>
+            )}
 
-                    {/* Main Content */}
-                    <div className="lg:col-span-2">
-                        {/* Create Post Section */}
-                        <CreatePost onPostCreated={fetchUserPosts} />
-
-                        {/* Posts Feed */}
-                        <div className="space-y-6">
-                            {loading ? (
-                                <div className="flex items-center justify-center py-12">
-                                    <div className="text-center">
-                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto mb-4"></div>
-                                        <p className="text-gray-600">Loading posts...</p>
-                                    </div>
-                                </div>
-                            ) : error ? (
-                                <div className="text-center py-12">
-                                    <p className="text-red-600 mb-4">{error}</p>
-                                    <button
-                                        onClick={() => window.location.reload()}
-                                        className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-                                    >
-                                        Try Again
-                                    </button>
-                                </div>
-                            ) : posts.length === 0 ? (
-                                <div className="text-center py-12">
-                                    <p className="text-gray-500 text-lg mb-2">No posts yet</p>
-                                    <p className="text-gray-400">Share your first bowling experience!</p>
-                                </div>
-                            ) : (
-                                posts.map((post) => (
-                                    <UserPostCard
-                                        key={post.metadata.id}
-                                        post={post}
-                                        onPostUpdate={fetchUserPosts}
-                                        onPostChange={handlePostChange}
-                                    />
-                                ))
-                            )}
+            {/* Cover Photo Section */}
+            <div className="relative h-64 bg-linear-to-r from-green-600 to-green-400 overflow-hidden group">
+                {user?.cover_photo_url && (
+                    <img 
+                        src={user.cover_photo_url} 
+                        alt="Cover" 
+                        className="w-full h-full object-cover" 
+                    />
+                )}
+                <button
+                    onClick={() => document.getElementById('cover-input')?.click()}
+                    disabled={coverUpload.isUploading}
+                    className="absolute bottom-4 right-4 bg-white text-gray-800 p-2 rounded-lg shadow-md hover:bg-gray-100 transition disabled:opacity-50 flex items-center gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                >
+                    {coverUpload.isUploading ? (
+                        <>
+                            <Loader className="w-5 h-5 animate-spin" />
+                                <span className="text-sm">{coverUpload.progress}%</span>
+                            </>
+                        ) : (
+                            <Camera className="w-5 h-5" />
+                        )}
+                    </button>
+                {coverUpload.isUploading && (
+                    <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-3">
+                        <div className="flex items-center justify-between text-white text-sm mb-2">
+                            <span>Uploading cover photo...</span>
+                            <span>{coverUpload.progress}%</span>
                         </div>
+                        <div className="w-full bg-gray-700 rounded-full h-2">
+                            <div
+                                className="bg-green-500 h-2 rounded-full transition-all duration-300"
+                                style={{ width: `${coverUpload.progress}%` }}
+                            />
+                        </div>
+                        <p className="text-xs text-gray-300 mt-1">Speed: {coverUpload.speed}</p>
                     </div>
+                )}
+                <input
+                    id="cover-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleImageUpload(e, 'cover')}
+                    className="hidden"
+                />
+            </div>
 
-                    {/* Profile Sidebar */}
-                    <div className="lg:col-span-1 space-y-4">
-                        {/* Success/Error Messages */}
-                        {successMessage && (
-                            <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm flex items-start gap-2">
-                                <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-                                <p>{successMessage}</p>
-                            </div>
-                        )}
-                        {errorMessage && (
-                            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm flex items-start gap-2">
-                                <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-                                <p>{errorMessage}</p>
-                            </div>
-                        )}
-
-                        <div className="bg-white rounded-lg shadow-sm p-6">
-                            {/* Profile Header */}
-                            <div className="text-center mb-6">
-                                <div className="relative inline-block">
-                                    <img
-                                        src={user?.profile_picture_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Jennifer"}
-                                        alt="Profile"
-                                        className="w-20 h-20 rounded-full mx-auto mb-4 object-cover"
+            {/* Profile Content */}
+            <div className="relative">
+                {/* Profile Picture and Header */}
+                <div className="bg-white border-b border-gray-200">
+                    <div className="max-w-6xl mx-auto px-4 py-8">
+                        <div className="flex flex-col gap-6 mb-6">
+                            {/* Profile Pic + Info */}
+                            <div className="flex flex-col sm:flex-row items-start gap-6">
+                                {/* Profile Picture */}
+                                <div className="relative -mt-24 sm:-mt-32 group shrink-0">
+                                    <div className="w-40 h-40 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white flex items-center justify-center">
+                                        {user?.profile_picture_url ? (
+                                            <img 
+                                                src={user.profile_picture_url} 
+                                                alt={user.name} 
+                                                className="w-full h-full object-cover" 
+                                            />
+                                        ) : (
+                                            <span style={{ color: '#8BC342' }} className="text-5xl font-bold">
+                                                {user?.name?.[0] || 'P'}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <button
+                                        onClick={() => document.getElementById('profile-input')?.click()}
+                                        disabled={profileUpload.isUploading}
+                                        className="absolute bottom-2 right-2 bg-green-500 text-white p-2 rounded-full border-2 border-white hover:bg-green-600 transition disabled:opacity-50 opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                                    >
+                                        {profileUpload.isUploading ? (
+                                            <Loader className="w-4 h-4 animate-spin" />
+                                        ) : (
+                                            <Camera className="w-4 h-4" />
+                                        )}
+                                    </button>
+                                    {profileUpload.isUploading && (
+                                        <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-lg text-xs whitespace-nowrap">
+                                            <div className="flex items-center gap-2">
+                                                <Loader className="w-3 h-3 animate-spin" />
+                                                <span>Uploading {profileUpload.progress}%</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <input
+                                        id="profile-input"
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => handleImageUpload(e, 'profile')}
+                                        className="hidden"
                                     />
                                 </div>
-                                <h2 className="text-xl font-bold text-gray-900">{user?.name || "User Name"}</h2>
-                                <p className="text-green-600 font-medium">{user?.is_pro ? "Pro Player" : "Amateur Player"}</p>
-                                <button
-                                    onClick={() => router.push('/profile/edit')}
-                                    className="text-green-600 text-sm hover:underline flex items-center justify-center gap-1 mx-auto mt-2"
-                                >
-                                    <Edit className="w-4 h-4" />
-                                    Edit Photos & Basic
-                                </button>
-                            </div>
 
-                            {/* Level and EXP */}
-                            <div className="grid grid-cols-2 gap-4 mb-6">
-                                <div className="bg-blue-50 rounded-lg p-4 text-center">
-                                    <div className="text-2xl font-bold text-blue-600">{user?.level !== undefined ? user.level : 'N/A'}</div>
-                                    <div className="text-sm text-gray-600">Level</div>
-                                </div>
-                                <div className="bg-green-50 rounded-lg p-4 text-center">
-                                    <div className="text-2xl font-bold text-green-600">{user?.xp !== undefined ? user.xp : 'N/A'}</div>
-                                    <div className="text-sm text-gray-600">XP</div>
-                                </div>
-                            </div>
-                        </div>
+                                {/* Basic Info */}
+                                <div className="flex-1 min-w-0 pt-2 max-w-3xl">
+                                    <div className="flex items-center gap-3 mb-1">
+                                        <h1 className="text-3xl font-bold text-gray-900">{user?.name}</h1>
+                                        {user?.is_pro && (
+                                            <div className="flex items-center">
+                                                <svg className="w-6 h-6 text-[#8BC342]" viewBox="0 0 24 24" fill="currentColor">
+                                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                                    <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.2"/>
+                                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                                </svg>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <p className="text-gray-500 text-lg mb-4">@{user?.username}</p>
 
-                        {/* ===== GROUP 1: GAME STATS ===== */}
-                        <div className="bg-white rounded-lg shadow-sm overflow-hidden border-l-4 border-l-yellow-400">
-                            <button
-                                onClick={() => toggleGroup('gameStats')}
-                                className="w-full flex justify-between items-center p-6 hover:bg-gray-50 transition-colors"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <h3 className="text-lg font-semibold text-gray-900">Bowling Statistics</h3>
-                                    {isGameStatsIncomplete() && (
-                                        <div className="flex items-center gap-2 bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">
-                                            <AlertCircle className="w-4 h-4" />
-                                            <span>Incomplete</span>
-                                        </div>
-                                    )}
-                                </div>
-                                {expandedGroups.gameStats ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                            </button>
-                            {expandedGroups.gameStats && (
-                                <div className="border-t px-6 pb-6">
-                                    {isEditingGameStats ? (
-                                        <div className="space-y-4">
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Average Score</label>
-                                                <input
-                                                    type="number"
-                                                    step="0.1"
-                                                    value={gameStatsForm.average_score}
-                                                    onChange={(e) => handleGameStatsFormChange('average_score', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                    disabled={isUpdatingGameStats}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">High Game</label>
-                                                <input
-                                                    type="number"
-                                                    value={gameStatsForm.high_game}
-                                                    onChange={(e) => handleGameStatsFormChange('high_game', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                    disabled={isUpdatingGameStats}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">High Series</label>
-                                                <input
-                                                    type="number"
-                                                    value={gameStatsForm.high_series}
-                                                    onChange={(e) => handleGameStatsFormChange('high_series', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                    disabled={isUpdatingGameStats}
-                                                />
-                                            </div>
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Experience (years)</label>
-                                                <input
-                                                    type="number"
-                                                    value={gameStatsForm.experience}
-                                                    onChange={(e) => handleGameStatsFormChange('experience', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                    disabled={isUpdatingGameStats}
-                                                />
-                                            </div>
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={() => setIsEditingGameStats(false)}
-                                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                                                >
-                                                    Cancel
-                                                </button>
-                                                <button
-                                                    onClick={handleGameStatsUpdate}
-                                                    disabled={isUpdatingGameStats}
-                                                    className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white font-medium py-2 px-3 rounded-lg transition-colors"
-                                                >
-                                                    {isUpdatingGameStats ? 'Saving...' : 'Save'}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-3">
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-gray-600">Avg. Score:</span>
-                                                <span className="font-medium">{user?.stats?.average_score !== undefined ? Math.round(user.stats.average_score) : 'N/A'}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-gray-600">High Game:</span>
-                                                <span className="font-medium">{user?.stats?.high_game !== undefined ? user.stats.high_game : 'N/A'}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-gray-600">High Series:</span>
-                                                <span className="font-medium">{user?.stats?.high_series !== undefined ? user.stats.high_series : 'N/A'}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-gray-600">Experience (yrs):</span>
-                                                <span className="font-medium">{user?.stats?.experience !== undefined ? user.stats.experience : 'N/A'}</span>
-                                            </div>
-                                            <button
-                                                onClick={() => setIsEditingGameStats(true)}
-                                                className="w-full mt-4 text-green-600 text-sm hover:underline"
-                                            >
-                                                Edit
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* ===== GROUP 2: USER INFO ===== */}
-                        <div className="bg-white rounded-lg shadow-sm overflow-hidden border-l-4 border-l-yellow-400">
-                            <button
-                                onClick={() => toggleGroup('userInfo')}
-                                className="w-full flex justify-between items-center p-6 hover:bg-gray-50 transition-colors"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <h3 className="text-lg font-semibold text-gray-900">Personal Information</h3>
-                                    {isUserInfoIncomplete() && (
-                                        <div className="flex items-center gap-2 bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">
-                                            <AlertCircle className="w-4 h-4" />
-                                            <span>Incomplete</span>
-                                        </div>
-                                    )}
-                                </div>
-                                {expandedGroups.userInfo ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                            </button>
-                            {expandedGroups.userInfo && (
-                                <div className="border-t px-6 pb-6">
-                                    {isEditingUserInfo ? (
-                                        <div className="space-y-4">
-                                            {/* Bio */}
-                                            <div>
-                                                <div className="flex items-center justify-between mb-1">
-                                                    <label className="block text-sm font-medium text-gray-700">Bio</label>
-                                                    <button 
-                                                        onClick={() => togglePrivacy('bio')}
-                                                        className="hover:bg-gray-100 p-1 rounded transition flex items-center gap-1 text-xs text-gray-600"
-                                                        type="button"
-                                                    >
-                                                        {getPrivacyIcon(privacySettings.bio)}
-                                                        <span>{privacySettings.bio ? 'Public' : 'Private'}</span>
-                                                    </button>
-                                                </div>
+                                    {/* Bio Section */}
+                                    <div className="mb-6 group relative max-w-2xl">
+                                        {editMode.bio ? (
+                                            <div className="space-y-2">
                                                 <textarea
-                                                    value={userInfoForm.bio}
-                                                    onChange={(e) => handleUserInfoFormChange('bio', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 min-h-[100px]"
-                                                    disabled={isUpdatingUserInfo}
-                                                    placeholder="Tell us about yourself..."
+                                                    value={formData.bio}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-900"
+                                                    rows={3}
+                                                    placeholder="Write your bio..."
                                                 />
-                                            </div>
-
-                                            {/* Date of Birth */}
-                                            <div>
-                                                <div className="flex items-center justify-between mb-1">
-                                                    <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
-                                                    <button 
-                                                        onClick={() => togglePrivacy('birthdate')}
-                                                        className="hover:bg-gray-100 p-1 rounded transition flex items-center gap-1 text-xs text-gray-600"
-                                                        type="button"
+                                                <div className="flex justify-end gap-2">
+                                                    <button
+                                                        onClick={() => setEditMode(prev => ({ ...prev, bio: false }))}
+                                                        className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded"
                                                     >
-                                                        {getPrivacyIcon(privacySettings.birthdate)}
-                                                        <span>{privacySettings.birthdate ? 'Public' : 'Private'}</span>
+                                                        Cancel
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleSaveField('bio')}
+                                                        className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+                                                    >
+                                                        Save
                                                     </button>
                                                 </div>
-                                                <input
-                                                    type="date"
-                                                    value={userInfoForm.dob ? userInfoForm.dob.split('T')[0] : ''}
-                                                    onChange={(e) => {
-                                                        const dateStr = e.target.value;
-                                                        if (dateStr) {
-                                                            const selectedDate = new Date(dateStr);
-                                                            const today = new Date();
-                                                            let age = today.getFullYear() - selectedDate.getFullYear();
-                                                            const monthDiff = today.getMonth() - selectedDate.getMonth();
-                                                            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < selectedDate.getDate())) {
-                                                                age--;
-                                                            }
-
-                                                            // Only allow if user is 13 or older
-                                                            if (age >= 13) {
-                                                                const isoString = selectedDate.toISOString();
-                                                                handleUserInfoFormChange('dob', isoString);
-                                                            } else {
-                                                                alert('Users must be at least 13 years old to use this platform.');
-                                                            }
-                                                        }
-                                                    }}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                    disabled={isUpdatingUserInfo}
-                                                    max={new Date(new Date().getFullYear() - 13, new Date().getMonth(), new Date().getDate()).toISOString().split('T')[0]}
-                                                />
-                                                {userAge > 0 && (
-                                                    <p className="mt-1 text-sm text-gray-600">Age: {userAge} years old</p>
-                                                )}
                                             </div>
-
-                                            {/* Gender */}
-                                            <div>
-                                                <div className="flex items-center justify-between mb-1">
-                                                    <label className="block text-sm font-medium text-gray-700">Gender</label>
-                                                    <button 
-                                                        onClick={() => togglePrivacy('gender')}
-                                                        className="hover:bg-gray-100 p-1 rounded transition flex items-center gap-1 text-xs text-gray-600"
-                                                        type="button"
-                                                    >
-                                                        {getPrivacyIcon(privacySettings.gender)}
-                                                        <span>{privacySettings.gender ? 'Public' : 'Private'}</span>
-                                                    </button>
-                                                </div>
-                                                <select
-                                                    value={userInfoForm.gender}
-                                                    onChange={(e) => handleUserInfoFormChange('gender', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                    disabled={isUpdatingUserInfo}
-                                                >
-                                                    <option value="">Select</option>
-                                                    <option value="Man">Man</option>
-                                                    <option value="Woman">Woman</option>
-                                                </select>
-                                            </div>
-                                            {/* Address with Mapbox */}
-                                            <div>
-                                                <div className="flex items-center justify-between mb-1">
-                                                    <label className="block text-sm font-medium text-gray-700">Address</label>
-                                                    <button 
-                                                        onClick={() => togglePrivacy('address')}
-                                                        className="hover:bg-gray-100 p-1 rounded transition flex items-center gap-1 text-xs text-gray-600"
-                                                        type="button"
-                                                    >
-                                                        {getPrivacyIcon(privacySettings.address)}
-                                                        <span>{privacySettings.address ? 'Public' : 'Private'}</span>
-                                                    </button>
-                                                </div>
-                                                <div className="relative">
-                                                    <input
-                                                        type="text"
-                                                        value={userInfoForm.address_str}
-                                                        onChange={(e) => handleAddressChange(e.target.value)}
-                                                        onFocus={() => userInfoForm.address_str && setShowAddressSuggestions(true)}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                        disabled={isUpdatingUserInfo}
-                                                        placeholder="Enter your address"
-                                                        autoComplete="off"
-                                                    />
-                                                    {showAddressSuggestions && addressSuggestions.length > 0 && (
-                                                        <div
-                                                            ref={suggestionsRef}
-                                                            className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto"
-                                                        >
-                                                            {addressSuggestions.map((suggestion) => (
-                                                                <div
-                                                                    key={suggestion.id}
-                                                                    onClick={() => {
-                                                                        setUserInfoForm(prev => ({
-                                                                            ...prev,
-                                                                            address_str: suggestion.place_name,
-                                                                            lat: suggestion.center[1].toString(),
-                                                                            long: suggestion.center[0].toString()
-                                                                        }));
-                                                                        setAddressSearchQuery(suggestion.place_name);
-                                                                        setShowAddressSuggestions(false);
-                                                                        setAddressSuggestions([]);
-                                                                    }}
-                                                                    className="px-4 py-3 hover:bg-green-50 cursor-pointer border-b last:border-b-0"
-                                                                >
-                                                                    <div className="text-sm text-gray-900">{suggestion.place_name}</div>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <p className="mt-1 text-xs text-gray-500">Location will be saved automatically</p>
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="col-span-2 flex items-center justify-end mb-1">
-                                                    <button 
-                                                        onClick={() => togglePrivacy('ballHandling')}
-                                                        className="hover:bg-gray-100 p-1 rounded transition flex items-center gap-1 text-xs text-gray-600"
-                                                        type="button"
-                                                    >
-                                                        {getPrivacyIcon(privacySettings.ballHandling)}
-                                                        <span>{privacySettings.ballHandling ? 'Public' : 'Private'}</span>
-                                                    </button>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Handedness</label>
-                                                    <select
-                                                        value={userInfoForm.handedness || ''}
-                                                        onChange={(e) => handleUserInfoFormChange('handedness', e.target.value)}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                        disabled={isUpdatingUserInfo}
-                                                    >
-                                                        <option value="">Select</option>
-                                                        <option value="right">Right</option>
-                                                        <option value="left">Left</option>
-                                                        <option value="both">Both</option>
-                                                    </select>
-                                                </div>
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Thumb Style</label>
-                                                    <select
-                                                        value={userInfoForm.thumb_style || ''}
-                                                        onChange={(e) => handleUserInfoFormChange('thumb_style', e.target.value)}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                        disabled={isUpdatingUserInfo}
-                                                    >
-                                                        <option value="">Select</option>
-                                                        <option value="thumb">Thumb</option>
-                                                        <option value="no-thumb">No Thumb</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <div className="flex items-center justify-between mb-1">
-                                                    <label className="block text-sm font-medium text-gray-700">Home Bowling Center</label>
-                                                    <button 
-                                                        onClick={() => togglePrivacy('homeCenter')}
-                                                        className="hover:bg-gray-100 p-1 rounded transition flex items-center gap-1 text-xs text-gray-600"
-                                                        type="button"
-                                                    >
-                                                        {getPrivacyIcon(privacySettings.homeCenter)}
-                                                        <span>{privacySettings.homeCenter ? 'Public' : 'Private'}</span>
-                                                    </button>
-                                                </div>
-                                                <div className="relative">
-                                                    <input
-                                                        type="text"
-                                                        value={homeCenterSearch}
-                                                        onChange={(e) => handleCenterSearchChange(e.target.value)}
-                                                        onFocus={() => homeCenterSearch && setShowCenterSuggestions(true)}
-                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                        disabled={isUpdatingUserInfo}
-                                                        placeholder="Search for a bowling center"
-                                                        autoComplete="off"
-                                                    />
-                                                    {showCenterSuggestions && centerSuggestions.length > 0 && (
-                                                        <div
-                                                            ref={centerSuggestionsRef}
-                                                            className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto"
-                                                        >
-                                                            {centerSuggestions.map((center) => (
-                                                                <div
-                                                                    key={center.id}
-                                                                    onClick={() => {
-                                                                        setUserInfoForm(prev => ({
-                                                                            ...prev,
-                                                                            home_center: center.name,
-                                                                            home_center_id: center.id
-                                                                        }));
-                                                                        setHomeCenterSearch(center.name);
-                                                                        setShowCenterSuggestions(false);
-                                                                        setCenterSuggestions([]);
-                                                                    }}
-                                                                    className="px-4 py-3 hover:bg-green-50 cursor-pointer border-b last:border-b-0"
-                                                                >
-                                                                    <div className="text-sm font-medium text-gray-900">{center.name}</div>
-                                                                    <div className="text-xs text-gray-500">{center.city}, {center.state}</div>
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                    {showCenterSuggestions && centerSuggestions.length === 0 && homeCenterSearch.length >= 2 && (
-                                                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-10 px-4 py-3 text-sm text-gray-500">
-                                                            No bowling centers found.
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            {/* Parent Information (for ages 13-18) */}
-                                            {is13to18 && (
-                                                <div className="border-t-2 border-yellow-300 pt-4 mt-4">
-                                                    <h4 className="text-sm font-semibold text-gray-800 mb-3 bg-yellow-50 p-2 rounded">Parent/Guardian Information</h4>
-                                                    <div className="grid grid-cols-2 gap-4">
-                                                        <div>
-                                                            <label className="block text-sm font-medium text-gray-700 mb-1">Parent First Name</label>
-                                                            <input
-                                                                type="text"
-                                                                value={userInfoForm.parentFirstName}
-                                                                onChange={(e) => handleUserInfoFormChange('parentFirstName', e.target.value)}
-                                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                                disabled={isUpdatingUserInfo}
-                                                                placeholder="First name"
-                                                            />
-                                                        </div>
-                                                        <div>
-                                                            <label className="block text-sm font-medium text-gray-700 mb-1">Parent Last Name</label>
-                                                            <input
-                                                                type="text"
-                                                                value={userInfoForm.parentLastName}
-                                                                onChange={(e) => handleUserInfoFormChange('parentLastName', e.target.value)}
-                                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                                disabled={isUpdatingUserInfo}
-                                                                placeholder="Last name"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-sm font-medium text-gray-700 mb-1 mt-3">Parent Email</label>
-                                                        <input
-                                                            type="email"
-                                                            value={userInfoForm.parentEmail}
-                                                            onChange={(e) => handleUserInfoFormChange('parentEmail', e.target.value)}
-                                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                            disabled={isUpdatingUserInfo}
-                                                            placeholder="Parent email"
-                                                        />
-                                                    </div>
-                                                </div>
-                                            )}
-
-                                            {/* Coach & USBC Information (for ages 18+) */}
-                                            {is18Plus && (
-                                                <div className="border-t-2 border-blue-300 pt-4 mt-4">
-                                                    <h4 className="text-sm font-semibold text-gray-800 mb-3 bg-blue-50 p-2 rounded">Professional Information</h4>
-                                                    <div className="flex items-center gap-2 mb-3">
-                                                        <input
-                                                            type="checkbox"
-                                                            id="is_coach"
-                                                            checked={userInfoForm.is_coach}
-                                                            onChange={(e) => handleUserInfoFormChange('is_coach', e.target.checked)}
-                                                            className="w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
-                                                            disabled={isUpdatingUserInfo}
-                                                        />
-                                                        <label htmlFor="is_coach" className="text-sm font-medium text-gray-700 cursor-pointer">
-                                                            Are you a coach?
-                                                        </label>
-                                                    </div>
-
-                                                    {userInfoForm.is_coach && (
-                                                        <div>
-                                                            <label className="block text-sm font-medium text-gray-700 mb-1">USBC Card Number</label>
-                                                            <input
-                                                                type="text"
-                                                                value={userInfoForm.usbcCardNumber}
-                                                                onChange={(e) => handleUserInfoFormChange('usbcCardNumber', e.target.value)}
-                                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500"
-                                                                disabled={isUpdatingUserInfo}
-                                                                placeholder="Enter USBC card number"
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-
-                                            <div className="flex gap-2 mt-4">
+                                        ) : (
+                                            <div className="flex items-start gap-2">
+                                                <p className="text-gray-700 leading-relaxed">{user?.bio?.content || 'No bio added yet'}</p>
                                                 <button
-                                                    onClick={() => setIsEditingUserInfo(false)}
-                                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                                                    onClick={() => setEditMode(prev => ({ ...prev, bio: true }))}
+                                                    className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1 hover:bg-gray-100 rounded transition text-gray-500"
                                                 >
-                                                    Cancel
+                                                    <Edit2 className="w-4 h-4" />
                                                 </button>
-                                                <button
-                                                    onClick={handleUserInfoUpdate}
-                                                    disabled={isUpdatingUserInfo}
-                                                    className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white font-medium py-2 px-3 rounded-lg transition-colors"
-                                                >
-                                                    {isUpdatingUserInfo ? 'Saving...' : 'Save'}
-                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Stats */}
+                                    <div className="flex gap-8 mb-6 border-t border-b border-gray-100 py-4 w-fit">
+                                        <div className="text-center min-w-20">
+                                            <div className="text-2xl font-bold text-gray-900">{user?.follow_info?.follwers || user?.follower_count || 0}</div>
+                                            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Followers</div>
+                                        </div>
+                                        <div className="text-center min-w-20">
+                                            <div className="text-2xl font-bold text-gray-900">{user?.follow_info?.followings || user?.following_count || 0}</div>
+                                            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Following</div>
+                                        </div>
+                                        <div className="text-center min-w-20">
+                                            <div className="text-2xl font-bold text-gray-900">{user?.xp || 0}</div>
+                                            <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">XP</div>
+                                        </div>
+                                    </div>
+
+                                    {/* Favorite Brands */}
+                                    {user?.favorite_brands && user.favorite_brands.length > 0 && (
+                                        <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100 mb-6">
+                                            <h3 className="text-lg font-bold mb-4">Favorite Brands</h3>
+                                            <div className="flex flex-wrap gap-2 items-center">
+                                                {user.favorite_brands.map((brand) => (
+                                                    <div key={brand.brand_id} className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition group cursor-pointer">
+                                                        <img
+                                                            src={brand.logo_url}
+                                                            alt={brand.name}
+                                                            className="w-5 h-5 object-contain grayscale group-hover:grayscale-0 transition-all"
+                                                        />
+                                                        <span className="text-sm font-medium text-gray-600 group-hover:text-gray-900">{brand.name}</span>
+                                                    </div>
+                                                ))}
                                             </div>
                                         </div>
-                                    ) : (
-                                        <div className="space-y-3">
-                                            <div className="flex justify-between items-start">
-                                                <span className="text-gray-600 shrink-0 mr-4">Bio:</span>
-                                                <span className="font-medium text-right">{user?.bio?.content || 'No bio added'}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-gray-600">Date of Birth:</span>
-                                                <span className="font-medium">{user?.birthdate_data?.date ? new Date(user.birthdate_data.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A'} (Age: {user?.birthdate_data?.age || 'N/A'})</span>
-                                            </div>
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-gray-600">Gender:</span>
-                                                <span className="font-medium capitalize">{user?.gender_data?.role || 'N/A'}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-gray-600">Address:</span>
-                                                <span className="font-medium text-sm">{user?.address_data?.address_str || 'Not set'}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-gray-600">Home Center:</span>
-                                                <span className="font-medium">{user?.home_center_data?.center?.name || 'Not set'}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-gray-600">Handedness:</span>
-                                                <span className="font-medium capitalize">{user?.ball_handling_style?.description || 'Not set'}</span>
-                                            </div>
-                                            {user?.info?.is_youth && (
-                                                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-3">
-                                                    <h4 className="text-sm font-semibold text-yellow-800 mb-2">Parent/Guardian Information</h4>
-                                                    <div className="space-y-1 text-sm text-yellow-700">
-                                                        <p><span className="font-medium">Name:</span> {user.info.parentFirstName} {user.info.parentLastName}</p>
-                                                        <p><span className="font-medium">Email:</span> {user.info.parentEmail}</p>
-                                                    </div>
-                                                </div>
-                                            )}
-                                            {user?.info?.is_coach && (
-                                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mt-3">
-                                                    <h4 className="text-sm font-semibold text-blue-800 mb-2">Coach Information</h4>
-                                                    <p className="text-sm text-blue-700"><span className="font-medium">USBC Card:</span> {user.info.usbcCardNumber || 'Not provided'}</p>
-                                                </div>
-                                            )}
+                                    )}
+
+                                    {/* Intro Video - Moved from right side */}
+                                    <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100 group relative mb-6">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <h3 className="text-lg font-bold flex items-center gap-2">
+                                                <Play className="w-5 h-5" />
+                                                Intro Video
+                                            </h3>
                                             <button
-                                                onClick={() => setIsEditingUserInfo(true)}
-                                                className="w-full mt-4 text-green-600 text-sm hover:underline"
+                                                onClick={() => videoInputRef.current?.click()}
+                                                disabled={videoUpload.isUploading}
+                                                className="px-3 py-1.5 text-xs bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50 flex items-center gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
                                             >
-                                                Edit
+                                                {videoUpload.isUploading ? (
+                                                    <>
+                                                        <Loader className="w-3 h-3 animate-spin" />
+                                                        Uploading...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Upload className="w-3 h-3" />
+                                                        {user?.intro_video_url ? 'Change' : 'Upload'}
+                                                    </>
+                                                )}
                                             </button>
+                                            <input
+                                                ref={videoInputRef}
+                                                type="file"
+                                                accept="video/*"
+                                                onChange={handleVideoUpload}
+                                                className="hidden"
+                                            />
                                         </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* ===== GROUP 3: FAV BRANDS ===== */}
-                        <div className="bg-white rounded-lg shadow-sm overflow-hidden border-l-4 border-l-yellow-400">
-                            <button
-                                onClick={() => toggleGroup('favBrands')}
-                                className="w-full flex justify-between items-center p-6 hover:bg-gray-50 transition-colors"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <h3 className="text-lg font-semibold text-gray-900">{user?.is_pro ? "Sponsors" : "Favorite Brands"}</h3>
-                                    {isSponsorsIncomplete() && (
-                                        <div className="flex items-center gap-2 bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium">
-                                            <AlertCircle className="w-4 h-4" />
-                                            <span>Incomplete</span>
-                                        </div>
-                                    )}
-                                </div>
-                                {expandedGroups.favBrands ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                            </button>
-                            {expandedGroups.favBrands && (
-                                <div className="border-t px-6 pb-6">
-                                    {user?.is_pro ? (
-                                        <div>
-                                            {user?.favorite_brands && user.favorite_brands.filter(b => b.brandType === 'Business Sponsors').length > 0 ? (
-                                                <div className="space-y-3">
-                                                    {user.favorite_brands.filter(b => b.brandType === 'Business Sponsors').map((sponsor: Brand) => (
-                                                        <div key={sponsor.brand_id} className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
-                                                            <Image
-                                                                src={sponsor.logo_url}
-                                                                alt={`${sponsor.formal_name} logo`}
-                                                                width={32}
-                                                                height={32}
-                                                                className="object-contain"
-                                                            />
-                                                            <span className="text-sm text-gray-700 flex-1">{sponsor.formal_name}</span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            ) : (
-                                                <div className="text-center py-6 bg-gray-50 rounded-lg">
-                                                    <p className="text-gray-500 text-sm">No sponsors yet</p>
-                                                </div>
-                                            )}
-                                        </div>
-                                    ) : isEditingBrands ? (
-                                        <div className="space-y-6">
-                                            {brandsLoading ? (
-                                                <div className="flex justify-center py-8">
-                                                    <div className="text-gray-500">Loading brands...</div>
-                                                </div>
-                                            ) : brands ? (
-                                                <>
-                                                    {/* Ball Brands */}
-                                                    {brands.Balls && brands.Balls.length > 0 && (
-                                                        <div>
-                                                            <h4 className="text-sm font-medium text-gray-800 mb-3">Ball Brands</h4>
-                                                            <div className="grid grid-cols-1 gap-3">
-                                                                {brands.Balls.map((brand) => (
-                                                                    <label key={brand.brand_id} className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg border hover:bg-gray-50 transition-colors">
-                                                                        <input
-                                                                            type="checkbox"
-                                                                            checked={selectedBrands.balls.includes(brand.brand_id)}
-                                                                            onChange={() => handleBrandToggle('balls', brand.brand_id)}
-                                                                            disabled={isUpdatingBrands}
-                                                                            className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                                                                        />
-                                                                        <Image
-                                                                            src={brand.logo_url}
-                                                                            alt={`${brand.formal_name} logo`}
-                                                                            width={32}
-                                                                            height={32}
-                                                                            className="object-contain"
-                                                                        />
-                                                                        <span className="text-sm text-gray-700 flex-1">{brand.formal_name}</span>
-                                                                    </label>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    )}
-
-                                                    {/* Shoes */}
-                                                    {brands.Shoes && brands.Shoes.length > 0 && (
-                                                        <div>
-                                                            <h4 className="text-sm font-medium text-gray-800 mb-3">Shoes</h4>
-                                                            <div className="grid grid-cols-1 gap-3">
-                                                                {brands.Shoes.map((brand) => (
-                                                                    <label key={brand.brand_id} className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg border hover:bg-gray-50 transition-colors">
-                                                                        <input
-                                                                            type="checkbox"
-                                                                            checked={selectedBrands.shoes.includes(brand.brand_id)}
-                                                                            onChange={() => handleBrandToggle('shoes', brand.brand_id)}
-                                                                            disabled={isUpdatingBrands}
-                                                                            className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                                                                        />
-                                                                        <Image
-                                                                            src={brand.logo_url}
-                                                                            alt={`${brand.formal_name} logo`}
-                                                                            width={32}
-                                                                            height={32}
-                                                                            className="object-contain"
-                                                                        />
-                                                                        <span className="text-sm text-gray-700 flex-1">{brand.formal_name}</span>
-                                                                    </label>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    )}
-
-                                                    {/* Accessories */}
-                                                    {brands.Accessories && brands.Accessories.length > 0 && (
-                                                        <div>
-                                                            <h4 className="text-sm font-medium text-gray-800 mb-3">Accessories</h4>
-                                                            <div className="grid grid-cols-1 gap-3">
-                                                                {brands.Accessories.map((brand) => (
-                                                                    <label key={brand.brand_id} className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg border hover:bg-gray-50 transition-colors">
-                                                                        <input
-                                                                            type="checkbox"
-                                                                            checked={selectedBrands.accessories.includes(brand.brand_id)}
-                                                                            onChange={() => handleBrandToggle('accessories', brand.brand_id)}
-                                                                            disabled={isUpdatingBrands}
-                                                                            className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                                                                        />
-                                                                        <Image
-                                                                            src={brand.logo_url}
-                                                                            alt={`${brand.formal_name} logo`}
-                                                                            width={32}
-                                                                            height={32}
-                                                                            className="object-contain"
-                                                                        />
-                                                                        <span className="text-sm text-gray-700 flex-1">{brand.formal_name}</span>
-                                                                    </label>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    )}
-
-                                                    {/* Apparel */}
-                                                    {brands.Apparels && brands.Apparels.length > 0 && (
-                                                        <div>
-                                                            <h4 className="text-sm font-medium text-gray-800 mb-3">Apparel</h4>
-                                                            <div className="grid grid-cols-1 gap-3">
-                                                                {brands.Apparels.map((brand) => (
-                                                                    <label key={brand.brand_id} className="flex items-center space-x-3 cursor-pointer p-2 rounded-lg border hover:bg-gray-50 transition-colors">
-                                                                        <input
-                                                                            type="checkbox"
-                                                                            checked={selectedBrands.apparels.includes(brand.brand_id)}
-                                                                            onChange={() => handleBrandToggle('apparels', brand.brand_id)}
-                                                                            disabled={isUpdatingBrands}
-                                                                            className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                                                                        />
-                                                                        <Image
-                                                                            src={brand.logo_url}
-                                                                            alt={`${brand.formal_name} logo`}
-                                                                            width={32}
-                                                                            height={32}
-                                                                            className="object-contain"
-                                                                        />
-                                                                        <span className="text-sm text-gray-700 flex-1">{brand.formal_name}</span>
-                                                                    </label>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </>
-                                            ) : (
-                                                <div className="text-center py-8">
-                                                    <p className="text-gray-500">Failed to load brands</p>
-                                                </div>
-                                            )}
-                                            <div className="flex gap-2">
-                                                <button
-                                                    onClick={() => setIsEditingBrands(false)}
-                                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                                                >
-                                                    Cancel
-                                                </button>
-                                                <button
-                                                    onClick={handleBrandsUpdate}
-                                                    disabled={isUpdatingBrands}
-                                                    className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white font-medium py-2 px-3 rounded-lg transition-colors"
-                                                >
-                                                    {isUpdatingBrands ? 'Saving...' : 'Save Brands'}
-                                                </button>
+                                        {user?.intro_video_url ? (
+                                            <div className="relative rounded-lg overflow-hidden bg-black aspect-video max-w-md">
+                                                <video
+                                                    src={user.intro_video_url}
+                                                    controls
+                                                    className="w-full h-full object-cover"
+                                                />
                                             </div>
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-3">
-                                            {user?.favorite_brands && user.favorite_brands.length > 0 ? (
-                                                <>
-                                                    {['Balls', 'Shoes', 'Accessories', 'Apparels'].map((brandType) => {
-                                                        const brandsOfType = user.favorite_brands?.filter((brand: Brand) => brand.brandType === brandType) || [];
-                                                        if (brandsOfType.length === 0) return null;
-
-                                                        return (
-                                                            <div key={brandType}>
-                                                                <h4 className="text-sm font-medium text-gray-700 mb-2">{brandType}</h4>
-                                                                <div className="grid grid-cols-1 gap-2">
-                                                                    {brandsOfType.map((brand: Brand) => (
-                                                                        <div key={brand.brand_id} className="flex items-center space-x-3 p-2 bg-gray-50 rounded-lg">
-                                                                            <Image
-                                                                                src={brand.logo_url}
-                                                                                alt={`${brand.formal_name} logo`}
-                                                                                width={32}
-                                                                                height={32}
-                                                                                className="object-contain"
-                                                                            />
-                                                                            <span className="text-sm text-gray-700 flex-1">{brand.formal_name}</span>
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                    <button
-                                                        onClick={() => setIsEditingBrands(true)}
-                                                        className="w-full mt-4 text-green-600 text-sm hover:underline"
-                                                    >
-                                                        Edit Brands
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <div className="text-center py-6 bg-gray-50 rounded-lg">
-                                                    <p className="text-gray-500 text-sm">No favorite brands selected</p>
-                                                    <button
-                                                        onClick={() => setIsEditingBrands(true)}
-                                                        className="text-green-600 text-sm hover:underline mt-2"
-                                                    >
-                                                        Add Brands
-                                                    </button>
+                                        ) : (
+                                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center h-40 flex flex-col items-center justify-center max-w-md">
+                                                <Video className="w-10 h-10 text-gray-400 mb-2" />
+                                                <p className="text-gray-600 text-sm mb-1">No intro video yet</p>
+                                                <p className="text-xs text-gray-500 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">Click "Upload" to add</p>
+                                            </div>
+                                        )}
+                                        {videoUpload.isUploading && (
+                                            <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                                <div className="flex justify-between text-xs mb-1">
+                                                    <span className="text-blue-700">Uploading...</span>
+                                                    <span className="font-medium text-blue-900">{videoUpload.progress}%</span>
                                                 </div>
-                                            )}
-                                        </div>
-                                    )}
+                                                <div className="w-full bg-blue-200 rounded-full h-1.5 mb-1">
+                                                    <div
+                                                        className="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
+                                                        style={{ width: `${videoUpload.progress}%` }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+
                                 </div>
-                            )}
+                            </div>
                         </div>
+
+                        {/* Upload Message */}
+                        {uploadMessage && (
+                            <div className={`mb-6 p-4 rounded-lg flex items-start gap-3 ${
+                                uploadMessage.type === 'success'
+                                    ? 'bg-green-50 border border-green-200 text-green-700'
+                                    : 'bg-red-50 border border-red-200 text-red-700'
+                            }`}>
+                                <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                                <p className="text-sm">{uploadMessage.text}</p>
+                            </div>
+                        )}
                     </div>
                 </div>
+
+                {/* Profile Details Section with Tabs */}
+                <div className="max-w-6xl mx-auto px-4 py-8">
+                    {/* Tabs */}
+                    <div className="bg-white rounded-lg shadow-sm mb-6">
+                        <div className="border-b border-gray-200">
+                            <div className="flex overflow-x-auto">
+                                <button
+                                    onClick={() => setActiveTab('info')}
+                                    className={`px-6 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition ${
+                                        activeTab === 'info'
+                                            ? 'border-green-600 text-green-600'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
+                                >
+                                    Info
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('cards')}
+                                    className={`px-6 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition ${
+                                        activeTab === 'cards'
+                                            ? 'border-green-600 text-green-600'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
+                                >
+                                    Cards
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('stats')}
+                                    className={`px-6 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition ${
+                                        activeTab === 'stats'
+                                            ? 'border-green-600 text-green-600'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
+                                >
+                                    Stats
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('posts')}
+                                    className={`px-6 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition ${
+                                        activeTab === 'posts'
+                                            ? 'border-green-600 text-green-600'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
+                                >
+                                    Posts
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('media')}
+                                    className={`px-6 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition ${
+                                        activeTab === 'media'
+                                            ? 'border-green-600 text-green-600'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
+                                >
+                                    Media
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Tab Content */}
+                    <div className="bg-white rounded-lg shadow-sm p-6">
+                        {/* Info Tab */}
+                        {activeTab === 'info' && (
+                            <div className="space-y-6">
+                                    {/* Email */}
+                                    <div className="flex items-start justify-between pb-6 border-b border-gray-200 last:border-0">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <Mail className="w-4 h-4 text-gray-500" />
+                                                <label className="text-sm font-semibold text-gray-700">Email</label>
+                                            </div>
+                                            <p className="text-gray-600">{user?.email || 'Not provided'}</p>
+                                            <div className="flex items-center gap-2 mt-2">
+                                                <span className="text-xs text-gray-500">Private (cannot be changed)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Gender */}
+                                    <div className="flex items-start justify-between pb-6 border-b border-gray-200 last:border-0 group">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <label className="text-sm font-semibold text-gray-700">Gender</label>
+                                            </div>
+                                            {editMode.gender ? (
+                                                <div className="space-y-2">
+                                                    <select
+                                                        value={formData.gender}
+                                                        onChange={(e) => setFormData(prev => ({ ...prev, gender: e.target.value }))}
+                                                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                    >
+                                                        <option value="">Select gender</option>
+                                                        <option value="Male">Male</option>
+                                                        <option value="Women">Women</option>
+                                                    </select>
+                                                    <div className="flex items-center gap-2 mt-2">
+                                                        <input
+                                                            type="checkbox"
+                                                            id="gender-privacy"
+                                                            checked={privacySettings.gender}
+                                                            onChange={(e) => setPrivacySettings(prev => ({ ...prev, gender: e.target.checked }))}
+                                                            className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                                                        />
+                                                        <label htmlFor="gender-privacy" className="text-sm text-gray-600 flex items-center gap-1">
+                                                            {privacySettings.gender ? (
+                                                                <><Globe className="w-3 h-3 text-green-600" /> Make this public</>
+                                                            ) : (
+                                                                <><Lock className="w-3 h-3 text-gray-500" /> Make this public</>
+                                                            )}
+                                                        </label>
+                                                    </div>
+                                                    <div className="flex justify-end gap-2">
+                                                        <button
+                                                            onClick={() => setEditMode(prev => ({ ...prev, gender: false }))}
+                                                            className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleSaveField('gender')}
+                                                            className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+                                                        >
+                                                            Save
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div>
+                                                    <div className="flex items-center justify-between">
+                                                        <p className="text-gray-600">{user?.gender_data?.role || 'Not provided'}</p>
+                                                        <button
+                                                            onClick={() => setEditMode(prev => ({ ...prev, gender: true }))}
+                                                            className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1 hover:bg-gray-100 rounded transition text-gray-500"
+                                                        >
+                                                            <Edit2 className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 mt-2">
+                                                        <span className="text-xs flex items-center gap-1">
+                                                            {privacySettings.gender ? (
+                                                                <><Globe className="w-3 h-3 text-green-600" /> <span className="text-green-600 font-medium">Public</span></>
+                                                            ) : (
+                                                                <><Lock className="w-3 h-3 text-gray-500" /> <span className="text-gray-500 font-medium">Private</span></>
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Birthdate */}
+                                    <div className="flex items-start justify-between pb-6 border-b border-gray-200 last:border-0 group">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <label className="text-sm font-semibold text-gray-700">Birthdate</label>
+                                            </div>
+                                            {editMode.birthdate ? (
+                                                <div className="space-y-2">
+                                                    <input
+                                                        type="date"
+                                                        value={formData.birthdate}
+                                                        onChange={(e) => setFormData(prev => ({ ...prev, birthdate: e.target.value }))}
+                                                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                    />
+                                                    <div className="flex items-center gap-2">
+                                                        <input
+                                                            type="checkbox"
+                                                            id="birthdate-privacy"
+                                                            checked={privacySettings.birthdate}
+                                                            onChange={(e) => setPrivacySettings(prev => ({ ...prev, birthdate: e.target.checked }))}
+                                                            className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                                                        />
+                                                        <label htmlFor="birthdate-privacy" className="text-sm text-gray-600 flex items-center gap-1">
+                                                            {privacySettings.birthdate ? (
+                                                                <><Globe className="w-3 h-3 text-green-600" /> Make this public</>
+                                                            ) : (
+                                                                <><Lock className="w-3 h-3 text-gray-500" /> Make this public</>
+                                                            )}
+                                                        </label>
+                                                    </div>
+                                                    <div className="flex justify-end gap-2">
+                                                        <button
+                                                            onClick={() => setEditMode(prev => ({ ...prev, birthdate: false }))}
+                                                            className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleSaveField('birthdate')}
+                                                            className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+                                                        >
+                                                            Save
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div>
+                                                    <div className="flex items-center justify-between">
+                                                        <p className="text-gray-600">{user?.birthdate_data?.date || 'Not provided'}</p>
+                                                        <button
+                                                            onClick={() => setEditMode(prev => ({ ...prev, birthdate: true }))}
+                                                            className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1 hover:bg-gray-100 rounded transition text-gray-500"
+                                                        >
+                                                            <Edit2 className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 mt-2">
+                                                        <span className="text-xs flex items-center gap-1">
+                                                            {privacySettings.birthdate ? (
+                                                                <><Globe className="w-3 h-3 text-green-600" /> <span className="text-green-600 font-medium">Public</span></>
+                                                            ) : (
+                                                                <><Lock className="w-3 h-3 text-gray-500" /> <span className="text-gray-500 font-medium">Private</span></>
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Address */}
+                                    <div className="flex items-start justify-between pb-6 border-b border-gray-200 last:border-0 group">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <MapPin className="w-4 h-4 text-gray-500" />
+                                                <label className="text-sm font-semibold text-gray-700">Address</label>
+                                            </div>
+                                            <div>
+                                                <div className="flex items-center justify-between">
+                                                    <div className="space-y-1">
+                                                        <p className="text-gray-600">{user?.address_data?.address_str || 'Not provided'}</p>
+                                                        {user?.address_data?.zipcode && (
+                                                            <p className="text-sm text-gray-500">Zipcode: {user.address_data.zipcode}</p>
+                                                        )}
+                                                    </div>
+                                                    <button
+                                                        onClick={() => setAddressModalOpen(true)}
+                                                        className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1 hover:bg-gray-100 rounded transition text-gray-500"
+                                                    >
+                                                        <Edit2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                                <div className="flex items-center gap-2 mt-2">
+                                                    <span className="text-xs flex items-center gap-1">
+                                                        {privacySettings.address ? (
+                                                            <><Globe className="w-3 h-3 text-green-600" /> <span className="text-green-600 font-medium">Public</span></>
+                                                        ) : (
+                                                            <><Lock className="w-3 h-3 text-gray-500" /> <span className="text-gray-500 font-medium">Private</span></>
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Ball Handling Style */}
+                                    <div className="flex items-start justify-between pb-6 border-b border-gray-200 last:border-0 group">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <Dumbbell className="w-4 h-4 text-gray-500" />
+                                                <label className="text-sm font-semibold text-gray-700">Ball Handling</label>
+                                            </div>
+                                            {editMode.ballHandling ? (
+                                                <div className="space-y-3">
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        <div>
+                                                            <label className="text-xs text-gray-500 mb-1 block">Handedness</label>
+                                                            <select
+                                                                value={formData.handedness}
+                                                                onChange={(e) => setFormData(prev => ({ ...prev, handedness: e.target.value }))}
+                                                                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                                                            >
+                                                                <option value="">Select</option>
+                                                                <option value="Righty">Righty</option>
+                                                                <option value="Lefty">Lefty</option>
+                                                            </select>
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-xs text-gray-500 mb-1 block">Style</label>
+                                                            <select
+                                                                value={formData.ball_carry}
+                                                                onChange={(e) => setFormData(prev => ({ ...prev, ball_carry: e.target.value }))}
+                                                                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                                                            >
+                                                                <option value="">Select</option>
+                                                                <option value="One handed">One handed</option>
+                                                                <option value="Two handed">Two handed</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 mt-2">
+                                                        <input
+                                                            type="checkbox"
+                                                            id="ballHandling-privacy"
+                                                            checked={privacySettings.ballHandling}
+                                                            onChange={(e) => setPrivacySettings(prev => ({ ...prev, ballHandling: e.target.checked }))}
+                                                            className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                                                        />
+                                                        <label htmlFor="ballHandling-privacy" className="text-sm text-gray-600 flex items-center gap-1">
+                                                            {privacySettings.ballHandling ? (
+                                                                <><Globe className="w-3 h-3 text-green-600" /> Make this public</>
+                                                            ) : (
+                                                                <><Lock className="w-3 h-3 text-gray-500" /> Make this public</>
+                                                            )}
+                                                        </label>
+                                                    </div>
+                                                    <div className="flex justify-end gap-2">
+                                                        <button
+                                                            onClick={() => setEditMode(prev => ({ ...prev, ballHandling: false }))}
+                                                            className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleSaveField('ballHandling')}
+                                                            className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+                                                        >
+                                                            Save
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div>
+                                                    <div className="flex items-center justify-between">
+                                                        <p className="text-gray-600">
+                                                            {user?.ball_handling_style?.description || 
+                                                             (formData.ball_carry && formData.handedness ? `${formData.ball_carry} ${formData.handedness}` : 'Not provided')}
+                                                        </p>
+                                                        <button
+                                                            onClick={() => setEditMode(prev => ({ ...prev, ballHandling: true }))}
+                                                            className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1 hover:bg-gray-100 rounded transition text-gray-500"
+                                                        >
+                                                            <Edit2 className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 mt-2">
+                                                        <span className="text-xs flex items-center gap-1">
+                                                            {privacySettings.ballHandling ? (
+                                                                <><Globe className="w-3 h-3 text-green-600" /> <span className="text-green-600 font-medium">Public</span></>
+                                                            ) : (
+                                                                <><Lock className="w-3 h-3 text-gray-500" /> <span className="text-gray-500 font-medium">Private</span></>
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Home Center */}
+                                    <div className="flex items-start justify-between pb-6 border-b border-gray-200 last:border-0 group">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <Building2 className="w-4 h-4 text-gray-500" />
+                                                <label className="text-sm font-semibold text-gray-700">Home Center</label>
+                                            </div>
+                                            <div>
+                                                <div className="flex items-center justify-between">
+                                                    <div className="space-y-1">
+                                                        <p className="text-gray-600">{user?.home_center_data?.center?.name || 'Not selected'}</p>
+                                                        {user?.home_center_data?.center?.address_str && (
+                                                            <p className="text-sm text-gray-500 flex items-center gap-1">
+                                                                <MapPin className="w-3 h-3" />
+                                                                {user.home_center_data.center.address_str}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                    <button
+                                                        onClick={() => setHomeCenterModalOpen(true)}
+                                                        className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1 hover:bg-gray-100 rounded transition text-gray-500"
+                                                    >
+                                                        <Edit2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                                <div className="flex items-center gap-2 mt-2">
+                                                    <span className="text-xs flex items-center gap-1">
+                                                        {user?.home_center_data?.is_public ? (
+                                                            <><Globe className="w-3 h-3 text-green-600" /> <span className="text-green-600 font-medium">Public</span></>
+                                                        ) : (
+                                                            <><Lock className="w-3 h-3 text-gray-500" /> <span className="text-gray-500 font-medium">Private</span></>
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                        )}
+
+                        {/* Cards Tab */}
+                        {activeTab === 'cards' && (
+                            <div className="text-center py-12">
+                                <p className="text-gray-500">Trading cards feature coming soon...</p>
+                            </div>
+                        )}
+
+                        {/* Stats Tab */}
+                        {activeTab === 'stats' && (
+                            <div className="space-y-6">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h3 className="text-lg font-bold">Bowling Statistics</h3>
+                                    {!editingStats && (
+                                        <button
+                                            onClick={() => setEditingStats(true)}
+                                            className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-2"
+                                        >
+                                            <Edit2 className="w-4 h-4" />
+                                            Edit Stats
+                                        </button>
+                                    )}
+                                </div>
+
+                                {editingStats ? (
+                                    <div className="space-y-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Average Score
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    value={bowlingStats.average}
+                                                    onChange={(e) => setBowlingStats(prev => ({ ...prev, average: parseFloat(e.target.value) || 0 }))}
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                    placeholder="e.g., 185.5"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    High Game
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    value={bowlingStats.high_game}
+                                                    onChange={(e) => setBowlingStats(prev => ({ ...prev, high_game: parseInt(e.target.value) || 0 }))}
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                    placeholder="e.g., 300"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    High Series
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    value={bowlingStats.high_series}
+                                                    onChange={(e) => setBowlingStats(prev => ({ ...prev, high_series: parseInt(e.target.value) || 0 }))}
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                    placeholder="e.g., 900"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Experience (Years)
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    value={bowlingStats.experience}
+                                                    onChange={(e) => setBowlingStats(prev => ({ ...prev, experience: parseInt(e.target.value) || 0 }))}
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                    placeholder="e.g., 5"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-end gap-2 pt-4">
+                                            <button
+                                                onClick={() => {
+                                                    setEditingStats(false);
+                                                    fetchBowlingStats();
+                                                }}
+                                                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                onClick={handleSaveBowlingStats}
+                                                disabled={isSaving}
+                                                className="px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-300"
+                                            >
+                                                {isSaving ? 'Saving...' : 'Save Stats'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="bg-green-50 p-6 rounded-lg border border-green-100">
+                                            <div className="text-sm text-gray-600 mb-1">Average Score</div>
+                                            <div className="text-3xl font-bold text-green-600">{bowlingStats.average.toFixed(1)}</div>
+                                        </div>
+                                        <div className="bg-blue-50 p-6 rounded-lg border border-blue-100">
+                                            <div className="text-sm text-gray-600 mb-1">High Game</div>
+                                            <div className="text-3xl font-bold text-blue-600">{bowlingStats.high_game}</div>
+                                        </div>
+                                        <div className="bg-purple-50 p-6 rounded-lg border border-purple-100">
+                                            <div className="text-sm text-gray-600 mb-1">High Series</div>
+                                            <div className="text-3xl font-bold text-purple-600">{bowlingStats.high_series}</div>
+                                        </div>
+                                        <div className="bg-orange-50 p-6 rounded-lg border border-orange-100">
+                                            <div className="text-sm text-gray-600 mb-1">Experience</div>
+                                            <div className="text-3xl font-bold text-orange-600">{bowlingStats.experience} years</div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Posts Tab */}
+                        {activeTab === 'posts' && (
+                            <div className="text-center py-12">
+                                <p className="text-gray-500">Posts feature coming soon...</p>
+                            </div>
+                        )}
+
+                        {/* Media Tab */}
+                        {activeTab === 'media' && (
+                            <div className="text-center py-12">
+                                <p className="text-gray-500">Media gallery coming soon...</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Address Modal */}
+                <AddressModal
+                    isOpen={addressModalOpen}
+                    onClose={() => setAddressModalOpen(false)}
+                    onSave={handleAddressSave}
+                    initialAddress={formData.address}
+                    initialZipcode={formData.zipcode}
+                    title="Update Address"
+                />
+
+                {/* Home Center Modal */}
+                <HomeCenterModal
+                    isOpen={homeCenterModalOpen}
+                    onClose={() => setHomeCenterModalOpen(false)}
+                    onSave={handleHomeCenterSave}
+                    currentCenterId={user?.home_center_data?.center?.id}
+                    accessToken={user?.access_token || ''}
+                />
             </div>
         </div>
     );
+
+    // Handle address save from modal
+    async function handleAddressSave(address: {
+        address: string;
+        zipcode: string;
+        latitude: string;
+        longitude: string;
+    }) {
+        if (!user || !user.authenticated) return;
+
+        setFormData(prev => ({
+            ...prev,
+            address: address.address,
+            zipcode: address.zipcode,
+            latitude: address.latitude,
+            longitude: address.longitude
+        }));
+
+        setIsSaving(true);
+        try {
+            const baseUrl = 'https://test.bowlersnetwork.com';
+            const headers = {
+                'Authorization': `Bearer ${user.access_token}`,
+                'Content-Type': 'application/json',
+            };
+
+            await axios.post(
+                `${baseUrl}/api/profile/address`,
+                {
+                    address_str: address.address,
+                    zipcode: address.zipcode,
+                    lat: address.latitude,
+                    long: address.longitude,
+                    is_public: privacySettings.address
+                },
+                { headers }
+            );
+
+            setUploadMessage({ type: 'success', text: 'Address updated successfully!' });
+            setTimeout(() => setUploadMessage(null), 3000);
+        } catch (error) {
+            console.error('Error saving address:', error);
+            setUploadMessage({ type: 'error', text: 'Failed to update address. Please try again.' });
+            setTimeout(() => setUploadMessage(null), 5000);
+        } finally {
+            setIsSaving(false);
+        }
+    }
+
+    // Handle home center save from modal
+    async function handleHomeCenterSave(centerId: number, isPublic: boolean) {
+        if (!user || !user.authenticated) return;
+
+        setIsSaving(true);
+        try {
+            const baseUrl = 'https://test.bowlersnetwork.com';
+            const headers = {
+                'Authorization': `Bearer ${user.access_token}`,
+                'Content-Type': 'application/json',
+            };
+
+            await axios.post(
+                `${baseUrl}/api/profile/home-center`,
+                {
+                    center_id: centerId,
+                    is_public: isPublic
+                },
+                { headers }
+            );
+
+            setUploadMessage({ type: 'success', text: 'Home center updated successfully!' });
+            setTimeout(() => setUploadMessage(null), 3000);
+            
+            // Optionally refresh user data to show updated center
+            // You might want to call a refresh function here
+        } catch (error) {
+            console.error('Error saving home center:', error);
+            setUploadMessage({ type: 'error', text: 'Failed to update home center. Please try again.' });
+            setTimeout(() => setUploadMessage(null), 5000);
+        } finally {
+            setIsSaving(false);
+        }
+    }
 }
+              

@@ -47,7 +47,7 @@ const navigation = [
     // { name: 'Roadmap', href: '/roadmap', icon: Map },
     { name: 'Overview', href: '/overview', icon: BarChart3 },
     { name: 'Events', href: '/events', icon: CalendarDays },
-    // { name: 'Media', href: '/media', icon: Play },
+    { name: 'Media', href: '/media', icon: Play },
     // { name: 'Products', href: '/products', icon: Package },
     // { name: 'Xchange', href: '/xchange', icon: ShoppingCart },
     // { name: 'Perks', href: '/perks', icon: Gift },

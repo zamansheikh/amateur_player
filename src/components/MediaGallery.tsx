@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { Play, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface MediaGalleryProps {
@@ -19,49 +20,37 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
     // Determine if we're in a flexible height context (feed) or fixed height context (grid)
     const isFlexibleHeight = !!maxHeight;
 
-    // Helper function to check if a media URL is a video
-    const isVideo = (url: string): boolean => {
-        return url.toLowerCase().includes('.mp4') ||
-            url.toLowerCase().includes('.webm') ||
-            url.toLowerCase().includes('.mov') ||
-            url.toLowerCase().includes('.avi') ||
-            url.toLowerCase().includes('.mkv');
-    };
-
-    const openLightbox = (index: number) => {
-        if (!enableLightbox) return; // Don't open lightbox if disabled
-        setCurrentMediaIndex(index);
-        setLightboxOpen(true);
-        document.body.style.overflow = 'hidden'; // Prevent background scroll
-    };
-
     const closeLightbox = useCallback(() => {
         setLightboxOpen(false);
         document.body.style.overflow = 'unset'; // Restore scroll
     }, []);
 
     const nextMedia = useCallback(() => {
-        setCurrentMediaIndex((prev) => (prev + 1) % (media?.length || 1));
+        if (media && media.length > 0) {
+            setCurrentMediaIndex((prev) => (prev + 1) % media.length);
+        }
     }, [media]);
 
     const prevMedia = useCallback(() => {
-        setCurrentMediaIndex((prev) => (prev - 1 + (media?.length || 1)) % (media?.length || 1));
+        if (media && media.length > 0) {
+            setCurrentMediaIndex((prev) => (prev - 1 + media.length) % media.length);
+        }
     }, [media]);
 
     // Keyboard navigation
     useEffect(() => {
         const handleKeyPress = (e: KeyboardEvent) => {
-            if (!lightboxOpen) return;
-
+            if (!lightboxOpen || !media || media.length === 0) return;
+            
             switch (e.key) {
                 case 'Escape':
                     closeLightbox();
                     break;
                 case 'ArrowLeft':
-                    if (media && media.length > 1) prevMedia();
+                    if (media.length > 1) prevMedia();
                     break;
                 case 'ArrowRight':
-                    if (media && media.length > 1) nextMedia();
+                    if (media.length > 1) nextMedia();
                     break;
             }
         };
@@ -70,6 +59,7 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
         return () => document.removeEventListener('keydown', handleKeyPress);
     }, [lightboxOpen, closeLightbox, nextMedia, prevMedia, media]);
 
+    // Early return after all hooks
     if (!media || media.length === 0) {
         if (isFlexibleHeight) {
             return null; // Don't show placeholder in feed context
@@ -79,7 +69,7 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
                 <div className="text-center text-gray-400">
                     <div className="w-8 h-8 mx-auto mb-2 opacity-30">
                         <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
+                            <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
                         </svg>
                     </div>
                     <p className="text-xs">No media</p>
@@ -87,6 +77,22 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
             </div>
         );
     }
+
+    // Helper function to check if a media URL is a video
+    const isVideo = (url: string): boolean => {
+        return url.toLowerCase().includes('.mp4') || 
+               url.toLowerCase().includes('.webm') || 
+               url.toLowerCase().includes('.mov') || 
+               url.toLowerCase().includes('.avi') ||
+               url.toLowerCase().includes('.mkv');
+    };
+
+    const openLightbox = (index: number) => {
+        if (!enableLightbox) return; // Don't open lightbox if disabled
+        setCurrentMediaIndex(index);
+        setLightboxOpen(true);
+        document.body.style.overflow = 'hidden'; // Prevent background scroll
+    };
 
     // Touch/swipe navigation
     const minSwipeDistance = 50;
@@ -102,7 +108,7 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
 
     const onTouchEnd = () => {
         if (!touchStart || !touchEnd) return;
-
+        
         const distance = touchStart - touchEnd;
         const isLeftSwipe = distance > minSwipeDistance;
         const isRightSwipe = distance < -minSwipeDistance;
@@ -123,9 +129,9 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
 
         if (isVideo(mediaUrl)) {
             return (
-                <div
-                    key={index}
-                    className={combinedStyles}
+                <div 
+                    key={index} 
+                    className={combinedStyles} 
                     onClick={enableLightbox ? () => openLightbox(index) : undefined}
                 >
                     <video
@@ -143,10 +149,12 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
             );
         } else {
             return (
-                <img
+                <Image
                     key={index}
                     src={mediaUrl}
                     alt={`Post content ${index + 1}`}
+                    width={500}
+                    height={300}
                     className={`${className} object-cover rounded-md border border-green-200 transition-opacity ${clickableStyles}`}
                     onClick={enableLightbox ? () => openLightbox(index) : undefined}
                 />
@@ -173,7 +181,7 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
         const heightClass = isFlexibleHeight ? "h-60" : "h-full";
         return (
             <div className={`grid grid-cols-2 gap-1 ${heightClass}`}>
-                {media.slice(0, 2).map((mediaUrl, index) =>
+                {media.slice(0, 2).map((mediaUrl, index) => 
                     renderMediaItem(mediaUrl, index, `w-full ${heightClass}`)
                 )}
             </div>
@@ -186,7 +194,7 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
             <div className={`grid grid-cols-2 gap-1 ${heightClass}`}>
                 {renderMediaItem(media[0], 0, `w-full ${heightClass}`)}
                 <div className={`grid grid-rows-2 gap-1 ${heightClass}`}>
-                    {media.slice(1, 3).map((mediaUrl, index) =>
+                    {media.slice(1, 3).map((mediaUrl, index) => 
                         renderMediaItem(mediaUrl, index + 1, `w-full ${heightClass}`)
                     )}
                 </div>
@@ -198,7 +206,7 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
         const heightClass = isFlexibleHeight ? "h-60" : "h-full";
         return (
             <div className={`grid grid-cols-2 grid-rows-2 gap-1 ${heightClass}`}>
-                {media.slice(0, 4).map((mediaUrl, index) =>
+                {media.slice(0, 4).map((mediaUrl, index) => 
                     renderMediaItem(mediaUrl, index, `w-full ${heightClass}`)
                 )}
             </div>
@@ -208,16 +216,16 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
     const renderFiveOrMoreMedia = () => {
         const remainingCount = media.length - 4;
         const heightClass = isFlexibleHeight ? "h-60" : "h-full";
-
+        
         return (
             <div className={`grid grid-cols-2 grid-rows-2 gap-1 ${heightClass}`}>
-                {media.slice(0, 3).map((mediaUrl, index) =>
+                {media.slice(0, 3).map((mediaUrl, index) => 
                     renderMediaItem(mediaUrl, index, `w-full ${heightClass}`)
                 )}
                 <div className={`relative w-full ${heightClass}`}>
                     {renderMediaItem(media[3], 3, `w-full ${heightClass}`)}
                     {remainingCount > 0 && (
-                        <div
+                        <div 
                             className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center rounded-md cursor-pointer hover:bg-opacity-70 transition-opacity border border-green-200"
                             onClick={() => openLightbox(3)}
                         >
@@ -233,7 +241,7 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
 
     const renderMediaGrid = () => {
         const count = media.length;
-
+        
         if (count === 1) return renderSingleMedia();
         if (count === 2) return renderTwoMedia();
         if (count === 3) return renderThreeMedia();
@@ -249,7 +257,7 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
 
             {/* Lightbox - Only render if enableLightbox is true */}
             {enableLightbox && lightboxOpen && (
-                <div
+                <div 
                     className="fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50"
                     onTouchStart={onTouchStart}
                     onTouchMove={onTouchMove}
@@ -264,13 +272,15 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
                                 className="max-w-full max-h-full object-contain rounded-lg"
                             />
                         ) : (
-                            <img
+                            <Image
                                 src={media[currentMediaIndex]}
                                 alt={`Post content ${currentMediaIndex + 1}`}
+                                width={800}
+                                height={600}
                                 className="max-w-full max-h-full object-contain rounded-lg"
                             />
                         )}
-
+                        
                         {/* Close button - Improved styling */}
                         <button
                             onClick={closeLightbox}
@@ -279,7 +289,7 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
                         >
                             <X className="w-6 h-6" />
                         </button>
-
+                        
                         {/* Navigation arrows - Improved styling */}
                         {media.length > 1 && (
                             <>
@@ -299,7 +309,7 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
                                 </button>
                             </>
                         )}
-
+                        
                         {/* Media counter - Improved styling */}
                         {media.length > 1 && (
                             <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-70 text-white px-4 py-2 rounded-full text-sm font-medium backdrop-blur-sm border border-white border-opacity-20">

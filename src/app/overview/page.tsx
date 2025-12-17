@@ -428,7 +428,7 @@ export default function OverviewPage() {
                   Total Followers
                 </div>
                 <div className="text-3xl font-bold text-gray-900 mb-1">
-                  {dashboardData?.follower_count || user?.follower_count || 0}
+                  {dashboardData?.follower_count || user?.follow_info?.follwers || 0}
                 </div>
                 <div className="text-sm text-green-500">
                   +24 new followers this week

@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -9,7 +7,7 @@ import CreatePost from '@/components/CreatePost';
 import FeedPostCard from '@/components/FeedPostCard';
 import FeedSidebar from '@/components/FeedSidebar';
 
-export default function HomePage() {
+export default function FeedPage() {
     const [posts, setPosts] = useState<FeedPost[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

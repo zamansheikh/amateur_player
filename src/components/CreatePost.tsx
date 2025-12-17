@@ -1,9 +1,11 @@
 'use client';
 
-import { ImageIcon, Video, Link2, Globe, ChevronDown } from 'lucide-react';
+import { ImageIcon, BarChart3, Calendar, X } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import CreatePostModal from './CreatePostModal';
+import { useCloudUpload } from '@/lib/useCloudUpload';
+import { api } from '@/lib/api';
+import Image from 'next/image';
 
 interface CreatePostProps {
     onPostCreated?: () => void;
@@ -11,17 +13,28 @@ interface CreatePostProps {
 
 export default function CreatePost({ onPostCreated }: CreatePostProps) {
     const { user } = useAuth();
-    const [showModal, setShowModal] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [postText, setPostText] = useState('');
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+    const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
+    const [isPosting, setIsPosting] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number }>({});
+    const [notImplementedMessage, setNotImplementedMessage] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const { uploadFile } = useCloudUpload();
 
-    const handleCreatePostClick = () => {
-        setShowModal(true);
+    const handleExpandClick = () => {
+        setIsExpanded(true);
     };
 
-    const handleCloseModal = () => {
-        setShowModal(false);
-        setSelectedFiles([]); // Clear files when modal is closed
+    const handleCollapse = () => {
+        if (!isPosting) {
+            setIsExpanded(false);
+            setPostText('');
+            setSelectedFiles([]);
+            setUploadedUrls([]);
+            setUploadProgress({});
+        }
     };
 
     const handlePhotoVideoClick = () => {
@@ -30,82 +43,254 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
-        if (files && files.length > 0) {
-            setSelectedFiles(Array.from(files));
-            // Open modal when files are selected
-            setShowModal(true);
+        if (!files || files.length === 0) return;
+
+        const newFiles = Array.from(files);
+        setSelectedFiles(prev => [...prev, ...newFiles]);
+        setIsExpanded(true);
+    };
+
+    const removeFile = (index: number) => {
+        setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+        setUploadedUrls(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const handleNotImplemented = (feature: string) => {
+        setNotImplementedMessage(feature);
+        setTimeout(() => setNotImplementedMessage(''), 2000);
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        // Validation: at least text or files required
+        if (!postText.trim() && selectedFiles.length === 0) return;
+        if (isPosting) return;
+
+        try {
+            setIsPosting(true);
+
+            // Upload files to cloud if any
+            const mediaUrls: string[] = [];
+            if (selectedFiles.length > 0) {
+                for (let i = 0; i < selectedFiles.length; i++) {
+                    const file = selectedFiles[i];
+                    const fileId = `${file.name}-${i}`;
+                    setUploadProgress(prev => ({ ...prev, [fileId]: 0 }));
+
+                    try {
+                        const result = await uploadFile(file, 'cdn');
+
+                        if (result.success && result.publicUrl) {
+                            mediaUrls.push(result.publicUrl);
+                        }
+                        
+                        setUploadProgress(prev => {
+                            const newProgress = { ...prev };
+                            delete newProgress[fileId];
+                            return newProgress;
+                        });
+                    } catch (error) {
+                        console.error('Upload failed for file:', file.name, error);
+                        setUploadProgress(prev => {
+                            const newProgress = { ...prev };
+                            delete newProgress[fileId];
+                            return newProgress;
+                        });
+                    }
+                }
+            }
+
+            // Build payload
+            const payload: { text?: string; media_urls?: string[] } = {};
+            
+            if (postText.trim()) {
+                payload.text = postText.trim();
+            }
+            
+            if (mediaUrls.length > 0) {
+                payload.media_urls = mediaUrls;
+            }
+
+            // Post to API
+            await api.post('/api/posts/v2', payload);
+
+            // Reset form
+            setPostText('');
+            setSelectedFiles([]);
+            setUploadedUrls([]);
+            setUploadProgress({});
+            setIsExpanded(false);
+
+            if (onPostCreated) {
+                onPostCreated();
+            }
+        } catch (error) {
+            console.error('Error creating post:', error);
+        } finally {
+            setIsPosting(false);
         }
     };
 
+    const isVideo = (file: File): boolean => {
+        return file.type.startsWith('video/');
+    };
+
+    const getPreviewUrl = (file: File): string => {
+        return URL.createObjectURL(file);
+    };
+
+    const isUploadingAny = Object.keys(uploadProgress).length > 0;
+
     return (
-        <>
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6 mb-4 md:mb-6">
-                {/* Action Buttons Row - Icons only on mobile, full buttons on desktop */}
-                <div className="flex items-center justify-between sm:justify-start sm:gap-3 md:gap-6 mb-6">
-                    {/* Create Post Button */}
-                    <button
-                        onClick={handleCreatePostClick}
-                        className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 text-gray-600 hover:text-blue-600 transition-colors flex-1 sm:flex-initial"
-                    >
-                        <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                            <div className="w-5 h-5 bg-blue-600 rounded-sm flex items-center justify-center">
-                                <div className="w-3 h-2 bg-white rounded-sm"></div>
-                            </div>
-                        </div>
-                        <span className="font-medium text-sm md:text-base hidden sm:inline">Create Post</span>
-                    </button>
-
-                    {/* Add Photos/Videos Button */}
-                    <button
-                        onClick={handlePhotoVideoClick}
-                        className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 text-gray-600 hover:text-red-600 transition-colors flex-1 sm:flex-initial"
-                    >
-                        <div className="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                            <ImageIcon className="w-5 h-5 text-red-600" />
-                        </div>
-                        <span className="font-medium text-sm md:text-base hidden sm:inline">Add Photos/Videos</span>
-                    </button>
-
-                    {/* Attach Link Button */}
-                    <button className="flex items-center justify-center sm:justify-start gap-2 sm:gap-3 text-gray-600 hover:text-green-600 transition-colors flex-1 sm:flex-initial">
-                        <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                            <Link2 className="w-5 h-5 text-green-600" />
-                        </div>
-                        <span className="font-medium text-sm md:text-base hidden sm:inline">Attach Link</span>
-                    </button>
-                </div>
-
-                {/* Main Post Input Area */}
-                <div className="flex items-start gap-3 md:gap-4 mb-4">
+        <div className="bg-white border-b border-gray-200">
+            <div className="p-4 md:p-6">
+                <div className="flex gap-4">
+                    {/* Profile Picture */}
                     <img
                         src={user?.profile_picture_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Bob"}
                         alt="Profile"
-                        className="w-10 md:w-12 h-10 md:h-12 rounded-full object-cover flex-shrink-0"
+                        className="w-12 h-12 rounded-full object-cover shrink-0"
                     />
+                    
+                    {/* Input and Actions */}
                     <div className="flex-1 min-w-0">
-                        <div
-                            onClick={handleCreatePostClick}
-                            className="w-full min-h-[60px] md:min-h-[80px] p-3 md:p-4 text-gray-500 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors flex items-center text-sm md:text-lg"
-                        >
-                            What&apos;s on your mind, {user?.first_name || user?.name?.split(' ')[0] || 'Bob'}?
-                        </div>
-                    </div>
-                </div>
+                        {/* Not Implemented Message */}
+                        {notImplementedMessage && (
+                            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-700 text-sm">
+                                {notImplementedMessage} is not implemented yet.
+                            </div>
+                        )}
 
-                {/* Bottom Action Bar */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-gray-100">
-                    <div className="flex items-center gap-2">
-                        <Globe className="w-4 h-4 text-gray-600" />
-                        <span className="text-gray-600 font-medium text-sm">Public</span>
-                        <ChevronDown className="w-4 h-4 text-gray-600" />
-                    </div>
+                        <form onSubmit={handleSubmit}>
+                            {/* Textarea - Expandable */}
+                            {!isExpanded ? (
+                                <div
+                                    onClick={handleExpandClick}
+                                    className="text-xl text-gray-500 placeholder-gray-500 p-3 rounded-2xl hover:bg-gray-50 cursor-pointer transition-colors mb-4"
+                                >
+                                    What&apos;s happening?!
+                                </div>
+                            ) : (
+                                <textarea
+                                    value={postText}
+                                    onChange={(e) => setPostText(e.target.value)}
+                                    placeholder="What's happening?!"
+                                    className="w-full text-xl text-gray-800 placeholder-gray-400 border-0 resize-none focus:outline-none mb-4 min-h-[120px]"
+                                    disabled={isPosting}
+                                    autoFocus
+                                />
+                            )}
 
-                    <button
-                        onClick={handleCreatePostClick}
-                        className="bg-gray-300 text-gray-500 font-semibold px-8 py-2.5 rounded-full cursor-pointer hover:bg-gray-400 transition-colors"
-                    >
-                        Post
-                    </button>
+                            {/* Upload Progress */}
+                            {isUploadingAny && (
+                                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <p className="text-sm text-blue-700 mb-2">Uploading media...</p>
+                                    {Object.entries(uploadProgress).map(([fileId, progress]) => (
+                                        <div key={fileId} className="mb-2">
+                                            <div className="w-full bg-blue-100 rounded-full h-2">
+                                                <div
+                                                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                                                    style={{ width: `${progress}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Selected Files Preview */}
+                            {selectedFiles.length > 0 && isExpanded && (
+                                <div className="mb-4">
+                                    <div className={`grid gap-2 ${
+                                        selectedFiles.length === 1 ? 'grid-cols-1' :
+                                        selectedFiles.length === 2 ? 'grid-cols-2' :
+                                        selectedFiles.length === 3 ? 'grid-cols-3' :
+                                        'grid-cols-4'
+                                    } max-h-96 overflow-y-auto`}>
+                                        {selectedFiles.map((file, index) => (
+                                            <div key={index} className="relative group aspect-square">
+                                                {isVideo(file) ? (
+                                                    <video
+                                                        src={getPreviewUrl(file)}
+                                                        className="w-full h-full object-cover rounded-lg border-2 border-gray-200"
+                                                        muted
+                                                    />
+                                                ) : (
+                                                    <Image
+                                                        src={getPreviewUrl(file)}
+                                                        alt="Preview"
+                                                        width={200}
+                                                        height={200}
+                                                        className="w-full h-full object-cover rounded-lg border-2 border-gray-200"
+                                                    />
+                                                )}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeFile(index)}
+                                                    className="absolute top-2 right-2 w-7 h-7 bg-black bg-opacity-70 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-opacity-90"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Action Buttons Row */}
+                            <div className={`flex items-center justify-between ${!isExpanded ? 'border-t border-gray-100 pt-3' : ''}`}>
+                                <div className="flex gap-2">
+                                    {/* Image/Video Button */}
+                                    <button
+                                        type="button"
+                                        onClick={handlePhotoVideoClick}
+                                        disabled={isPosting}
+                                        className="w-9 h-9 rounded-full hover:bg-blue-50 text-blue-400 flex items-center justify-center transition-colors hover:text-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        title="Add photo or video"
+                                    >
+                                        <ImageIcon className="w-5 h-5" />
+                                    </button>
+
+                                    {/* Poll Button */}
+                                    <button
+                                        type="button"
+                                        onClick={() => handleNotImplemented('Poll feature')}
+                                        disabled={isPosting}
+                                        className="w-9 h-9 rounded-full hover:bg-blue-50 text-blue-400 flex items-center justify-center transition-colors hover:text-blue-500 disabled:opacity-50"
+                                        title="Create a poll"
+                                    >
+                                        <BarChart3 className="w-5 h-5" />
+                                    </button>
+
+                                    {/* Event Button */}
+                                    <button
+                                        type="button"
+                                        onClick={() => handleNotImplemented('Event feature')}
+                                        disabled={isPosting}
+                                        className="w-9 h-9 rounded-full hover:bg-blue-50 text-blue-400 flex items-center justify-center transition-colors hover:text-blue-500 disabled:opacity-50"
+                                        title="Create an event"
+                                    >
+                                        <Calendar className="w-5 h-5" />
+                                    </button>
+                                </div>
+
+                                {/* Post Button */}
+                                <button
+                                    type="submit"
+                                    disabled={isPosting || isUploadingAny || (!postText.trim() && uploadedUrls.length === 0)}
+                                    className="font-bold py-2 px-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-white"
+                                    style={{ 
+                                        backgroundColor: (isPosting || isUploadingAny || (!postText.trim() && uploadedUrls.length === 0)) 
+                                            ? '#d1d5db' 
+                                            : '#8BC342' 
+                                    }}
+                                >
+                                    {isPosting ? 'Posting...' : 'Post'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
 
@@ -118,14 +303,6 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                 accept="image/*,video/*"
                 className="hidden"
             />
-
-            {/* Modal */}
-            <CreatePostModal
-                isOpen={showModal}
-                onClose={handleCloseModal}
-                onPostCreated={onPostCreated}
-                initialFiles={selectedFiles}
-            />
-        </>
+        </div>
     );
 }
