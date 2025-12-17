@@ -41,7 +41,7 @@ function ProfileCompletionCheck({ children }: { children: React.ReactNode }) {
 
 const navigation = [
     { name: 'Newsfeed', href: '/home', icon: Home },
-    { name: 'Pro Players', href: '/pro-players', icon: Trophy },
+    // { name: 'Pro Players', href: '/pro-players', icon: Trophy },
     { name: 'Chatter', href: '/chatter', icon: Lightbulb },
     { name: 'Trading Cards', href: '/trading-cards', icon: Zap },
     // { name: 'Roadmap', href: '/roadmap', icon: Map },
@@ -49,8 +49,8 @@ const navigation = [
     { name: 'Events', href: '/events', icon: CalendarDays },
     { name: 'Media', href: '/media', icon: Play },
     // { name: 'Products', href: '/products', icon: Package },
-    // { name: 'Xchange', href: '/xchange', icon: ShoppingCart },
-    // { name: 'Perks', href: '/perks', icon: Gift },
+    { name: 'Xchange', href: '/xchange', icon: ShoppingCart },
+    { name: 'Perks', href: '/perks', icon: Gift },
     // { name: 'Messages', href: '/messages', icon: MessageCircle },
     // { name: 'My Teams', href: '/teams', icon: Users },
     { name: 'Analytics', href: '/analytics', icon: Target },
