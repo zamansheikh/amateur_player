@@ -246,7 +246,7 @@ export default function TradingCardsPage() {
                       }) perspective(1000px) rotateY(${offset * -5}deg)`,
                       zIndex: 50 - absOffset,
                       opacity: absOffset > 2 ? 0 : 1 - absOffset * 0.2,
-                      pointerEvents: isActive ? "auto" : "none",
+                      pointerEvents: "auto",
                       filter: isActive
                         ? "drop-shadow(0 0 20px rgba(74, 222, 128, 0.3))"
                         : "none",
@@ -280,7 +280,7 @@ export default function TradingCardsPage() {
                         title={`Card ${card.metadata.card_id}`}
                         loading="lazy"
                         scrolling="no"
-                        style={{ overflow: "hidden", pointerEvents: "none" }}
+                        style={{ overflow: "hidden" }}
                         sandbox="allow-scripts allow-same-origin allow-forms"
                       />
 
