@@ -41,9 +41,9 @@ export default function PrivateAccessPage() {
                 console.log('privateLogin result:', result);
 
                 if (result.success) {
-                    // Redirect to home page after successful login
-                    console.log('Login successful, redirecting to /home');
-                    router.replace('/home');
+                    // Redirect to profile page after successful login
+                    console.log('Login successful, redirecting to /profile');
+                    router.replace('/profile');
                 } else {
                     console.error('Login failed with error:', result.error);
                     setError(result.error || 'Failed to authenticate. Invalid or expired access key.');

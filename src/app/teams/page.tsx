@@ -678,7 +678,7 @@ export default function TeamsPage() {
                         )}
 
                         {/* Upload Image */}
-                        <div className="mb-8">
+                        {/* <div className="mb-8">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Upload Image
                             </label>
@@ -686,7 +686,7 @@ export default function TeamsPage() {
                                 <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                                 <p className="text-gray-500 text-sm">Click to upload or drag and drop</p>
                             </div>
-                        </div>
+                        </div> */}
 
                         {/* Create Button */}
                         <button
