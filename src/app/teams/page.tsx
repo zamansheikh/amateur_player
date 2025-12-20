@@ -106,7 +106,7 @@ export default function TeamsPage() {
     // Fetch available members
     const fetchMembers = async () => {
         try {
-            const response = await api.get('/api/user-data');
+            const response = await api.get('/api/profile/all');
             setAvailableMembers(response.data);
         } catch (error) {
             console.error('Error fetching members:', error);
@@ -640,6 +640,42 @@ export default function TeamsPage() {
                                 </div>
                             )}
                         </div>
+
+                        {/* Selected Members Display */}
+                        {selectedMembers.length > 0 && (
+                            <div className="mb-6">
+                                <label className="block text-sm font-medium text-gray-700 mb-3">
+                                    Selected Members ({selectedMembers.length})
+                                </label>
+                                <div className="flex flex-wrap gap-2">
+                                    {availableMembers
+                                        .filter(member => selectedMembers.includes(member.user_id))
+                                        .map((member) => (
+                                            <div
+                                                key={member.user_id}
+                                                className="flex items-center gap-2 bg-green-100 border border-green-300 rounded-full px-3 py-1.5"
+                                            >
+                                                <div className="w-6 h-6 rounded-full overflow-hidden">
+                                                    {member.profile_picture_url ? (
+                                                        <img src={member.profile_picture_url} alt={member.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-gray-300 flex items-center justify-center">
+                                                            <span className="text-gray-600 text-xs">👤</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <span className="text-sm text-gray-800 font-medium">{member.name}</span>
+                                                <button
+                                                    onClick={() => handleMemberToggle(member.user_id)}
+                                                    className="ml-1 text-green-600 hover:text-red-600 transition-colors"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Upload Image */}
                         <div className="mb-8">
