@@ -33,7 +33,7 @@ export default function FeedPostCard({
   };
 
   const handlePostClick = () => {
-    router.push(`/post/${post.post_id}`);
+    router.push(`/post/${post.uid}`);
   };
 
   const handleLike = async () => {

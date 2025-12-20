@@ -18,6 +18,7 @@ export default function ProfilePage() {
     const { geocodeMultiple, results: addressSuggestions, isLoading: isGeocodingLoading } = useMapboxGeocoding();
     
     const [editMode, setEditMode] = useState({
+        name: false,
         bio: false,
         gender: false,
         birthdate: false,
@@ -45,6 +46,8 @@ export default function ProfilePage() {
     const addressSuggestionsRef = useRef<HTMLDivElement>(null);
 
     const [formData, setFormData] = useState({
+        first_name: '',
+        last_name: '',
         bio: '',
         gender: '',
         birthdate: '',
@@ -91,6 +94,8 @@ export default function ProfilePage() {
 
             setFormData(prev => ({
                 ...prev,
+                first_name: user.first_name || '',
+                last_name: user.last_name || '',
                 bio: user.bio?.content || '',
                 gender: user.gender_data?.role || '',
                 birthdate: user.birthdate_data?.date || '',
@@ -137,7 +142,7 @@ export default function ProfilePage() {
         }
     };
 
-    const handleSaveField = async (field: 'bio' | 'gender' | 'birthdate' | 'address' | 'ballHandling') => {
+    const handleSaveField = async (field: 'name' | 'bio' | 'gender' | 'birthdate' | 'address' | 'ballHandling') => {
         if (!user || !user.authenticated) return;
 
         setIsSaving(true);
@@ -148,7 +153,16 @@ export default function ProfilePage() {
                 'Content-Type': 'application/json',
             };
 
-            if (field === 'bio') {
+            if (field === 'name') {
+                await axios.post(
+                    `${baseUrl}/api/profile/update/name`,
+                    { 
+                        first_name: formData.first_name,
+                        last_name: formData.last_name
+                    },
+                    { headers }
+                );
+            } else if (field === 'bio') {
                 await axios.post(
                     `${baseUrl}/api/profile/bio`,
                     { 
@@ -548,18 +562,61 @@ export default function ProfilePage() {
 
                                 {/* Basic Info */}
                                 <div className="flex-1 min-w-0 pt-2 max-w-3xl">
-                                    <div className="flex items-center gap-3 mb-1">
-                                        <h1 className="text-3xl font-bold text-gray-900">{user?.name}</h1>
-                                        {user?.is_pro && (
-                                            <div className="flex items-center">
-                                                <svg className="w-6 h-6 text-[#8BC342]" viewBox="0 0 24 24" fill="currentColor">
-                                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                                                    <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.2"/>
-                                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                                                </svg>
+                                    {/* Name Edit Section */}
+                                    {editMode.name ? (
+                                        <div className="mb-4 space-y-3">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                <input
+                                                    type="text"
+                                                    value={formData.first_name}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, first_name: e.target.value }))}
+                                                    placeholder="First Name"
+                                                    className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-900"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    value={formData.last_name}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, last_name: e.target.value }))}
+                                                    placeholder="Last Name"
+                                                    className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-900"
+                                                />
                                             </div>
-                                        )}
-                                    </div>
+                                            <div className="flex justify-end gap-2">
+                                                <button
+                                                    onClick={() => setEditMode(prev => ({ ...prev, name: false }))}
+                                                    className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded"
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    onClick={() => handleSaveField('name')}
+                                                    disabled={isSaving}
+                                                    className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+                                                >
+                                                    {isSaving ? 'Saving...' : 'Save'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-3 mb-1 group">
+                                            <h1 className="text-3xl font-bold text-gray-900">{user?.name}</h1>
+                                            {user?.is_pro && (
+                                                <div className="flex items-center">
+                                                    <svg className="w-6 h-6 text-[#8BC342]" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                                        <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.2"/>
+                                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                                    </svg>
+                                                </div>
+                                            )}
+                                            <button
+                                                onClick={() => setEditMode(prev => ({ ...prev, name: true }))}
+                                                className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1 hover:bg-gray-100 rounded transition text-gray-500"
+                                            >
+                                                <Edit2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    )}
                                     <p className="text-gray-500 text-lg mb-4">@{user?.username}</p>
 
                                     {/* Bio Section */}
