@@ -241,12 +241,12 @@ export default function TeamsPage() {
             {/* Header */}
             <div className="mb-4 md:mb-6 relative h-32 md:h-48 rounded-2xl overflow-hidden shadow-lg">
                 {/* Gradient background */}
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-400"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-lime-600 via-lime-500 to-lime-400"></div>
                 {/* Overlay */}
                 <div className="absolute inset-0 bg-black bg-opacity-40"></div>
                 {/* Geometric design elements */}
-                <div className="absolute top-0 left-0 w-64 h-64 bg-blue-500 opacity-20 transform -skew-x-12 -translate-x-20 -translate-y-20"></div>
-                <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-400 opacity-20 transform skew-x-12 translate-x-20 -translate-y-20"></div>
+                <div className="absolute top-0 left-0 w-64 h-64 bg-lime-500 opacity-20 transform -skew-x-12 -translate-x-20 -translate-y-20"></div>
+                <div className="absolute top-0 right-0 w-64 h-64 bg-lime-400 opacity-20 transform skew-x-12 translate-x-20 -translate-y-20"></div>
                 {/* Content */}
                 <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between h-full px-4 md:px-8 py-3 md:py-0">
                     <div className="mb-2 md:mb-0">
@@ -261,7 +261,7 @@ export default function TeamsPage() {
                             <input
                                 type="text"
                                 placeholder="Search teams..."
-                                className="w-full pl-10 pr-3 py-1.5 md:py-2 border border-transparent rounded-lg text-xs md:text-sm focus:ring-2 focus:ring-cyan-300 focus:border-transparent bg-white bg-opacity-90 text-gray-900 placeholder-gray-500"
+                                className="w-full pl-10 pr-3 py-1.5 md:py-2 border border-transparent rounded-lg text-xs md:text-sm focus:ring-2 focus:ring-lime-300 focus:border-transparent bg-white bg-opacity-90 text-gray-900 placeholder-gray-500"
                             />
                         </div>
                     </div>
@@ -272,7 +272,7 @@ export default function TeamsPage() {
             <div className="mb-8">
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                     {/* Tab Headers */}
-                    <div className="bg-gradient-to-r from-cyan-600 to-cyan-700 px-6 py-4">
+                    <div className="bg-gradient-to-r from-lime-600 to-lime-700 px-6 py-4">
                         <div className="flex items-center justify-between">
                             <div>
                                 <h2 className="text-lg font-semibold text-white flex items-center gap-2">
@@ -286,7 +286,7 @@ export default function TeamsPage() {
                             {activeTab === 'teams' && (
                                 <button
                                     onClick={() => setIsCreateModalOpen(true)}
-                                    className="bg-white text-cyan-600 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors hover:bg-green-50"
+                                    className="bg-white text-lime-600 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors hover:bg-lime-50"
                                 >
                                     <Plus className="w-4 h-4" />
                                     Create Team
@@ -358,7 +358,7 @@ export default function TeamsPage() {
                                                         <div className="min-w-0">
                                                             <h3 className="text-base md:text-lg font-semibold text-gray-900 hover:text-green-600 transition-colors truncate">{team.name}</h3>
                                                             <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs md:text-sm text-gray-500">
-                                                                <span className="text-blue-600 font-medium">{team.member_count || 0} Members</span>
+                                                                <span className="text-lime-600 font-medium">{team.member_count || 0} Members</span>
                                                                 <span className="hidden sm:inline">•</span>
                                                                 <span className="hidden sm:inline">Created {team.created_at}</span>
                                                             </div>
@@ -370,7 +370,7 @@ export default function TeamsPage() {
                                                                 e.stopPropagation();
                                                                 handleTeamChat(team);
                                                             }}
-                                                            className="px-2 md:px-3 py-1.5 md:py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs md:text-sm font-medium rounded-lg transition-colors flex items-center gap-1 md:gap-2 whitespace-nowrap"
+                                                            className="px-2 md:px-3 py-1.5 md:py-2 bg-lime-600 hover:bg-lime-700 text-white text-xs md:text-sm font-medium rounded-lg transition-colors flex items-center gap-1 md:gap-2 whitespace-nowrap"
                                                         >
                                                             <MessageCircle className="w-3 md:w-4 h-3 md:h-4" />
                                                             <span className="hidden sm:inline">Chat</span>
@@ -408,7 +408,7 @@ export default function TeamsPage() {
                                         <p className="text-gray-400 text-sm mb-4">Create your first team to get started!</p>
                                         <button
                                             onClick={() => setIsCreateModalOpen(true)}
-                                            className="bg-cyan-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors mx-auto"
+                                            className="bg-lime-600 hover:bg-lime-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors mx-auto"
                                         >
                                             <Plus className="w-4 h-4" />
                                             Create Team
@@ -487,14 +487,14 @@ export default function TeamsPage() {
                                 {invitations.sent.length > 0 ? (
                                     <div className="space-y-4">
                                         {invitations.sent.map((invitation) => (
-                                            <div key={invitation.invitation_id} className="bg-blue-50 border border-blue-200 rounded-lg p-4 hover:bg-blue-100 transition-colors">
+                                            <div key={invitation.invitation_id} className="bg-lime-50 border border-lime-200 rounded-lg p-4 hover:bg-lime-100 transition-colors">
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center gap-4">
-                                                        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-blue-300">
+                                                        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-lime-300">
                                                             {invitation.invited_user.profile_picture_url ? (
                                                                 <img src={invitation.invited_user.profile_picture_url} alt={invitation.invited_user.name} className="w-full h-full object-cover" />
                                                             ) : (
-                                                                <div className="w-full h-full bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center">
+                                                                <div className="w-full h-full bg-gradient-to-br from-lime-400 to-lime-500 flex items-center justify-center">
                                                                     <span className="text-white text-lg font-bold">
                                                                         {invitation.invited_user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
                                                                     </span>
@@ -504,7 +504,7 @@ export default function TeamsPage() {
                                                         <div>
                                                             <p className="text-sm text-gray-600">You invited</p>
                                                             <p className="text-lg font-bold text-gray-800">{invitation.invited_user.name}</p>
-                                                            <p className="text-sm text-blue-700 font-medium">
+                                                            <p className="text-sm text-lime-700 font-medium">
                                                                 to join <span className="font-bold">{invitation.team.name}</span>
                                                             </p>
                                                             <div className="flex items-center gap-2 mt-1">
@@ -528,8 +528,8 @@ export default function TeamsPage() {
                                     </div>
                                 ) : (
                                     <div className="text-center py-12">
-                                        <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                            <span className="text-blue-500 text-2xl">📤</span>
+                                        <div className="w-16 h-16 bg-lime-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <span className="text-lime-600 text-2xl">📤</span>
                                         </div>
                                         <p className="text-gray-500 font-medium">No sent invitations</p>
                                         <p className="text-gray-400 text-sm">Invitations you send to team members will appear here!</p>
