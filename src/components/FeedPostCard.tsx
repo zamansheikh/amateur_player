@@ -41,20 +41,19 @@ export default function FeedPostCard({
 
     try {
       setIsLiking(true);
-      // Optimistic update
-      const newLikedState = !localPost.is_liked;
+      
+      // Call API first to get the actual response
+      const response = await api.get(`/api/posts/v2/like/${post.uid}`);
+      const { is_liked, like_count } = response.data;
+
+      // Update with actual server response
       const updatedPost: FeedPost = {
         ...localPost,
-        is_liked: newLikedState,
-        like_count: newLikedState
-          ? localPost.like_count + 1
-          : localPost.like_count - 1,
+        is_liked,
+        like_count,
       };
       setLocalPost(updatedPost);
-      setLocalLikes(newLikedState ? localLikes + 1 : localLikes - 1);
-
-      // Call API
-      await api.get(`/api/posts/${post.post_id}/like`);
+      setLocalLikes(like_count);
 
       // Notify parent of the change
       if (onPostChange) {
@@ -62,7 +61,7 @@ export default function FeedPostCard({
       }
     } catch (error) {
       console.error("Error liking post:", error);
-      // Revert optimistic update on error
+      // Revert to original state on error
       setLocalPost(post);
       setLocalLikes(post.like_count);
     } finally {
