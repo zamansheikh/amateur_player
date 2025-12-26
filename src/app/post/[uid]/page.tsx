@@ -71,6 +71,7 @@ export default function PostDetailPage() {
   const [commentText, setCommentText] = useState("");
   const [commentMediaUrl, setCommentMediaUrl] = useState("");
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [isUploadingMedia, setIsUploadingMedia] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -150,6 +151,7 @@ export default function PostDetailPage() {
       const file = (fileInputRef.current as any)?._file;
       if (file && commentMediaUrl) {
         try {
+          setIsUploadingMedia(true);
           const result = await uploadFile(file, 'cdn');
           if (result.success && result.publicUrl) {
             uploadedMediaUrl = result.publicUrl;
@@ -158,6 +160,8 @@ export default function PostDetailPage() {
         } catch (uploadErr) {
           console.error("Error uploading media:", uploadErr);
           // Continue with comment even if media upload fails
+        } finally {
+          setIsUploadingMedia(false);
         }
       }
       
@@ -408,19 +412,39 @@ export default function PostDetailPage() {
                   <div className="mt-2">
                     {commentMediaUrl ? (
                       <div className="relative inline-block">
-                        <Image
-                          src={commentMediaUrl}
-                          alt="Upload preview"
-                          width={150}
-                          height={150}
-                          className="rounded-lg object-cover"
-                        />
-                        <button
-                          onClick={handleRemoveMedia}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
+                        {isUploadingMedia ? (
+                          <div className="border border-gray-300 rounded-lg p-3 bg-gray-50">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Loader2 className="w-4 h-4 animate-spin text-green-600" />
+                              <span className="text-sm text-gray-700">Uploading media...</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div
+                                className="bg-green-600 h-2 rounded-full transition-all"
+                                style={{ width: `${progress}%` }}
+                              />
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {progress}% - {speed}
+                            </p>
+                          </div>
+                        ) : (
+                          <>
+                            <Image
+                              src={commentMediaUrl}
+                              alt="Upload preview"
+                              width={150}
+                              height={150}
+                              className="rounded-lg object-cover"
+                            />
+                            <button
+                              onClick={handleRemoveMedia}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </>
+                        )}
                       </div>
                     ) : uploadState === 'uploading' || uploadState === 'initiating' ? (
                       <div className="border border-gray-300 rounded-lg p-3 bg-gray-50">
@@ -452,7 +476,7 @@ export default function PostDetailPage() {
                   <div className="flex justify-end mt-2">
                     <button
                       onClick={handleSubmitComment}
-                      disabled={!commentText.trim() || isSubmittingComment || uploadState === 'uploading'}
+                      disabled={!commentText.trim() || isSubmittingComment || isUploadingMedia || uploadState === 'uploading'}
                       className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
                     >
                       {isSubmittingComment ? (
