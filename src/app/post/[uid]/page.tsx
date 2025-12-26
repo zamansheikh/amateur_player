@@ -145,9 +145,20 @@ export default function PostDetailPage() {
         text: commentText
       };
       
-      // Use uploaded file URL if available
-      if (commentMediaUrl.trim()) {
-        payload.media_urls = [commentMediaUrl.trim()];
+      // Upload media if a file was selected
+      let uploadedMediaUrl: string | null = null;
+      const file = (fileInputRef.current as any)?._file;
+      if (file && commentMediaUrl) {
+        try {
+          const result = await uploadFile(file, 'cdn');
+          if (result.success && result.publicUrl) {
+            uploadedMediaUrl = result.publicUrl;
+            payload.media_urls = [uploadedMediaUrl];
+          }
+        } catch (uploadErr) {
+          console.error("Error uploading media:", uploadErr);
+          // Continue with comment even if media upload fails
+        }
       }
       
       await axios.post(
@@ -164,6 +175,10 @@ export default function PostDetailPage() {
       setCommentText("");
       setCommentMediaUrl("");
       resetUpload();
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+        (fileInputRef.current as any)._file = null;
+      }
       
       // Refresh post to get new comments
       await fetchPost();
@@ -175,17 +190,23 @@ export default function PostDetailPage() {
   };
 
   // Handle file selection for upload
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     try {
-      const result = await uploadFile(file, 'cdn');
-      if (result.success && result.publicUrl) {
-        setCommentMediaUrl(result.publicUrl);
-      }
+      // Create a local preview URL instead of uploading immediately
+      const previewUrl = URL.createObjectURL(file);
+      // Store the file for later upload
+      const reader = new FileReader();
+      reader.onload = () => {
+        setCommentMediaUrl(previewUrl);
+      };
+      reader.readAsArrayBuffer(file);
+      // Keep reference to file for upload on submission
+      (fileInputRef.current as any)._file = file;
     } catch (err) {
-      console.error("Error uploading file:", err);
+      console.error("Error selecting file:", err);
     }
   };
 
@@ -246,7 +267,7 @@ export default function PostDetailPage() {
         {/* Post Detail */}
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
           {/* Post Header */}
-          <div className="p-4 border-b">
+          <div className="p-4 border-b border-gray-200">
             <div className="flex items-center gap-3">
               <Image
                 src={post.author.profile_picture_url}
@@ -287,7 +308,7 @@ export default function PostDetailPage() {
           </div>
 
           {/* Like Section */}
-          <div className="px-4 py-3 border-t border-b">
+          <div className="px-4 py-3 border-t border-b border-gray-200">
             <button
               onClick={handleLike}
               disabled={isLiking}
@@ -356,7 +377,7 @@ export default function PostDetailPage() {
             </div>
 
             {/* Add Comment Form */}
-            <div className="border-t pt-4">
+            <div className="border-t border-gray-200 pt-4">
               <div className="flex gap-3">
                 <Image
                   src={user?.profile_picture_url || "/logo/default-avatar.png"}

@@ -99,7 +99,7 @@ export default function MessagesPage() {
   const fetchAvailableMembers = async () => {
     try {
       setLoadingMembers(true);
-      const response = await api.get('/api/user-data');
+      const response = await api.get('/api/profile/all');
       setAvailableMembers(response.data);
     } catch (error) {
       console.error('Error fetching available members:', error);
