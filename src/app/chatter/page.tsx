@@ -2,57 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { MessageCircle, Plus, Award, Send, ChevronUp, ChevronDown } from 'lucide-react';
+import { MessageCircle, Plus } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { api } from '@/lib/api';
-import Image from 'next/image';
-import { format } from 'date-fns';
-
-interface Topic {
-    id: number;
-    topic: string;
-    description: string;
-}
-
-interface Author {
-    user_id: number;
-    username: string;
-    name: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-    profile_picture_url: string;
-}
-
-interface Opinion {
-    opinion_id: number;
-    opinion: string;
-    created: string;
-    edited: string;
-    is_edited: boolean;
-    is_upvoted_by_the_pros: boolean;
-    point: number;
-    point_str: string;
-    author: Author;
-    viewer_is_author: boolean;
-    viewer_vote: boolean | null;
-}
-
-interface Discussion {
-    discussion_id: number;
-    uid: string;
-    title: string;
-    description: string;
-    created: string;
-    edited: string;
-    is_upvoted_by_the_pros: boolean;
-    point: number;
-    point_str: string;
-    author: Author;
-    opinions: Opinion[];
-    viewer_is_author: boolean;
-    viewer_vote: boolean | null;
-}
+import { Topic, Discussion } from '@/types/chatter';
+import DiscussionCard from '@/components/DiscussionCard';
 
 export default function ChatterPage() {
     const { user } = useAuth();
@@ -100,31 +54,11 @@ export default function ChatterPage() {
         fetchTopics();
     }, []);
 
-    // Handle vote for discussion list only
-    const handleVote = async (nodeType: 'discussion' | 'opinion', nodeId: number, isUpvote: boolean) => {
-        try {
-            const response = await api.post('/api/lanes/discussions/vote', {
-                node_type: nodeType,
-                node_id: nodeId,
-                is_upvote: isUpvote
-            });
-
-            if (nodeType === 'discussion') {
-                // Update discussion in list
-                setDiscussions(discussions.map(d =>
-                    d.discussion_id === nodeId
-                        ? {
-                            ...d,
-                            point_str: response.data.point_str,
-                            viewer_vote: isUpvote,
-                            point: parseInt(response.data.point_str.replace(/[+\-\s]/g, ''))
-                        }
-                        : d
-                ));
-            }
-        } catch (err) {
-            console.error('Error voting:', err);
-        }
+    // Handle discussion update from card
+    const handleDiscussionUpdate = (updatedDiscussion: Discussion) => {
+        setDiscussions(prev => prev.map(d => 
+            d.discussion_id === updatedDiscussion.discussion_id ? updatedDiscussion : d
+        ));
     };
 
     // Handle post new discussion
@@ -296,87 +230,11 @@ export default function ChatterPage() {
                             </div>
                         ) : (
                             discussions.map(discussion => (
-                                <div key={discussion.discussion_id} className="bg-white rounded-lg sm:rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                                    <div className="p-3 sm:p-4 md:p-6">
-                                        {/* Header - clickable part */}
-                                        <Link href={`/chatter/${discussion.uid}`}>
-                                            <div className="flex items-start justify-between mb-4 sm:mb-5 gap-2 sm:gap-3 cursor-pointer">
-                                                <div className="flex items-start gap-2 sm:gap-3 md:gap-4 flex-1 min-w-0">
-                                                    {/* Avatar */}
-                                                    <div className="flex-shrink-0">
-                                                        {discussion.author.profile_picture_url ? (
-                                                            <Image
-                                                                src={discussion.author.profile_picture_url}
-                                                                alt={discussion.author.name}
-                                                                width={48}
-                                                                height={48}
-                                                                className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full object-cover flex-shrink-0"
-                                                            />
-                                                        ) : (
-                                                            <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-[#8BC342] to-[#6fa332] flex items-center justify-center text-white font-bold text-xs sm:text-sm flex-shrink-0">
-                                                                {discussion.author.name.split(' ').map(n => n[0]).join('')}
-                                                            </div>
-                                                        )}
-                                                    </div>
-
-                                                    {/* Author info and title */}
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center gap-1 sm:gap-2 mb-2 sm:mb-3 flex-wrap">
-                                                            <h3 className="font-semibold text-gray-900 text-sm sm:text-base">{discussion.author.name}</h3>
-                                                            <span className="text-xs sm:text-sm text-gray-500">@{discussion.author.username}</span>
-                                                        </div>
-                                                        <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{discussion.title}</h2>
-                                                        <p className="text-gray-700 text-xs sm:text-sm md:text-base mb-2 sm:mb-3 line-clamp-3">{discussion.description}</p>
-                                                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                                                            <span>{discussion.created}</span>
-                                                            <span>•</span>
-                                                            <span>{discussion.opinions.length} {discussion.opinions.length === 1 ? 'opinion' : 'opinions'}</span>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Pro badge */}
-                                                    {discussion.is_upvoted_by_the_pros && (
-                                                        <div className="flex-shrink-0 flex items-center gap-1 bg-green-50 px-2 sm:px-3 py-1 rounded-full">
-                                                            <Award className="w-3 h-3 sm:w-4 sm:h-4 text-[#8BC342]" />
-                                                            <span className="text-xs font-bold text-[#8BC342]">Pro Voted</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </Link>
-
-                                        {/* Footer with vote - not inside Link */}
-                                        <div className="flex items-center gap-3 pt-4 sm:pt-5 border-t border-gray-200">
-                                            {/* Voting buttons */}
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    onClick={() => handleVote('discussion', discussion.discussion_id, true)}
-                                                    className={`p-1.5 sm:p-2 rounded transition-colors ${discussion.viewer_vote === true
-                                                        ? 'text-[#8BC342] bg-green-50'
-                                                        : 'text-gray-400 hover:text-[#8BC342] hover:bg-green-50'
-                                                        }`}
-                                                >
-                                                    <ChevronUp className="w-5 h-5 sm:w-6 sm:h-6" />
-                                                </button>
-                                                <span className={`text-sm font-semibold min-w-[2rem] text-center ${discussion.point_str.startsWith('+') ? 'text-[#8BC342]' :
-                                                    discussion.point_str.startsWith('-') ? 'text-red-600' :
-                                                        'text-gray-600'
-                                                    }`}>
-                                                    {discussion.point_str}
-                                                </span>
-                                                <button
-                                                    onClick={() => handleVote('discussion', discussion.discussion_id, false)}
-                                                    className={`p-1.5 sm:p-2 rounded transition-colors ${discussion.viewer_vote === false
-                                                        ? 'text-red-600 bg-red-50'
-                                                        : 'text-gray-400 hover:text-red-600 hover:bg-red-50'
-                                                        }`}
-                                                >
-                                                    <ChevronDown className="w-5 h-5 sm:w-6 sm:h-6" />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <DiscussionCard 
+                                    key={discussion.discussion_id} 
+                                    discussion={discussion} 
+                                    onUpdate={handleDiscussionUpdate}
+                                />
                             ))
                         )}
                     </div>
