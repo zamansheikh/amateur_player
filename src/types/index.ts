@@ -139,6 +139,27 @@ export interface PerformanceMetrics {
 }
 
 // Feed Post type
+export interface FeedComment {
+    post_id: number;
+    comment_id: number;
+    user: {
+        user_id: number;
+        name: string;
+        first_name: string;
+        last_name: string;
+        username: string;
+        email: string;
+        roles: {
+            is_pro: boolean;
+            is_center_admin: boolean;
+            is_tournament_director: boolean;
+        };
+        profile_picture_url: string;
+    };
+    text: string;
+    media_urls: string[];
+}
+
 export interface FeedPost {
     post_id: number;
     uid: string;
@@ -164,6 +185,7 @@ export interface FeedPost {
     created: string;
     like_count: number;
     is_liked: boolean;
+    comments?: FeedComment[];
 }
 
 // Comment user type for video comments

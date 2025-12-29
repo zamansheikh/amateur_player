@@ -3,7 +3,9 @@
 import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Send, Loader2 } from "lucide-react";
 import { api } from "@/lib/api";
+import { useAuth } from "@/contexts/AuthContext";
 import { FeedPost } from "@/types";
 import MediaGallery from "./MediaGallery";
 
@@ -20,9 +22,13 @@ export default function FeedPostCard({
   onPostChange,
   enableMediaLightbox = false, // Default to false for feeds
 }: FeedPostCardProps) {
+  const { user } = useAuth();
   const [localLikes, setLocalLikes] = useState(post.like_count);
   const [isLiking, setIsLiking] = useState(false);
   const [localPost, setLocalPost] = useState(post);
+  const [isCommentsExpanded, setIsCommentsExpanded] = useState(false);
+  const [commentText, setCommentText] = useState("");
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const router = useRouter();
 
   // Initialize following state
@@ -99,6 +105,37 @@ export default function FeedPostCard({
       console.error("Error toggling follow:", error);
       // Revert to original state on error
       setIsFollowing(post.author.is_following);
+    }
+  };
+
+  const handleCommentClick = () => {
+    setIsCommentsExpanded(!isCommentsExpanded);
+  };
+
+  const handleSubmitComment = async () => {
+    if (!commentText.trim() || isSubmittingComment) return;
+
+    try {
+      setIsSubmittingComment(true);
+      const payload = { text: commentText };
+      
+      await api.post(`/api/posts/v2/comment/${post.uid}`, payload);
+      
+      setCommentText("");
+
+      // Fetch updated post details to get the new comment
+      const response = await api.get(`/api/posts/v2/details/${post.uid}`);
+      const updatedPost = response.data;
+      
+      setLocalPost(updatedPost);
+      
+      if (onPostUpdate) {
+        onPostUpdate();
+      }
+    } catch (error) {
+      console.error("Error submitting comment:", error);
+    } finally {
+      setIsSubmittingComment(false);
     }
   };
 
@@ -209,7 +246,7 @@ export default function FeedPostCard({
               )}
             </button>
             <button
-              onClick={handlePostClick}
+              onClick={handleCommentClick}
               className="flex items-center gap-1 md:gap-2 text-gray-600 hover:text-green-500 transition-colors duration-200"
             >
               <Image
@@ -223,11 +260,11 @@ export default function FeedPostCard({
               <span className="text-xs md:text-sm font-medium whitespace-nowrap">{localLikes} Likes</span>
             </button>
             <button
-              onClick={handlePostClick}
+              onClick={handleCommentClick}
               className="flex items-center gap-1 md:gap-2 text-gray-600 hover:text-green-500 transition-colors duration-200"
             >
               <span className="text-xs md:text-sm font-medium whitespace-nowrap">
-                0 Comment
+                {localPost.comments?.length || 0} Comment{localPost.comments?.length !== 1 ? 's' : ''}
               </span>
             </button>
           </div>
@@ -244,6 +281,75 @@ export default function FeedPostCard({
           </button>
         </div>
       </div>
+
+      {/* Comments Section */}
+      {isCommentsExpanded && (
+        <div className="px-3 md:px-6 py-3 md:py-4 border-t border-gray-100 bg-gray-50">
+          {/* Existing Comments */}
+          {localPost.comments && localPost.comments.length > 0 && (
+            <div className="space-y-4 mb-4">
+              {localPost.comments.slice(-2).map((comment) => (
+                <div key={comment.comment_id} className="flex gap-3">
+                  <img
+                    src={comment.user.profile_picture_url}
+                    alt={comment.user.name}
+                    className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                  />
+                  <div className="flex-1 bg-white p-3 rounded-lg shadow-sm">
+                    <p className="font-semibold text-sm text-gray-900">
+                      {comment.user.name}
+                    </p>
+                    <p className="text-gray-800 text-sm mt-1">{comment.text}</p>
+                  </div>
+                </div>
+              ))}
+              {localPost.comments.length > 2 && (
+                <button 
+                  onClick={handlePostClick}
+                  className="text-sm text-green-600 hover:text-green-700 font-medium"
+                >
+                  View all {localPost.comments.length} comments
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Comment Input */}
+          <div className="flex gap-3">
+            <img
+              src={user?.profile_picture_url || "/logo/default-avatar.png"}
+              alt="Your avatar"
+              className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+            />
+            <div className="flex-1 relative">
+              <input
+                type="text"
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmitComment();
+                  }
+                }}
+                placeholder="Write a comment..."
+                className="w-full px-4 py-2 pr-10 bg-white border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+              <button
+                onClick={handleSubmitComment}
+                disabled={!commentText.trim() || isSubmittingComment}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-green-600 hover:bg-green-50 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmittingComment ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
