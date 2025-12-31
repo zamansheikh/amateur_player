@@ -12,7 +12,7 @@ import FollowersModal from '@/components/FollowersModal';
 import axios from 'axios';
 
 export default function ProfilePage() {
-    const { user } = useAuth();
+    const { user, refreshUser } = useAuth();
     const profileUpload = useCloudUpload();
     const coverUpload = useCloudUpload();
     const videoUpload = useCloudUpload();
@@ -216,11 +216,12 @@ export default function ProfilePage() {
                 );
             }
 
+            await refreshUser();
             setUploadMessage({ type: 'success', text: `${field.charAt(0).toUpperCase() + field.slice(1)} updated successfully!` });
             setEditMode(prev => ({ ...prev, [field]: false }));
-            setTimeout(() => {
-                window.location.reload();
-            }, 1500);
+            
+            // Clear success message after 3 seconds
+            setTimeout(() => setUploadMessage(null), 3000);
         } catch (error: any) {
             console.error(`Error updating ${field}:`, error);
             const errorMsg = error.response?.data?.message || `Failed to update ${field}`;
@@ -289,10 +290,11 @@ export default function ProfilePage() {
             );
 
             if (response.status === 200 || response.status === 201) {
+                await refreshUser();
                 setUploadMessage({ type: 'success', text: `${type === 'profile' ? 'Profile picture' : 'Cover photo'} updated successfully!` });
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500);
+                
+                // Clear success message after 3 seconds
+                setTimeout(() => setUploadMessage(null), 3000);
             }
         } catch (error: any) {
             console.error('Error updating profile media:', error);
@@ -341,10 +343,11 @@ export default function ProfilePage() {
             );
 
             if (response.status === 200 || response.status === 201) {
+                await refreshUser();
                 setUploadMessage({ type: 'success', text: 'Intro video updated successfully!' });
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500);
+                
+                // Clear success message after 3 seconds
+                setTimeout(() => setUploadMessage(null), 3000);
             }
         } catch (error: any) {
             console.error('Error updating intro video:', error);
@@ -444,6 +447,7 @@ export default function ProfilePage() {
                 { headers }
             );
 
+            await refreshUser();
             setUploadMessage({ type: 'success', text: 'Bowling stats updated successfully!' });
             setTimeout(() => setUploadMessage(null), 3000);
             setEditingStats(false);
