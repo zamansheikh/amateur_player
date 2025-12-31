@@ -8,6 +8,7 @@ import { useMapboxGeocoding } from '@/lib/useMapboxGeocoding';
 import { GeocodingResult } from '@/lib/mapboxGeocodingService';
 import AddressModal from '@/components/AddressModal';
 import HomeCenterModal from '@/components/HomeCenterModal';
+import FollowersModal from '@/components/FollowersModal';
 import axios from 'axios';
 
 export default function ProfilePage() {
@@ -27,6 +28,8 @@ export default function ProfilePage() {
     });
     const [addressModalOpen, setAddressModalOpen] = useState(false);
     const [homeCenterModalOpen, setHomeCenterModalOpen] = useState(false);
+    const [followersModalOpen, setFollowersModalOpen] = useState(false);
+    const [followingModalOpen, setFollowingModalOpen] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [uploadMessage, setUploadMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
     const [activeTab, setActiveTab] = useState<'info' | 'cards' | 'stats' | 'posts' | 'media'>('info');
@@ -660,14 +663,20 @@ export default function ProfilePage() {
 
                                     {/* Stats */}
                                     <div className="flex gap-8 mb-6 border-t border-b border-gray-100 py-4 w-fit">
-                                        <div className="text-center min-w-20">
+                                        <button
+                                            onClick={() => setFollowersModalOpen(true)}
+                                            className="text-center min-w-20 hover:opacity-80 transition-opacity cursor-pointer"
+                                        >
                                             <div className="text-2xl font-bold text-gray-900">{user?.follow_info?.follwers || user?.follower_count || 0}</div>
                                             <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Followers</div>
-                                        </div>
-                                        <div className="text-center min-w-20">
+                                        </button>
+                                        <button
+                                            onClick={() => setFollowingModalOpen(true)}
+                                            className="text-center min-w-20 hover:opacity-80 transition-opacity cursor-pointer"
+                                        >
                                             <div className="text-2xl font-bold text-gray-900">{user?.follow_info?.followings || user?.following_count || 0}</div>
                                             <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">Following</div>
-                                        </div>
+                                        </button>
                                         <div className="text-center min-w-20">
                                             <div className="text-2xl font-bold text-gray-900">{user?.xp || 0}</div>
                                             <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">XP</div>
@@ -1316,6 +1325,22 @@ export default function ProfilePage() {
                     onClose={() => setHomeCenterModalOpen(false)}
                     onSave={handleHomeCenterSave}
                     currentCenterId={user?.home_center_data?.center?.id}
+                    accessToken={user?.access_token || ''}
+                />
+
+                {/* Followers Modal */}
+                <FollowersModal
+                    isOpen={followersModalOpen}
+                    onClose={() => setFollowersModalOpen(false)}
+                    type="followers"
+                    accessToken={user?.access_token || ''}
+                />
+
+                {/* Following Modal */}
+                <FollowersModal
+                    isOpen={followingModalOpen}
+                    onClose={() => setFollowingModalOpen(false)}
+                    type="following"
                     accessToken={user?.access_token || ''}
                 />
             </div>
