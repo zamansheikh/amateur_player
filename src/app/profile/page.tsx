@@ -97,7 +97,7 @@ export default function ProfilePage() {
                 first_name: user.first_name || '',
                 last_name: user.last_name || '',
                 bio: user.bio?.content || '',
-                gender: user.gender_data?.role || '',
+                gender: (user.gender_data?.role === 'Women' ? 'Female' : user.gender_data?.role) || '',
                 birthdate: user.birthdate_data?.date || '',
                 address: user.address_data?.address_str || '',
                 zipcode: user.address_data?.zipcode || '',
@@ -869,7 +869,7 @@ export default function ProfilePage() {
                                                     >
                                                         <option value="">Select gender</option>
                                                         <option value="Male">Male</option>
-                                                        <option value="Women">Women</option>
+                                                        <option value="Female">Female</option>
                                                     </select>
                                                     <div className="flex items-center gap-2 mt-2">
                                                         <input
@@ -905,7 +905,7 @@ export default function ProfilePage() {
                                             ) : (
                                                 <div>
                                                     <div className="flex items-center justify-between">
-                                                        <p className="text-gray-600">{user?.gender_data?.role || 'Not provided'}</p>
+                                                        <p className="text-gray-600">{(user?.gender_data?.role === 'Women' ? 'Female' : user?.gender_data?.role) || 'Not provided'}</p>
                                                         <button
                                                             onClick={() => setEditMode(prev => ({ ...prev, gender: true }))}
                                                             className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1 hover:bg-gray-100 rounded transition text-gray-500"
