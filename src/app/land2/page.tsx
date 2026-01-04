@@ -54,6 +54,7 @@ export default function Landing2Page() {
                         alt="Hero Section Background"
                         fill
                         className="object-cover"
+                        unoptimized
                         priority
                     />
                 </div>
@@ -107,6 +108,7 @@ export default function Landing2Page() {
                                             alt="Amateurs"
                                             width={200}
                                             height={260}
+                                            unoptimized
                                             className="w-full h-full object-cover"
                                         />
                                     </div>
@@ -123,6 +125,7 @@ export default function Landing2Page() {
                                             alt="Experience"
                                             width={200}
                                             height={400}
+                                            unoptimized
                                             className="w-full h-full object-cover"
                                         />
                                     </div>
@@ -136,6 +139,7 @@ export default function Landing2Page() {
                                             alt="Centers"
                                             width={200}
                                             height={260}
+                                            unoptimized
                                             className="w-full h-full object-cover"
                                         />
                                     </div>
@@ -152,6 +156,7 @@ export default function Landing2Page() {
                                             alt="Pros"
                                             width={200}
                                             height={260}
+                                            unoptimized
                                             className="w-full h-full object-cover"
                                         />
                                     </div>
@@ -168,6 +173,7 @@ export default function Landing2Page() {
                                             alt="Shops"
                                             width={200}
                                             height={260}
+                                            unoptimized
                                             className="w-full h-full object-cover"
                                         />
                                     </div>
@@ -208,6 +214,7 @@ export default function Landing2Page() {
                             alt="All-in-One Bowling Experience"
                             width={1400}
                             height={600}
+                            unoptimized
                             className="w-full h-auto object-cover"
                         />
                     </div>
@@ -260,6 +267,7 @@ export default function Landing2Page() {
                                     alt="Bowling Experience"
                                     width={400}
                                     height={300}
+                                    unoptimized
                                     className="w-full h-full object-cover"
                                 />
                             </div>
@@ -300,6 +308,7 @@ export default function Landing2Page() {
                     <Image
                         src="/land2/background_green.jpg"
                         alt="Background"
+                        unoptimized
                         fill
                         className="object-cover"
                     />
@@ -329,6 +338,7 @@ export default function Landing2Page() {
                                 alt="Mobile Phone Mockup"
                                 width={1200}
                                 height={1000}
+                                unoptimized
                                 priority
                             />
                         </div>
@@ -390,6 +400,7 @@ export default function Landing2Page() {
                                 alt="Trading Cards"
                                 width={600}
                                 height={500}
+                                unoptimized
                                 className="w-full h-auto"
                             />
                         </div>
@@ -414,6 +425,7 @@ export default function Landing2Page() {
                             alt="Beyond the Chatter"
                             width={1000}
                             height={600}
+                            unoptimized
                             className="w-full h-auto mx-auto rounded-2xl"
                         />
                     </div>
@@ -490,6 +502,7 @@ export default function Landing2Page() {
                     <Image
                         src="/land2/smarter_center_section.jpg"
                         alt="Bowling Center"
+                        unoptimized
                         fill
                         className="object-cover"
                     />
@@ -524,6 +537,1241 @@ export default function Landing2Page() {
                                     <span className="w-3 h-3 rounded-full bg-white inline-block mr-3"></span>
                                     REQUEST A DEMO
                                 </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Streamline Section */}
+            <section className="py-24 bg-white overflow-hidden">
+                <div className="max-w-7xl mx-auto px-8">
+                    <div className="flex flex-col lg:flex-row items-center gap-16">
+                        {/* Left Side: Dashboard Image */}
+                        <div className="flex-1 relative">
+                            <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                                <Image
+                                    src="/land2/streamline_section_main.png"
+                                    alt="Streamline Dashboard"
+                                    width={800}
+                                    unoptimized
+                                    height={600}
+                                    className="w-full h-auto object-cover"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Right Side: Content */}
+                        <div className="flex-1">
+                            <h2 className="text-4xl md:text-5xl font-black text-gray-900 leading-tight mb-12 text-right">
+                                STREAMLINE YOUR CENTER.<br />
+                                SUCCEED TOGETHER.
+                            </h2>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                {/* Left large image */}
+                                <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-lg">
+                                    <Image
+                                        src="/land2/smarter_center_section.jpg"
+                                        alt="Smarter Center"
+                                        fill
+                                        unoptimized
+                                        className="object-cover"
+                                    />
+                                </div>
+                                
+                                {/* Right column with 2 images */}
+                                <div className="flex flex-col gap-4 h-[400px]">
+                                    <div className="relative flex-1 rounded-2xl overflow-hidden shadow-lg">
+                                        <Image
+                                            src="/land2/4.jpg"
+                                            alt="Feature 1"
+                                            fill
+                                            unoptimized
+                                            className="object-cover"
+                                        />
+                                    </div>
+                                    <div className="relative flex-1 rounded-2xl overflow-hidden shadow-lg">
+                                        <Image
+                                            src="/land2/5.jpg"
+                                            alt="Feature 2"
+                                            unoptimized
+                                            fill
+                                            className="object-cover"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Partnership Section */}
+            <section className="py-20 px-8 bg-white">
+                <div className="max-w-7xl mx-auto">
+                    {/* Container with Background Image - Top Section */}
+                    <div 
+                        className="relative rounded-3xl overflow-hidden mb-8"
+                        style={{
+                            backgroundImage: 'url(/land2/1.jpg)',
+                            backgroundSize: 'cover',
+                            backgroundPosition: 'center'
+                        }}
+                    >
+                        {/* Dark Overlay */}
+                        <div className="absolute inset-0 bg-black/40"></div>
+
+                        {/* Content Container - Top Section */}
+                        <div className="relative z-10 p-12 flex items-center justify-between gap-8">
+                            {/* Left: Heading Box */}
+                            <div className="flex-1 bg-gradient-to-r from-[#86D864] to-[#7ac85a] rounded-xl p-8">
+                                <h2 className="text-4xl md:text-5xl font-black leading-tight text-white">
+                                    Reach Bowlers.<br />
+                                    Drive Demand.<br />
+                                    Build Partnerships.
+                                </h2>
+                                <p className="text-white/95 text-sm mt-4">
+                                    Showcase your products, run targeted promotions, and connect directly with centers and pros through the BowlersNetwork ecosystem.
+                                </p>
+                            </div>
+
+                            {/* Right: Feature Products Box */}
+                            <div className="flex-1 bg-gradient-to-r from-[#86D864] to-[#7ac85a] rounded-xl p-8">
+                                <div className="flex items-start gap-3">
+                                    <div className="text-white mt-1">
+                                        <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-white font-black text-lg mb-2">Feature Products</h3>
+                                        <p className="text-white/95 text-sm">
+                                            Highlight gear and apparel in a curated shopping experience.
+                                        </p>
+                                        <div className="mt-3 flex gap-1">
+                                            <div className="w-2 h-2 bg-white rounded-full"></div>
+                                            <div className="w-2 h-2 bg-white/50 rounded-full"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Bottom Section - Form and Image */}
+                    <div className="grid grid-cols-2 gap-12 items-start">
+                        {/* Left: Partnership Form */}
+                        <div>
+                            <form className="bg-white rounded-lg p-8 shadow-lg">
+                                <div className="mb-6">
+                                    <label className="block text-gray-800 font-bold text-sm mb-2">Name</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Your Name"
+                                        className="w-full px-4 py-3 border border-[#86D864] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#86D864] focus:border-transparent placeholder-gray-400"
+                                    />
+                                </div>
+
+                                <div className="mb-6">
+                                    <label className="block text-gray-800 font-bold text-sm mb-2">Company Name</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Your Company"
+                                        className="w-full px-4 py-3 border border-[#86D864] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#86D864] focus:border-transparent placeholder-gray-400"
+                                    />
+                                </div>
+
+                                <div className="mb-6">
+                                    <label className="block text-gray-800 font-bold text-sm mb-2">Email</label>
+                                    <input
+                                        type="email"
+                                        placeholder="you@email.com"
+                                        className="w-full px-4 py-3 border border-[#86D864] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#86D864] focus:border-transparent placeholder-gray-400"
+                                    />
+                                </div>
+
+                                <div className="mb-8">
+                                    <label className="block text-gray-800 font-bold text-sm mb-2">Message</label>
+                                    <textarea
+                                        placeholder="Tell us about your partnership goals"
+                                        rows={4}
+                                        className="w-full px-4 py-3 border border-[#86D864] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#86D864] focus:border-transparent placeholder-gray-400 resize-none"
+                                    ></textarea>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    className="w-full text-white font-black text-sm px-6 py-3 rounded-full transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg hover:scale-105"
+                                    style={{ backgroundColor: '#86D864' }}
+                                >
+                                    <span className="w-2.5 h-2.5 bg-white rounded-full"></span>
+                                    PARTNER WITH US
+                                </button>
+                            </form>
+                        </div>
+
+                        {/* Right: Product Mockup Image */}
+                        <div className="relative h-[500px]">
+                            <Image
+                                src="/land2/7.png"
+                                unoptimized
+                                alt="Partnership Features"
+                                fill
+                                className="object-cover"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Customer Success Story Section */}
+            <section className="py-20 px-8 bg-white">
+                <div className="max-w-7xl mx-auto">
+                    {/* Header */}
+                    <div className="text-center mb-16">
+                        <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-4">
+                            Customer Success Story
+                        </h2>
+                        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                            From amateurs to pros, centers to shops — hear why they choose Bowlers Network.
+                        </p>
+                    </div>
+
+                    {/* Testimonials Grid */}
+                    <div className="grid grid-cols-3 gap-8 mb-12">
+                        {/* Testimonial 1 */}
+                        <div className="bg-gray-50 rounded-2xl p-8">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#86D864] to-[#7ac85a] flex items-center justify-center text-white font-bold">
+                                    BD
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-gray-900">
+                                        <a href="#" className="hover:underline">Bailey Dupont</a>
+                                    </h3>
+                                    <div className="flex gap-1 text-yellow-400">
+                                        {[...Array(5)].map((_, i) => (
+                                            <span key={i}>★</span>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="ml-auto text-gray-400">⋯</div>
+                            </div>
+                            <p className="text-gray-700 text-sm leading-relaxed mb-4">
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
+                            </p>
+                            <p className="font-bold text-gray-900 text-sm">500% Engagement<br />Growth</p>
+                        </div>
+
+                        {/* Testimonial 2 */}
+                        <div className="bg-gray-50 rounded-2xl p-8">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#86D864] to-[#7ac85a] flex items-center justify-center text-white font-bold">
+                                    BD
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-gray-900">
+                                        <a href="#" className="hover:underline">Bailey Dupont</a>
+                                    </h3>
+                                    <div className="flex gap-1 text-yellow-400">
+                                        {[...Array(5)].map((_, i) => (
+                                            <span key={i}>★</span>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="ml-auto text-gray-400">⋯</div>
+                            </div>
+                            <p className="text-gray-700 text-sm leading-relaxed mb-4">
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
+                            </p>
+                            <p className="font-bold text-gray-900 text-sm">500% Engagement<br />Growth</p>
+                        </div>
+
+                        {/* Testimonial 3 */}
+                        <div className="bg-gray-50 rounded-2xl p-8">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#86D864] to-[#7ac85a] flex items-center justify-center text-white font-bold">
+                                    BD
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-gray-900">
+                                        <a href="#" className="hover:underline">Bailey Dupont</a>
+                                    </h3>
+                                    <div className="flex gap-1 text-yellow-400">
+                                        {[...Array(5)].map((_, i) => (
+                                            <span key={i}>★</span>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="ml-auto text-gray-400">⋯</div>
+                            </div>
+                            <p className="text-gray-700 text-sm leading-relaxed mb-4">
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris
+                            </p>
+                            <p className="font-bold text-gray-900 text-sm">500% Engagement<br />Growth</p>
+                        </div>
+                    </div>
+
+                    {/* View All Stories Button */}
+                    <div className="flex justify-center">
+                        <button className="px-8 py-3 bg-[#86D864] text-white font-black rounded-full hover:shadow-lg transition-shadow flex items-center gap-2">
+                            <span className="w-2.5 h-2.5 bg-white rounded-full"></span>
+                            SEE ALL STORIES
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            {/* Be Seen Where The Bowling World Connects Section */}
+            <section 
+                className="relative py-32 px-8 rounded-3xl mx-8 mb-12 overflow-hidden"
+                style={{
+                    backgroundImage: 'url(/land2/19.png)',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
+                }}
+            >
+                {/* Dark Overlay */}
+                <div className="absolute inset-0 bg-black/40"></div>
+
+                {/* Content */}
+                <div className="relative z-10 max-w-4xl mx-auto text-center">
+                    <h2 className="text-5xl md:text-6xl font-black text-white leading-tight mb-6">
+                        Be Seen Where The Bowling<br />World Connects
+                    </h2>
+                    <p className="text-xl text-white/95 mb-8">
+                        Engage players, fans, and brands with authentic, community-driven activations.
+                    </p>
+                    <button className="px-8 py-3 bg-[#86D864] text-white font-black rounded-full hover:shadow-lg transition-shadow flex items-center gap-2 mx-auto">
+                        <span className="w-2.5 h-2.5 bg-white rounded-full"></span>
+                        PARTNER WITH US
+                    </button>
+                </div>
+            </section>
+
+            {/* Why Partner With Us Section */}
+            <section className="py-20 px-8 bg-white">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid grid-cols-2 gap-16 items-start">
+                        {/* Left: Content */}
+                        <div>
+                            <h2 className="text-5xl md:text-6xl font-black text-gray-900 leading-tight mb-6">
+                                Why Partner With Us?
+                            </h2>
+                            <p className="text-lg text-gray-700 mb-8">
+                                Reach 67M+ bowlers through TV, OTT, podcasts, social, and live events.
+                            </p>
+
+                            {/* Features List */}
+                            <ul className="space-y-4">
+                                <li className="flex items-start gap-3">
+                                    <span className="text-[#86D864] font-bold text-xl mt-1">•</span>
+                                    <span className="text-gray-700">
+                                        Access a massive, loyal audience across digital and physical touchpoints.
+                                    </span>
+                                </li>
+                                <li className="flex items-start gap-3">
+                                    <span className="text-[#86D864] font-bold text-xl mt-1">•</span>
+                                    <span className="text-gray-700">
+                                        Integrate into broadcasts, podcasts, events, and trading cards.
+                                    </span>
+                                </li>
+                                <li className="flex items-start gap-3">
+                                    <span className="text-[#86D864] font-bold text-xl mt-1">•</span>
+                                    <span className="text-gray-700">
+                                        Build authentic connections with a community-driven sport.
+                                    </span>
+                                </li>
+                                <li className="flex items-start gap-3">
+                                    <span className="text-[#86D864] font-bold text-xl mt-1">•</span>
+                                    <span className="text-gray-700">
+                                        Drive measurable ROI with attribution + analytics built in.
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* Right: Image */}
+                        <div className="relative h-[500px]">
+                            <Image
+                                src="/land2/20.png"
+                                unoptimized
+                                alt="Analytics Dashboard"
+                                fill
+                                className="object-cover rounded-2xl"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Pricing Section */}
+            <section className="py-20 px-8 bg-white">
+                <div className="max-w-7xl mx-auto">
+                    {/* Header */}
+                    <div className="text-center mb-16">
+                        <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-4">
+                            Choose the Plan That Fits Your Game
+                        </h2>
+                        <p className="text-lg text-gray-600 mb-2">
+                            Flexible options for amateurs, pros, centers, and shops — start free, grow with premium tools.
+                        </p>
+                        <p className="text-lg text-gray-700 font-semibold">
+                            14 days free trial. No contract or credit card required.
+                        </p>
+                    </div>
+
+                    {/* Billing Toggle */}
+                    <div className="flex justify-center items-center gap-6 mb-12">
+                        <button className="text-gray-900 font-bold text-lg hover:text-[#86D864] transition-colors">
+                            MONTHLY
+                        </button>
+                        <button className="px-6 py-2 bg-[#86D864] text-white font-bold rounded-full flex items-center gap-2 hover:shadow-lg transition-shadow">
+                            <span className="w-2.5 h-2.5 bg-white rounded-full"></span>
+                            ANNUALLY
+                        </button>
+                    </div>
+
+                    {/* Pricing Cards */}
+                    <div className="grid grid-cols-3 gap-8 max-w-6xl mx-auto">
+                        {/* Starter Plan */}
+                        <div className="bg-gray-50 rounded-2xl p-8 flex flex-col">
+                            <h3 className="text-[#86D864] font-black text-lg mb-4">STARTER</h3>
+                            <div className="mb-8">
+                                <span className="text-4xl font-black text-gray-900">$29</span>
+                                <span className="text-gray-600 font-semibold">/MONTH</span>
+                            </div>
+
+                            <ul className="space-y-3 mb-8 flex-1">
+                                <li className="flex items-start gap-2 text-gray-700">
+                                    <span className="text-[#86D864] font-bold mt-1">•</span>
+                                    <span>Basic profile setup</span>
+                                </li>
+                                <li className="flex items-start gap-2 text-gray-700">
+                                    <span className="text-[#86D864] font-bold mt-1">•</span>
+                                    <span>Access to community feed</span>
+                                </li>
+                                <li className="flex items-start gap-2 text-gray-700">
+                                    <span className="text-[#86D864] font-bold mt-1">•</span>
+                                    <span>Limited participation in leaderboards</span>
+                                </li>
+                                <li className="flex items-start gap-2 text-gray-700">
+                                    <span className="text-[#86D864] font-bold mt-1">•</span>
+                                    <span>Browse shops & centers</span>
+                                </li>
+                            </ul>
+
+                            <button className="w-full py-3 border-2 border-[#86D864] text-[#86D864] font-black rounded-full hover:bg-[#86D864] hover:text-white transition-colors">
+                                GET STARTED
+                            </button>
+                        </div>
+
+                        {/* Pro Plan - Most Popular */}
+                        <div className="relative -mt-4">
+                            {/* Most Popular Badge */}
+                            <div className="absolute -top-4 left-0 right-0 flex justify-center">
+                                <div className="bg-[#86D864] text-gray-900 font-black px-6 py-2 rounded-full">
+                                    MOST POPULAR
+                                </div>
+                            </div>
+
+                            <div className="bg-gray-900 rounded-2xl p-8 flex flex-col h-full text-white">
+                                <h3 className="text-yellow-400 font-black text-lg mb-4">PRO</h3>
+                                <div className="mb-8">
+                                    <span className="text-4xl font-black">$49</span>
+                                    <span className="text-gray-300 font-semibold">/MONTH</span>
+                                </div>
+
+                                <ul className="space-y-3 mb-8 flex-1">
+                                    <li className="flex items-start gap-2">
+                                        <span className="text-[#86D864] font-bold mt-1">•</span>
+                                        <span>Advanced stats & analytics</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="text-[#86D864] font-bold mt-1">•</span>
+                                        <span>Trading card & reward features</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="text-[#86D864] font-bold mt-1">•</span>
+                                        <span>Tournament/league tools</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="text-[#86D864] font-bold mt-1">•</span>
+                                        <span>Exclusive partner offers</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="text-[#86D864] font-bold mt-1">•</span>
+                                        <span>Priority support</span>
+                                    </li>
+                                </ul>
+
+                                <button className="w-full py-3 bg-[#86D864] text-gray-900 font-black rounded-full hover:shadow-lg transition-shadow">
+                                    UPGRADE
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Enterprise Plan */}
+                        <div className="bg-gray-50 rounded-2xl p-8 flex flex-col">
+                            <h3 className="text-[#86D864] font-black text-lg mb-4">ENTERPRISE</h3>
+                            <div className="mb-8">
+                                <span className="text-4xl font-black text-gray-900">CUSTOM</span>
+                                <span className="text-gray-600 font-semibold text-sm block">PRICE</span>
+                            </div>
+
+                            <ul className="space-y-3 mb-8 flex-1">
+                                <li className="flex items-start gap-2 text-gray-700">
+                                    <span className="text-[#86D864] font-bold mt-1">•</span>
+                                    <span>League & tournament management suite</span>
+                                </li>
+                                <li className="flex items-start gap-2 text-gray-700">
+                                    <span className="text-[#86D864] font-bold mt-1">•</span>
+                                    <span>Centralized payments integration</span>
+                                </li>
+                                <li className="flex items-start gap-2 text-gray-700">
+                                    <span className="text-[#86D864] font-bold mt-1">•</span>
+                                    <span>Pro shop storefront</span>
+                                </li>
+                                <li className="flex items-start gap-2 text-gray-700">
+                                    <span className="text-[#86D864] font-bold mt-1">•</span>
+                                    <span>Sponsorship & advertising dashboard</span>
+                                </li>
+                            </ul>
+
+                            <button className="w-full py-3 border-2 border-gray-300 text-[#86D864] font-black rounded-full hover:bg-gray-100 transition-colors">
+                                CONTACT US
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Driven by Passion Section */}
+            <section className="py-20 px-8 bg-white">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid grid-cols-2 gap-12 items-start">
+                        {/* Left: Image */}
+                        <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-lg">
+                            <Image
+                                src="/land2/22.png"
+                                unoptimized
+                                alt="Bowling Center Community"
+                                fill
+                                className="object-cover"
+                            />
+                        </div>
+
+                        {/* Right: Content */}
+                        <div>
+                            {/* Heading */}
+                            <h2 className="text-5xl md:text-6xl font-black text-gray-900 leading-tight mb-6">
+                                Driven by Passion.<br />Built for Bowlers.
+                            </h2>
+
+                            {/* Subheading */}
+                            <p className="text-lg text-gray-600 mb-8">
+                                We're on a mission to unite the bowling world — from amateurs and pros to centers and brands — through technology, community, and innovation.
+                            </p>
+
+                            {/* Mission and Vision Cards */}
+                            <div className="grid grid-cols-2 gap-6 mb-6">
+                                {/* Our Mission */}
+                                <div className="bg-green-50 rounded-xl p-6">
+                                    <h3 className="text-gray-900 font-black text-lg mb-3">Our Mission</h3>
+                                    <p className="text-gray-700 text-sm mb-4">
+                                        Founded by passionate bowlers, Bowlers Network began with a simple vision: to transform every lane into a connected experience.
+                                    </p>
+                                    <a href="#" className="text-[#86D864] font-bold text-sm flex items-center gap-1 hover:gap-2 transition-all">
+                                        Read More <span>›</span>
+                                    </a>
+                                </div>
+
+                                {/* Our Vision */}
+                                <div className="bg-blue-50 rounded-xl p-6">
+                                    <h3 className="text-gray-900 font-black text-lg mb-3">Our Vision</h3>
+                                    <p className="text-gray-700 text-sm mb-4">
+                                        Founded by passionate bowlers, Bowlers Network began with a simple vision: to transform every lane into a connected experience.
+                                    </p>
+                                    <a href="#" className="text-[#86D864] font-bold text-sm flex items-center gap-1 hover:gap-2 transition-all">
+                                        Read More <span>›</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            {/* Our Story */}
+                            <div className="bg-gray-100 rounded-xl p-6">
+                                <h3 className="text-gray-900 font-black text-lg mb-3">Our Story</h3>
+                                <p className="text-gray-700 text-sm mb-4">
+                                    Founded by passionate bowlers, Bowlers Network began with a simple vision: to transform every lane into a connected experience. What started with a single lane and a big dream has grown into a platform that brings together players, centers, pros, and brands.
+                                </p>
+                                <a href="#" className="text-[#86D864] font-bold text-sm flex items-center gap-1 hover:gap-2 transition-all">
+                                    Read More <span>›</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Press Section */}
+            <section className="py-20 px-8 bg-white border-t border-gray-200">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid grid-cols-3 gap-16">
+                        {/* Left: Press Header */}
+                        <div>
+                            <p className="text-gray-500 text-sm mb-8">Courtesy of our community & partners</p>
+                            <h2 className="text-7xl font-black text-gray-900 leading-tight mb-16">
+                                PRESS
+                            </h2>
+
+                            {/* Featured Articles */}
+                            <div className="mb-12">
+                                <h3 className="text-gray-900 font-black text-lg mb-2">FEATURED ARTICLES</h3>
+                                <p className="text-gray-600 text-sm leading-relaxed mb-6">
+                                    Check out the latest stories, mentions, and highlights about Bowler's Network.
+                                </p>
+                            </div>
+
+                            {/* Press Contact */}
+                            <div>
+                                <p className="text-gray-900 font-black text-sm mb-2">PRESS CONTACT</p>
+                                <p className="text-gray-600 text-sm mb-2">
+                                    For press inquiries, interviews, or media collaborations:
+                                </p>
+                                <a href="mailto:press@bowlersnetwork.com" className="text-gray-700 font-semibold hover:text-[#86D864] transition-colors">
+                                    press@bowlersnetwork.com
+                                </a>
+                            </div>
+                        </div>
+
+                        {/* Right: Article Cards */}
+                        <div className="col-span-2">
+                            <div className="grid grid-cols-2 gap-8">
+                                {/* Article 1 */}
+                                <div>
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="flex items-center gap-1 bg-green-100 rounded-full px-2 py-1">
+                                            <span className="text-[#86D864] font-black text-xs">●</span>
+                                            <span className="text-[#86D864] font-bold text-xs">Article</span>
+                                        </div>
+                                        <span className="text-gray-500 text-sm">September 27, 2025</span>
+                                    </div>
+                                    
+                                    <h3 className="text-gray-900 font-black text-xl mb-4 leading-tight">
+                                        The Future of Bowling: Beyond the Lanes
+                                    </h3>
+
+                                    <p className="text-gray-700 text-sm mb-6 leading-relaxed">
+                                        Bowler's Network is redefining how fans, players, and brands engage with bowling. By combining social media, gamification, and community-driven content, the platform is turning every game into a global conversation.
+                                    </p>
+
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-bold">
+                                                PH
+                                            </div>
+                                            <span className="text-gray-700 text-sm font-semibold">Paul Heymen</span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-[#86D864] font-black text-xs">●</span>
+                                            <span className="text-gray-600 text-sm">28 Comments</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="relative h-40 rounded-xl overflow-hidden">
+                                        <Image
+                                            src="/land2/article1.jpg"
+                                            unoptimized
+                                            alt="The Future of Bowling"
+                                            fill
+                                            className="object-cover"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Article 2 */}
+                                <div>
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="flex items-center gap-1 bg-green-100 rounded-full px-2 py-1">
+                                            <span className="text-[#86D864] font-black text-xs">●</span>
+                                            <span className="text-[#86D864] font-bold text-xs">Article</span>
+                                        </div>
+                                        <span className="text-gray-500 text-sm">September 27, 2025</span>
+                                    </div>
+                                    
+                                    <h3 className="text-gray-900 font-black text-xl mb-4 leading-tight">
+                                        Building a Digital Bowling Community
+                                    </h3>
+
+                                    <p className="text-gray-700 text-sm mb-6 leading-relaxed">
+                                        From casual players to pro athletes, Bowler's Network is creating a space where everyone has a voice. With features like live updates, fan challenges, and player-led storytelling, the platform is set to become the go-to hub for bowling culture.
+                                    </p>
+
+                                    <div className="flex items-center justify-between mb-4">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-white text-xs font-bold">
+                                                JD
+                                            </div>
+                                            <span className="text-gray-700 text-sm font-semibold">Jon Deo</span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            <span className="text-[#86D864] font-black text-xs">●</span>
+                                            <span className="text-gray-600 text-sm">28 Comments</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="relative h-40 rounded-xl overflow-hidden">
+                                        <Image
+                                            src="/land2/article2.jpg"
+                                            unoptimized
+                                            alt="Building a Digital Bowling Community"
+                                            fill
+                                            className="object-cover"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Contact Section */}
+            <section className="bg-gray-100 py-20 px-8">
+                <div className="max-w-7xl mx-auto">
+                    <div className="grid grid-cols-2 gap-16">
+                        {/* Left: Contact Info */}
+                        <div>
+                            <h2 className="text-5xl md:text-6xl font-black text-gray-900 leading-tight mb-4">
+                                Reach Out Anytime
+                            </h2>
+                            <p className="text-gray-700 text-lg mb-12">
+                                Our team is here to support, collaborate, and create meaningful connections in the bowling community.
+                            </p>
+
+                            {/* Email */}
+                            <div className="mb-8">
+                                <p className="text-gray-900 font-black text-xs mb-2 tracking-widest">EMAIL</p>
+                                <a href="mailto:contact@company.com" className="text-gray-600 hover:text-[#86D864] transition-colors">
+                                    contact@company.com
+                                </a>
+                            </div>
+
+                            {/* Phone */}
+                            <div className="mb-12">
+                                <p className="text-gray-900 font-black text-xs mb-2 tracking-widest">PHONE</p>
+                                <a href="tel:+11234567890" className="text-gray-600 hover:text-[#86D864] transition-colors">
+                                    (123) 456-7890
+                                </a>
+                            </div>
+
+                            {/* Map */}
+                            <div className="mb-12 relative h-48 rounded-lg overflow-hidden">
+                                <Image
+                                    src="/land2/map.png"
+                                    unoptimized
+                                    alt="Location Map"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+
+                            {/* Social Links */}
+                            <div>
+                                <p className="text-gray-900 font-black text-xs mb-4 tracking-widest">FOLLOW US</p>
+                                <div className="flex items-center gap-6">
+                                    <a href="#" className="text-gray-900 hover:text-[#86D864] transition-colors text-2xl">
+                                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 0C5.372 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.6.111.82-.261.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C3.422 17.8 2.633 17.376 2.633 17.376c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.237 1.838 1.237 1.07 1.834 2.809 1.304 3.495.997.108-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222 0 1.604-.015 2.896-.015 3.286 0 .319.216.694.824.576C20.565 21.795 24 17.295 24 12c0-6.627-5.373-12-12-12z" />
+                                        </svg>
+                                    </a>
+                                    <a href="#" className="text-gray-900 hover:text-[#86D864] transition-colors text-2xl">
+                                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm3.5 8.5h-2c-.276 0-.5.224-.5.5v2h2.5l-.5 2h-2v7h-2v-7H9v-2h1.5V8.5c0-1.38 1.12-2.5 2.5-2.5h2v2z" />
+                                        </svg>
+                                    </a>
+                                    <a href="#" className="text-gray-900 hover:text-[#86D864] transition-colors text-2xl">
+                                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2s9 5 20 5a9.5 9.5 0 00-9-5.5c4.75 2.25 7-7 7-7a10.6 10.6 0 01-3 1z" />
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right: Contact Form */}
+                        <div className="bg-white rounded-2xl p-8">
+                            <form className="space-y-6">
+                                <div>
+                                    <label className="block text-gray-900 font-black text-sm mb-2">Name</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Your Name"
+                                        className="w-full px-4 py-3 border-2 border-[#86D864] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#86D864] focus:border-transparent placeholder-gray-400"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-gray-900 font-black text-sm mb-2">Email</label>
+                                    <input
+                                        type="email"
+                                        placeholder="you@email.com"
+                                        className="w-full px-4 py-3 border-2 border-[#86D864] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#86D864] focus:border-transparent placeholder-gray-400"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-gray-900 font-black text-sm mb-2">Message</label>
+                                    <textarea
+                                        placeholder="Tell us about your partnership goals"
+                                        rows={5}
+                                        className="w-full px-4 py-3 border-2 border-[#86D864] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#86D864] focus:border-transparent placeholder-gray-400 resize-none"
+                                    ></textarea>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    className="w-full py-4 bg-[#86D864] text-white font-black rounded-lg hover:shadow-lg transition-shadow"
+                                >
+                                    SEND MESSAGE
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="border-t border-gray-300 mt-16 pt-8">
+                        <div className="flex items-center justify-between">
+                            <p className="text-gray-600 text-sm">
+                                @ BowlersNetwork 2025
+                            </p>
+                            <div className="flex items-center gap-8">
+                                <a href="#" className="text-[#86D864] hover:text-[#7ac85a] text-sm font-semibold transition-colors">
+                                    Privacy Policy
+                                </a>
+                                <a href="#" className="text-[#86D864] hover:text-[#7ac85a] text-sm font-semibold transition-colors">
+                                    Terms of Service
+                                </a>
+                                <a href="#" className="text-[#86D864] hover:text-[#7ac85a] text-sm font-semibold transition-colors">
+                                    Contact
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Trusted Partners Section */}
+            <section className="py-20 px-8 bg-white">
+                <div className="max-w-7xl mx-auto">
+                    {/* Header */}
+                    <div className="text-center mb-16">
+                        <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-4">
+                            Our Trusted Partners
+                        </h2>
+                        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                            Proudly collaborating with leading brands and organizations to grow the bowling community.
+                        </p>
+                    </div>
+
+                    {/* Partners Grid */}
+                    <div className="grid grid-cols-4 gap-8">
+                        {/* Partner 1 - Ahrefs */}
+                        <div className="bg-gray-50 rounded-2xl p-8 flex items-center justify-center h-24 hover:shadow-lg transition-shadow">
+                            <div className="text-center">
+                                <svg className="w-32 h-auto" viewBox="0 0 200 60" fill="none">
+                                    <text x="10" y="45" fontSize="36" fontWeight="bold" fill="#FF6600">ahrefs</text>
+                                </svg>
+                            </div>
+                        </div>
+
+                        {/* Partner 2 - Microsoft */}
+                        <div className="bg-gray-50 rounded-2xl p-8 flex items-center justify-center h-24 hover:shadow-lg transition-shadow">
+                            <div className="text-center">
+                                <svg className="w-32 h-auto" viewBox="0 0 200 60" fill="none">
+                                    <rect x="20" y="20" width="12" height="12" fill="#F25022"/>
+                                    <rect x="35" y="20" width="12" height="12" fill="#7FBA00"/>
+                                    <rect x="20" y="35" width="12" height="12" fill="#00A4EF"/>
+                                    <rect x="35" y="35" width="12" height="12" fill="#FFB900"/>
+                                    <text x="60" y="40" fontSize="18" fontWeight="bold" fill="#333">Microsoft</text>
+                                </svg>
+                            </div>
+                        </div>
+
+                        {/* Partner 3 - HelpScout */}
+                        <div className="bg-gray-50 rounded-2xl p-8 flex items-center justify-center h-24 hover:shadow-lg transition-shadow">
+                            <div className="text-center">
+                                <text className="font-black text-lg text-gray-900">HelpScout</text>
+                            </div>
+                        </div>
+
+                        {/* Partner 4 - Jotform */}
+                        <div className="bg-gray-50 rounded-2xl p-8 flex items-center justify-center h-24 hover:shadow-lg transition-shadow">
+                            <div className="text-center">
+                                <text className="font-black text-lg text-gray-900">Jotform</text>
+                            </div>
+                        </div>
+
+                        {/* Partner 5 - Amazon */}
+                        <div className="bg-gray-50 rounded-2xl p-8 flex items-center justify-center h-24 hover:shadow-lg transition-shadow">
+                            <div className="text-center">
+                                <text className="font-black text-lg text-gray-900">amazon</text>
+                            </div>
+                        </div>
+
+                        {/* Partner 6 - Notion */}
+                        <div className="bg-gray-50 rounded-2xl p-8 flex items-center justify-center h-24 hover:shadow-lg transition-shadow">
+                            <div className="text-center">
+                                <text className="font-black text-lg text-gray-900">Notion</text>
+                            </div>
+                        </div>
+
+                        {/* Partner 7 - LinkedIn */}
+                        <div className="bg-gray-50 rounded-2xl p-8 flex items-center justify-center h-24 hover:shadow-lg transition-shadow">
+                            <div className="text-center">
+                                <text className="font-black text-lg text-blue-600">LinkedIn</text>
+                            </div>
+                        </div>
+
+                        {/* Partner 8 - Circle */}
+                        <div className="bg-gray-50 rounded-2xl p-8 flex items-center justify-center h-24 hover:shadow-lg transition-shadow">
+                            <div className="text-center">
+                                <text className="font-black text-lg text-blue-600">Circle</text>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* The People Behind The Network Section */}
+            <section className="py-20 px-8 bg-white">
+                <div className="max-w-7xl mx-auto">
+                    {/* Header */}
+                    <div className="text-center mb-16">
+                        <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-4">
+                            The People Behind The Network
+                        </h2>
+                        <p className="text-lg text-gray-600">
+                            United by our love for bowling, innovation, and connecting players worldwide.
+                        </p>
+                    </div>
+
+                    {/* Team Member Card */}
+                    <div className="grid grid-cols-2 gap-16 items-center max-w-5xl mx-auto">
+                        {/* Left: Team Member Image */}
+                        <div className="relative h-96 rounded-3xl overflow-hidden bg-blue-100">
+                            <Image
+                                src="/land2/jay_fettig.png"
+                                unoptimized
+                                alt="Jay Fettig"
+                                fill
+                                className="object-cover"
+                            />
+                        </div>
+
+                        {/* Right: Team Member Info */}
+                        <div>
+                            <h3 className="text-gray-900 font-black text-2xl mb-3">JAY FETTIG</h3>
+                            
+                            <div className="inline-block bg-[#86D864] text-white font-black px-4 py-2 rounded-lg mb-6">
+                                Founder & CEO
+                            </div>
+
+                            <p className="text-gray-700 leading-relaxed mb-6 text-sm">
+                                Proud nisi officia reprehenderit nulla incididunt anim dolor ad velit consequat velit commodo tempor do parjatur velit velit sunt deserunt amet commodo non fugiat cupidatat labore qui dolore tempor reprehenderit Lorem occaecat aute qui veniam et reprehenderit minim veniam occaecat ullamco dolor ipsum ullamco in consectetur ipsum irure aliqua ad do est ea aliqua incididunt ipsum ex commodo deserunt cillum sit adipisicing mollit aliquip quis provident deserunt mollit in provident veniam duis ut nulla occaecat fugiat minim excepteur commodo duis do enim aute aliquip do aute amet labore irure minim sunt in veniam duis eisumod sit laboris mollit veniam excepteur
+                            </p>
+
+                            <a href="#" className="inline-flex items-center gap-2 border-2 border-[#86D864] text-[#86D864] font-bold px-6 py-3 rounded-lg hover:bg-[#86D864] hover:text-white transition-all">
+                                Read More <span>›</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Board of Directors Section */}
+            <section className="py-20 px-8 bg-gray-50">
+                <div className="max-w-7xl mx-auto">
+                    {/* Header */}
+                    <div className="grid grid-cols-2 gap-12 items-start mb-16">
+                        <h2 className="text-5xl md:text-6xl font-black text-gray-900 leading-tight">
+                            Board of Directors
+                        </h2>
+                        <p className="text-gray-700 leading-relaxed">
+                            Nostrud non cupidatat ipsum sint do velit magna tempor aute amet dolore magna est pariatur consectetur et ullamco aute anim do reprehenderit amet exercitation aute
+                        </p>
+                    </div>
+
+                    {/* Board Members Grid */}
+                    <div className="grid grid-cols-3 gap-8">
+                        {/* Member 1 - Norm Duke (Blue) */}
+                        <div>
+                            <div className="relative h-64 rounded-2xl overflow-hidden bg-blue-100 mb-4">
+                                <div className="absolute top-4 left-4 z-10">
+                                    <span className="bg-[#86D864] text-white font-black text-xs px-3 py-1 rounded-full">
+                                        Owner
+                                    </span>
+                                </div>
+                                <Image
+                                    src="/land2/norm_duke.png"
+                                    unoptimized
+                                    alt="Norm Duke"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                            <h3 className="text-gray-900 font-black text-lg mb-2">Norm Duke</h3>
+                            <p className="text-gray-700 text-sm leading-relaxed mb-3">
+                                Et aliquip occaecat deserunt cupidatat occaecat et Lorem exercitation sit
+                            </p>
+                            <a href="#" className="text-[#86D864] font-semibold text-sm hover:underline">
+                                Read More...
+                            </a>
+                        </div>
+
+                        {/* Member 2 - Chuck Gardner (Peach) */}
+                        <div>
+                            <div className="relative h-64 rounded-2xl overflow-hidden bg-red-100 mb-4">
+                                <div className="absolute top-4 left-4 z-10">
+                                    <span className="bg-[#86D864] text-white font-black text-xs px-3 py-1 rounded-full">
+                                        Owner
+                                    </span>
+                                </div>
+                                <Image
+                                    src="/land2/chuck_gardner.png"
+                                    unoptimized
+                                    alt="Chuck Gardner"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                            <h3 className="text-gray-900 font-black text-lg mb-2">Chuck Gardner</h3>
+                            <p className="text-gray-700 text-sm leading-relaxed mb-3">
+                                Et aliquip occaecat deserunt cupidatat occaecat et Lorem exercitation sit
+                            </p>
+                            <a href="#" className="text-[#86D864] font-semibold text-sm hover:underline">
+                                Read More...
+                            </a>
+                        </div>
+
+                        {/* Member 3 - Parker Bohn (Cyan) */}
+                        <div>
+                            <div className="relative h-64 rounded-2xl overflow-hidden bg-cyan-100 mb-4">
+                                <div className="absolute top-4 left-4 z-10">
+                                    <span className="bg-[#86D864] text-white font-black text-xs px-3 py-1 rounded-full">
+                                        Owner
+                                    </span>
+                                </div>
+                                <Image
+                                    src="/land2/parker_bohn.png"
+                                    unoptimized
+                                    alt="Parker Bohn"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                            <h3 className="text-gray-900 font-black text-lg mb-2">Parker Bohn</h3>
+                            <p className="text-gray-700 text-sm leading-relaxed mb-3">
+                                Et aliquip occaecat deserunt cupidatat occaecat et Lorem exercitation sit
+                            </p>
+                            <a href="#" className="text-[#86D864] font-semibold text-sm hover:underline">
+                                Read More...
+                            </a>
+                        </div>
+
+                        {/* Member 4 - Liz Johnson (Cyan) */}
+                        <div>
+                            <div className="relative h-64 rounded-2xl overflow-hidden bg-cyan-100 mb-4">
+                                <div className="absolute top-4 left-4 z-10">
+                                    <span className="bg-[#86D864] text-white font-black text-xs px-3 py-1 rounded-full">
+                                        Owner
+                                    </span>
+                                </div>
+                                <Image
+                                    src="/land2/liz_johnson.png"
+                                    unoptimized
+                                    alt="Liz Johnson"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                            <h3 className="text-gray-900 font-black text-lg mb-2">Liz Johnson</h3>
+                            <p className="text-gray-700 text-sm leading-relaxed mb-3">
+                                Et aliquip occaecat deserunt cupidatat occaecat et Lorem exercitation sit
+                            </p>
+                            <a href="#" className="text-[#86D864] font-semibold text-sm hover:underline">
+                                Read More...
+                            </a>
+                        </div>
+
+                        {/* Member 5 - Carolyn Dorin-Ballard (Peach) */}
+                        <div>
+                            <div className="relative h-64 rounded-2xl overflow-hidden bg-red-100 mb-4">
+                                <div className="absolute top-4 left-4 z-10">
+                                    <span className="bg-[#86D864] text-white font-black text-xs px-3 py-1 rounded-full">
+                                        Owner
+                                    </span>
+                                </div>
+                                <Image
+                                    src="/land2/carolyn-dorin-ballard.png"
+                                    unoptimized
+                                    alt="Carolyn Dorin-Ballard"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                            <h3 className="text-gray-900 font-black text-lg mb-2">Carolyn Dorin-Ballard</h3>
+                            <p className="text-gray-700 text-sm leading-relaxed mb-3">
+                                Et aliquip occaecat deserunt cupidatat occaecat et Lorem exercitation sit
+                            </p>
+                            <a href="#" className="text-[#86D864] font-semibold text-sm hover:underline">
+                                Read More...
+                            </a>
+                        </div>
+
+                        {/* Member 6 - Norm Duke v2 (Blue) */}
+                        <div>
+                            <div className="relative h-64 rounded-2xl overflow-hidden bg-blue-100 mb-4">
+                                <div className="absolute top-4 left-4 z-10">
+                                    <span className="bg-[#86D864] text-white font-black text-xs px-3 py-1 rounded-full">
+                                        Director of Player Relationships
+                                    </span>
+                                </div>
+                                <Image
+                                    src="/land2/norm_duke_v2.png"
+                                    unoptimized
+                                    alt="Norm Duke"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                            <h3 className="text-gray-900 font-black text-lg mb-2">Norm Duke</h3>
+                            <p className="text-gray-700 text-sm leading-relaxed mb-3">
+                                Et aliquip occaecat deserunt cupidatat occaecat et Lorem exercitation sit
+                            </p>
+                            <a href="#" className="text-[#86D864] font-semibold text-sm hover:underline">
+                                Read More...
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Our People, Our Power Section */}
+            <section className="py-20 px-8 bg-white">
+                <div className="max-w-7xl mx-auto">
+                    {/* Header */}
+                    <div className="text-center mb-16">
+                        <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-4">
+                            Our People, Our Power
+                        </h2>
+                        <p className="text-lg text-gray-600">
+                            Dedicated professionals bringing innovation, passion, and teamwork to every roll.
+                        </p>
+                    </div>
+
+                    {/* Team Members Grid */}
+                    <div className="grid grid-cols-3 gap-8">
+                        {/* Member 1 */}
+                        <div className="rounded-xl overflow-hidden shadow-lg">
+                            <div className="relative h-64 bg-cyan-100">
+                                <Image
+                                    src="https://i.pravatar.cc/400?img=1"
+                                    alt="Nahian Ferdous"
+                                    fill
+                                    unoptimized
+                                    className="object-cover"
+                                />
+                            </div>
+                            <div className="bg-[#86D864] text-white p-4">
+                                <h3 className="font-black text-lg">Nahian Ferdous</h3>
+                                <p className="text-sm font-semibold">Business Intelligence Specialist</p>
+                            </div>
+                        </div>
+
+                        {/* Member 2 */}
+                        <div className="rounded-xl overflow-hidden shadow-lg">
+                            <div className="relative h-64 bg-cyan-100">
+                                <Image
+                                    src="https://i.pravatar.cc/400?img=2"
+                                    alt="Mumit Prottoy"
+                                    fill
+                                    unoptimized
+                                    className="object-cover"
+                                />
+                            </div>
+                            <div className="bg-[#86D864] text-white p-4">
+                                <h3 className="font-black text-lg">Mumit Prottoy</h3>
+                                <p className="text-sm font-semibold">Lead Developer</p>
+                            </div>
+                        </div>
+
+                        {/* Member 3 */}
+                        <div className="rounded-xl overflow-hidden shadow-lg">
+                            <div className="relative h-64 bg-cyan-100">
+                                <Image
+                                    src="https://i.pravatar.cc/400?img=3"
+                                    alt="Asraful Alam Shuvo"
+                                    unoptimized
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                            <div className="bg-[#86D864] text-white p-4">
+                                <h3 className="font-black text-lg">Asraful Alam Shuvo</h3>
+                                <p className="text-sm font-semibold">Marketing Lead</p>
+                            </div>
+                        </div>
+
+                        {/* Member 4 */}
+                        <div className="rounded-xl overflow-hidden shadow-lg">
+                            <div className="relative h-64 bg-cyan-100">
+                                <Image
+                                    src="https://i.pravatar.cc/400?img=4"
+                                    alt="Azmaine Sabbir"
+                                    unoptimized
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                            <div className="bg-[#86D864] text-white p-4">
+                                <h3 className="font-black text-lg">Azmaine Sabbir</h3>
+                                <p className="text-sm font-semibold">Marketing Specialist</p>
+                            </div>
+                        </div>
+
+                        {/* Member 5 */}
+                        <div className="rounded-xl overflow-hidden shadow-lg">
+                            <div className="relative h-64 bg-cyan-100">
+                                <Image
+                                    src="https://i.pravatar.cc/400?img=5"
+                                    alt="Adrita"
+                                    unoptimized
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                            <div className="bg-[#86D864] text-white p-4">
+                                <h3 className="font-black text-lg">Adrita</h3>
+                                <p className="text-sm font-semibold">Content Specialist</p>
+                            </div>
+                        </div>
+
+                        {/* Member 6 */}
+                        <div className="rounded-xl overflow-hidden shadow-lg">
+                            <div className="relative h-64 bg-cyan-100">
+                                <Image
+                                    src="https://i.pravatar.cc/400?img=6"
+                                    alt="Pranto"
+                                    unoptimized
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                            <div className="bg-[#86D864] text-white p-4">
+                                <h3 className="font-black text-lg">Pranto</h3>
+                                <p className="text-sm font-semibold">Creative Designer</p>
                             </div>
                         </div>
                     </div>
