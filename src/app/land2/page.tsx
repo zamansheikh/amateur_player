@@ -50,7 +50,7 @@ export default function Landing2Page() {
                 {/* Right Side: Image (50% width, full height) */}
                 <div className="absolute right-0 top-0 w-1/2 h-[700px]">
                     <Image
-                        src="/land2/hero_section.jpg"
+                        src="/land2_opt/hero_section.webp"
                         alt="Hero Section Background"
                         fill
                         className="object-cover"
@@ -104,7 +104,7 @@ export default function Landing2Page() {
                                 <div className="row-span-1">
                                     <div className="rounded-t-2xl overflow-hidden h-64">
                                         <Image
-                                            src="/land2/amateurs.jpg"
+                                            src="/land2_opt/amateurs.webp"
                                             alt="Amateurs"
                                             width={200}
                                             height={260}
@@ -121,7 +121,7 @@ export default function Landing2Page() {
                                 <div className="row-span-2">
                                     <div className="rounded-2xl overflow-hidden h-148">
                                         <Image
-                                            src="/land2/middle_unknown.jpg"
+                                            src="/land2_opt/middle_unknown.webp"
                                             alt="Experience"
                                             width={200}
                                             height={400}
@@ -135,7 +135,7 @@ export default function Landing2Page() {
                                 <div className="row-span-1">
                                     <div className="rounded-t-2xl overflow-hidden h-64">
                                         <Image
-                                            src="/land2/centers.jpg"
+                                            src="/land2_opt/centers.webp"
                                             alt="Centers"
                                             width={200}
                                             height={260}
@@ -152,7 +152,7 @@ export default function Landing2Page() {
                                 <div className="row-span-1">
                                     <div className="rounded-t-2xl overflow-hidden h-64">
                                         <Image
-                                            src="/land2/pros.jpg"
+                                            src="/land2_opt/pros.webp"
                                             alt="Pros"
                                             width={200}
                                             height={260}
@@ -169,7 +169,7 @@ export default function Landing2Page() {
                                 <div className="row-span-1">
                                     <div className="rounded-t-2xl overflow-hidden h-64">
                                         <Image
-                                            src="/land2/shops.jpg"
+                                            src="/land2_opt/shops.webp"
                                             alt="Shops"
                                             width={200}
                                             height={260}
@@ -210,7 +210,7 @@ export default function Landing2Page() {
 
                     <div className="mt-8 rounded-2xl overflow-hidden mx-auto max-w-5xl">
                         <Image
-                            src="/land2/all_in_one.jpg"
+                            src="/land2_opt/all_in_one.webp"
                             alt="All-in-One Bowling Experience"
                             width={1400}
                             height={600}
@@ -263,7 +263,7 @@ export default function Landing2Page() {
 
                             <div className="w-full rounded-2xl overflow-hidden h-48">
                                 <Image
-                                    src="/land2/15.jpg"
+                                    src="/land2_opt/15.webp"
                                     alt="Bowling Experience"
                                     width={400}
                                     height={300}
@@ -306,7 +306,7 @@ export default function Landing2Page() {
                 {/* Green Card Background */}
                 <div className="absolute left-1/2 -translate-x-1/2 top-0 w-[90vw] max-w-6xl h-[520px] rounded-3xl overflow-hidden z-0">
                     <Image
-                        src="/land2/background_green.jpg"
+                        src="/land2_opt/background_green.webp"
                         alt="Background"
                         unoptimized
                         fill
@@ -334,7 +334,7 @@ export default function Landing2Page() {
                     <div className="relative flex items-center justify-end w-3/4">
                         <div className="absolute right-0 top-0 ">
                             <Image
-                                src="/land2/mobile_phone_mockup.png"
+                                src="/land2_opt/mobile_phone_mockup.webp"
                                 alt="Mobile Phone Mockup"
                                 width={1200}
                                 height={1000}
@@ -396,7 +396,7 @@ export default function Landing2Page() {
                         {/* Right Side: Trading Card Image */}
                         <div className="flex justify-center">
                             <Image
-                                src="/land2/trading_card_section.png"
+                                src="/land2_opt/trading_card_section.webp"
                                 alt="Trading Cards"
                                 width={600}
                                 height={500}
@@ -421,7 +421,7 @@ export default function Landing2Page() {
                     {/* Center Image */}
                     <div className="mb-16">
                         <Image
-                            src="/land2/beyond_the_chatter_section.png"
+                            src="/land2_opt/beyond_the_chatter_section.webp"
                             alt="Beyond the Chatter"
                             width={1000}
                             height={600}
@@ -500,7 +500,7 @@ export default function Landing2Page() {
                 {/* Background Image */}
                 <div className="absolute inset-0 z-0 rounded-3xl overflow-hidden">
                     <Image
-                        src="/land2/smarter_center_section.jpg"
+                        src="/land2_opt/smarter_center_section.webp"
                         alt="Bowling Center"
                         unoptimized
                         fill
@@ -551,7 +551,7 @@ export default function Landing2Page() {
                         <div className="flex-1 relative">
                             <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                                 <Image
-                                    src="/land2/streamline_section_main.png"
+                                    src="/land2_opt/streamline_section_main.webp"
                                     alt="Streamline Dashboard"
                                     width={800}
                                     unoptimized
@@ -572,7 +572,7 @@ export default function Landing2Page() {
                                 {/* Left large image */}
                                 <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-lg">
                                     <Image
-                                        src="/land2/smarter_center_section.jpg"
+                                        src="/land2_opt/smarter_center_section.webp"
                                         alt="Smarter Center"
                                         fill
                                         unoptimized
@@ -584,7 +584,7 @@ export default function Landing2Page() {
                                 <div className="flex flex-col gap-4 h-[400px]">
                                     <div className="relative flex-1 rounded-2xl overflow-hidden shadow-lg">
                                         <Image
-                                            src="/land2/4.jpg"
+                                            src="/land2_opt/4.webp"
                                             alt="Feature 1"
                                             fill
                                             unoptimized
@@ -593,7 +593,7 @@ export default function Landing2Page() {
                                     </div>
                                     <div className="relative flex-1 rounded-2xl overflow-hidden shadow-lg">
                                         <Image
-                                            src="/land2/5.jpg"
+                                            src="/land2_opt/5.webp"
                                             alt="Feature 2"
                                             unoptimized
                                             fill
@@ -614,7 +614,7 @@ export default function Landing2Page() {
                     <div 
                         className="relative rounded-3xl overflow-hidden mb-8"
                         style={{
-                            backgroundImage: 'url(/land2/1.jpg)',
+                            backgroundImage: 'url(/land2_opt/1.webp)',
                             backgroundSize: 'cover',
                             backgroundPosition: 'center'
                         }}
@@ -714,7 +714,7 @@ export default function Landing2Page() {
                         {/* Right: Product Mockup Image */}
                         <div className="relative h-[500px]">
                             <Image
-                                src="/land2/7.png"
+                                src="/land2_opt/7.webp"
                                 unoptimized
                                 alt="Partnership Features"
                                 fill
@@ -827,7 +827,7 @@ export default function Landing2Page() {
             <section 
                 className="relative py-32 px-8 rounded-3xl mx-8 mb-12 overflow-hidden"
                 style={{
-                    backgroundImage: 'url(/land2/19.png)',
+                    backgroundImage: 'url(/land2_opt/19.webp)',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
                 }}
@@ -895,7 +895,7 @@ export default function Landing2Page() {
                         {/* Right: Image */}
                         <div className="relative h-[500px]">
                             <Image
-                                src="/land2/20.png"
+                                src="/land2_opt/20.webp"
                                 unoptimized
                                 alt="Analytics Dashboard"
                                 fill
@@ -1054,7 +1054,7 @@ export default function Landing2Page() {
                         {/* Left: Image */}
                         <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-lg">
                             <Image
-                                src="/land2/22.png"
+                                src="/land2_opt/22.webp"
                                 unoptimized
                                 alt="Bowling Center Community"
                                 fill
@@ -1181,7 +1181,7 @@ export default function Landing2Page() {
 
                                     <div className="relative h-40 rounded-xl overflow-hidden">
                                         <Image
-                                            src="/land2/article1.jpg"
+                                            src="/land2_opt/article1.webp"
                                             unoptimized
                                             alt="The Future of Bowling"
                                             fill
@@ -1223,7 +1223,7 @@ export default function Landing2Page() {
 
                                     <div className="relative h-40 rounded-xl overflow-hidden">
                                         <Image
-                                            src="/land2/article2.jpg"
+                                            src="/land2_opt/article2.webp"
                                             unoptimized
                                             alt="Building a Digital Bowling Community"
                                             fill
@@ -1269,7 +1269,7 @@ export default function Landing2Page() {
                             {/* Map */}
                             <div className="mb-12 relative h-48 rounded-lg overflow-hidden">
                                 <Image
-                                    src="/land2/map.png"
+                                    src="/land2_opt/map.webp"
                                     unoptimized
                                     alt="Location Map"
                                     fill
@@ -1462,7 +1462,7 @@ export default function Landing2Page() {
                         {/* Left: Team Member Image */}
                         <div className="relative h-96 rounded-3xl overflow-hidden bg-blue-100">
                             <Image
-                                src="/land2/jay_fettig.png"
+                                src="/land2_opt/jay_fettig.webp"
                                 unoptimized
                                 alt="Jay Fettig"
                                 fill
@@ -1514,7 +1514,7 @@ export default function Landing2Page() {
                                     </span>
                                 </div>
                                 <Image
-                                    src="/land2/norm_duke.png"
+                                    src="/land2_opt/norm_duke.webp"
                                     unoptimized
                                     alt="Norm Duke"
                                     fill
@@ -1539,7 +1539,7 @@ export default function Landing2Page() {
                                     </span>
                                 </div>
                                 <Image
-                                    src="/land2/chuck_gardner.png"
+                                    src="/land2_opt/chuck_gardner.webp"
                                     unoptimized
                                     alt="Chuck Gardner"
                                     fill
@@ -1564,7 +1564,7 @@ export default function Landing2Page() {
                                     </span>
                                 </div>
                                 <Image
-                                    src="/land2/parker_bohn.png"
+                                    src="/land2_opt/parker_bohn.webp"
                                     unoptimized
                                     alt="Parker Bohn"
                                     fill
@@ -1589,7 +1589,7 @@ export default function Landing2Page() {
                                     </span>
                                 </div>
                                 <Image
-                                    src="/land2/liz_johnson.png"
+                                    src="/land2_opt/liz_johnson.webp"
                                     unoptimized
                                     alt="Liz Johnson"
                                     fill
@@ -1614,7 +1614,7 @@ export default function Landing2Page() {
                                     </span>
                                 </div>
                                 <Image
-                                    src="/land2/carolyn-dorin-ballard.png"
+                                    src="/land2_opt/carolyn-dorin-ballard.webp"
                                     unoptimized
                                     alt="Carolyn Dorin-Ballard"
                                     fill
@@ -1639,7 +1639,7 @@ export default function Landing2Page() {
                                     </span>
                                 </div>
                                 <Image
-                                    src="/land2/norm_duke_v2.png"
+                                    src="/land2_opt/norm_duke_v2.webp"
                                     unoptimized
                                     alt="Norm Duke"
                                     fill
