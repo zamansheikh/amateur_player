@@ -906,7 +906,146 @@ export default function Landing2Page() {
                 </div>
             </section>
 
-            
+            {/* Pricing Section */}
+            <section className="py-20 px-8 bg-white">
+                <div className="max-w-7xl mx-auto">
+                    {/* Header */}
+                    <div className="text-center mb-16">
+                        <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-4">
+                            Choose the Plan That Fits Your Game
+                        </h2>
+                        <p className="text-lg text-gray-600 mb-2">
+                            Flexible options for amateurs, pros, centers, and shops — start free, grow with premium tools.
+                        </p>
+                        <p className="text-lg text-gray-700 font-semibold">
+                            14 days free trial. No contract or credit card required.
+                        </p>
+                    </div>
+
+                    {/* Billing Toggle */}
+                    <div className="flex justify-center items-center gap-6 mb-12">
+                        <button className="text-gray-900 font-bold text-lg hover:text-[#86D864] transition-colors">
+                            MONTHLY
+                        </button>
+                        <button className="px-6 py-2 bg-[#86D864] text-white font-bold rounded-full flex items-center gap-2 hover:shadow-lg transition-shadow">
+                            <span className="w-2.5 h-2.5 bg-white rounded-full"></span>
+                            ANNUALLY
+                        </button>
+                    </div>
+
+                    {/* Pricing Cards */}
+                    <div className="grid grid-cols-3 gap-8 max-w-6xl mx-auto">
+                        {/* Starter Plan */}
+                        <div className="bg-gray-50 rounded-2xl p-8 flex flex-col">
+                            <h3 className="text-[#86D864] font-black text-lg mb-4">STARTER</h3>
+                            <div className="mb-8">
+                                <span className="text-4xl font-black text-gray-900">$29</span>
+                                <span className="text-gray-600 font-semibold">/MONTH</span>
+                            </div>
+
+                            <ul className="space-y-3 mb-8 flex-1">
+                                <li className="flex items-start gap-2 text-gray-700">
+                                    <span className="text-[#86D864] font-bold mt-1">•</span>
+                                    <span>Basic profile setup</span>
+                                </li>
+                                <li className="flex items-start gap-2 text-gray-700">
+                                    <span className="text-[#86D864] font-bold mt-1">•</span>
+                                    <span>Access to community feed</span>
+                                </li>
+                                <li className="flex items-start gap-2 text-gray-700">
+                                    <span className="text-[#86D864] font-bold mt-1">•</span>
+                                    <span>Limited participation in leaderboards</span>
+                                </li>
+                                <li className="flex items-start gap-2 text-gray-700">
+                                    <span className="text-[#86D864] font-bold mt-1">•</span>
+                                    <span>Browse shops & centers</span>
+                                </li>
+                            </ul>
+
+                            <button className="w-full py-3 border-2 border-[#86D864] text-[#86D864] font-black rounded-full hover:bg-[#86D864] hover:text-white transition-colors">
+                                GET STARTED
+                            </button>
+                        </div>
+
+                        {/* Pro Plan - Most Popular */}
+                        <div className="relative -mt-4">
+                            {/* Most Popular Badge */}
+                            <div className="absolute -top-4 left-0 right-0 flex justify-center">
+                                <div className="bg-[#86D864] text-gray-900 font-black px-6 py-2 rounded-full">
+                                    MOST POPULAR
+                                </div>
+                            </div>
+
+                            <div className="bg-gray-900 rounded-2xl p-8 flex flex-col h-full text-white">
+                                <h3 className="text-yellow-400 font-black text-lg mb-4">PRO</h3>
+                                <div className="mb-8">
+                                    <span className="text-4xl font-black">$49</span>
+                                    <span className="text-gray-300 font-semibold">/MONTH</span>
+                                </div>
+
+                                <ul className="space-y-3 mb-8 flex-1">
+                                    <li className="flex items-start gap-2">
+                                        <span className="text-[#86D864] font-bold mt-1">•</span>
+                                        <span>Advanced stats & analytics</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="text-[#86D864] font-bold mt-1">•</span>
+                                        <span>Trading card & reward features</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="text-[#86D864] font-bold mt-1">•</span>
+                                        <span>Tournament/league tools</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="text-[#86D864] font-bold mt-1">•</span>
+                                        <span>Exclusive partner offers</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="text-[#86D864] font-bold mt-1">•</span>
+                                        <span>Priority support</span>
+                                    </li>
+                                </ul>
+
+                                <button className="w-full py-3 bg-[#86D864] text-gray-900 font-black rounded-full hover:shadow-lg transition-shadow">
+                                    UPGRADE
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Enterprise Plan */}
+                        <div className="bg-gray-50 rounded-2xl p-8 flex flex-col">
+                            <h3 className="text-[#86D864] font-black text-lg mb-4">ENTERPRISE</h3>
+                            <div className="mb-8">
+                                <span className="text-4xl font-black text-gray-900">CUSTOM</span>
+                                <span className="text-gray-600 font-semibold text-sm block">PRICE</span>
+                            </div>
+
+                            <ul className="space-y-3 mb-8 flex-1">
+                                <li className="flex items-start gap-2 text-gray-700">
+                                    <span className="text-[#86D864] font-bold mt-1">•</span>
+                                    <span>League & tournament management suite</span>
+                                </li>
+                                <li className="flex items-start gap-2 text-gray-700">
+                                    <span className="text-[#86D864] font-bold mt-1">•</span>
+                                    <span>Centralized payments integration</span>
+                                </li>
+                                <li className="flex items-start gap-2 text-gray-700">
+                                    <span className="text-[#86D864] font-bold mt-1">•</span>
+                                    <span>Pro shop storefront</span>
+                                </li>
+                                <li className="flex items-start gap-2 text-gray-700">
+                                    <span className="text-[#86D864] font-bold mt-1">•</span>
+                                    <span>Sponsorship & advertising dashboard</span>
+                                </li>
+                            </ul>
+
+                            <button className="w-full py-3 border-2 border-gray-300 text-[#86D864] font-black rounded-full hover:bg-gray-100 transition-colors">
+                                CONTACT US
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
             {/* Driven by Passion Section */}
             <section className="py-20 px-8 bg-white">

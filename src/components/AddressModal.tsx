@@ -27,7 +27,7 @@ export default function AddressModal({
     initialZipcode = '',
     title = 'Update Address'
 }: AddressModalProps) {
-    const [searchType, setSearchType] = useState<'address' | 'zipcode'>('address');
+    const [searchType, setSearchType] = useState<'address' | 'zipcode'>('zipcode');
     const [searchQuery, setSearchQuery] = useState('');
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [showMapPicker, setShowMapPicker] = useState(false);
@@ -230,7 +230,7 @@ export default function AddressModal({
                         <>
                             {/* Search Type Toggle */}
                             <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
-                                <button
+                                {/* <button
                                     onClick={() => setSearchType('address')}
                                     className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition ${
                                         searchType === 'address'
@@ -239,7 +239,7 @@ export default function AddressModal({
                                     }`}
                                 >
                                     Search by Address
-                                </button>
+                                </button> */}
                                 <button
                                     onClick={() => setSearchType('zipcode')}
                                     className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition ${

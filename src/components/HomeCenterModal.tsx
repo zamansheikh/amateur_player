@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { X, Search, Loader, MapPin, Building2, Plus, Layers, Phone, Mail, Globe2 } from 'lucide-react';
+import { X, Search, Loader, MapPin, Building2, Plus, Layers, Phone, Mail, Globe2, AlertCircle } from 'lucide-react';
 import { BowlingCenter } from '@/types';
 import AddressModal from './AddressModal';
 
@@ -28,6 +28,7 @@ export default function HomeCenterModal({
     const [isPublic, setIsPublic] = useState(true);
     const [showAddCenterForm, setShowAddCenterForm] = useState(false);
     const [showAddressModal, setShowAddressModal] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     
     // Add center form state
     const [newCenter, setNewCenter] = useState({
@@ -75,21 +76,31 @@ export default function HomeCenterModal({
 
     const fetchCenters = async () => {
         setIsLoading(true);
+        setError(null);
         try {
             const response = await fetch('/api/centers', {
+                method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
                 }
             });
 
-            if (response.ok) {
-                const data = await response.json();
-                setCenters(data || []);
-                setFilteredCenters(data || []);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `Failed to fetch centers: ${response.status}`);
             }
+
+            const data = await response.json();
+            setCenters(Array.isArray(data) ? data : []);
+            setFilteredCenters(Array.isArray(data) ? data : []);
         } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Failed to fetch centers';
             console.error('Error fetching centers:', error);
+            setError(errorMessage);
+            setCenters([]);
+            setFilteredCenters([]);
         } finally {
             setIsLoading(false);
         }
@@ -200,6 +211,14 @@ export default function HomeCenterModal({
                     <div className="flex-1 overflow-y-auto p-6 space-y-4">
                         {!showAddCenterForm ? (
                             <>
+                                {/* Error Message */}
+                                {error && (
+                                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-start gap-2">
+                                        <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                                        <span>{error}</span>
+                                    </div>
+                                )}
+
                                 {/* Search Input */}
                                 <div className="relative">
                                     <input
@@ -226,7 +245,13 @@ export default function HomeCenterModal({
 
                                 {/* Centers List */}
                                 <div className="space-y-2 max-h-96 overflow-y-auto">
-                                    {filteredCenters.length === 0 && !isLoading && (
+                                    {isLoading && (
+                                        <div className="flex items-center justify-center py-8">
+                                            <Loader className="w-6 h-6 text-green-600 animate-spin" />
+                                        </div>
+                                    )}
+
+                                    {!isLoading && filteredCenters.length === 0 && !error && (
                                         <div className="text-center py-8 text-gray-500">
                                             No centers found. Try a different search or add a new center.
                                         </div>
