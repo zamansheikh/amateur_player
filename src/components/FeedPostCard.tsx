@@ -46,10 +46,25 @@ export default function FeedPostCard({
   const handleLike = async () => {
     if (isLiking) return;
 
+    // Optimistic update
+    const previousPost = { ...localPost };
+    const previousLikes = localLikes;
+    
+    const newIsLiked = !localPost.is_liked;
+    const newLikeCount = newIsLiked ? localPost.like_count + 1 : localPost.like_count - 1;
+
+    const optimisticPost: FeedPost = {
+      ...localPost,
+      is_liked: newIsLiked,
+      like_count: newLikeCount,
+    };
+
+    setLocalPost(optimisticPost);
+    setLocalLikes(newLikeCount);
+    setIsLiking(true);
+
     try {
-      setIsLiking(true);
-      
-      // Call API first to get the actual response
+      // Call API
       const response = await api.get(`/api/posts/v2/like/${post.uid}`);
       const { is_liked, like_count } = response.data;
 
@@ -69,8 +84,8 @@ export default function FeedPostCard({
     } catch (error) {
       console.error("Error liking post:", error);
       // Revert to original state on error
-      setLocalPost(post);
-      setLocalLikes(post.like_count);
+      setLocalPost(previousPost);
+      setLocalLikes(previousLikes);
     } finally {
       setIsLiking(false);
     }

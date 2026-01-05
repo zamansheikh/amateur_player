@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCloudUpload } from '@/lib/useCloudUpload';
 import { useMapboxGeocoding } from '@/lib/useMapboxGeocoding';
 import { GeocodingResult } from '@/lib/mapboxGeocodingService';
+import { BowlingCenter } from '@/types';
 import AddressModal from '@/components/AddressModal';
 import HomeCenterModal from '@/components/HomeCenterModal';
 import FollowersModal from '@/components/FollowersModal';
@@ -47,6 +48,10 @@ export default function ProfilePage() {
     const videoInputRef = useRef<HTMLInputElement>(null);
     const addressDebounceTimer = useRef<NodeJS.Timeout | undefined>(undefined);
     const addressSuggestionsRef = useRef<HTMLDivElement>(null);
+
+    // Optimistic UI state
+    const [displayAddress, setDisplayAddress] = useState<{address: string, zipcode: string} | null>(null);
+    const [displayHomeCenter, setDisplayHomeCenter] = useState<{name: string, address: string, id: number, is_public: boolean} | null>(null);
 
     const [formData, setFormData] = useState({
         first_name: '',
@@ -118,6 +123,23 @@ export default function ProfilePage() {
                 address: user.address_data?.is_public ?? false,
                 ballHandling: user.ball_handling_style?.is_public ?? true,
             }));
+
+            // Initialize optimistic UI state
+            if (user.address_data) {
+                setDisplayAddress({
+                    address: user.address_data.address_str,
+                    zipcode: user.address_data.zipcode
+                });
+            }
+            
+            if (user.home_center_data?.center) {
+                setDisplayHomeCenter({
+                    name: user.home_center_data.center.name,
+                    address: user.home_center_data.center.address_str || '',
+                    id: user.home_center_data.center.id,
+                    is_public: user.home_center_data.is_public
+                });
+            }
 
             // Fetch bowling stats
             fetchBowlingStats();
@@ -1020,9 +1042,9 @@ export default function ProfilePage() {
                                             <div>
                                                 <div className="flex items-center justify-between">
                                                     <div className="space-y-1">
-                                                        <p className="text-gray-600">{user?.address_data?.address_str || 'Not provided'}</p>
-                                                        {user?.address_data?.zipcode && (
-                                                            <p className="text-sm text-gray-500">Zipcode: {user.address_data.zipcode}</p>
+                                                        <p className="text-gray-600">{displayAddress?.address || user?.address_data?.address_str || 'Not provided'}</p>
+                                                        {(displayAddress?.zipcode || user?.address_data?.zipcode) && (
+                                                            <p className="text-sm text-gray-500">Zipcode: {displayAddress?.zipcode || user?.address_data?.zipcode}</p>
                                                         )}
                                                     </div>
                                                     <button
@@ -1149,11 +1171,11 @@ export default function ProfilePage() {
                                             <div>
                                                 <div className="flex items-center justify-between">
                                                     <div className="space-y-1">
-                                                        <p className="text-gray-600">{user?.home_center_data?.center?.name || 'Not selected'}</p>
-                                                        {user?.home_center_data?.center?.address_str && (
+                                                        <p className="text-gray-600">{displayHomeCenter?.name || user?.home_center_data?.center?.name || 'Not selected'}</p>
+                                                        {(displayHomeCenter?.address || user?.home_center_data?.center?.address_str) && (
                                                             <p className="text-sm text-gray-500 flex items-center gap-1">
                                                                 <MapPin className="w-3 h-3" />
-                                                                {user.home_center_data.center.address_str}
+                                                                {displayHomeCenter?.address || user?.home_center_data?.center?.address_str}
                                                             </p>
                                                         )}
                                                     </div>
@@ -1166,7 +1188,7 @@ export default function ProfilePage() {
                                                 </div>
                                                 <div className="flex items-center gap-2 mt-2">
                                                     <span className="text-xs flex items-center gap-1">
-                                                        {user?.home_center_data?.is_public ? (
+                                                        {(displayHomeCenter?.is_public ?? user?.home_center_data?.is_public) ? (
                                                             <><Globe className="w-3 h-3 text-green-600" /> <span className="text-green-600 font-medium">Public</span></>
                                                         ) : (
                                                             <><Lock className="w-3 h-3 text-gray-500" /> <span className="text-gray-500 font-medium">Private</span></>
@@ -1360,6 +1382,12 @@ export default function ProfilePage() {
     }) {
         if (!user || !user.authenticated) return;
 
+        // Optimistic update
+        setDisplayAddress({
+            address: address.address,
+            zipcode: address.zipcode
+        });
+
         setFormData(prev => ({
             ...prev,
             address: address.address,
@@ -1400,8 +1428,18 @@ export default function ProfilePage() {
     }
 
     // Handle home center save from modal
-    async function handleHomeCenterSave(centerId: number, isPublic: boolean) {
+    async function handleHomeCenterSave(centerId: number, isPublic: boolean, center?: BowlingCenter) {
         if (!user || !user.authenticated) return;
+
+        // Optimistic update
+        if (center) {
+            setDisplayHomeCenter({
+                name: center.name,
+                address: center.address_str || '',
+                id: center.id,
+                is_public: isPublic
+            });
+        }
 
         setIsSaving(true);
         try {

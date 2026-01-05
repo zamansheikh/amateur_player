@@ -8,7 +8,7 @@ import AddressModal from './AddressModal';
 interface HomeCenterModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (centerId: number, isPublic: boolean) => void;
+    onSave: (centerId: number, isPublic: boolean, center?: BowlingCenter) => void;
     currentCenterId?: number;
     accessToken: string;
 }
@@ -186,7 +186,8 @@ export default function HomeCenterModal({
             alert('Please select a center');
             return;
         }
-        onSave(selectedCenterId, isPublic);
+        const selectedCenter = centers.find(c => c.id === selectedCenterId);
+        onSave(selectedCenterId, isPublic, selectedCenter);
         onClose();
     };
 
