@@ -8,6 +8,7 @@ import { api } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { FeedPost } from "@/types";
 import MediaGallery from "./MediaGallery";
+import AutoExpandingTextarea from "./AutoExpandingTextarea";
 
 interface FeedPostCardProps {
   post: FeedPost;
@@ -319,11 +320,10 @@ export default function FeedPostCard({
             <img
               src={user?.profile_picture_url || "/logo/default-avatar.png"}
               alt="Your avatar"
-              className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+              className="w-8 h-8 rounded-full object-cover flex-shrink-0 mt-2"
             />
             <div className="flex-1 relative">
-              <input
-                type="text"
+              <AutoExpandingTextarea
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 onKeyDown={(e) => {
@@ -333,12 +333,14 @@ export default function FeedPostCard({
                   }
                 }}
                 placeholder="Write a comment..."
-                className="w-full px-4 py-2 pr-10 bg-white border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                minRows={1}
+                maxRows={5}
+                className="w-full px-4 py-2 pr-10 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
               />
               <button
                 onClick={handleSubmitComment}
                 disabled={!commentText.trim() || isSubmittingComment}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-green-600 hover:bg-green-50 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="absolute right-2 bottom-2 p-1.5 text-green-600 hover:bg-green-50 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmittingComment ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

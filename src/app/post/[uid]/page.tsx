@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import axios from "axios";
 import { useCloudUpload } from "@/lib/useCloudUpload";
 import FeedPostCard from "@/components/FeedPostCard";
+import AutoExpandingTextarea from "@/components/AutoExpandingTextarea";
 
 interface Comment {
   post_id: number;
@@ -388,15 +389,16 @@ export default function PostDetailPage() {
                   alt="Your avatar"
                   width={40}
                   height={40}
-                  className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                  className="w-10 h-10 rounded-full object-cover flex-shrink-0 mt-2"
                 />
                 <div className="flex-1">
-                  <textarea
+                  <AutoExpandingTextarea
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
                     placeholder="Write a comment..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
-                    rows={3}
+                    minRows={1}
+                    maxRows={5}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
                   />
                   
                   {/* Hidden File Input */}
