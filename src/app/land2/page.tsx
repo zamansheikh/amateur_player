@@ -1532,107 +1532,30 @@ export default function Landing2Page() {
 
                     {/* Team Members Grid */}
                     <div className="grid grid-cols-3 gap-8">
-                        {/* Member 1 */}
-                        <div className="rounded-xl overflow-hidden shadow-lg">
-                            <div className="relative h-64 bg-cyan-100">
-                                <Image
-                                    src="https://i.pravatar.cc/400?img=1"
-                                    alt="Nahian Ferdous"
-                                    fill
-                                    unoptimized
-                                    className="object-cover"
-                                />
+                        {[
+                            { src: '/team_headshots/Nahian Ferdouse.webp', name: 'Nahian Ferdouse', role: 'Business Intelligence Specialist' },
+                            { src: '/team_headshots/mumit_prottoy.webp', name: 'Mumit Prottoy', role: 'Lead Developer' },
+                            { src: '/team_headshots/Shuvo Headshot.webp', name: 'Asraful Alam Shuvo', role: 'Marketing Lead' },
+                            { src: '/team_headshots/Azmain Hossain Sabbir-Photo.webp', name: 'Azmain Hossain Sabbir', role: 'Marketing Specialist' },
+                            { src: '/team_headshots/Sadia Durdana Adrita.webp', name: 'Sadia Durdana Adrita', role: 'Content Specialist' },
+                            { src: '/team_headshots/Hasibul Hasan Pranto.webp', name: 'Hasibul Hasan Pranto', role: 'Creative Designer' },
+                            { src: '/team_headshots/Brittany Kolatzny-Headshot.webp', name: 'Brittany Kolatzny', role: 'Team Member' },
+                        ].map((member) => (
+                            <div key={member.src} className="rounded-xl overflow-hidden shadow-lg">
+                                <div className="relative h-64 bg-cyan-100">
+                                    <Image
+                                        src={member.src}
+                                        alt={member.name}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </div>
+                                <div className="bg-[#86D864] text-white p-4">
+                                    <h3 className="font-black text-lg">{member.name}</h3>
+                                    <p className="text-sm font-semibold">{member.role ?? 'Team Member'}</p>
+                                </div>
                             </div>
-                            <div className="bg-[#86D864] text-white p-4">
-                                <h3 className="font-black text-lg">Nahian Ferdous</h3>
-                                <p className="text-sm font-semibold">Business Intelligence Specialist</p>
-                            </div>
-                        </div>
-
-                        {/* Member 2 */}
-                        <div className="rounded-xl overflow-hidden shadow-lg">
-                            <div className="relative h-64 bg-cyan-100">
-                                <Image
-                                    src="https://i.pravatar.cc/400?img=2"
-                                    alt="Mumit Prottoy"
-                                    fill
-                                    unoptimized
-                                    className="object-cover"
-                                />
-                            </div>
-                            <div className="bg-[#86D864] text-white p-4">
-                                <h3 className="font-black text-lg">Mumit Prottoy</h3>
-                                <p className="text-sm font-semibold">Lead Developer</p>
-                            </div>
-                        </div>
-
-                        {/* Member 3 */}
-                        <div className="rounded-xl overflow-hidden shadow-lg">
-                            <div className="relative h-64 bg-cyan-100">
-                                <Image
-                                    src="https://i.pravatar.cc/400?img=3"
-                                    alt="Asraful Alam Shuvo"
-                                    unoptimized
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                            <div className="bg-[#86D864] text-white p-4">
-                                <h3 className="font-black text-lg">Asraful Alam Shuvo</h3>
-                                <p className="text-sm font-semibold">Marketing Lead</p>
-                            </div>
-                        </div>
-
-                        {/* Member 4 */}
-                        <div className="rounded-xl overflow-hidden shadow-lg">
-                            <div className="relative h-64 bg-cyan-100">
-                                <Image
-                                    src="https://i.pravatar.cc/400?img=4"
-                                    alt="Azmaine Sabbir"
-                                    unoptimized
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                            <div className="bg-[#86D864] text-white p-4">
-                                <h3 className="font-black text-lg">Azmaine Sabbir</h3>
-                                <p className="text-sm font-semibold">Marketing Specialist</p>
-                            </div>
-                        </div>
-
-                        {/* Member 5 */}
-                        <div className="rounded-xl overflow-hidden shadow-lg">
-                            <div className="relative h-64 bg-cyan-100">
-                                <Image
-                                    src="https://i.pravatar.cc/400?img=5"
-                                    alt="Adrita"
-                                    unoptimized
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                            <div className="bg-[#86D864] text-white p-4">
-                                <h3 className="font-black text-lg">Adrita</h3>
-                                <p className="text-sm font-semibold">Content Specialist</p>
-                            </div>
-                        </div>
-
-                        {/* Member 6 */}
-                        <div className="rounded-xl overflow-hidden shadow-lg">
-                            <div className="relative h-64 bg-cyan-100">
-                                <Image
-                                    src="https://i.pravatar.cc/400?img=6"
-                                    alt="Pranto"
-                                    unoptimized
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                            <div className="bg-[#86D864] text-white p-4">
-                                <h3 className="font-black text-lg">Pranto</h3>
-                                <p className="text-sm font-semibold">Creative Designer</p>
-                            </div>
-                        </div>
+                        ))}
                     </div>
                 </div>
             </section>
