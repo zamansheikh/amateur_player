@@ -158,19 +158,19 @@ export default function Landing2Page() {
     return (
         <div className="min-h-screen bg-white">
             {/* Navigation Header */}
-            <nav className="flex items-center justify-between px-8 py-6 bg-white border-b border-gray-200">
+            <nav className="flex flex-col md:flex-row items-center justify-between px-4 md:px-8 py-4 md:py-6 bg-white border-b border-gray-200 gap-4 md:gap-0">
                 {/* Logo */}
-                <div className="text-2xl font-black text-gray-900 tracking-tight">
+                <div className="text-xl md:text-2xl font-black text-gray-900 tracking-tight">
                     BOWLERS NETWORK
                 </div>
 
                 {/* Menu Items */}
-                <div className="flex items-center gap-8">
+                <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8">
                     {menuItems.map((item) => (
                         <Link
                             key={item.label}
                             href={item.href}
-                            className="text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors"
+                            className="text-xs md:text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors"
                         >
                             {item.label}
                         </Link>
@@ -179,16 +179,16 @@ export default function Landing2Page() {
 
                 {/* User Icon */}
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-colors" style={{ backgroundColor: '#86D864' }}>
-                        <UserCircle className="w-6 h-6 text-white" />
+                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center cursor-pointer transition-colors" style={{ backgroundColor: '#86D864' }}>
+                        <UserCircle className="w-5 h-5 md:w-6 md:h-6 text-white" />
                     </div>
                 </div>
             </nav>
 
             {/* Hero Section */}
             <section className="relative h-screen flex items-start overflow-hidden">
-                {/* Right Side: Image (50% width, full height) */}
-                <div className="absolute right-0 top-0 w-1/2 h-[700px]">
+                {/* Right Side: Image (50% width on desktop, full on mobile) */}
+                <div className="absolute right-0 top-0 w-full md:w-1/2 h-full md:h-[700px] opacity-20 md:opacity-100">
                     <Image
                         src="/land2_opt/hero_section.webp"
                         alt="Hero Section Background"
@@ -200,22 +200,22 @@ export default function Landing2Page() {
                 </div>
 
                 {/* Content Container - Overlaps onto image */}
-                <div className="relative z-10 w-full px-16 pt-32">
+                <div className="relative z-10 w-full px-6 md:px-16 pt-20 md:pt-32 flex flex-col items-start">
                     {/* Main Heading */}
-                    <div className="mb-12">
-                        <h1 className="text-6xl font-black leading-[1.1] mb-0" style={{ color: '#86D864' }}>
+                    <div className="mb-8 md:mb-12">
+                        <h1 className="text-4xl md:text-6xl font-black leading-[1.1] mb-0" style={{ color: '#86D864' }}>
                             JOIN THE ULTIMATE
                         </h1>
-                        <h2 className="text-8xl font-black leading-[1.1] text-black">
+                        <h2 className="text-5xl md:text-8xl font-black leading-[1.1] text-black">
                             BOWLING
                         </h2>
-                        <h2 className="text-8xl font-black leading-[1.1] text-black">
+                        <h2 className="text-5xl md:text-8xl font-black leading-[1.1] text-black">
                             NETWORK
                         </h2>
                     </div>
 
                     {/* Description Box */}
-                    <div className="mb-10 bg-white/95 backdrop-blur-sm p-5 w-fit max-w-md">
+                    <div className="mb-8 md:mb-10 bg-white/95 backdrop-blur-sm p-5 w-full md:w-fit max-w-md rounded-lg md:rounded-none shadow-sm md:shadow-none">
                         <p className="text-xs font-bold text-gray-800 leading-relaxed uppercase">
                             Connect with bowlers, pros, centers, and shops. Share your passion, improve your game, and access exclusive resources.
                         </p>
@@ -223,7 +223,7 @@ export default function Landing2Page() {
 
                     {/* Register Button */}
                     <button
-                        className="text-white font-black text-sm px-10 py-3 rounded-full transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
+                        className="text-white font-black text-xs md:text-sm px-8 md:px-10 py-3 rounded-full transition-all flex items-center gap-2 shadow-md hover:shadow-lg w-full md:w-auto justify-center md:justify-start"
                         style={{ backgroundColor: '#86D864' }}
                     >
                         <span className="w-2.5 h-2.5 bg-white rounded-full"></span>
@@ -233,13 +233,13 @@ export default function Landing2Page() {
             </section>
 
             {/* Built for Every Bowler Section */}
-            <section className="py-16 px-8 bg-white">
+            <section className="py-12 md:py-16 px-4 md:px-8 bg-white">
                 <div className="max-w-7xl mx-auto">
                     {/* Section Content */}
-                    <div className="flex items-start gap-12">
+                    <div className="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12">
                         {/* Left: Images Grid */}
-                        <div className="flex-1">
-                            <div className="grid grid-cols-3 gap-4" style={{ gridTemplateRows: 'auto auto' }}>
+                        <div className="flex-1 w-full order-2 md:order-1">
+                            <div className="grid grid-cols-3 gap-2 md:gap-4" style={{ gridTemplateRows: 'auto auto' }}>
                                 {/* Item 1: Amateurs (top-left) */}
                                 <div className="row-span-1">
                                     <div className="rounded-t-2xl overflow-hidden h-64">
@@ -325,11 +325,11 @@ export default function Landing2Page() {
                         </div>
 
                         {/* Right: Text Content */}
-                        <div className="flex-1 flex flex-col justify-start pt-4">
-                            <h2 className="text-6xl font-black leading-tight text-black mb-8">
+                        <div className="flex-1 flex flex-col justify-start pt-4 w-full text-center md:text-left">
+                            <h2 className="text-4xl md:text-6xl font-black leading-tight text-black mb-6 md:mb-8">
                                 Built for<br />Every<br />Bowler
                             </h2>
-                            <p className="text-base font-semibold text-gray-800 leading-relaxed">
+                            <p className="text-sm md:text-base font-semibold text-gray-800 leading-relaxed">
                                 Whether you're rolling your first ball, chasing a pro title, running a center, or stocking the shelves — Bowlers Network connects the whole bowling world.
                             </p>
                         </div>
@@ -338,12 +338,12 @@ export default function Landing2Page() {
             </section>
 
             {/* All-in-OneBowling Experience Section */}
-            <section className="py-20 px-8 bg-white">
+            <section className="py-12 md:py-20 px-4 md:px-8 bg-white">
                 <div className="max-w-7xl mx-auto text-center">
-                    <h2 className="text-4xl md:text-5xl font-black text-black">
+                    <h2 className="text-3xl md:text-5xl font-black text-black">
                         All-in-OneBowling Experience
                     </h2>
-                    <p className="mt-4 text-lg md:text-xl text-gray-700 max-w-2xl mx-auto">
+                    <p className="mt-4 text-base md:text-xl text-gray-700 max-w-2xl mx-auto">
                         From casual play to pro competition — every feature you need, in one
                         connected platform.
                     </p>
@@ -362,14 +362,14 @@ export default function Landing2Page() {
             </section>
 
             {/* Bowl Collect Compete Section */}
-            <section className="py-20 px-8 bg-white">
+            <section className="py-12 md:py-20 px-4 md:px-8 bg-white">
                 <div className="max-w-7xl mx-auto">
-                    {/* Grid layout: 3 columns */}
-                    <div className="grid grid-cols-3 gap-6 items-start">
+                    {/* Grid layout: 1 col mobile, 3 cols desktop */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
                         {/* Left column - 2 boxes */}
-                        <div className="flex flex-col gap-6">
+                        <div className="flex flex-col gap-6 order-2 md:order-1">
                             {/* Box 1: Earn and Trade */}
-                            <div className="bg-gray-100 rounded-2xl p-8 h-32 flex items-start gap-4">
+                            <div className="bg-gray-100 rounded-2xl p-6 md:p-8 h-auto md:h-32 flex items-start gap-4">
                                 <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#86D864' }}>
                                     <TrendingUp className="w-6 h-6 text-white" />
                                 </div>
@@ -380,7 +380,7 @@ export default function Landing2Page() {
                             </div>
 
                             {/* Box 2: Connect */}
-                            <div className="bg-gray-100 rounded-2xl p-8 h-32 flex items-start gap-4">
+                            <div className="bg-gray-100 rounded-2xl p-6 md:p-8 h-auto md:h-32 flex items-start gap-4">
                                 <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#86D864' }}>
                                     <LucideLink className="w-6 h-6 text-white" />
                                 </div>
@@ -392,8 +392,8 @@ export default function Landing2Page() {
                         </div>
 
                         {/* Center column - heading, button, image */}
-                        <div className="flex flex-col items-center text-center gap-6">
-                            <h3 className="text-5xl md:text-6xl font-black leading-tight text-black">
+                        <div className="flex flex-col items-center text-center gap-6 order-1 md:order-2 mb-8 md:mb-0">
+                            <h3 className="text-4xl md:text-6xl font-black leading-tight text-black">
                                 Bowl<br />Collect<br />Compete
                             </h3>
                             <button className="inline-flex items-center gap-2 bg-[#86D864] text-white px-6 py-3 rounded-full font-bold text-sm shadow-md hover:shadow-lg transition-shadow">
@@ -401,7 +401,7 @@ export default function Landing2Page() {
                                 EXPLORE THE FEATURES
                             </button>
 
-                            <div className="w-full rounded-2xl overflow-hidden h-48">
+                            <div className="w-full rounded-2xl overflow-hidden h-48 md:h-48">
                                 <Image
                                     src="/land2_opt/15.webp"
                                     alt="Bowling Experience"
@@ -414,9 +414,9 @@ export default function Landing2Page() {
                         </div>
 
                         {/* Right column - 2 boxes */}
-                        <div className="flex flex-col gap-6">
+                        <div className="flex flex-col gap-6 order-3 md:order-3">
                             {/* Box 3: Enter */}
-                            <div className="bg-gray-100 rounded-2xl p-8 h-32 flex items-start gap-4">
+                            <div className="bg-gray-100 rounded-2xl p-6 md:p-8 h-auto md:h-32 flex items-start gap-4">
                                 <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#86D864' }}>
                                     <Calendar className="w-6 h-6 text-white" />
                                 </div>
@@ -427,7 +427,7 @@ export default function Landing2Page() {
                             </div>
 
                             {/* Box 4: Track */}
-                            <div className="bg-gray-100 rounded-2xl p-8 h-32 flex items-start gap-4">
+                            <div className="bg-gray-100 rounded-2xl p-6 md:p-8 h-auto md:h-32 flex items-start gap-4">
                                 <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#86D864' }}>
                                     <MapPin className="w-6 h-6 text-white" />
                                 </div>
@@ -442,9 +442,9 @@ export default function Landing2Page() {
             </section>
 
             {/* Every Bowler Is a Card Section */}
-            <section className="relative flex items-center justify-center py-0 px-0 min-h-[520px] bg-transparent overflow-visible">
+            <section className="relative flex items-center justify-center py-0 px-0 min-h-[520px] bg-transparent overflow-hidden md:overflow-visible">
                 {/* Green Card Background */}
-                <div className="absolute left-1/2 -translate-x-1/2 top-0 w-[90vw] max-w-6xl h-[520px] rounded-3xl overflow-hidden z-0">
+                <div className="absolute left-1/2 -translate-x-1/2 top-0 w-full md:w-[90vw] max-w-6xl h-full md:h-[520px] rounded-none md:rounded-3xl overflow-hidden z-0">
                     <Image
                         src="/land2_opt/background_green.webp"
                         alt="Background"
@@ -455,13 +455,13 @@ export default function Landing2Page() {
                 </div>
 
                 {/* Content Layout */}
-                <div className="relative z-10 w-full max-w-6xl flex items-center justify-between px-12 py-16">
+                <div className="relative z-10 w-full max-w-6xl flex flex-col md:flex-row items-center justify-between px-6 md:px-12 py-16 md:py-16 gap-8 md:gap-0">
                     {/* Left Side: Text Content */}
-                    <div className="flex flex-col items-start justify-center w-1/2 pl-2">
-                        <h2 className="text-5xl md:text-6xl font-black text-white leading-tight mb-6">
+                    <div className="flex flex-col items-center md:items-start justify-center w-full md:w-1/2 pl-0 md:pl-2 text-center md:text-left">
+                        <h2 className="text-4xl md:text-6xl font-black text-white leading-tight mb-6">
                             Every Bowler<br />Is a Card
                         </h2>
-                        <p className="text-lg text-white/90 mb-8 leading-relaxed">
+                        <p className="text-base md:text-lg text-white/90 mb-8 leading-relaxed">
                             Your stats. Your journey. Your legacy — collected, traded, and showcased.
                         </p>
                         <button className="inline-flex items-center gap-3 bg-[#86D864] text-white px-7 py-3 rounded-full font-bold text-base shadow-lg hover:bg-[#7acb5b] transition-colors">
@@ -471,8 +471,8 @@ export default function Landing2Page() {
                     </div>
 
                     {/* Right Side: Mobile Mockup Overlapping */}
-                    <div className="relative flex items-center justify-end w-3/4">
-                        <div className="absolute right-0 top-0 ">
+                    <div className="relative flex items-center justify-center md:justify-end w-full md:w-3/4">
+                        <div className="relative md:absolute right-auto md:right-0 top-auto md:top-0 w-64 md:w-auto">
                             <Image
                                 src="/land2_opt/mobile_phone_mockup.webp"
                                 alt="Mobile Phone Mockup"
@@ -480,24 +480,25 @@ export default function Landing2Page() {
                                 height={1000}
                                 unoptimized
                                 priority
+                                className="w-full h-auto"
                             />
                         </div>
-                        {/* Spacer for layout */}
-                        <div className="w-full h-[520px]"></div>
+                        {/* Spacer for layout on desktop */}
+                        <div className="hidden md:block w-full h-[520px]"></div>
                     </div>
                 </div>
             </section>
 
             {/* Trading Cards For Every Bowler Section */}
-            <section className="py-20 px-8 bg-white">
+            <section className="py-12 md:py-20 px-4 md:px-8 bg-white">
                 <div className="max-w-7xl mx-auto">
-                    <div className="grid grid-cols-2 gap-16 items-center">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center">
                         {/* Left Side: Text Content */}
-                        <div>
-                            <h2 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight mb-8">
+                        <div className="order-2 md:order-1">
+                            <h2 className="text-3xl md:text-6xl font-bold text-gray-900 leading-tight mb-6 md:mb-8 text-center md:text-left">
                                 Trading Cards For<br />Every Bowler
                             </h2>
-                            <p className="text-base text-gray-700 mb-6 leading-relaxed">
+                            <p className="text-sm md:text-base text-gray-700 mb-6 leading-relaxed text-center md:text-left">
                                 Amateur or professional, your journey lives on a dynamic trading card that evolves with your game.
                             </p>
 
@@ -549,17 +550,17 @@ export default function Landing2Page() {
             </section>
 
             {/* Beyond the Chatter — Build Your Brand Section */}
-            <section className="py-20 px-8 bg-gray-50">
+            <section className="py-12 md:py-20 px-4 md:px-8 bg-gray-50">
                 <div className="max-w-7xl mx-auto text-center">
-                    <h2 className="text-5xl md:text-6xl font-bold text-gray-900 mb-4">
+                    <h2 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4">
                         Beyond the Chatter — Build Your Brand
                     </h2>
-                    <p className="text-lg text-gray-700 max-w-3xl mx-auto mb-12">
+                    <p className="text-base md:text-lg text-gray-700 max-w-3xl mx-auto mb-8 md:mb-12">
                         Turn every game, every fan interaction, and every sponsor connection into lasting value.
                     </p>
 
                     {/* Center Image */}
-                    <div className="mb-16">
+                    <div className="mb-12 md:mb-16">
                         <Image
                             src="/land2_opt/beyond_the_chatter_section.webp"
                             alt="Beyond the Chatter"
@@ -571,9 +572,9 @@ export default function Landing2Page() {
                     </div>
 
                     {/* Feature Cards Grid */}
-                    <div className="grid grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
                         {/* Card 1: Manage Your Pro Profile */}
-                        <div className="bg-white rounded-2xl p-8 text-left shadow-sm">
+                        <div className="bg-white rounded-2xl p-6 md:p-8 text-left shadow-sm">
                             <div className="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mb-6">
                                 <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -588,7 +589,7 @@ export default function Landing2Page() {
                         </div>
 
                         {/* Card 2: Advanced Dashboards */}
-                        <div className="bg-white rounded-2xl p-8 text-left shadow-sm">
+                        <div className="bg-white rounded-2xl p-6 md:p-8 text-left shadow-sm">
                             <div className="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mb-6">
                                 <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -603,7 +604,7 @@ export default function Landing2Page() {
                         </div>
 
                         {/* Card 3: Fan Challenges */}
-                        <div className="bg-white rounded-2xl p-8 text-left shadow-sm">
+                        <div className="bg-white rounded-2xl p-6 md:p-8 text-left shadow-sm">
                             <div className="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mb-6">
                                 <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -618,7 +619,7 @@ export default function Landing2Page() {
                         </div>
 
                         {/* Card 4: Global Reach */}
-                        <div className="bg-white rounded-2xl p-8 text-left shadow-sm">
+                        <div className="bg-white rounded-2xl p-6 md:p-8 text-left shadow-sm">
                             <div className="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center mb-6">
                                 <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -636,7 +637,7 @@ export default function Landing2Page() {
             </section>
 
             {/* Smarter Centers Section */}
-            <section className="relative py-24 px-8 overflow-hidden rounded-3xl mx-8 mb-12">
+            <section className="relative py-12 md:py-24 px-4 md:px-8 overflow-hidden rounded-3xl mx-4 md:mx-8 mb-8 md:mb-12">
                 {/* Background Image */}
                 <div className="absolute inset-0 z-0 rounded-3xl overflow-hidden">
                     <Image
@@ -652,19 +653,19 @@ export default function Landing2Page() {
 
                 {/* Content */}
                 <div className="relative z-10 max-w-7xl mx-auto">
-                    <div className="flex items-stretch gap-12">
+                    <div className="flex flex-col md:flex-row items-stretch gap-8 md:gap-12">
                         {/* Left Side: Text Content */}
                         <div className="flex-1 flex flex-col justify-center">
                             <p className="text-sm font-bold tracking-widest mb-4" style={{ color: '#86D864' }}>
                                 RUN SMARTER. ENGAGE DEEPER.
                             </p>
-                            <h2 className="text-6xl md:text-7xl font-black text-white leading-tight">
+                            <h2 className="text-4xl md:text-7xl font-black text-white leading-tight mb-8 md:mb-0">
                                 Smarter Centers.<br />Stronger Engagement.
                             </h2>
                         </div>
 
                         {/* Right Side: Text & Buttons */}
-                        <div className="flex-1 bg-white rounded-3xl p-10 flex flex-col justify-center shadow-xl">
+                        <div className="flex-1 bg-white rounded-3xl p-6 md:p-10 flex flex-col justify-center shadow-xl">
                             <p className="text-gray-700 text-lg leading-relaxed mb-10">
                                 Streamline your center's operations and elevate the bowler experience with tools built to drive efficiency and growth.
                             </p>
@@ -684,11 +685,11 @@ export default function Landing2Page() {
             </section>
 
             {/* Streamline Section */}
-            <section className="py-24 bg-white overflow-hidden">
-                <div className="max-w-7xl mx-auto px-8">
-                    <div className="flex flex-col lg:flex-row items-center gap-16">
+            <section className="py-12 md:py-24 bg-white overflow-hidden">
+                <div className="max-w-7xl mx-auto px-4 md:px-8">
+                    <div className="flex flex-col lg:flex-row items-center gap-8 md:gap-16">
                         {/* Left Side: Dashboard Image */}
-                        <div className="flex-1 relative">
+                        <div className="flex-1 relative w-full">
                             <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                                 <Image
                                     src="/land2_opt/streamline_section_main.webp"
@@ -702,15 +703,15 @@ export default function Landing2Page() {
                         </div>
 
                         {/* Right Side: Content */}
-                        <div className="flex-1">
-                            <h2 className="text-4xl md:text-5xl font-black text-gray-900 leading-tight mb-12 text-right">
+                        <div className="flex-1 w-full">
+                            <h2 className="text-3xl md:text-5xl font-black text-gray-900 leading-tight mb-8 md:mb-12 text-center lg:text-right">
                                 STREAMLINE YOUR CENTER.<br />
                                 SUCCEED TOGETHER.
                             </h2>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* Left large image */}
-                                <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-lg">
+                                <div className="relative h-[250px] md:h-[400px] rounded-2xl overflow-hidden shadow-lg">
                                     <Image
                                         src="/land2_opt/smarter_center_section.webp"
                                         alt="Smarter Center"
@@ -721,7 +722,7 @@ export default function Landing2Page() {
                                 </div>
                                 
                                 {/* Right column with 2 images */}
-                                <div className="flex flex-col gap-4 h-[400px]">
+                                <div className="flex flex-col gap-4 h-[250px] md:h-[400px]">
                                     <div className="relative flex-1 rounded-2xl overflow-hidden shadow-lg">
                                         <Image
                                             src="/land2_opt/4.webp"
@@ -748,7 +749,7 @@ export default function Landing2Page() {
             </section>
 
             {/* Partnership Section */}
-            <section className="py-20 px-8 bg-white">
+            <section className="py-12 md:py-20 px-4 md:px-8 bg-white">
                 <div className="max-w-7xl mx-auto">
                     {/* Container with Background Image - Top Section */}
                     <div 
@@ -763,10 +764,10 @@ export default function Landing2Page() {
                         <div className="absolute inset-0 bg-black/40"></div>
 
                         {/* Content Container - Top Section */}
-                        <div className="relative z-10 p-12 flex items-center justify-between gap-8">
+                        <div className="relative z-10 p-6 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8">
                             {/* Left: Heading Box */}
-                            <div className="flex-1 bg-gradient-to-r from-[#86D864] to-[#7ac85a] rounded-xl p-8">
-                                <h2 className="text-4xl md:text-5xl font-black leading-tight text-white">
+                            <div className="flex-1 bg-gradient-to-r from-[#86D864] to-[#7ac85a] rounded-xl p-6 md:p-8 w-full">
+                                <h2 className="text-3xl md:text-5xl font-black leading-tight text-white">
                                     Reach Bowlers.<br />
                                     Drive Demand.<br />
                                     Build Partnerships.
@@ -777,7 +778,7 @@ export default function Landing2Page() {
                             </div>
 
                             {/* Right: Feature Products Box */}
-                            <div className="flex-1 bg-gradient-to-r from-[#86D864] to-[#7ac85a] rounded-xl p-8">
+                            <div className="flex-1 bg-gradient-to-r from-[#86D864] to-[#7ac85a] rounded-xl p-6 md:p-8 w-full">
                                 <div className="flex items-start gap-3">
                                     <div className="text-white mt-1">
                                         <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
@@ -800,10 +801,10 @@ export default function Landing2Page() {
                     </div>
 
                     {/* Bottom Section - Form and Image */}
-                    <div className="grid grid-cols-2 gap-12 items-start">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start mt-8">
                         {/* Left: Partnership Form */}
                         <div>
-                            <form className="bg-white rounded-lg p-8 shadow-lg">
+                            <form className="bg-white rounded-lg p-6 md:p-8 shadow-lg">
                                 <div className="mb-6">
                                     <label className="block text-gray-800 font-bold text-sm mb-2">Name</label>
                                     <input
@@ -852,13 +853,13 @@ export default function Landing2Page() {
                         </div>
 
                         {/* Right: Product Mockup Image */}
-                        <div className="relative h-[500px]">
+                        <div className="relative h-[300px] md:h-[500px]">
                             <Image
                                 src="/land2_opt/7.webp"
                                 unoptimized
                                 alt="Partnership Features"
                                 fill
-                                className="object-cover"
+                                className="object-cover rounded-xl"
                             />
                         </div>
                     </div>
@@ -869,7 +870,7 @@ export default function Landing2Page() {
 
             {/* Be Seen Where The Bowling World Connects Section */}
             <section 
-                className="relative py-32 px-8 rounded-3xl mx-8 mb-12 overflow-hidden"
+                className="relative py-16 md:py-32 px-4 md:px-8 rounded-3xl mx-4 md:mx-8 mb-8 md:mb-12 overflow-hidden"
                 style={{
                     backgroundImage: 'url(/land2_opt/19.webp)',
                     backgroundSize: 'cover',
@@ -881,10 +882,10 @@ export default function Landing2Page() {
 
                 {/* Content */}
                 <div className="relative z-10 max-w-4xl mx-auto text-center">
-                    <h2 className="text-5xl md:text-6xl font-black text-white leading-tight mb-6">
+                    <h2 className="text-4xl md:text-6xl font-black text-white leading-tight mb-4 md:mb-6">
                         Be Seen Where The Bowling<br />World Connects
                     </h2>
-                    <p className="text-xl text-white/95 mb-8">
+                    <p className="text-lg md:text-xl text-white/95 mb-6 md:mb-8">
                         Engage players, fans, and brands with authentic, community-driven activations.
                     </p>
                     <button className="px-8 py-3 bg-[#86D864] text-white font-black rounded-full hover:shadow-lg transition-shadow flex items-center gap-2 mx-auto">
@@ -895,12 +896,12 @@ export default function Landing2Page() {
             </section>
 
             {/* Why Partner With Us Section */}
-            <section className="py-20 px-8 bg-white">
+            <section className="py-12 md:py-20 px-4 md:px-8 bg-white">
                 <div className="max-w-7xl mx-auto">
-                    <div className="grid grid-cols-2 gap-16 items-start">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-start">
                         {/* Left: Content */}
                         <div>
-                            <h2 className="text-5xl md:text-6xl font-black text-gray-900 leading-tight mb-6">
+                            <h2 className="text-4xl md:text-6xl font-black text-gray-900 leading-tight mb-6">
                                 Why Partner With Us?
                             </h2>
                             <p className="text-lg text-gray-700 mb-8">
@@ -937,7 +938,7 @@ export default function Landing2Page() {
                         </div>
 
                         {/* Right: Image */}
-                        <div className="relative h-[500px]">
+                        <div className="relative h-[300px] md:h-[500px]">
                             <Image
                                 src="/land2_opt/20.webp"
                                 unoptimized
@@ -951,11 +952,11 @@ export default function Landing2Page() {
             </section>
 
             {/* Driven by Passion Section */}
-            <section className="py-20 px-8 bg-white">
+            <section className="py-12 md:py-20 px-4 md:px-8 bg-white">
                 <div className="max-w-7xl mx-auto">
-                    <div className="grid grid-cols-2 gap-12">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
                         {/* Left: Image */}
-                        <div className="relative h-full min-h-[500px] rounded-2xl overflow-hidden shadow-lg">
+                        <div className="relative h-64 md:h-full min-h-[300px] md:min-h-[500px] rounded-2xl overflow-hidden shadow-lg">
                             <Image
                                 src="/land2_opt/22.webp"
                                 unoptimized
@@ -968,17 +969,17 @@ export default function Landing2Page() {
                         {/* Right: Content */}
                         <div>
                             {/* Heading */}
-                            <h2 className="text-5xl md:text-6xl font-black text-gray-900 leading-tight mb-6">
+                            <h2 className="text-4xl md:text-6xl font-black text-gray-900 leading-tight mb-6">
                                 Driven by Passion.<br />Built for Bowlers.
                             </h2>
 
                             {/* Subheading */}
-                            <p className="text-lg text-gray-600 mb-8">
+                            <p className="text-base md:text-lg text-gray-600 mb-8">
                                 We're on a mission to unite the bowling world — from amateurs and pros to centers and brands — through technology, community, and innovation.
                             </p>
 
                             {/* Mission and Vision Cards */}
-                            <div className="grid grid-cols-2 gap-6 mb-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                 {/* Our Mission */}
                                 <div className="bg-green-50 rounded-xl p-6">
                                     <h3 className="text-gray-900 font-black text-lg mb-3">Our Mission</h3>
@@ -1020,15 +1021,15 @@ export default function Landing2Page() {
            
 
             {/* Contact Section */}
-            <section className="bg-gray-100 py-20 px-8">
+            <section className="bg-gray-100 py-12 md:py-20 px-4 md:px-8">
                 <div className="max-w-7xl mx-auto">
-                    <div className="grid grid-cols-2 gap-16">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16">
                         {/* Left: Contact Info */}
                         <div>
-                            <h2 className="text-5xl md:text-6xl font-black text-gray-900 leading-tight mb-4">
+                            <h2 className="text-4xl md:text-6xl font-black text-gray-900 leading-tight mb-4">
                                 Reach Out Anytime
                             </h2>
-                            <p className="text-gray-700 text-lg mb-12">
+                            <p className="text-gray-700 text-lg mb-8 md:mb-12">
                                 Our team is here to support, collaborate, and create meaningful connections in the bowling community.
                             </p>
 
@@ -1049,7 +1050,7 @@ export default function Landing2Page() {
                             </div>
 
                             {/* Address */}
-                            <div className="mb-12">
+                            <div className="mb-8 md:mb-12">
                                 <p className="text-gray-900 font-black text-xs mb-2 tracking-widest">LOCATION</p>
                                 <p className="text-gray-600">
                                     Main St & Park Ave<br />
@@ -1058,7 +1059,7 @@ export default function Landing2Page() {
                             </div>
 
                             {/* Map */}
-                            <div className="mb-12 relative h-64 rounded-xl overflow-hidden shadow-inner border-2 border-[#86D864]/20 bg-gray-50">
+                            <div className="mb-8 md:mb-12 relative h-64 rounded-xl overflow-hidden shadow-inner border-2 border-[#86D864]/20 bg-gray-50">
                                 <div id="contact-map" className="w-full h-full" />
                                 {!mapLoaded && (
                                     <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
@@ -1068,7 +1069,7 @@ export default function Landing2Page() {
                             </div>
 
                             {/* Social Links */}
-                            <div>
+                            <div className="mb-8 md:mb-0">
                                 <p className="text-gray-900 font-black text-xs mb-4 tracking-widest">FOLLOW US</p>
                                 <div className="flex items-center gap-6">
                                     <a href="#" className="text-gray-900 hover:text-[#86D864] transition-colors text-2xl">
@@ -1091,7 +1092,7 @@ export default function Landing2Page() {
                         </div>
 
                         {/* Right: Contact Form */}
-                        <div className="bg-white rounded-2xl p-8">
+                        <div className="bg-white rounded-2xl p-6 md:p-8">
                             <form className="space-y-6">
                                 <div>
                                     <label className="block text-gray-900 font-black text-sm mb-2">Name</label>
@@ -1153,23 +1154,23 @@ export default function Landing2Page() {
             </section>
 
             {/* Trusted Partners Section */}
-            <section className="py-20 px-8 bg-white">
+            <section className="py-12 md:py-20 px-4 md:px-8 bg-white">
                 <div className="max-w-7xl mx-auto">
                     {/* Header */}
-                    <div className="text-center mb-16">
-                        <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-4">
+                    <div className="text-center mb-12 md:mb-16">
+                        <h2 className="text-4xl md:text-6xl font-black text-gray-900 mb-4">
                             Our Trusted Partners
                         </h2>
-                        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                        <p className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto">
                             Proudly collaborating with leading brands and organizations to grow the bowling community.
                         </p>
                     </div>
 
                     {/* Partners Grid */}
-                    <div className="grid grid-cols-4 gap-8">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
                         {brands.length > 0 ? (
                             brands.map((brand) => (
-                                <div key={brand.brand_id} className="bg-gray-50 rounded-2xl p-8 flex items-center justify-center h-24 hover:shadow-lg transition-shadow">
+                                <div key={brand.brand_id} className="bg-gray-50 rounded-2xl p-4 md:p-8 flex items-center justify-center h-20 md:h-24 hover:shadow-lg transition-shadow">
                                     <div className="relative w-full h-full">
                                         <Image
                                             src={brand.logo_url}
@@ -1196,22 +1197,22 @@ export default function Landing2Page() {
             </section>
 
             {/* The People Behind The Network Section */}
-            <section className="py-20 px-8 bg-white">
+            <section className="py-12 md:py-20 px-4 md:px-8 bg-white">
                 <div className="max-w-7xl mx-auto">
                     {/* Header */}
-                    <div className="text-center mb-16">
-                        <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-4">
+                    <div className="text-center mb-12 md:mb-16">
+                        <h2 className="text-4xl md:text-6xl font-black text-gray-900 mb-4">
                             The People Behind The Network
                         </h2>
-                        <p className="text-lg text-gray-600">
+                        <p className="text-base md:text-lg text-gray-600">
                             United by our love for bowling, innovation, and connecting players worldwide.
                         </p>
                     </div>
 
                     {/* Team Member Card */}
-                    <div className="grid grid-cols-2 gap-16 items-center max-w-5xl mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center max-w-5xl mx-auto">
                         {/* Left: Team Member Image */}
-                        <div className="relative h-96 rounded-3xl overflow-hidden bg-blue-100">
+                        <div className="relative h-[300px] md:h-96 rounded-3xl overflow-hidden bg-blue-100">
                             <Image
                                 src={jayFettig.src}
                                 unoptimized
@@ -1247,11 +1248,11 @@ export default function Landing2Page() {
             </section>
 
             {/* Board of Directors Section */}
-            <section className="py-20 px-8 bg-gray-50">
+            <section className="py-12 md:py-20 px-4 md:px-8 bg-gray-50">
                 <div className="max-w-7xl mx-auto">
                     {/* Header */}
-                    <div className="grid grid-cols-2 gap-12 items-start mb-16">
-                        <h2 className="text-5xl md:text-4xl font-black text-gray-900 leading-tight">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start mb-12 md:mb-16">
+                        <h2 className="text-3xl md:text-5xl font-black text-gray-900 leading-tight">
                             Executive Leadership & Board of Directors
                         </h2>
                         <p className="text-gray-700 leading-relaxed">
@@ -1260,7 +1261,7 @@ export default function Landing2Page() {
                     </div>
 
                     {/* Board Members Grid */}
-                    <div className="grid grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
                         {boardMembers.map((member) => (
                             <div key={member.key}>
                                 <div className={`relative h-64 rounded-2xl overflow-hidden ${member.bgClass} mb-4`}>
@@ -1291,22 +1292,22 @@ export default function Landing2Page() {
                     {modalOpen && selectedMember && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                             <div className="absolute inset-0 bg-black/50" onClick={closeModal}></div>
-                            <div className="relative bg-white rounded-2xl shadow-2xl max-w-5xl w-full overflow-hidden grid grid-cols-1 md:grid-cols-2">
-                                <div className="p-12 flex flex-col justify-between">
+                            <div className="relative bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-full overflow-y-auto grid grid-cols-1 md:grid-cols-2">
+                                <div className="p-6 md:p-12 flex flex-col justify-between order-2 md:order-1">
                                     <div>
                                         <div className="inline-block bg-[#86D864] text-white font-black px-4 py-2 rounded-lg mb-4 text-sm">
                                             {selectedMember.title}
                                         </div>
-                                        <h3 className="text-3xl font-black mb-6 text-gray-900">{selectedMember.name}</h3>
+                                        <h3 className="text-2xl md:text-3xl font-black mb-6 text-gray-900">{selectedMember.name}</h3>
                                     </div>
                                     <div>
                                         <p className="text-gray-700 leading-relaxed text-sm whitespace-pre-wrap">{selectedMember.description}</p>
                                     </div>
                                 </div>
-                                <div className="relative h-64 md:h-auto bg-gray-200">
+                                <div className="relative h-64 md:h-auto bg-gray-200 order-1 md:order-2">
                                     <Image src={selectedMember.src} alt={selectedMember.name} unoptimized fill className="object-cover" style={{ objectPosition: selectedMember.position || 'center' }} />
                                 </div>
-                                <button onClick={closeModal} className="absolute top-4 right-4 text-gray-600 bg-white rounded-full p-2 shadow hover:bg-gray-100">✕</button>
+                                <button onClick={closeModal} className="absolute top-4 right-4 text-gray-600 bg-white rounded-full p-2 shadow hover:bg-gray-100 z-50">✕</button>
                             </div>
                         </div>
                     )}
@@ -1314,20 +1315,20 @@ export default function Landing2Page() {
             </section>
 
             {/* Our People, Our Power Section */}
-            <section className="py-20 px-8 bg-white">
+            <section className="py-12 md:py-20 px-4 md:px-8 bg-white">
                 <div className="max-w-7xl mx-auto">
                     {/* Header */}
-                    <div className="text-center mb-16">
-                        <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-4">
+                    <div className="text-center mb-12 md:mb-16">
+                        <h2 className="text-4xl md:text-6xl font-black text-gray-900 mb-4">
                             Our People, Our Power
                         </h2>
-                        <p className="text-lg text-gray-600">
+                        <p className="text-base md:text-lg text-gray-600">
                             Dedicated professionals bringing innovation, passion, and teamwork to every roll.
                         </p>
                     </div>
 
                     {/* Team Members Grid */}
-                    <div className="grid grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
                         {[
                             { src: '/team_headshots/Nahian Ferdouse.webp', name: 'Nahian Ferdouse', role: 'Business Intelligence Specialist', position: 'top' },
                             { src: '/team_headshots/mumit_prottoy.webp', name: 'Mumit Prottoy', role: 'Lead Developer', position: 'top' },
