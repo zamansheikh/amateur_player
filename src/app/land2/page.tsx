@@ -508,21 +508,21 @@ export default function Landing2Page() {
                 <div className="relative z-10 w-full max-w-6xl flex flex-col md:flex-row items-center justify-between px-6 md:px-12 py-16 md:py-16 gap-8 md:gap-0">
                     {/* Left Side: Text Content */}
                     <div className="flex flex-col items-center md:items-start justify-center w-full md:w-1/2 pl-0 md:pl-2 text-center md:text-left">
-                        <h2 className="text-4xl md:text-6xl font-black text-white leading-tight mb-6">
+                        <h2 className="text-4xl md:text-6xl font-medium text-white leading-tight mb-4 tracking-tight">
                             Every Bowler<br />Is a Card
                         </h2>
-                        <p className="text-base md:text-lg text-white/90 mb-8 leading-relaxed">
+                        <p className="text-sm md:text-base text-white/90 mb-6 leading-relaxed max-w-sm">
                             Your stats. Your journey. Your legacy — collected, traded, and showcased.
                         </p>
-                        <button className="inline-flex items-center gap-3 bg-[#86D864] text-white px-7 py-3 rounded-full font-bold text-base shadow-lg hover:bg-[#7acb5b] transition-colors">
-                            <span className="w-3 h-3 rounded-full bg-white"></span>
-                            CREATE YOUR CARD&nbsp;&rarr;
+                        <button className="inline-flex items-center gap-2 bg-[#A3E635] text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-md hover:bg-[#92d02e] transition-colors uppercase tracking-wide">
+                            <span className="w-2.5 h-2.5 rounded-full bg-white"></span>
+                            CREATE YOUR CARD &rarr;
                         </button>
                     </div>
 
                     {/* Right Side: Mobile Mockup Overlapping */}
-                    <div className="relative flex items-center justify-center md:justify-end w-full md:w-3/4">
-                        <div className="relative md:absolute right-auto md:right-0 top-auto md:top-0 w-64 md:w-auto">
+                    <div className="relative flex items-center justify-center md:justify-end w-full md:w-1/2">
+                        <div className="relative md:absolute right-auto md:-right-24 top-auto md:-top-44 w-full md:w-[820px] pointer-events-none">
                             <Image
                                 src="/land2_opt/mobile_phone_mockup.webp"
                                 alt="Mobile Phone Mockup"
@@ -530,11 +530,9 @@ export default function Landing2Page() {
                                 height={1000}
                                 unoptimized
                                 priority
-                                className="w-full h-auto"
+                                className="w-full h-auto drop-shadow-2xl"
                             />
                         </div>
-                        {/* Spacer for layout on desktop */}
-                        <div className="hidden md:block w-full h-[520px]"></div>
                     </div>
                 </div>
             </section>
