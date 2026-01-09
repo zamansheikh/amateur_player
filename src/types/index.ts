@@ -539,6 +539,8 @@ export interface AuthContextType {
     isLoading: boolean;
     signin: (username: string, password: string) => Promise<{ success: boolean; profileComplete?: boolean }>;
     privateLogin: (privateKey: string) => Promise<{ success: boolean; error?: string }>;
+    validatePrivateKey: (privateKey: string) => Promise<{ success: boolean; error?: string }>;
+    betaPrivateSignup: (privateKey: string, userData: any) => Promise<{ success: boolean; error?: string }>;
     signup: (userData: any) => Promise<boolean>;
     signout: () => void;
     refreshUser: () => Promise<void>;

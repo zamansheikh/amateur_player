@@ -4,7 +4,7 @@ export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Public routes that don't require authentication
-    const publicRoutes = ['/landing', '/', '/no-access', '/land2'];
+    const publicRoutes = ['/landing', '/', '/no-access', '/land2', '/signin'];
 
     // Pro player routes are also public (for viewing pro profiles without login)
     const isProPlayerRoute = pathname.startsWith('/pro/');

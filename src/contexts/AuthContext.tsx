@@ -192,6 +192,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
+    const validatePrivateKey = async (privateKey: string): Promise<{ success: boolean; error?: string }> => {
+        try {
+            setIsLoading(true);
+            // Reusing private-login for validation as it's the only one we have
+            // But we don't save the token yet
+            const response = await fetch('/api/private-login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ private_key: privateKey })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                return { success: false, error: errorData.error || 'Invalid private key' };
+            }
+
+            return { success: true };
+        } catch (error) {
+            return { success: false, error: 'Validation failed' };
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const betaPrivateSignup = async (privateKey: string, userData: any): Promise<{ success: boolean; error?: string }> => {
+        try {
+            setIsLoading(true);
+            const response = await authApi.betaPrivateSignup(privateKey, userData);
+            return { success: true };
+        } catch (error: any) {
+            console.error('Beta signup error:', error);
+            return { 
+                success: false, 
+                error: error.response?.data?.error || 'Signup failed' 
+            };
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const signout = () => {
         localStorage.removeItem('access_token');
         localStorage.removeItem('user');
@@ -271,7 +311,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, isLoading, signin, privateLogin, signup, signout, refreshUser }}>
+        <AuthContext.Provider value={{ user, isLoading, signin, privateLogin, validatePrivateKey, betaPrivateSignup, signup, signout, refreshUser }}>
             {children}
         </AuthContext.Provider>
     );

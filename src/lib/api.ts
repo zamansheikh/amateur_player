@@ -81,6 +81,11 @@ export const authApi = {
     }) => {
         const response = await api.post('/api/validate-signup-data', validationData);
         return response.data;
+    },
+
+    betaPrivateSignup: async (privateKey: string, userData: { username: string; password: string }) => {
+        const response = await api.post(`/api/beta-private-signup/${privateKey}`, userData);
+        return response.data;
     }
 };
 
