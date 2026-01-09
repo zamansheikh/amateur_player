@@ -404,51 +404,55 @@ export default function Landing2Page() {
             </section>
 
             {/* Bowl Collect Compete Section */}
-            <section className="py-12 md:py-20 px-4 md:px-8 bg-white">
+            <section className="py-12 md:py-24 px-4 md:px-8 bg-white overflow-hidden">
                 <div className="max-w-7xl mx-auto">
                     {/* Grid layout: 1 col mobile, 3 cols desktop */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 items-stretch">
                         {/* Left column - 2 boxes */}
-                        <div className="flex flex-col gap-6 order-2 md:order-1">
+                        <div className="flex flex-col gap-6 order-2 md:order-1 h-full">
                             {/* Box 1: Earn and Trade */}
-                            <div className="bg-gray-100 rounded-2xl p-6 md:p-8 h-auto md:h-32 flex items-start gap-4">
-                                <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#86D864' }}>
-                                    <TrendingUp className="w-6 h-6 text-white" />
+                            <div className="bg-gray-100/60 rounded-3xl p-8 md:p-10 flex flex-col items-start flex-1 min-h-[280px]">
+                                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-auto" style={{ backgroundColor: '#86D864' }}>
+                                    <TrendingUp className="w-8 h-8 text-white" />
                                 </div>
-                                <div>
-                                    <div className="font-bold text-gray-900">Earn and Trade</div>
-                                    <div className="text-sm text-gray-600">Exclusive digital bowling cards</div>
+                                <div className="mt-8">
+                                    <p className="text-gray-700 text-lg leading-snug">
+                                        <span className="font-black text-gray-950 text-[20px] block md:inline mb-1 md:mb-0 mr-2">Earn and Trade</span>
+                                        <span className="text-gray-600 font-medium">Exclusive digital bowling cards</span>
+                                    </p>
                                 </div>
                             </div>
 
                             {/* Box 2: Connect */}
-                            <div className="bg-gray-100 rounded-2xl p-6 md:p-8 h-auto md:h-32 flex items-start gap-4">
-                                <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#86D864' }}>
-                                    <LucideLink className="w-6 h-6 text-white" />
+                            <div className="bg-gray-100/60 rounded-3xl p-8 md:p-10 flex flex-col items-start flex-1 min-h-[280px]">
+                                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-auto" style={{ backgroundColor: '#86D864' }}>
+                                    <LucideLink className="w-8 h-8 text-white" />
                                 </div>
-                                <div>
-                                    <div className="font-bold text-gray-900">Connect</div>
-                                    <div className="text-sm text-gray-600">and chat with fellow bowlers</div>
+                                <div className="mt-8">
+                                    <p className="text-gray-700 text-lg leading-snug">
+                                        <span className="font-black text-gray-950 text-[20px] block md:inline mb-1 md:mb-0 mr-2">Connect</span>
+                                        <span className="text-gray-600 font-medium">and chat with fellow bowlers</span>
+                                    </p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Center column - heading, button, image */}
-                        <div className="flex flex-col items-center text-center gap-6 order-1 md:order-2 mb-8 md:mb-0">
-                            <h3 className="text-4xl md:text-6xl font-black leading-tight text-black">
+                        <div className="flex flex-col items-start text-left gap-8 order-1 md:order-2 mb-12 md:mb-0">
+                            <h3 className="text-6xl md:text-[50px] font-black leading-tight text-gray-900 tracking-tight">
                                 Bowl<br />Collect<br />Compete
                             </h3>
-                            <button className="inline-flex items-center gap-2 bg-[#86D864] text-white px-6 py-3 rounded-full font-bold text-sm shadow-md hover:shadow-lg transition-shadow">
-                                <span className="w-2.5 h-2.5 rounded-full bg-white"></span>
+                            <button className="inline-flex items-center gap-3 bg-[#86D864] text-white px-8 py-4 rounded-2xl font-black text-sm shadow-xl hover:shadow-2xl transition-all uppercase tracking-wider">
+                                <span className="w-3 h-3 rounded-full bg-white"></span>
                                 EXPLORE THE FEATURES
                             </button>
 
-                            <div className="w-full rounded-2xl overflow-hidden h-48 md:h-48">
+                            <div className="w-full rounded-3xl overflow-hidden mt-4 relative h-[320px] md:h-full">
                                 <Image
                                     src="/land2_opt/15.webp"
                                     alt="Bowling Experience"
-                                    width={400}
-                                    height={300}
+                                    width={600}
+                                    height={500}
                                     unoptimized
                                     className="w-full h-full object-cover"
                                 />
@@ -456,26 +460,30 @@ export default function Landing2Page() {
                         </div>
 
                         {/* Right column - 2 boxes */}
-                        <div className="flex flex-col gap-6 order-3 md:order-3">
+                        <div className="flex flex-col gap-6 order-3 md:order-3 h-full">
                             {/* Box 3: Enter */}
-                            <div className="bg-gray-100 rounded-2xl p-6 md:p-8 h-auto md:h-32 flex items-start gap-4">
-                                <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#86D864' }}>
-                                    <Calendar className="w-6 h-6 text-white" />
+                            <div className="bg-gray-100/60 rounded-3xl p-8 md:p-10 flex flex-col items-start flex-1 min-h-[280px]">
+                                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-auto" style={{ backgroundColor: '#86D864' }}>
+                                    <Calendar className="w-8 h-8 text-white" />
                                 </div>
-                                <div>
-                                    <div className="font-bold text-gray-900">Enter</div>
-                                    <div className="text-sm text-gray-600">members-only tournaments and events</div>
+                                <div className="mt-8">
+                                    <p className="text-gray-700 text-lg leading-snug">
+                                        <span className="font-black text-gray-950 text-[20px] block md:inline mb-1 md:mb-0 mr-2">Enter</span>
+                                        <span className="text-gray-600 font-medium">members-only tournaments and events</span>
+                                    </p>
                                 </div>
                             </div>
 
                             {/* Box 4: Track */}
-                            <div className="bg-gray-100 rounded-2xl p-6 md:p-8 h-auto md:h-32 flex items-start gap-4">
-                                <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ backgroundColor: '#86D864' }}>
-                                    <MapPin className="w-6 h-6 text-white" />
+                            <div className="bg-gray-100/60 rounded-3xl p-8 md:p-10 flex flex-col items-start flex-1 min-h-[280px]">
+                                <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-auto" style={{ backgroundColor: '#86D864' }}>
+                                    <MapPin className="w-8 h-8 text-white" />
                                 </div>
-                                <div>
-                                    <div className="font-bold text-gray-900">Track</div>
-                                    <div className="text-sm text-gray-600">your stats, milestones, and progress</div>
+                                <div className="mt-8">
+                                    <p className="text-gray-700 text-lg leading-snug">
+                                        <span className="font-black text-gray-950 text-[20px] block md:inline mb-1 md:mb-0 mr-2">Track</span>
+                                        <span className="text-gray-600 font-medium">your stats, milestones, and progress</span>
+                                    </p>
                                 </div>
                             </div>
                         </div>
