@@ -31,6 +31,8 @@ export default function SignInPage() {
     const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
     const [forgotError, setForgotError] = useState('');
     const [forgotLoading, setForgotLoading] = useState(false);
+    const [forgotToken, setForgotToken] = useState(''); // New state for reset token
+    const [forgotMethod, setForgotMethod] = useState<'otp' | 'magic'>('otp');
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -62,7 +64,7 @@ export default function SignInPage() {
     };
 
     // Forgot password handlers
-    const handleSendOTP = async (e: React.FormEvent) => {
+    const handleInitiateRecovery = async (e: React.FormEvent) => {
         e.preventDefault();
         setForgotError('');
 
@@ -74,19 +76,29 @@ export default function SignInPage() {
         setForgotLoading(true);
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://test.bowlersnetwork.com';
-            const response = await axios.post(`${apiUrl}/api/send-otp`, {
+            const endpoint = forgotMethod === 'otp' 
+                ? '/api/access/recovery/initiate/otp' 
+                : '/api/access/recovery/initiate/magic';
+            
+            const response = await axios.post(`${apiUrl}${endpoint}`, {
                 email: forgotEmail
             });
 
             if (response.status === 200) {
-                setForgotStep('otp');
+                if (forgotMethod === 'otp') {
+                    setForgotStep('otp');
+                } else {
+                    // For magic link, show success directly as it's an email link
+                    setForgotStep('success');
+                }
                 setForgotError('');
             }
         } catch (err: any) {
-            console.error('Send OTP failed:', err);
-            setForgotError(
-                err.response?.data?.message || 'Failed to send OTP. Please try again.'
-            );
+            console.error('Recovery initiation failed:', err);
+            const errorMessage = err.response?.data?.error || 
+                               err.response?.data?.message || 
+                               'Failed to initiate recovery. Please try again.';
+            setForgotError(errorMessage);
         } finally {
             setForgotLoading(false);
         }
@@ -114,21 +126,38 @@ export default function SignInPage() {
         setForgotLoading(true);
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://test.bowlersnetwork.com';
-            const response = await axios.post(`${apiUrl}/api/reset-password`, {
+            
+            // Step 1: Validate OTP and get reset token
+            const validateResponse = await axios.post(`${apiUrl}/api/access/recovery/validate/otp`, {
                 email: forgotEmail,
-                otp: otp,
-                password: newPassword
+                otp: otp
             });
 
-            if (response.status === 200) {
-                setForgotStep('success');
-                setForgotError('');
+            if (validateResponse.status === 200 && validateResponse.data.access_token) {
+                const resetToken = validateResponse.data.access_token;
+                
+                // Step 2: Use the token to reset the password
+                const resetResponse = await axios.post(
+                    `${apiUrl}/api/access/recovery/reset/password`,
+                    { password: newPassword },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${resetToken}`
+                        }
+                    }
+                );
+
+                if (resetResponse.status === 200) {
+                    setForgotStep('success');
+                    setForgotError('');
+                }
             }
         } catch (err: any) {
-            console.error('Reset password failed:', err);
-            setForgotError(
-                err.response?.data?.message || 'Failed to reset password. Please try again.'
-            );
+            console.error('Reset password process failed:', err);
+            const errorMessage = err.response?.data?.error || 
+                               err.response?.data?.message || 
+                               'Failed to reset password. Please try again.';
+            setForgotError(errorMessage);
         } finally {
             setForgotLoading(false);
         }
@@ -142,6 +171,7 @@ export default function SignInPage() {
         setNewPassword('');
         setConfirmNewPassword('');
         setForgotError('');
+        setForgotToken('');
     };
 
     return (
@@ -270,11 +300,34 @@ export default function SignInPage() {
             {/* Forgot Password Modal */}
             {showForgotPassword && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
-                        <h2 className="text-2xl font-bold text-gray-800 mb-6">Reset Password</h2>
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 border border-green-100">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">Reset Password</h2>
+                        <p className="text-sm text-gray-500 mb-6">Choose how you want to recover your account</p>
 
                         {forgotStep === 'email' && (
-                            <form onSubmit={handleSendOTP} className="space-y-4">
+                            <form onSubmit={handleInitiateRecovery} className="space-y-4">
+                                {/* Method Selection Tabs */}
+                                <div className="flex bg-gray-100 p-1 rounded-xl mb-6">
+                                    <button
+                                        type="button"
+                                        onClick={() => setForgotMethod('otp')}
+                                        className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
+                                            forgotMethod === 'otp' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                                        }`}
+                                    >
+                                        OTP Code
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setForgotMethod('magic')}
+                                        className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
+                                            forgotMethod === 'magic' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                                        }`}
+                                    >
+                                        Magic Link
+                                    </button>
+                                </div>
+
                                 {forgotError && (
                                     <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
                                         {forgotError}
@@ -294,7 +347,9 @@ export default function SignInPage() {
                                     />
                                 </div>
                                 <p className="text-sm text-gray-600">
-                                    We'll send you an OTP to reset your password.
+                                    {forgotMethod === 'otp' 
+                                        ? "We'll send you a 6-digit OTP code to verify your identity."
+                                        : "We'll send you a secure link to your email to reset your password."}
                                 </p>
                                 <div className="flex gap-3">
                                     <button
@@ -311,7 +366,7 @@ export default function SignInPage() {
                                         style={{ background: '#8BC342' }}
                                     >
                                         {forgotLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-                                        {forgotLoading ? 'Sending...' : 'Send OTP'}
+                                        {forgotLoading ? 'Sending...' : (forgotMethod === 'otp' ? 'Send OTP' : 'Send Link')}
                                     </button>
                                 </div>
                             </form>
@@ -414,8 +469,14 @@ export default function SignInPage() {
                                     <CheckCircle className="w-8 h-8 text-green-600" />
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-bold text-gray-800 mb-2">Password Reset Successful!</h3>
-                                    <p className="text-gray-600">You can now sign in with your new password.</p>
+                                    <h3 className="text-lg font-bold text-gray-800 mb-2">
+                                        {forgotMethod === 'magic' ? 'Check your email!' : 'Password Reset Successful!'}
+                                    </h3>
+                                    <p className="text-gray-600">
+                                        {forgotMethod === 'magic' 
+                                            ? `We've sent a magic reset link to ${forgotEmail}. Please check your inbox and follow the instructions.`
+                                            : 'You can now sign in with your new password.'}
+                                    </p>
                                 </div>
                                 <button
                                     onClick={closeForgotPasswordModal}
