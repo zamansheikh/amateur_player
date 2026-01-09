@@ -795,7 +795,7 @@ export default function Landing2Page() {
                 <div className="max-w-7xl mx-auto">
                     {/* Container with Background Image - Top Section */}
                     <div 
-                        className="relative rounded-3xl overflow-hidden mb-8"
+                        className="relative rounded-3xl overflow-hidden mb-8 min-h-[500px] md:min-h-[600px]"
                         style={{
                             backgroundImage: 'url(/land2_opt/1.webp)',
                             backgroundSize: 'cover',
@@ -806,22 +806,22 @@ export default function Landing2Page() {
                         <div className="absolute inset-0 bg-black/40"></div>
 
                         {/* Content Container - Top Section */}
-                        <div className="relative z-10 p-6 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8">
+                        <div className="relative z-10 p-6 md:p-12 flex flex-col md:flex-row justify-between items-start gap-8 h-full min-h-[500px] md:min-h-[600px]">
                             {/* Left: Heading Box */}
-                            <div className="flex-1 bg-gradient-to-r from-[#86D864] to-[#7ac85a] rounded-xl p-6 md:p-8 w-full">
+                            <div className="bg-gradient-to-r from-[#86D864] to-[#7ac85a] rounded-xl p-6 md:p-10 w-full md:max-w-xl md:mt-4 shadow-xl">
                                 <h2 className="text-3xl md:text-5xl font-black leading-tight text-white">
                                     Reach Bowlers.<br />
                                     Drive Demand.<br />
                                     Build Partnerships.
                                 </h2>
-                                <p className="text-white/95 text-sm mt-4">
+                                <p className="text-white/95 text-sm md:text-base mt-4 font-medium opacity-90">
                                     Showcase your products, run targeted promotions, and connect directly with centers and pros through the BowlersNetwork ecosystem.
                                 </p>
                             </div>
 
-                            {/* Right: Feature Products Box */}
-                            <div className="flex-1 bg-gradient-to-r from-[#86D864] to-[#7ac85a] rounded-xl p-6 md:p-8 w-full">
-                                <div className="flex items-start gap-3">
+                            {/* Right: Feature Products Box - Moved to bottom right */}
+                            <div className="bg-gradient-to-r from-[#86D864] to-[#7ac85a] rounded-xl p-6 md:p-8 w-full md:max-w-md md:self-end md:mb-4 shadow-xl">
+                                <div className="flex items-start gap-4">
                                     <div className="text-white mt-1">
                                         <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                                             <path d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" />
