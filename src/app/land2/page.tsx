@@ -141,13 +141,13 @@ export default function Landing2Page() {
 
     const jayFettig = {
         key: 'jay',
-        src: '/land2_opt/jay_fettig.webp',
+        src: '/ceo/jay_fettig.webp',
         name: 'JAY FETTIG',
         title: 'Founder & CEO',
         short: 'Jay Fettig is the Founder and CEO of BowlersNetwork.com and co-founder of JMar Entertainment. A lifelong bowler and entrepreneur, Jay created BowlersNetwork with a singular vision: to unify the bowling industry under one modern digital platform that empowers athletes, strengthens local centers, and delivers measurable value to sponsors and fans.',
         description: 'Jay Fettig is the Founder and CEO of BowlersNetwork.com and co-founder of JMar Entertainment. A lifelong bowler and entrepreneur, Jay created BowlersNetwork with a singular vision: to unify the bowling industry under one modern digital platform that empowers athletes, strengthens local centers, and delivers measurable value to sponsors and fans.\n\nJay’s leadership is driven by faith, family, and purpose. He has been married to his wife, Wendy, for over 30 years and is a proud father and grandfather. Throughout his career, Jay has owned and operated multiple businesses, some highly successful, others that fell short, but each experience reinforced a core belief: when passion drives the mission, the likelihood of success increases dramatically. Today, that philosophy fuels BowlersNetwork, where a team of deeply passionate people is aligned around one common goal growing the sport of bowling the right way, together.',
         bgClass: 'bg-blue-100',
-        position: 'center'
+        position: 'top'
     };
 
     const openModal = (member: BoardMember) => { setSelectedMember(member); setModalOpen(true); };
@@ -1254,10 +1254,9 @@ export default function Landing2Page() {
                     {/* Team Member Card */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center max-w-5xl mx-auto">
                         {/* Left: Team Member Image */}
-                        <div className="relative h-[300px] md:h-96 rounded-3xl overflow-hidden bg-blue-100">
+                        <div className="relative h-[350px] md:h-96 rounded-3xl overflow-hidden bg-blue-100">
                             <Image
                                 src={jayFettig.src}
-                                unoptimized
                                 alt={jayFettig.name}
                                 fill
                                 className="object-cover"
@@ -1380,7 +1379,7 @@ export default function Landing2Page() {
                             { src: '/team_headshots/Azmain Hossain Sabbir-Photo.webp', name: 'Azmain Hossain Sabbir', role: 'Marketing Specialist', position: 'center' },
                             { src: '/team_headshots/Sadia Durdana Adrita.webp', name: 'Sadia Durdana Adrita', role: 'Content Specialist', position: 'center' },
                             { src: '/team_headshots/Hasibul Hasan Pranto.webp', name: 'Hasibul Hasan Pranto', role: 'Creative Designer', position: 'top' },
-                            { src: '/team_headshots/Brittany Kolatzny-Headshot.webp', name: 'Brittany Kolatzny', role: 'Team Member', position: 'center' },
+                            { src: '/team_headshots/Brittany Kolatzny-Headshot.webp', name: 'Brittany Kolatzny', role: 'Director of Marketing', position: 'center' },
                         ].map((member) => (
                             <div key={member.src} className="rounded-xl overflow-hidden shadow-lg">
                                 <div className="relative h-64 bg-cyan-100">
