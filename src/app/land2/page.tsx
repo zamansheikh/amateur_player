@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { UserCircle, TrendingUp, Link as LucideLink, Calendar, MapPin } from 'lucide-react';
+import { UserCircle, TrendingUp, Link as LucideLink, Calendar, MapPin, X } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Landing2Page() {
@@ -26,8 +26,105 @@ export default function Landing2Page() {
         position: string;
     }
 
+    interface Brand {
+        brand_id: number;
+        brandType: string;
+        name: string;
+        formal_name: string;
+        logo_url: string;
+    }
+
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedMember, setSelectedMember] = useState<BoardMember | null>(null);
+    const [brands, setBrands] = useState<Brand[]>([]);
+    const mapRef = useRef<any>(null);
+    const [mapLoaded, setMapLoaded] = useState(false);
+
+    useEffect(() => {
+        const fetchBrands = async () => {
+            try {
+                const response = await fetch('https://test.bowlersnetwork.com/api/brands');
+                const data = await response.json();
+
+                let brandData: Brand[] = [];
+                if (data.Shoes && Array.isArray(data.Shoes)) {
+                    // Combine specific categories or just show Business Sponsors as partners
+                    brandData = [
+                        ...(data['Business Sponsors'] || []),
+                        ...(data['Balls'] || []),
+                        ...(data['Apparels'] || [])
+                    ].slice(0, 12); // Show a reasonable number
+                } else if (data.data && Array.isArray(data.data)) {
+                    brandData = data.data;
+                } else if (data.brands && Array.isArray(data.brands)) {
+                    brandData = data.brands;
+                } else if (Array.isArray(data)) {
+                    brandData = data;
+                }
+
+                setBrands(brandData);
+            } catch (error) {
+                console.error('Error fetching brands:', error);
+            }
+        };
+
+        fetchBrands();
+    }, []);
+
+    // Mapbox Initialization
+    useEffect(() => {
+        const initializeMap = () => {
+            if (!(window as any).mapboxgl || mapRef.current) return;
+
+            // Use the token from env or fallback to a known public token for this project
+            const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || 'pk.eyJ1IjoiamF5ZmV0dGlnIiwiYSI6ImNtY3Q3MmswNzAyOWQybHBwaDlzeXJmanIifQ.iaiqh6-04UjJcwPKrOqoXw';
+            (window as any).mapboxgl.accessToken = mapboxToken;
+            
+            const map = new (window as any).mapboxgl.Map({
+                container: 'contact-map',
+                style: 'mapbox://styles/mapbox/light-v11',
+                center: [-85.6681, 42.9634], // Grand Rapids, MI
+                zoom: 12,
+                attributionControl: true
+            });
+
+            // Add navigation controls
+            map.addControl(new (window as any).mapboxgl.NavigationControl(), 'bottom-right');
+
+            // Add marker
+            new (window as any).mapboxgl.Marker({ color: '#86D864' })
+                .setLngLat([-85.6681, 42.9634])
+                .addTo(map);
+
+            mapRef.current = map;
+            setMapLoaded(true);
+        };
+
+        if (!(window as any).mapboxgl) {
+            // Load script
+            const script = document.createElement('script');
+            script.src = 'https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js';
+            script.async = true;
+            document.head.appendChild(script);
+
+            // Load CSS
+            const link = document.createElement('link');
+            link.href = 'https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css';
+            link.rel = 'stylesheet';
+            document.head.appendChild(link);
+
+            script.onload = () => initializeMap();
+        } else {
+            initializeMap();
+        }
+
+        return () => {
+            if (mapRef.current) {
+                mapRef.current.remove();
+                mapRef.current = null;
+            }
+        };
+    }, []);
 
     const boardMembers = [
         { key: 'norm', src: '/pro_teams/norm duke pic.webp', name: 'Norm Duke', title: 'Vice President', short: 'Hall of Famer and Vice President guiding strategy with precision, integrity, and respect for the game', description: 'Norm Duke is Vice President of BowlersNetwork.com and one of the most accomplished competitors in the history of the sport. A PBA Hall of Famer whose success spans multiple decades, Norm is respected for his precision, adaptability, and professionalism. Deeply committed to family and mentorship, Norm provides strategic guidance, player leadership, and a steady voice rooted in integrity and respect for the game.', bgClass: 'bg-blue-100', position: 'top' },
@@ -952,14 +1049,13 @@ export default function Landing2Page() {
                             </div>
 
                             {/* Map */}
-                            <div className="mb-12 relative h-48 rounded-lg overflow-hidden">
-                                <Image
-                                    src="/land2_opt/map.webp"
-                                    unoptimized
-                                    alt="Location Map"
-                                    fill
-                                    className="object-cover"
-                                />
+                            <div className="mb-12 relative h-64 rounded-xl overflow-hidden shadow-inner border-2 border-[#86D864]/20 bg-gray-50">
+                                <div id="contact-map" className="w-full h-full" />
+                                {!mapLoaded && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
+                                        <div className="w-8 h-8 border-4 border-[#86D864] border-t-transparent rounded-full animate-spin"></div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Social Links */}
@@ -1062,69 +1158,30 @@ export default function Landing2Page() {
 
                     {/* Partners Grid */}
                     <div className="grid grid-cols-4 gap-8">
-                        {/* Partner 1 - Ahrefs */}
-                        <div className="bg-gray-50 rounded-2xl p-8 flex items-center justify-center h-24 hover:shadow-lg transition-shadow">
-                            <div className="text-center">
-                                <svg className="w-32 h-auto" viewBox="0 0 200 60" fill="none">
-                                    <text x="10" y="45" fontSize="36" fontWeight="bold" fill="#FF6600">ahrefs</text>
-                                </svg>
-                            </div>
-                        </div>
-
-                        {/* Partner 2 - Microsoft */}
-                        <div className="bg-gray-50 rounded-2xl p-8 flex items-center justify-center h-24 hover:shadow-lg transition-shadow">
-                            <div className="text-center">
-                                <svg className="w-32 h-auto" viewBox="0 0 200 60" fill="none">
-                                    <rect x="20" y="20" width="12" height="12" fill="#F25022"/>
-                                    <rect x="35" y="20" width="12" height="12" fill="#7FBA00"/>
-                                    <rect x="20" y="35" width="12" height="12" fill="#00A4EF"/>
-                                    <rect x="35" y="35" width="12" height="12" fill="#FFB900"/>
-                                    <text x="60" y="40" fontSize="18" fontWeight="bold" fill="#333">Microsoft</text>
-                                </svg>
-                            </div>
-                        </div>
-
-                        {/* Partner 3 - HelpScout */}
-                        <div className="bg-gray-50 rounded-2xl p-8 flex items-center justify-center h-24 hover:shadow-lg transition-shadow">
-                            <div className="text-center">
-                                <text className="font-black text-lg text-gray-900">HelpScout</text>
-                            </div>
-                        </div>
-
-                        {/* Partner 4 - Jotform */}
-                        <div className="bg-gray-50 rounded-2xl p-8 flex items-center justify-center h-24 hover:shadow-lg transition-shadow">
-                            <div className="text-center">
-                                <text className="font-black text-lg text-gray-900">Jotform</text>
-                            </div>
-                        </div>
-
-                        {/* Partner 5 - Amazon */}
-                        <div className="bg-gray-50 rounded-2xl p-8 flex items-center justify-center h-24 hover:shadow-lg transition-shadow">
-                            <div className="text-center">
-                                <text className="font-black text-lg text-gray-900">amazon</text>
-                            </div>
-                        </div>
-
-                        {/* Partner 6 - Notion */}
-                        <div className="bg-gray-50 rounded-2xl p-8 flex items-center justify-center h-24 hover:shadow-lg transition-shadow">
-                            <div className="text-center">
-                                <text className="font-black text-lg text-gray-900">Notion</text>
-                            </div>
-                        </div>
-
-                        {/* Partner 7 - LinkedIn */}
-                        <div className="bg-gray-50 rounded-2xl p-8 flex items-center justify-center h-24 hover:shadow-lg transition-shadow">
-                            <div className="text-center">
-                                <text className="font-black text-lg text-blue-600">LinkedIn</text>
-                            </div>
-                        </div>
-
-                        {/* Partner 8 - Circle */}
-                        <div className="bg-gray-50 rounded-2xl p-8 flex items-center justify-center h-24 hover:shadow-lg transition-shadow">
-                            <div className="text-center">
-                                <text className="font-black text-lg text-blue-600">Circle</text>
-                            </div>
-                        </div>
+                        {brands.length > 0 ? (
+                            brands.map((brand) => (
+                                <div key={brand.brand_id} className="bg-gray-50 rounded-2xl p-8 flex items-center justify-center h-24 hover:shadow-lg transition-shadow">
+                                    <div className="relative w-full h-full">
+                                        <Image
+                                            src={brand.logo_url}
+                                            alt={brand.name}
+                                            fill
+                                            className="object-contain"
+                                            unoptimized
+                                        />
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <>
+                                {/* Fallback/Loading placeholders */}
+                                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                                    <div key={i} className="bg-gray-50 rounded-2xl p-8 flex items-center justify-center h-24 animate-pulse">
+                                        <div className="w-24 h-8 bg-gray-200 rounded"></div>
+                                    </div>
+                                ))}
+                            </>
+                        )}
                     </div>
                 </div>
             </section>
