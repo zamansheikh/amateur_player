@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { UserCircle, TrendingUp, Link as LucideLink, Calendar, MapPin, X } from 'lucide-react';
+import { UserCircle, TrendingUp, Link as LucideLink, Calendar, MapPin, X, Menu } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Landing2Page() {
@@ -15,7 +15,16 @@ export default function Landing2Page() {
         { label: 'ABOUT US', href: '/about' },
     ];
 
-    interface BoardMember {
+    /* BoardMember and Brand interfaces omitted for brevity */
+
+    const [modalOpen, setModalOpen] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [selectedMember, setSelectedMember] = useState<BoardMember | null>(null);
+    const [brands, setBrands] = useState<Brand[]>([]);
+    const mapRef = useRef<any>(null);
+    const [mapLoaded, setMapLoaded] = useState(false);
+
+        interface BoardMember {
         key: string;
         src: string;
         name: string;
@@ -34,11 +43,6 @@ export default function Landing2Page() {
         logo_url: string;
     }
 
-    const [modalOpen, setModalOpen] = useState(false);
-    const [selectedMember, setSelectedMember] = useState<BoardMember | null>(null);
-    const [brands, setBrands] = useState<Brand[]>([]);
-    const mapRef = useRef<any>(null);
-    const [mapLoaded, setMapLoaded] = useState(false);
 
     useEffect(() => {
         const fetchBrands = async () => {
@@ -158,30 +162,68 @@ export default function Landing2Page() {
     return (
         <div className="min-h-screen bg-white">
             {/* Navigation Header */}
-            <nav className="flex flex-col md:flex-row items-center justify-between px-4 md:px-8 py-4 md:py-6 bg-white border-b border-gray-200 gap-4 md:gap-0">
-                {/* Logo */}
-                <div className="text-xl md:text-2xl font-black text-gray-900 tracking-tight">
-                    BOWLERS NETWORK
-                </div>
+            <nav className="bg-white border-b border-gray-200 sticky top-0 z-[100]">
+                <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 md:py-6">
+                    <div className="flex items-center justify-between w-full">
+                        {/* Logo - Centered on mobile */}
+                        <div className="text-xl md:text-2xl font-black text-gray-900 tracking-tight flex-1 text-center md:text-left">
+                            BOWLERS NETWORK
+                        </div>
 
-                {/* Menu Items */}
-                <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8">
-                    {menuItems.map((item) => (
-                        <Link
-                            key={item.label}
-                            href={item.href}
-                            className="text-xs md:text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors"
-                        >
-                            {item.label}
-                        </Link>
-                    ))}
-                </div>
+                        {/* Mobile Menu Toggle - Positioned right on mobile */}
+                        <div className="md:hidden absolute right-4">
+                            <button 
+                                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                className="text-gray-900 focus:outline-none"
+                            >
+                                {isMenuOpen ? <X className="w-8 h-8" /> : <Menu className="w-8 h-8" />}
+                            </button>
+                        </div>
 
-                {/* User Icon */}
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center cursor-pointer transition-colors" style={{ backgroundColor: '#86D864' }}>
-                        <UserCircle className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                        {/* Desktop Menu Items */}
+                        <div className="hidden md:flex items-center gap-8 ml-auto mr-8">
+                            {menuItems.map((item) => (
+                                <Link
+                                    key={item.label}
+                                    href={item.href}
+                                    className="text-xs md:text-sm font-semibold text-gray-700 hover:text-[#86D864] transition-colors"
+                                >
+                                    {item.label}
+                                </Link>
+                            ))}
+                        </div>
+
+                        {/* Desktop User Icon */}
+                        <div className="hidden md:flex items-center">
+                            <div className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-colors hover:scale-105" style={{ backgroundColor: '#86D864' }}>
+                                <UserCircle className="w-6 h-6 text-white" />
+                            </div>
+                        </div>
                     </div>
+
+                    {/* Mobile Menu Content - Expanded */}
+                    {isMenuOpen && (
+                        <div className="md:hidden mt-8 pb-4 flex flex-col items-center animate-in fade-in slide-in-from-top-5 duration-300">
+                            {/* Links in a centered grid-like layout */}
+                            <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-4 px-6 mb-6">
+                                {menuItems.map((item) => (
+                                    <Link
+                                        key={item.label}
+                                        href={item.href}
+                                        onClick={() => setIsMenuOpen(false)}
+                                        className="text-[11px] font-bold text-gray-900 hover:text-[#86D864] tracking-widest"
+                                    >
+                                        {item.label}
+                                    </Link>
+                                ))}
+                            </div>
+                            
+                            {/* Profile Icon at bottom of menu */}
+                            <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg" style={{ backgroundColor: '#86D864' }}>
+                                <UserCircle className="w-7 h-7 text-white" />
+                            </div>
+                        </div>
+                    )}
                 </div>
             </nav>
 
