@@ -38,7 +38,7 @@ export default function Landing2Page() {
         { key: 'marshall', src: '/pro_teams/marshall kent pic.webp', name: 'Marshall Kent', title: 'Co-Founder & Board Member', short: 'PBA champion and co-founder bringing the athlete\'s voice into platform leadership and long-term growth.', description: 'Marshall Kent is a world-class professional bowler and co-founder of BowlersNetwork.com. A multiple-time PBA Tour champion and major winner, Marshall brings the athlete\'s perspective directly into the leadership of the platform. His role ensures BowlersNetwork is built by bowlers, for bowlers—creating new opportunities for professionals to build lasting income, visibility, and relevance beyond competition', bgClass: 'bg-blue-100', position: 'center' },
     ];
 
-    const openModal = (member: React.SetStateAction<null>) => { setSelectedMember(member); setModalOpen(true); };
+    const openModal = (member: BoardMember) => { setSelectedMember(member); setModalOpen(true); };
     const closeModal = () => { setModalOpen(false); setSelectedMember(null); };
 
     useEffect(() => {
