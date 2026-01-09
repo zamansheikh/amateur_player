@@ -281,10 +281,10 @@ export default function Landing2Page() {
                     <div className="flex flex-col md:flex-row items-center md:items-start gap-8 md:gap-12">
                         {/* Left: Images Grid */}
                         <div className="flex-1 w-full order-2 md:order-1">
-                            <div className="grid grid-cols-3 gap-2 md:gap-4" style={{ gridTemplateRows: 'auto auto' }}>
-                                {/* Item 1: Amateurs (top-left) */}
-                                <div className="row-span-1">
-                                    <div className="rounded-t-2xl overflow-hidden h-64">
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+                                {/* Item 1: Amateurs (Row 1 Mobile) */}
+                                <div className="row-span-1 order-1">
+                                    <div className="rounded-t-2xl overflow-hidden h-48 md:h-64">
                                         <Image
                                             src="/land2_opt/amateurs.webp"
                                             alt="Amateurs"
@@ -294,14 +294,31 @@ export default function Landing2Page() {
                                             className="w-full h-full object-cover"
                                         />
                                     </div>
-                                    <div className="rounded-b-1xl text-white text-center py-2 font-bold text-sm" style={{ backgroundColor: '#86D864' }}>
+                                    <div className="rounded-b-1xl text-white text-center py-2 font-bold text-xs md:text-sm" style={{ backgroundColor: '#86D864' }}>
                                         Amateurs
                                     </div>
                                 </div>
 
-                                {/* Item 3: Middle Unknown (top-center, tall) */}
-                                <div className="row-span-2">
-                                    <div className="rounded-2xl overflow-hidden h-148">
+                                {/* Item 4: Centers (Row 1 Mobile) */}
+                                <div className="row-span-1 order-2 md:order-3">
+                                    <div className="rounded-t-2xl overflow-hidden h-48 md:h-64">
+                                        <Image
+                                            src="/land2_opt/centers.webp"
+                                            alt="Centers"
+                                            width={200}
+                                            height={260}
+                                            unoptimized
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                    <div className="rounded-b-1xl text-white text-center py-2 font-bold text-xs md:text-sm" style={{ backgroundColor: '#86D864' }}>
+                                        Centers
+                                    </div>
+                                </div>
+
+                                {/* Item 3: Middle Unknown (Row 2 Mobile, Tall in Desktop Center) */}
+                                <div className="col-span-2 md:col-span-1 row-span-1 md:row-span-2 order-3 md:order-2">
+                                    <div className="rounded-2xl overflow-hidden h-64 md:h-148">
                                         <Image
                                             src="/land2_opt/middle_unknown.webp"
                                             alt="Experience"
@@ -313,26 +330,9 @@ export default function Landing2Page() {
                                     </div>
                                 </div>
 
-                                {/* Item 4: Centers (top-right) */}
-                                <div className="row-span-1">
-                                    <div className="rounded-t-2xl overflow-hidden h-64">
-                                        <Image
-                                            src="/land2_opt/centers.webp"
-                                            alt="Centers"
-                                            width={200}
-                                            height={260}
-                                            unoptimized
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                    <div className="rounded-b-1xl text-white text-center py-2 font-bold text-sm" style={{ backgroundColor: '#86D864' }}>
-                                        Centers
-                                    </div>
-                                </div>
-
-                                {/* Item 2: Pros (bottom-left) */}
-                                <div className="row-span-1">
-                                    <div className="rounded-t-2xl overflow-hidden h-64">
+                                {/* Item 2: Pros (Row 3 Mobile) */}
+                                <div className="row-span-1 order-4">
+                                    <div className="rounded-t-2xl overflow-hidden h-48 md:h-64">
                                         <Image
                                             src="/land2_opt/pros.webp"
                                             alt="Pros"
@@ -342,14 +342,14 @@ export default function Landing2Page() {
                                             className="w-full h-full object-cover"
                                         />
                                     </div>
-                                    <div className="rounded-b-1xl text-white text-center py-2 font-bold text-sm" style={{ backgroundColor: '#86D864' }}>
+                                    <div className="rounded-b-1xl text-white text-center py-2 font-bold text-xs md:text-sm" style={{ backgroundColor: '#86D864' }}>
                                         Pros
                                     </div>
                                 </div>
 
-                                {/* Item 5: Shops (bottom-right) */}
-                                <div className="row-span-1">
-                                    <div className="rounded-t-2xl overflow-hidden h-64">
+                                {/* Item 5: Shops (Row 3 Mobile) */}
+                                <div className="row-span-1 order-5">
+                                    <div className="rounded-t-2xl overflow-hidden h-48 md:h-64">
                                         <Image
                                             src="/land2_opt/shops.webp"
                                             alt="Shops"
@@ -359,7 +359,7 @@ export default function Landing2Page() {
                                             className="w-full h-full object-cover"
                                         />
                                     </div>
-                                    <div className="rounded-b-1xl text-white text-center py-2 font-bold text-sm" style={{ backgroundColor: '#86D864' }}>
+                                    <div className="rounded-b-1xl text-white text-center py-2 font-bold text-xs md:text-sm" style={{ backgroundColor: '#86D864' }}>
                                         Shops
                                     </div>
                                 </div>
