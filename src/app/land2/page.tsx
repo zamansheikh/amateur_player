@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { UserCircle, TrendingUp, Link as LucideLink, Calendar, MapPin } from 'lucide-react';
 import Link from 'next/link';
@@ -14,6 +14,27 @@ export default function Landing2Page() {
         { label: 'PARTNERS', href: '/partners' },
         { label: 'ABOUT US', href: '/about' },
     ];
+
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedMember, setSelectedMember] = useState(null);
+
+    const boardMembers = [
+        { key: 'norm', src: '/pro_teams/norm duke pic.webp', name: 'Norm Duke', title: 'Vice President', short: 'Hall of Famer and Vice President guiding strategy with precision, integrity, and respect for the game', description: 'Norm Duke is Vice President of BowlersNetwork.com and one of the most accomplished competitors in the history of the sport. A PBA Hall of Famer whose success spans multiple decades, Norm is respected for his precision, adaptability, and professionalism. Deeply committed to family and mentorship, Norm provides strategic guidance, player leadership, and a steady voice rooted in integrity and respect for the game.', bgClass: 'bg-blue-100', position: 'center' },
+        { key: 'chuck', src: '/pro_teams/Chuck 1.webp', name: 'Chuck Gardner', title: 'Owner', short: 'Et aliquip occaecat deserunt cupidatat occaecat et Lorem exercitation sit', description: 'Chuck Gardner brings leadership and experience to the board.', bgClass: 'bg-red-100', position: 'center' },
+        { key: 'parker', src: '/pro_teams/Parker Bohn Pic.webp', name: 'Parker Bohn', title: 'Owner', short: 'Et aliquip occaecat deserunt cupidatat occaecat et Lorem exercitation sit', description: 'Parker Bohn is an owner and adviser to the network.', bgClass: 'bg-cyan-100', position: 'center' },
+        { key: 'liz', src: '/pro_teams/Liz Johnson pic.webp', name: 'Liz Johnson', title: 'Owner', short: 'Et aliquip occaecat deserunt cupidatat occaecat et Lorem exercitation sit', description: 'Liz Johnson leads player initiatives and outreach.', bgClass: 'bg-cyan-100', position: 'center' },
+        { key: 'carolyn', src: '/pro_teams/carolyn dorin ballard pic.webp', name: 'Carolyn Dorin-Ballard', title: 'Owner', short: 'Et aliquip occaecat deserunt cupidatat occaecat et Lorem exercitation sit', description: 'Carolyn Dorin-Ballard heads community outreach and development.', bgClass: 'bg-red-100', position: 'center' },
+        { key: 'marshall', src: '/pro_teams/marshall kent pic.webp', name: 'Marshall Kent', title: 'Co-Founder & Board Member', short: 'PBA champion and co-founder bringing the athlete\'s voice into platform leadership and long-term growth.', description: 'Marshall Kent is a world-class professional bowler and co-founder of BowlersNetwork.com. A multiple-time PBA Tour champion and major winner, Marshall brings the athlete\'s perspective directly into the leadership of the platform. His role ensures BowlersNetwork is built by bowlers, for bowlers—creating new opportunities for professionals to build lasting income, visibility, and relevance beyond competition', bgClass: 'bg-blue-100', position: 'center' },
+    ];
+
+    const openModal = (member) => { setSelectedMember(member); setModalOpen(true); };
+    const closeModal = () => { setModalOpen(false); setSelectedMember(null); };
+
+    useEffect(() => {
+        function onKey(e) { if (e.key === 'Escape') closeModal(); }
+        if (modalOpen) window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [modalOpen]);
 
     return (
         <div className="min-h-screen bg-white">
@@ -1364,156 +1385,52 @@ export default function Landing2Page() {
 
                     {/* Board Members Grid */}
                     <div className="grid grid-cols-3 gap-8">
-                        {/* Member 1 - Norm Duke (Blue) */}
-                        <div>
-                            <div className="relative h-64 rounded-2xl overflow-hidden bg-blue-100 mb-4">
-                                <div className="absolute top-4 left-4 z-10">
-                                    <span className="bg-[#86D864] text-white font-black text-xs px-3 py-1 rounded-full">
-                                        Owner
-                                    </span>
+                        {boardMembers.map((member) => (
+                            <div key={member.key}>
+                                <div className={`relative h-64 rounded-2xl overflow-hidden ${member.bgClass} mb-4`}>
+                                    <div className="absolute top-4 left-4 z-10">
+                                        <span className="bg-[#86D864] text-white font-black text-xs px-3 py-1 rounded-full">
+                                            {member.title}
+                                        </span>
+                                    </div>
+                                    <Image
+                                        src={member.src}
+                                        unoptimized
+                                        alt={member.name}
+                                        fill
+                                        className="object-cover"
+                                        style={{ objectPosition: member.position || 'center' }}
+                                    />
                                 </div>
-                                <Image
-                                    src="/land2_opt/norm_duke.webp"
-                                    unoptimized
-                                    alt="Norm Duke"
-                                    fill
-                                    className="object-cover"
-                                />
+                                <h3 className="text-gray-900 font-black text-lg mb-2">{member.name}</h3>
+                                <p className="text-gray-700 text-sm leading-relaxed mb-3">{member.short}</p>
+                                <a href="#" onClick={(e) => { e.preventDefault(); openModal(member); }} className="text-[#86D864] font-semibold text-sm hover:underline">
+                                    Read More...
+                                </a>
                             </div>
-                            <h3 className="text-gray-900 font-black text-lg mb-2">Norm Duke</h3>
-                            <p className="text-gray-700 text-sm leading-relaxed mb-3">
-                                Et aliquip occaecat deserunt cupidatat occaecat et Lorem exercitation sit
-                            </p>
-                            <a href="#" className="text-[#86D864] font-semibold text-sm hover:underline">
-                                Read More...
-                            </a>
-                        </div>
-
-                        {/* Member 2 - Chuck Gardner (Peach) */}
-                        <div>
-                            <div className="relative h-64 rounded-2xl overflow-hidden bg-red-100 mb-4">
-                                <div className="absolute top-4 left-4 z-10">
-                                    <span className="bg-[#86D864] text-white font-black text-xs px-3 py-1 rounded-full">
-                                        Owner
-                                    </span>
-                                </div>
-                                <Image
-                                    src="/land2_opt/chuck_gardner.webp"
-                                    unoptimized
-                                    alt="Chuck Gardner"
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                            <h3 className="text-gray-900 font-black text-lg mb-2">Chuck Gardner</h3>
-                            <p className="text-gray-700 text-sm leading-relaxed mb-3">
-                                Et aliquip occaecat deserunt cupidatat occaecat et Lorem exercitation sit
-                            </p>
-                            <a href="#" className="text-[#86D864] font-semibold text-sm hover:underline">
-                                Read More...
-                            </a>
-                        </div>
-
-                        {/* Member 3 - Parker Bohn (Cyan) */}
-                        <div>
-                            <div className="relative h-64 rounded-2xl overflow-hidden bg-cyan-100 mb-4">
-                                <div className="absolute top-4 left-4 z-10">
-                                    <span className="bg-[#86D864] text-white font-black text-xs px-3 py-1 rounded-full">
-                                        Owner
-                                    </span>
-                                </div>
-                                <Image
-                                    src="/land2_opt/parker_bohn.webp"
-                                    unoptimized
-                                    alt="Parker Bohn"
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                            <h3 className="text-gray-900 font-black text-lg mb-2">Parker Bohn</h3>
-                            <p className="text-gray-700 text-sm leading-relaxed mb-3">
-                                Et aliquip occaecat deserunt cupidatat occaecat et Lorem exercitation sit
-                            </p>
-                            <a href="#" className="text-[#86D864] font-semibold text-sm hover:underline">
-                                Read More...
-                            </a>
-                        </div>
-
-                        {/* Member 4 - Liz Johnson (Cyan) */}
-                        <div>
-                            <div className="relative h-64 rounded-2xl overflow-hidden bg-cyan-100 mb-4">
-                                <div className="absolute top-4 left-4 z-10">
-                                    <span className="bg-[#86D864] text-white font-black text-xs px-3 py-1 rounded-full">
-                                        Owner
-                                    </span>
-                                </div>
-                                <Image
-                                    src="/land2_opt/liz_johnson.webp"
-                                    unoptimized
-                                    alt="Liz Johnson"
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                            <h3 className="text-gray-900 font-black text-lg mb-2">Liz Johnson</h3>
-                            <p className="text-gray-700 text-sm leading-relaxed mb-3">
-                                Et aliquip occaecat deserunt cupidatat occaecat et Lorem exercitation sit
-                            </p>
-                            <a href="#" className="text-[#86D864] font-semibold text-sm hover:underline">
-                                Read More...
-                            </a>
-                        </div>
-
-                        {/* Member 5 - Carolyn Dorin-Ballard (Peach) */}
-                        <div>
-                            <div className="relative h-64 rounded-2xl overflow-hidden bg-red-100 mb-4">
-                                <div className="absolute top-4 left-4 z-10">
-                                    <span className="bg-[#86D864] text-white font-black text-xs px-3 py-1 rounded-full">
-                                        Owner
-                                    </span>
-                                </div>
-                                <Image
-                                    src="/land2_opt/carolyn-dorin-ballard.webp"
-                                    unoptimized
-                                    alt="Carolyn Dorin-Ballard"
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                            <h3 className="text-gray-900 font-black text-lg mb-2">Carolyn Dorin-Ballard</h3>
-                            <p className="text-gray-700 text-sm leading-relaxed mb-3">
-                                Et aliquip occaecat deserunt cupidatat occaecat et Lorem exercitation sit
-                            </p>
-                            <a href="#" className="text-[#86D864] font-semibold text-sm hover:underline">
-                                Read More...
-                            </a>
-                        </div>
-
-                        {/* Member 6 - Norm Duke v2 (Blue) */}
-                        <div>
-                            <div className="relative h-64 rounded-2xl overflow-hidden bg-blue-100 mb-4">
-                                <div className="absolute top-4 left-4 z-10">
-                                    <span className="bg-[#86D864] text-white font-black text-xs px-3 py-1 rounded-full">
-                                        Director of Player Relationships
-                                    </span>
-                                </div>
-                                <Image
-                                    src="/land2_opt/norm_duke_v2.webp"
-                                    unoptimized
-                                    alt="Norm Duke"
-                                    fill
-                                    className="object-cover"
-                                />
-                            </div>
-                            <h3 className="text-gray-900 font-black text-lg mb-2">Norm Duke</h3>
-                            <p className="text-gray-700 text-sm leading-relaxed mb-3">
-                                Et aliquip occaecat deserunt cupidatat occaecat et Lorem exercitation sit
-                            </p>
-                            <a href="#" className="text-[#86D864] font-semibold text-sm hover:underline">
-                                Read More...
-                            </a>
-                        </div>
+                        ))}
                     </div>
+
+                    {/* Modal */}
+                    {modalOpen && selectedMember && (
+                        <div className="fixed inset-0 z-50 flex items-center justify-center">
+                            <div className="absolute inset-0 bg-black/50" onClick={closeModal}></div>
+                            <div className="relative bg-white rounded-xl shadow-xl max-w-4xl w-full mx-4 overflow-hidden grid grid-cols-1 md:grid-cols-2">
+                                <div className="p-8 flex flex-col justify-between">
+                                    <div>
+                                        <h3 className="text-2xl font-black mb-4">{selectedMember.name}</h3>
+                                    </div>
+                                    <div>
+                                        <p className="text-gray-700">{selectedMember.description}</p>
+                                    </div>
+                                </div>
+                                <div className="relative h-64 md:h-auto">
+                                    <Image src={selectedMember.src} alt={selectedMember.name} unoptimized fill className="object-cover" />
+                                </div>
+                                <button onClick={closeModal} className="absolute top-3 right-3 text-gray-600 bg-white rounded-full p-2 shadow">✕</button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </section>
 
@@ -1533,13 +1450,13 @@ export default function Landing2Page() {
                     {/* Team Members Grid */}
                     <div className="grid grid-cols-3 gap-8">
                         {[
-                            { src: '/team_headshots/Nahian Ferdouse.webp', name: 'Nahian Ferdouse', role: 'Business Intelligence Specialist' },
-                            { src: '/team_headshots/mumit_prottoy.webp', name: 'Mumit Prottoy', role: 'Lead Developer' },
-                            { src: '/team_headshots/Shuvo Headshot.webp', name: 'Asraful Alam Shuvo', role: 'Marketing Lead' },
-                            { src: '/team_headshots/Azmain Hossain Sabbir-Photo.webp', name: 'Azmain Hossain Sabbir', role: 'Marketing Specialist' },
-                            { src: '/team_headshots/Sadia Durdana Adrita.webp', name: 'Sadia Durdana Adrita', role: 'Content Specialist' },
-                            { src: '/team_headshots/Hasibul Hasan Pranto.webp', name: 'Hasibul Hasan Pranto', role: 'Creative Designer' },
-                            { src: '/team_headshots/Brittany Kolatzny-Headshot.webp', name: 'Brittany Kolatzny', role: 'Team Member' },
+                            { src: '/team_headshots/Nahian Ferdouse.webp', name: 'Nahian Ferdouse', role: 'Business Intelligence Specialist', position: 'top' },
+                            { src: '/team_headshots/mumit_prottoy.webp', name: 'Mumit Prottoy', role: 'Lead Developer', position: 'top' },
+                            { src: '/team_headshots/Shuvo Headshot.webp', name: 'Asraful Alam Shuvo', role: 'Marketing Lead', position: 'center' },
+                            { src: '/team_headshots/Azmain Hossain Sabbir-Photo.webp', name: 'Azmain Hossain Sabbir', role: 'Marketing Specialist', position: 'center' },
+                            { src: '/team_headshots/Sadia Durdana Adrita.webp', name: 'Sadia Durdana Adrita', role: 'Content Specialist', position: 'center' },
+                            { src: '/team_headshots/Hasibul Hasan Pranto.webp', name: 'Hasibul Hasan Pranto', role: 'Creative Designer', position: 'top' },
+                            { src: '/team_headshots/Brittany Kolatzny-Headshot.webp', name: 'Brittany Kolatzny', role: 'Team Member', position: 'center' },
                         ].map((member) => (
                             <div key={member.src} className="rounded-xl overflow-hidden shadow-lg">
                                 <div className="relative h-64 bg-cyan-100">
@@ -1547,7 +1464,9 @@ export default function Landing2Page() {
                                         src={member.src}
                                         alt={member.name}
                                         fill
+                                        unoptimized
                                         className="object-cover"
+                                        style={{ objectPosition: member.position || 'center' }}
                                     />
                                 </div>
                                 <div className="bg-[#86D864] text-white p-4">
