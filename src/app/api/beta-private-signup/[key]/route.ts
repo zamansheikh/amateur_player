@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: { key: string } }
+    context: { params: Promise<{ key: string }> }
 ) {
     try {
+        const { key: privateKey } = await context.params;
         const body = await request.json();
         const { username, password } = body;
-        const privateKey = params.key;
 
         if (!username || !password) {
             return NextResponse.json(
