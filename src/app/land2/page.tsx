@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { UserCircle, TrendingUp, Link as LucideLink, Calendar, MapPin, X, Menu } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function Landing2Page() {
     const menuItems = [
@@ -23,6 +25,8 @@ export default function Landing2Page() {
     const [brands, setBrands] = useState<Brand[]>([]);
     const mapRef = useRef<any>(null);
     const [mapLoaded, setMapLoaded] = useState(false);
+    const { user } = useAuth();
+    const router = useRouter();
 
         interface BoardMember {
         key: string;
@@ -153,6 +157,14 @@ export default function Landing2Page() {
     const openModal = (member: BoardMember) => { setSelectedMember(member); setModalOpen(true); };
     const closeModal = () => { setModalOpen(false); setSelectedMember(null); };
 
+    const handleProfileClick = () => {
+        if (user?.authenticated) {
+            router.push('/home');
+        } else {
+            router.push('/signin');
+        }
+    };
+
     useEffect(() => {
         function onKey(e: KeyboardEvent) { if (e.key === 'Escape') closeModal(); }
         if (modalOpen) window.addEventListener('keydown', onKey);
@@ -195,7 +207,11 @@ export default function Landing2Page() {
 
                         {/* Desktop User Icon */}
                         <div className="hidden md:flex items-center">
-                            <div className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-colors hover:scale-105" style={{ backgroundColor: '#86D864' }}>
+                            <div 
+                                onClick={handleProfileClick}
+                                className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-colors hover:scale-105" 
+                                style={{ backgroundColor: '#86D864' }}
+                            >
                                 <UserCircle className="w-6 h-6 text-white" />
                             </div>
                         </div>
@@ -219,7 +235,11 @@ export default function Landing2Page() {
                             </div>
                             
                             {/* Profile Icon at bottom of menu */}
-                            <div className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg" style={{ backgroundColor: '#86D864' }}>
+                            <div 
+                                onClick={handleProfileClick}
+                                className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg cursor-pointer" 
+                                style={{ backgroundColor: '#86D864' }}
+                            >
                                 <UserCircle className="w-7 h-7 text-white" />
                             </div>
                         </div>
