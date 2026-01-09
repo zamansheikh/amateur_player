@@ -1254,7 +1254,7 @@ export default function Landing2Page() {
                     {/* Team Member Card */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center max-w-5xl mx-auto">
                         {/* Left: Team Member Image */}
-                        <div className="relative h-[350px] md:h-96 rounded-3xl overflow-hidden bg-blue-100">
+                        <div className="relative h-[340px] md:h-[420px] rounded-3xl overflow-hidden bg-blue-100">
                             <Image
                                 src={jayFettig.src}
                                 alt={jayFettig.name}
@@ -1331,26 +1331,45 @@ export default function Landing2Page() {
 
                     {/* Modal */}
                     {modalOpen && selectedMember && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                            <div className="absolute inset-0 bg-black/50" onClick={closeModal}></div>
-                            <div className="relative bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-full overflow-y-auto grid grid-cols-1 md:grid-cols-2">
-                                <div className="p-6 md:p-12 flex flex-col justify-between order-2 md:order-1">
-                                    <div>
-                                        <h3 className="text-3xl md:text-5xl font-black text-[#86D864] mb-3 leading-tight">{selectedMember.name}</h3>
-                                        <div className="inline-block bg-[#86D864] text-white font-black px-4 py-1.5 rounded-lg mb-8 text-xs md:text-sm shadow-sm">
-                                            {selectedMember.title}
+                        <div className="fixed inset-0 z-[200] flex items-center justify-center p-2 md:p-4">
+                            <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={closeModal}></div>
+                            <div className="relative bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[95vh] md:max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+                                {/* Close Button - Always on top and fixed */}
+                                <button 
+                                    onClick={closeModal} 
+                                    className="absolute top-4 right-4 text-gray-500 bg-white/90 backdrop-blur-sm rounded-full p-2.5 shadow-xl hover:bg-white hover:text-gray-900 transition-all z-[210] border border-gray-100"
+                                >
+                                    <X className="w-6 h-6" />
+                                </button>
+                                
+                                <div className="overflow-y-auto flex-1 h-full scrollbar-hide">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 h-full">
+                                        <div className="relative h-[450px] md:h-auto bg-gray-100 order-1 md:order-2">
+                                            <Image 
+                                                src={selectedMember.src} 
+                                                alt={selectedMember.name} 
+                                                unoptimized 
+                                                fill 
+                                                className="object-cover" 
+                                                style={{ objectPosition: selectedMember.position || 'center' }} 
+                                                priority
+                                            />
+                                            {/* Gradient overlay for mobile picture to make close button visible if needed */}
+                                            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-transparent md:hidden pointer-events-none"></div>
+                                        </div>
+                                        <div className="p-6 md:p-12 flex flex-col order-2 md:order-1">
+                                            <div className="mb-8">
+                                                <h3 className="text-4xl md:text-5xl font-black text-[#86D864] mb-4 leading-tight">{selectedMember.name}</h3>
+                                                <div className="inline-block bg-[#86D864] text-white font-black px-5 py-2 rounded-xl text-sm md:text-base shadow-md">
+                                                    {selectedMember.title}
+                                                </div>
+                                            </div>
+                                            <div className="prose prose-sm md:prose-base max-w-none">
+                                                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{selectedMember.description}</p>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="flex-1">
-                                        <p className="text-gray-700 leading-relaxed text-sm md:text-base whitespace-pre-wrap">{selectedMember.description}</p>
-                                    </div>
                                 </div>
-                                <div className="relative h-72 md:h-auto bg-gray-200 order-1 md:order-2">
-                                    <Image src={selectedMember.src} alt={selectedMember.name} unoptimized fill className="object-cover" style={{ objectPosition: selectedMember.position || 'center' }} />
-                                </div>
-                                <button onClick={closeModal} className="absolute top-4 right-4 text-gray-400 bg-white/90 backdrop-blur-sm rounded-full p-2.5 shadow-lg hover:bg-white hover:text-gray-600 transition-all z-50">
-                                    <X className="w-5 h-5" />
-                                </button>
                             </div>
                         </div>
                     )}
