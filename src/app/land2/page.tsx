@@ -1264,6 +1264,7 @@ export default function Landing2Page() {
                             <Image
                                 src={jayFettig.src}
                                 alt={jayFettig.name}
+                                unoptimized
                                 width={600}
                                 height={800}
                                 className="h-full w-auto rounded-2xl object-cover"
