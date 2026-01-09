@@ -160,12 +160,12 @@ export default function SignInPage() {
                         <span className="text-2xl font-bold text-gray-900">Bowlers Network</span>
                     </div>
                     <h2 className="text-3xl font-bold text-gray-900">Sign in to your account</h2>
-                    <p className="mt-2 text-sm text-gray-600">
+                    {/* <p className="mt-2 text-sm text-gray-600">
                         Or{' '}
                         <Link href="/signup" className="font-medium text-green-600 hover:text-green-500">
                             create a new account
                         </Link>
-                    </p>
+                    </p> */}
                 </div>
 
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
