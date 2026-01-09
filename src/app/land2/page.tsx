@@ -1267,9 +1267,9 @@ export default function Landing2Page() {
 
                         {/* Right: Team Member Info */}
                         <div>
-                            <h3 className="text-gray-900 font-black text-2xl mb-3">{jayFettig.name}</h3>
+                            <h3 className="text-[#86D864] font-black text-4xl md:text-5xl mb-4 leading-tight">{jayFettig.name}</h3>
                             
-                            <div className="inline-block bg-[#86D864] text-white font-black px-4 py-2 rounded-lg mb-6">
+                            <div className="inline-block bg-[#86D864] text-white font-black px-4 py-1.5 rounded-lg mb-8 text-sm md:text-base">
                                 {jayFettig.title}
                             </div>
 
@@ -1337,19 +1337,21 @@ export default function Landing2Page() {
                             <div className="relative bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-full overflow-y-auto grid grid-cols-1 md:grid-cols-2">
                                 <div className="p-6 md:p-12 flex flex-col justify-between order-2 md:order-1">
                                     <div>
-                                        <div className="inline-block bg-[#86D864] text-white font-black px-4 py-2 rounded-lg mb-4 text-sm">
+                                        <h3 className="text-3xl md:text-5xl font-black text-[#86D864] mb-3 leading-tight">{selectedMember.name}</h3>
+                                        <div className="inline-block bg-[#86D864] text-white font-black px-4 py-1.5 rounded-lg mb-8 text-xs md:text-sm shadow-sm">
                                             {selectedMember.title}
                                         </div>
-                                        <h3 className="text-2xl md:text-3xl font-black mb-6 text-gray-900">{selectedMember.name}</h3>
                                     </div>
-                                    <div>
-                                        <p className="text-gray-700 leading-relaxed text-sm whitespace-pre-wrap">{selectedMember.description}</p>
+                                    <div className="flex-1">
+                                        <p className="text-gray-700 leading-relaxed text-sm md:text-base whitespace-pre-wrap">{selectedMember.description}</p>
                                     </div>
                                 </div>
-                                <div className="relative h-64 md:h-auto bg-gray-200 order-1 md:order-2">
+                                <div className="relative h-72 md:h-auto bg-gray-200 order-1 md:order-2">
                                     <Image src={selectedMember.src} alt={selectedMember.name} unoptimized fill className="object-cover" style={{ objectPosition: selectedMember.position || 'center' }} />
                                 </div>
-                                <button onClick={closeModal} className="absolute top-4 right-4 text-gray-600 bg-white rounded-full p-2 shadow hover:bg-gray-100 z-50">✕</button>
+                                <button onClick={closeModal} className="absolute top-4 right-4 text-gray-400 bg-white/90 backdrop-blur-sm rounded-full p-2.5 shadow-lg hover:bg-white hover:text-gray-600 transition-all z-50">
+                                    <X className="w-5 h-5" />
+                                </button>
                             </div>
                         </div>
                     )}
