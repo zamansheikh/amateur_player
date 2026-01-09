@@ -15,8 +15,19 @@ export default function Landing2Page() {
         { label: 'ABOUT US', href: '/about' },
     ];
 
+    interface BoardMember {
+        key: string;
+        src: string;
+        name: string;
+        title: string;
+        short: string;
+        description: string;
+        bgClass: string;
+        position: string;
+    }
+
     const [modalOpen, setModalOpen] = useState(false);
-    const [selectedMember, setSelectedMember] = useState(null);
+    const [selectedMember, setSelectedMember] = useState<BoardMember | null>(null);
 
     const boardMembers = [
         { key: 'norm', src: '/pro_teams/norm duke pic.webp', name: 'Norm Duke', title: 'Vice President', short: 'Hall of Famer and Vice President guiding strategy with precision, integrity, and respect for the game', description: 'Norm Duke is Vice President of BowlersNetwork.com and one of the most accomplished competitors in the history of the sport. A PBA Hall of Famer whose success spans multiple decades, Norm is respected for his precision, adaptability, and professionalism. Deeply committed to family and mentorship, Norm provides strategic guidance, player leadership, and a steady voice rooted in integrity and respect for the game.', bgClass: 'bg-blue-100', position: 'center' },
@@ -1428,7 +1439,7 @@ export default function Landing2Page() {
                                     </div>
                                 </div>
                                 <div className="relative h-64 md:h-auto bg-gray-200">
-                                    <Image src={selectedMember.src} alt={selectedMember.name} unoptimized fill className="object-cover" />
+                                    <Image src={selectedMember.src} alt={selectedMember.name} unoptimized fill className="object-cover" style={{ objectPosition: selectedMember.position || 'center' }} />
                                 </div>
                                 <button onClick={closeModal} className="absolute top-4 right-4 text-gray-600 bg-white rounded-full p-2 shadow hover:bg-gray-100">✕</button>
                             </div>
