@@ -801,10 +801,10 @@ export default function Landing2Page() {
                     </div>
 
                     {/* Bottom Section - Form and Image */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start mt-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-stretch mt-8">
                         {/* Left: Partnership Form */}
-                        <div>
-                            <form className="bg-white rounded-lg p-6 md:p-8 shadow-lg">
+                        <div className="flex flex-col">
+                            <form className="bg-white rounded-lg p-6 md:p-8 shadow-lg flex-1">
                                 <div className="mb-6">
                                     <label className="block text-gray-800 font-bold text-sm mb-2">Name</label>
                                     <input
@@ -853,7 +853,7 @@ export default function Landing2Page() {
                         </div>
 
                         {/* Right: Product Mockup Image */}
-                        <div className="relative h-[300px] md:h-[500px]">
+                        <div className="relative h-[400px] md:h-auto min-h-[400px]">
                             <Image
                                 src="/land2_opt/7.webp"
                                 unoptimized
@@ -898,9 +898,9 @@ export default function Landing2Page() {
             {/* Why Partner With Us Section */}
             <section className="py-12 md:py-20 px-4 md:px-8 bg-white">
                 <div className="max-w-7xl mx-auto">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-start">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-16 items-center">
                         {/* Left: Content */}
-                        <div>
+                        <div className="md:col-span-5">
                             <h2 className="text-4xl md:text-6xl font-black text-gray-900 leading-tight mb-6">
                                 Why Partner With Us?
                             </h2>
@@ -938,13 +938,13 @@ export default function Landing2Page() {
                         </div>
 
                         {/* Right: Image */}
-                        <div className="relative h-[300px] md:h-[500px]">
+                        <div className="md:col-span-7 relative h-[300px] md:h-[600px]">
                             <Image
                                 src="/land2_opt/20.webp"
                                 unoptimized
                                 alt="Analytics Dashboard"
                                 fill
-                                className="object-cover rounded-2xl"
+                                className="object-contain md:object-cover rounded-2xl"
                             />
                         </div>
                     </div>
