@@ -38,6 +38,17 @@ export default function Landing2Page() {
         { key: 'marshall', src: '/pro_teams/marshall kent pic.webp', name: 'Marshall Kent', title: 'Co-Founder & Board Member', short: 'PBA champion and co-founder bringing the athlete\'s voice into platform leadership and long-term growth.', description: 'Marshall Kent is a world-class professional bowler and co-founder of BowlersNetwork.com. A multiple-time PBA Tour champion and major winner, Marshall brings the athlete\'s perspective directly into the leadership of the platform. His role ensures BowlersNetwork is built by bowlers, for bowlers—creating new opportunities for professionals to build lasting income, visibility, and relevance beyond competition', bgClass: 'bg-blue-100', position: 'top' },
     ];
 
+    const jayFettig = {
+        key: 'jay',
+        src: '/land2_opt/jay_fettig.webp',
+        name: 'JAY FETTIG',
+        title: 'Founder & CEO',
+        short: 'Jay Fettig is the Founder and CEO of BowlersNetwork.com and co-founder of JMar Entertainment. A lifelong bowler and entrepreneur, Jay created BowlersNetwork with a singular vision: to unify the bowling industry under one modern digital platform that empowers athletes, strengthens local centers, and delivers measurable value to sponsors and fans.',
+        description: 'Jay Fettig is the Founder and CEO of BowlersNetwork.com and co-founder of JMar Entertainment. A lifelong bowler and entrepreneur, Jay created BowlersNetwork with a singular vision: to unify the bowling industry under one modern digital platform that empowers athletes, strengthens local centers, and delivers measurable value to sponsors and fans.\n\nJay’s leadership is driven by faith, family, and purpose. He has been married to his wife, Wendy, for over 30 years and is a proud father and grandfather. Throughout his career, Jay has owned and operated multiple businesses, some highly successful, others that fell short, but each experience reinforced a core belief: when passion drives the mission, the likelihood of success increases dramatically. Today, that philosophy fuels BowlersNetwork, where a team of deeply passionate people is aligned around one common goal growing the sport of bowling the right way, together.',
+        bgClass: 'bg-blue-100',
+        position: 'center'
+    };
+
     const openModal = (member: BoardMember) => { setSelectedMember(member); setModalOpen(true); };
     const closeModal = () => { setModalOpen(false); setSelectedMember(null); };
 
@@ -1136,27 +1147,32 @@ export default function Landing2Page() {
                         {/* Left: Team Member Image */}
                         <div className="relative h-96 rounded-3xl overflow-hidden bg-blue-100">
                             <Image
-                                src="/land2_opt/jay_fettig.webp"
+                                src={jayFettig.src}
                                 unoptimized
-                                alt="Jay Fettig"
+                                alt={jayFettig.name}
                                 fill
                                 className="object-cover"
+                                style={{ objectPosition: jayFettig.position }}
                             />
                         </div>
 
                         {/* Right: Team Member Info */}
                         <div>
-                            <h3 className="text-gray-900 font-black text-2xl mb-3">JAY FETTIG</h3>
+                            <h3 className="text-gray-900 font-black text-2xl mb-3">{jayFettig.name}</h3>
                             
                             <div className="inline-block bg-[#86D864] text-white font-black px-4 py-2 rounded-lg mb-6">
-                                Founder & CEO
+                                {jayFettig.title}
                             </div>
 
                             <p className="text-gray-700 leading-relaxed mb-6 text-sm">
-                                Proud nisi officia reprehenderit nulla incididunt anim dolor ad velit consequat velit commodo tempor do parjatur velit velit sunt deserunt amet commodo non fugiat cupidatat labore qui dolore tempor reprehenderit Lorem occaecat aute qui veniam et reprehenderit minim veniam occaecat ullamco dolor ipsum ullamco in consectetur ipsum irure aliqua ad do est ea aliqua incididunt ipsum ex commodo deserunt cillum sit adipisicing mollit aliquip quis provident deserunt mollit in provident veniam duis ut nulla occaecat fugiat minim excepteur commodo duis do enim aute aliquip do aute amet labore irure minim sunt in veniam duis eisumod sit laboris mollit veniam excepteur
+                                {jayFettig.short}
                             </p>
 
-                            <a href="#" className="inline-flex items-center gap-2 border-2 border-[#86D864] text-[#86D864] font-bold px-6 py-3 rounded-lg hover:bg-[#86D864] hover:text-white transition-all">
+                            <a 
+                                href="#" 
+                                onClick={(e) => { e.preventDefault(); openModal(jayFettig); }}
+                                className="inline-flex items-center gap-2 border-2 border-[#86D864] text-[#86D864] font-bold px-6 py-3 rounded-lg hover:bg-[#86D864] hover:text-white transition-all"
+                            >
                                 Read More <span>›</span>
                             </a>
                         </div>
