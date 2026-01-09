@@ -746,7 +746,7 @@ export default function Landing2Page() {
 
                         {/* Right Side: Content */}
                         <div className="flex-1 w-full">
-                            <h2 className="text-3xl md:text-5xl font-black text-gray-900 leading-tight mb-8 md:mb-12 text-center lg:text-right">
+                            <h2 className="text-3xl md:text-4xl font-black text-gray-900 leading-tight mb-8 md:mb-12 text-center lg:text-right">
                                 STREAMLINE YOUR CENTER.<br />
                                 SUCCEED TOGETHER.
                             </h2>
