@@ -83,8 +83,8 @@ export default function Landing2Page() {
             const map = new (window as any).mapboxgl.Map({
                 container: 'contact-map',
                 style: 'mapbox://styles/mapbox/light-v11',
-                center: [-85.6681, 42.9634], // Grand Rapids, MI
-                zoom: 12,
+                center: [-82.5158, 40.7589], // Mansfield, OH (Main St & Park Ave)
+                zoom: 15,
                 attributionControl: true
             });
 
@@ -93,7 +93,7 @@ export default function Landing2Page() {
 
             // Add marker
             new (window as any).mapboxgl.Marker({ color: '#86D864' })
-                .setLngLat([-85.6681, 42.9634])
+                .setLngLat([-82.5158, 40.7589])
                 .addTo(map);
 
             mapRef.current = map;
@@ -1041,11 +1041,20 @@ export default function Landing2Page() {
                             </div>
 
                             {/* Phone */}
-                            <div className="mb-12">
+                            <div className="mb-8">
                                 <p className="text-gray-900 font-black text-xs mb-2 tracking-widest">PHONE</p>
                                 <a href="tel:+11234567890" className="text-gray-600 hover:text-[#86D864] transition-colors">
                                     (123) 456-7890
                                 </a>
+                            </div>
+
+                            {/* Address */}
+                            <div className="mb-12">
+                                <p className="text-gray-900 font-black text-xs mb-2 tracking-widest">LOCATION</p>
+                                <p className="text-gray-600">
+                                    Main St & Park Ave<br />
+                                    Mansfield, OH 44902
+                                </p>
                             </div>
 
                             {/* Map */}
