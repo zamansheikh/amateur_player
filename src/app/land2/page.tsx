@@ -20,14 +20,14 @@ export default function Landing2Page() {
 
     const boardMembers = [
         { key: 'norm', src: '/pro_teams/norm duke pic.webp', name: 'Norm Duke', title: 'Vice President', short: 'Hall of Famer and Vice President guiding strategy with precision, integrity, and respect for the game', description: 'Norm Duke is Vice President of BowlersNetwork.com and one of the most accomplished competitors in the history of the sport. A PBA Hall of Famer whose success spans multiple decades, Norm is respected for his precision, adaptability, and professionalism. Deeply committed to family and mentorship, Norm provides strategic guidance, player leadership, and a steady voice rooted in integrity and respect for the game.', bgClass: 'bg-blue-100', position: 'center' },
-        { key: 'chuck', src: '/pro_teams/Chuck 1.webp', name: 'Chuck Gardner', title: 'Owner', short: 'Et aliquip occaecat deserunt cupidatat occaecat et Lorem exercitation sit', description: 'Chuck Gardner brings leadership and experience to the board.', bgClass: 'bg-red-100', position: 'center' },
-        { key: 'parker', src: '/pro_teams/Parker Bohn Pic.webp', name: 'Parker Bohn', title: 'Owner', short: 'Et aliquip occaecat deserunt cupidatat occaecat et Lorem exercitation sit', description: 'Parker Bohn is an owner and adviser to the network.', bgClass: 'bg-cyan-100', position: 'center' },
-        { key: 'liz', src: '/pro_teams/Liz Johnson pic.webp', name: 'Liz Johnson', title: 'Owner', short: 'Et aliquip occaecat deserunt cupidatat occaecat et Lorem exercitation sit', description: 'Liz Johnson leads player initiatives and outreach.', bgClass: 'bg-cyan-100', position: 'center' },
-        { key: 'carolyn', src: '/pro_teams/carolyn dorin ballard pic.webp', name: 'Carolyn Dorin-Ballard', title: 'Owner', short: 'Et aliquip occaecat deserunt cupidatat occaecat et Lorem exercitation sit', description: 'Carolyn Dorin-Ballard heads community outreach and development.', bgClass: 'bg-red-100', position: 'center' },
+        { key: 'chuck', src: '/pro_teams/Chuck 1.webp', name: 'Chuck Gardner', title: 'Owner & Secretary-Treasurer', short: 'Youth-first leader and Bowl4Life founder committed to scholarships, stewardship, and integrity.', description: 'Chuck Gardner serves as Secretary and Treasurer of BowlersNetwork.com. Alongside his wife Deborah, he founded the Bowl4Life Foundation, which has awarded nearly $1 million in youth bowling scholarships nationwide.\n\nA member of the South Carolina USBC Hall of Fame, Chuck provides governance oversight, financial stewardship, and values-based leadership rooted in service, integrity, and family.', bgClass: 'bg-red-100', position: 'center' },
+        { key: 'parker', src: '/pro_teams/Parker Bohn Pic.webp', name: 'Parker Bohn III', title: 'Owner & Board Member', short: 'Hall of Famer, lifelong Brunswick staff member, and legacy-driven coach committed to family and teaching.', description: 'Parker Bohn III is a PBA Hall of Famer and board member of BowlersNetwork.com. A career-long Brunswick professional staff member, Parker has represented the brand and the sport with consistency and class for more than four decades.\n\nFamily and legacy are central to Parker\'s life. Alongside his family, he operates Bohn\'s Elite Training, where bowlers of all ages train using modern technology and elite instruction. His commitment to teaching, sportsmanship, and long-term development strengthens BowlersNetwork\'s foundation.', bgClass: 'bg-cyan-100', position: 'center' },
+        { key: 'liz', src: '/pro_teams/Liz Johnson pic.webp', name: 'Liz Johnson', title: 'Board Member', short: 'All-time great and Hall of Famer helping shape excellence, opportunity, and athlete advocacy.', description: 'Liz Johnson is one of the most accomplished bowlers of all time and a board member of BowlersNetwork.com. A multiple-time major champion and Hall of Famer, Liz is known for her unmatched accuracy, preparation, and mental toughness.\n\nLiz is a role model for generations of bowlers and brings an athlete-first, excellence-driven perspective to BowlersNetwork\'s leadership.', bgClass: 'bg-cyan-100', position: 'center' },
+        { key: 'carolyn', src: '/pro_teams/carolyn dorin ballard pic.webp', name: 'Carolyn Dorin-Ballard', title: 'Board Member', short: 'PWBA and USBC Hall of Famer dedicated to faith, family, coaching, and raising the standard of competition.', description: 'Carolyn Dorin-Ballard is a PWBA and USBC Hall of Famer and board member of BowlersNetwork.com. Her career has been defined by championship success, professionalism, and leadership.\n\nGrounded in her faith and family, Carolyn, together with her husband, Del Ballard Jr., operates Ballards Bowling Academy and multiple pro shops. Their work focuses on teaching fundamentals, confidence, and character while growing the game at the grassroots level.', bgClass: 'bg-red-100', position: 'center' },
         { key: 'marshall', src: '/pro_teams/marshall kent pic.webp', name: 'Marshall Kent', title: 'Co-Founder & Board Member', short: 'PBA champion and co-founder bringing the athlete\'s voice into platform leadership and long-term growth.', description: 'Marshall Kent is a world-class professional bowler and co-founder of BowlersNetwork.com. A multiple-time PBA Tour champion and major winner, Marshall brings the athlete\'s perspective directly into the leadership of the platform. His role ensures BowlersNetwork is built by bowlers, for bowlers—creating new opportunities for professionals to build lasting income, visibility, and relevance beyond competition', bgClass: 'bg-blue-100', position: 'center' },
     ];
 
-    const openModal = (member) => { setSelectedMember(member); setModalOpen(true); };
+    const openModal = (member: React.SetStateAction<null>) => { setSelectedMember(member); setModalOpen(true); };
     const closeModal = () => { setModalOpen(false); setSelectedMember(null); };
 
     useEffect(() => {
@@ -1375,11 +1375,11 @@ export default function Landing2Page() {
                 <div className="max-w-7xl mx-auto">
                     {/* Header */}
                     <div className="grid grid-cols-2 gap-12 items-start mb-16">
-                        <h2 className="text-5xl md:text-6xl font-black text-gray-900 leading-tight">
-                            Board of Directors
+                        <h2 className="text-5xl md:text-4xl font-black text-gray-900 leading-tight">
+                            Executive Leadership & Board of Directors
                         </h2>
                         <p className="text-gray-700 leading-relaxed">
-                            Nostrud non cupidatat ipsum sint do velit magna tempor aute amet dolore magna est pariatur consectetur et ullamco aute anim do reprehenderit amet exercitation aute
+                            Executive Leadership represents the operational and fiduciary backbone of BowlersNetwork, balancing innovation, athlete advocacy, and responsible governance.
                         </p>
                     </div>
 
@@ -1413,21 +1413,24 @@ export default function Landing2Page() {
 
                     {/* Modal */}
                     {modalOpen && selectedMember && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center">
+                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                             <div className="absolute inset-0 bg-black/50" onClick={closeModal}></div>
-                            <div className="relative bg-white rounded-xl shadow-xl max-w-4xl w-full mx-4 overflow-hidden grid grid-cols-1 md:grid-cols-2">
-                                <div className="p-8 flex flex-col justify-between">
+                            <div className="relative bg-white rounded-2xl shadow-2xl max-w-5xl w-full overflow-hidden grid grid-cols-1 md:grid-cols-2">
+                                <div className="p-12 flex flex-col justify-between">
                                     <div>
-                                        <h3 className="text-2xl font-black mb-4">{selectedMember.name}</h3>
+                                        <div className="inline-block bg-[#86D864] text-white font-black px-4 py-2 rounded-lg mb-4 text-sm">
+                                            {selectedMember.title}
+                                        </div>
+                                        <h3 className="text-3xl font-black mb-6 text-gray-900">{selectedMember.name}</h3>
                                     </div>
                                     <div>
-                                        <p className="text-gray-700">{selectedMember.description}</p>
+                                        <p className="text-gray-700 leading-relaxed text-sm whitespace-pre-wrap">{selectedMember.description}</p>
                                     </div>
                                 </div>
-                                <div className="relative h-64 md:h-auto">
+                                <div className="relative h-64 md:h-auto bg-gray-200">
                                     <Image src={selectedMember.src} alt={selectedMember.name} unoptimized fill className="object-cover" />
                                 </div>
-                                <button onClick={closeModal} className="absolute top-3 right-3 text-gray-600 bg-white rounded-full p-2 shadow">✕</button>
+                                <button onClick={closeModal} className="absolute top-4 right-4 text-gray-600 bg-white rounded-full p-2 shadow hover:bg-gray-100">✕</button>
                             </div>
                         </div>
                     )}
