@@ -1260,13 +1260,14 @@ export default function Landing2Page() {
                     {/* Team Member Card */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center max-w-5xl mx-auto">
                         {/* Left: Team Member Image */}
-                        <div className="relative h-[340px] md:h-[420px] rounded-3xl overflow-hidden bg-blue-100">
+                        <div className="h-[340px] md:h-[420px] flex justify-center md:justify-center">
                             <Image
                                 src={jayFettig.src}
                                 alt={jayFettig.name}
-                                fill
-                                className="object-cover"
-                                style={{ objectPosition: jayFettig.position }}
+                                width={600}
+                                height={800}
+                                className="h-full w-auto rounded-2xl object-cover"
+                                style={{ objectPosition: jayFettig.position || 'center' }}
                             />
                         </div>
 
