@@ -1260,7 +1260,7 @@ export default function Landing2Page() {
                     {/* Team Member Card */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center max-w-5xl mx-auto">
                         {/* Left: Team Member Image */}
-                        <div className="h-[340px] md:h-[420px] flex justify-center md:justify-center">
+                        <div className="h-[340px] md:h-[420px] flex justify-center md:justify-end">
                             <Image
                                 src={jayFettig.src}
                                 alt={jayFettig.name}
@@ -1312,20 +1312,23 @@ export default function Landing2Page() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
                         {boardMembers.map((member) => (
                             <div key={member.key}>
-                                <div className={`relative h-64 rounded-2xl overflow-hidden ${member.bgClass} mb-4`}>
-                                    <div className="absolute top-4 left-4 z-10">
-                                        <span className="bg-[#86D864] text-white font-black text-xs px-3 py-1 rounded-full">
-                                            {member.title}
-                                        </span>
+                                <div className="h-64 flex justify-center mb-4">
+                                    <div className="relative h-full">
+                                        <div className="absolute top-4 left-4 z-10">
+                                            <span className="bg-[#86D864] text-white font-black text-xs px-3 py-1 rounded-full">
+                                                {member.title}
+                                            </span>
+                                        </div>
+                                        <Image
+                                            src={member.src}
+                                            unoptimized
+                                            alt={member.name}
+                                            width={400}
+                                            height={400}
+                                            className="h-full w-auto rounded-2xl object-cover"
+                                            style={{ objectPosition: member.position || 'center' }}
+                                        />
                                     </div>
-                                    <Image
-                                        src={member.src}
-                                        unoptimized
-                                        alt={member.name}
-                                        fill
-                                        className="object-cover"
-                                        style={{ objectPosition: member.position || 'center' }}
-                                    />
                                 </div>
                                 <h3 className="text-gray-900 font-black text-lg mb-2">{member.name}</h3>
                                 <p className="text-gray-700 text-sm leading-relaxed mb-3">{member.short}</p>
@@ -1408,13 +1411,14 @@ export default function Landing2Page() {
                             { src: '/team_headshots/Brittany Kolatzny-Headshot.webp', name: 'Brittany Kolatzny', role: 'Director of Marketing', position: 'center' },
                         ].map((member) => (
                             <div key={member.src} className="rounded-xl overflow-hidden shadow-lg">
-                                <div className="relative h-64 bg-cyan-100">
+                                <div className="h-64 flex justify-center">
                                     <Image
                                         src={member.src}
                                         alt={member.name}
-                                        fill
+                                        width={400}
+                                        height={400}
                                         unoptimized
-                                        className="object-cover"
+                                        className="h-full w-auto rounded-xl object-cover"
                                         style={{ objectPosition: member.position || 'center' }}
                                     />
                                 </div>
