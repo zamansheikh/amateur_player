@@ -845,9 +845,9 @@ export default function Landing2Page() {
             {/* Driven by Passion Section */}
             <section className="py-20 px-8 bg-white">
                 <div className="max-w-7xl mx-auto">
-                    <div className="grid grid-cols-2 gap-12 items-start">
+                    <div className="grid grid-cols-2 gap-12">
                         {/* Left: Image */}
-                        <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-lg">
+                        <div className="relative h-full min-h-[500px] rounded-2xl overflow-hidden shadow-lg">
                             <Image
                                 src="/land2_opt/22.webp"
                                 unoptimized
