@@ -47,7 +47,7 @@ api.interceptors.response.use(
 // Authentication API functions
 export const authApi = {
     login: async (username: string, password: string) => {
-        const response = await api.post('/api/amateur-login', {
+        const response = await api.post('/api/auth/login/amateurs', {
             username,
             password
         });
