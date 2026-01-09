@@ -63,8 +63,8 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const { user, signout, isLoading } = useAuth();
 
-    // Public routes that don't require authentication (SIGNIN AND SIGNUP REMOVED)
-    const publicRoutes = ['/landing', '/landing/page', '/land2', '/select-your-role', '/complete-profile', '/no-access'];
+    // Public routes that don't require authentication
+    const publicRoutes = ['/landing', '/landing/page', '/land2', '/select-your-role', '/complete-profile', '/no-access', '/signin', '/signup'];
 
     // Check if it's a pro player public route
     const isProPlayerRoute = pathname.startsWith('/pro/');
