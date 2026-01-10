@@ -921,13 +921,14 @@ export default function Landing2Page() {
                         </div>
 
                         {/* Right: Product Mockup Image */}
-                        <div className="relative h-[400px] md:h-auto min-h-[400px]">
+                        <div className="relative h-[400px] md:h-auto min-h-[400px] overflow-hidden rounded-xl">
                             <Image
                                 src="/land2_opt/7.webp"
                                 unoptimized
                                 alt="Partnership Features"
                                 fill
-                                className="object-cover rounded-xl"
+                                className="object-contain w-full h-full"
+                                style={{ objectPosition: 'center' }}
                             />
                         </div>
                     </div>
