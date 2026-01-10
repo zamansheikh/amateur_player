@@ -12,7 +12,6 @@ export default function Landing2Page() {
         { label: 'AMATEURS', href: '/amateurs' },
         { label: 'PROS', href: '/pro-players' },
         { label: 'CENTERS', href: '/centers' },
-        { label: 'SHOPS', href: '/shops' },
         { label: 'PARTNERS', href: '/partners' },
         { label: 'ABOUT US', href: '/about' },
     ];
@@ -179,7 +178,7 @@ export default function Landing2Page() {
                     <div className="flex items-center justify-between w-full">
                         {/* Logo - Centered on mobile */}
                         <div className="text-xl md:text-2xl font-black text-gray-900 tracking-tight flex-1 text-center md:text-left">
-                            BOWLERS NETWORK
+                            BowlersNetwork
                         </div>
 
                         {/* Mobile Menu Toggle - Positioned right on mobile */}
