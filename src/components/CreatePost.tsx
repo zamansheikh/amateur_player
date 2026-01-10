@@ -145,29 +145,29 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
     return (
         <div className="bg-white border-b border-gray-200">
             <div className="p-4 md:p-6">
-                <div className="flex gap-4">
-                    {/* Profile Picture */}
-                    <img
-                        src={user?.profile_picture_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Bob"}
-                        alt="Profile"
-                        className="w-12 h-12 rounded-full object-cover shrink-0"
-                    />
-                    
-                    {/* Input and Actions */}
-                    <div className="flex-1 min-w-0">
-                        {/* Not Implemented Message */}
-                        {notImplementedMessage && (
-                            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-700 text-sm">
-                                {notImplementedMessage} is not implemented yet.
-                            </div>
-                        )}
+                <form onSubmit={handleSubmit}>
+                    <div className="flex gap-4 mb-4">
+                        {/* Profile Picture */}
+                        <img
+                            src={user?.profile_picture_url || "https://api.dicebear.com/7.x/avataaars/svg?seed=Bob"}
+                            alt="Profile"
+                            className="w-12 h-12 rounded-full object-cover shrink-0"
+                        />
+                        
+                        {/* Input Area */}
+                        <div className="flex-1 min-w-0">
+                            {/* Not Implemented Message */}
+                            {notImplementedMessage && (
+                                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-700 text-sm">
+                                    {notImplementedMessage} is not implemented yet.
+                                </div>
+                            )}
 
-                        <form onSubmit={handleSubmit}>
                             {/* Textarea - Expandable */}
                             {!isExpanded ? (
                                 <div
                                     onClick={handleExpandClick}
-                                    className="text-xl text-gray-500 placeholder-gray-500 p-3 rounded-2xl hover:bg-gray-50 cursor-pointer transition-colors mb-4"
+                                    className="text-xl text-gray-500 placeholder-gray-500 p-2 rounded-2xl hover:bg-gray-50 cursor-pointer transition-colors"
                                 >
                                     What&apos;s happening?!
                                 </div>
@@ -176,125 +176,125 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                                     value={postText}
                                     onChange={(e) => setPostText(e.target.value)}
                                     placeholder="What's happening?!"
-                                    className="w-full text-xl text-gray-800 placeholder-gray-400 border-0 resize-none focus:outline-none mb-4 min-h-[120px]"
+                                    className="w-full text-xl text-gray-800 placeholder-gray-400 border-0 resize-none focus:outline-none min-h-[120px]"
                                     disabled={isPosting}
                                     autoFocus
                                 />
                             )}
+                        </div>
+                    </div>
 
-                            {/* Upload Progress */}
-                            {isUploadingAny && (
-                                <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                                    <p className="text-sm text-blue-700 mb-2">Uploading media...</p>
-                                    {Object.entries(uploadProgress).map(([fileId, progress]) => (
-                                        <div key={fileId} className="mb-2">
-                                            <div className="w-full bg-blue-100 rounded-full h-2">
-                                                <div
-                                                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                                                    style={{ width: `${progress}%` }}
-                                                />
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            {/* Selected Files Preview */}
-                            {selectedFiles.length > 0 && isExpanded && (
-                                <div className="mb-4">
-                                    <div className={`grid gap-2 ${
-                                        selectedFiles.length === 1 ? 'grid-cols-1' :
-                                        selectedFiles.length === 2 ? 'grid-cols-2' :
-                                        selectedFiles.length === 3 ? 'grid-cols-3' :
-                                        'grid-cols-4'
-                                    } max-h-96 overflow-y-auto`}>
-                                        {selectedFiles.map((file, index) => (
-                                            <div key={index} className="relative group aspect-square">
-                                                {isVideo(file) ? (
-                                                    <video
-                                                        src={getPreviewUrl(file)}
-                                                        className="w-full h-full object-cover rounded-lg border-2 border-gray-200"
-                                                        muted
-                                                    />
-                                                ) : (
-                                                    <Image
-                                                        src={getPreviewUrl(file)}
-                                                        alt="Preview"
-                                                        width={200}
-                                                        height={200}
-                                                        className="w-full h-full object-cover rounded-lg border-2 border-gray-200"
-                                                    />
-                                                )}
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeFile(index)}
-                                                    className="absolute top-2 right-2 w-7 h-7 bg-black bg-opacity-70 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-opacity-90"
-                                                >
-                                                    <X className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        ))}
+                    {/* Upload Progress */}
+                    {isUploadingAny && (
+                        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <p className="text-sm text-blue-700 mb-2">Uploading media...</p>
+                            {Object.entries(uploadProgress).map(([fileId, progress]) => (
+                                <div key={fileId} className="mb-2">
+                                    <div className="w-full bg-blue-100 rounded-full h-2">
+                                        <div
+                                            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                                            style={{ width: `${progress}%` }}
+                                        />
                                     </div>
                                 </div>
-                            )}
+                            ))}
+                        </div>
+                    )}
 
-                            {/* Action Buttons Row */}
-                            <div className={`flex items-center justify-between gap-1 sm:gap-2 ${!isExpanded ? 'border-t border-gray-100 pt-3' : ''}`}>
-                                <div className="flex items-center gap-0.5 sm:gap-2">
-                                    {/* Image/Video Button */}
-                                    <button
-                                        type="button"
-                                        onClick={handlePhotoVideoClick}
-                                        disabled={isPosting}
-                                        className="flex items-center gap-1 h-9 px-1.5 sm:px-2.5 rounded-full hover:bg-green-50 text-green-500 transition-colors hover:text-green-600 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
-                                        title="Add photo or video"
-                                    >
-                                        <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-                                        <span className="text-[10px] sm:text-xs font-bold">Media</span>
-                                    </button>
-
-                                    {/* Poll Button */}
-                                    <button
-                                        type="button"
-                                        onClick={() => handleNotImplemented('Poll feature')}
-                                        disabled={isPosting}
-                                        className="flex items-center gap-1 h-9 px-1.5 sm:px-2.5 rounded-full hover:bg-green-50 text-green-500 transition-colors hover:text-green-600 disabled:opacity-50 shrink-0"
-                                        title="Create a poll"
-                                    >
-                                        <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-                                        <span className="text-[10px] sm:text-xs font-bold">Poll</span>
-                                    </button>
-
-                                    {/* Event Button */}
-                                    <button
-                                        type="button"
-                                        onClick={() => handleNotImplemented('Event feature')}
-                                        disabled={isPosting}
-                                        className="flex items-center gap-1 h-9 px-1.5 sm:px-2.5 rounded-full hover:bg-green-50 text-green-500 transition-colors hover:text-green-600 disabled:opacity-50 shrink-0"
-                                        title="Create an event"
-                                    >
-                                        <Calendar className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
-                                        <span className="text-[10px] sm:text-xs font-bold">Event</span>
-                                    </button>
-                                </div>
-
-                                {/* Post Button */}
-                                <button
-                                    type="submit"
-                                    disabled={isPosting || isUploadingAny || (!postText.trim() && uploadedUrls.length === 0)}
-                                    className="font-bold py-1 sm:py-2 px-4 sm:px-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs sm:text-base whitespace-nowrap"
-                                    style={{ 
-                                        backgroundColor: (isPosting || isUploadingAny || (!postText.trim() && uploadedUrls.length === 0)) 
-                                            ? '#d1d5db' 
-                                            : '#8BC342' 
-                                    }}
-                                >
-                                    {isPosting ? 'Posting...' : 'Post'}
-                                </button>
+                    {/* Selected Files Preview */}
+                    {selectedFiles.length > 0 && isExpanded && (
+                        <div className="mb-4">
+                            <div className={`grid gap-2 ${
+                                selectedFiles.length === 1 ? 'grid-cols-1' :
+                                selectedFiles.length === 2 ? 'grid-cols-2' :
+                                selectedFiles.length === 3 ? 'grid-cols-3' :
+                                'grid-cols-4'
+                            } max-h-96 overflow-y-auto`}>
+                                {selectedFiles.map((file, index) => (
+                                    <div key={index} className="relative group aspect-square">
+                                        {isVideo(file) ? (
+                                            <video
+                                                src={getPreviewUrl(file)}
+                                                className="w-full h-full object-cover rounded-lg border-2 border-gray-200"
+                                                muted
+                                            />
+                                        ) : (
+                                            <Image
+                                                src={getPreviewUrl(file)}
+                                                alt="Preview"
+                                                width={200}
+                                                height={200}
+                                                className="w-full h-full object-cover rounded-lg border-2 border-gray-200"
+                                            />
+                                        )}
+                                        <button
+                                            type="button"
+                                            onClick={() => removeFile(index)}
+                                            className="absolute top-2 right-2 w-7 h-7 bg-black bg-opacity-70 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-opacity-90"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                ))}
                             </div>
-                        </form>
+                        </div>
+                    )}
+
+                    {/* Action Buttons Row - Full Width */}
+                    <div className={`flex items-center justify-between gap-2 border-t border-gray-100 pt-3`}>
+                        <div className="flex items-center gap-1 sm:gap-4">
+                            {/* Image/Video Button */}
+                            <button
+                                type="button"
+                                onClick={handlePhotoVideoClick}
+                                disabled={isPosting}
+                                className="flex items-center gap-1.5 h-10 px-2 sm:px-3 rounded-full hover:bg-green-50 text-green-500 transition-colors hover:text-green-600 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                                title="Add photo or video"
+                            >
+                                <ImageIcon className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
+                                <span className="text-xs sm:text-sm font-bold">Media</span>
+                            </button>
+
+                            {/* Poll Button */}
+                            <button
+                                type="button"
+                                onClick={() => handleNotImplemented('Poll feature')}
+                                disabled={isPosting}
+                                className="flex items-center gap-1.5 h-10 px-2 sm:px-3 rounded-full hover:bg-green-50 text-green-500 transition-colors hover:text-green-600 disabled:opacity-50 shrink-0"
+                                title="Create a poll"
+                            >
+                                <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
+                                <span className="text-xs sm:text-sm font-bold">Poll</span>
+                            </button>
+
+                            {/* Event Button */}
+                            <button
+                                type="button"
+                                onClick={() => handleNotImplemented('Event feature')}
+                                disabled={isPosting}
+                                className="flex items-center gap-1.5 h-10 px-2 sm:px-3 rounded-full hover:bg-green-50 text-green-500 transition-colors hover:text-green-600 disabled:opacity-50 shrink-0"
+                                title="Create an event"
+                            >
+                                <Calendar className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
+                                <span className="text-xs sm:text-sm font-bold">Event</span>
+                            </button>
+                        </div>
+
+                        {/* Post Button */}
+                        <button
+                            type="submit"
+                            disabled={isPosting || isUploadingAny || (!postText.trim() && uploadedUrls.length === 0)}
+                            className="font-bold py-2 px-6 sm:px-10 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm sm:text-lg whitespace-nowrap"
+                            style={{ 
+                                backgroundColor: (isPosting || isUploadingAny || (!postText.trim() && uploadedUrls.length === 0)) 
+                                    ? '#d1d5db' 
+                                    : '#8BC342' 
+                            }}
+                        >
+                            {isPosting ? 'Posting...' : 'Post'}
+                        </button>
                     </div>
-                </div>
+                </form>
             </div>
 
             {/* Hidden File Input */}
