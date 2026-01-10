@@ -249,14 +249,16 @@ export default function Landing2Page() {
             {/* Hero Section */}
             <section className="relative h-screen flex items-start overflow-hidden">
                 {/* Right Side: Image (50% width on desktop, full on mobile) */}
-                <div className="absolute right-0 top-0 w-full md:w-1/2 h-full md:h-[700px] opacity-20 md:opacity-100">
+                <div className="absolute right-0 top-0 md:top-0 w-full md:w-1/2 h-full md:h-screen min-h-[620px] opacity-20 md:opacity-100">
                     <Image
                         src="/land2_opt/hero_section.webp"
                         alt="Hero Section Background"
                         fill
-                        className="object-cover"
+                        className="object-cover object-center md:object-right"
+                        style={{ objectPosition: 'right 25%' }}
                         unoptimized
                         priority
+                        aria-hidden
                     />
                 </div>
 
