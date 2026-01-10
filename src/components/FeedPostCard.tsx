@@ -232,66 +232,81 @@ export default function FeedPostCard({
       {/* Post Actions */}
       <div className="px-3 md:px-6 py-3 md:py-4 border-t border-gray-50 bg-gray-50/30">
         <div className="flex items-center justify-between gap-2 md:gap-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4 md:gap-6">
+            {/* Like Action */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handleLike}
+                disabled={isLiking}
+                className={`group relative p-1.5 md:p-2 rounded-full transition-all duration-300 transform 
+                  disabled:opacity-50 disabled:cursor-not-allowed shrink-0
+                  hover:bg-red-50 hover:scale-125 active:scale-95
+                  ${localPost.is_liked
+                    ? "text-red-500"
+                    : "text-gray-400 hover:text-red-500"
+                  }`}
+              >
+                <div className={`${localPost.is_liked ? "animate-like-pop" : "transition-transform duration-200"}`}>
+                  {localPost.is_liked ? (
+                    <Image
+                      src="/icons/like_icon.svg"
+                      alt="Unlike"
+                      unoptimized
+                      width={20}
+                      height={20}
+                      className="md:w-6 md:h-6 drop-shadow-sm"
+                    />
+                  ) : (
+                    <Image
+                      src="/icons/not_like_icon.svg"
+                      alt="Like"
+                      unoptimized
+                      width={20}
+                      height={20}
+                      className="md:w-6 md:h-6 grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100"
+                    />
+                  )}
+                </div>
+                {/* Ping effect when liked - runs only once when activated */}
+                {localPost.is_liked && (
+                  <span className="absolute inset-0 rounded-full bg-red-400 animate-ping-once pointer-events-none"></span>
+                )}
+              </button>
+              <span className={`text-xs md:text-sm font-semibold transition-colors duration-200 ${localPost.is_liked ? "text-red-500" : "text-gray-600"}`}>
+                {localLikes}
+              </span>
+            </div>
+
+            {/* Comment Action */}
             <button
-              onClick={handleLike}
-              disabled={isLiking}
-              className={`transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shrink-0 ${localPost.is_liked
-                ? "text-red-500 hover:text-red-600"
-                : "text-green-400 hover:text-red-500"
-                }`}
+              onClick={handleCommentClick}
+              className="flex items-center gap-1 md:gap-2 group text-gray-600 hover:text-green-600 transition-all duration-200 hover:scale-110 active:scale-95"
             >
-              {localPost.is_liked ? (
+              <div className="p-1.5 md:p-2 rounded-full group-hover:bg-green-50 transition-colors">
                 <Image
-                  src="/icons/like_icon.svg"
-                  alt="Unlike"
+                  src="/icons/comment_icon.svg"
+                  alt="Comment"
                   unoptimized
                   width={20}
                   height={20}
-                  className="md:w-6 md:h-6"
+                  className="md:w-6 md:h-6 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity"
                 />
-              ) : (
-                <Image
-                  src="/icons/not_like_icon.svg"
-                  alt="Like"
-                  unoptimized
-                  width={20}
-                  height={20}
-                  className="md:w-6 md:h-6"
-                />
-              )}
-            </button>
-            <button
-              onClick={handleCommentClick}
-              className="flex items-center gap-1 md:gap-2 text-gray-600 hover:text-green-500 transition-colors duration-200"
-            >
-              <Image
-                src="/icons/comment_icon.svg"
-                alt="Comment"
-                unoptimized
-                width={20}
-                height={20}
-                className="md:w-6 md:h-6 shrink-0"
-              />
-              <span className="text-xs md:text-sm font-medium whitespace-nowrap">{localLikes} Likes</span>
-            </button>
-            <button
-              onClick={handleCommentClick}
-              className="flex items-center gap-1 md:gap-2 text-gray-600 hover:text-green-500 transition-colors duration-200"
-            >
+              </div>
               <span className="text-xs md:text-sm font-medium whitespace-nowrap">
-                {localPost.comments?.length || 0} Comment{localPost.comments?.length !== 1 ? 's' : ''}
+                {localPost.comments?.length || 0}
               </span>
             </button>
           </div>
-          <button className="flex items-center gap-1 md:gap-2 text-gray-600 hover:text-green-500 transition-colors duration-200 shrink-0">
+
+          {/* Share Action */}
+          <button className="flex items-center gap-1 md:gap-2 p-1.5 md:p-2 rounded-full text-gray-600 hover:text-blue-500 hover:bg-blue-50 transition-all duration-200 hover:scale-110 active:scale-95 shrink-0 group">
             <Image
               src="/icons/share_icon.svg"
               alt="Share"
               unoptimized
               width={20}
               height={20}
-              className="md:w-6 md:h-6 shrink-0"
+              className="md:w-6 md:h-6 shrink-0 opacity-70 group-hover:opacity-100"
             />
             <span className="text-xs md:text-sm font-medium hidden sm:inline">Share</span>
           </button>
