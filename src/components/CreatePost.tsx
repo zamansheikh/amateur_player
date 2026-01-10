@@ -239,17 +239,18 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                             )}
 
                             {/* Action Buttons Row */}
-                            <div className={`flex items-center justify-between ${!isExpanded ? 'border-t border-gray-100 pt-3' : ''}`}>
-                                <div className="flex gap-2">
+                            <div className={`flex items-center justify-between gap-1 sm:gap-2 ${!isExpanded ? 'border-t border-gray-100 pt-3' : ''}`}>
+                                <div className="flex items-center gap-0.5 sm:gap-2">
                                     {/* Image/Video Button */}
                                     <button
                                         type="button"
                                         onClick={handlePhotoVideoClick}
                                         disabled={isPosting}
-                                        className="w-9 h-9 rounded-full hover:bg-green-50 text-green-500 flex items-center justify-center transition-colors hover:text-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="flex items-center gap-1 h-9 px-1.5 sm:px-2.5 rounded-full hover:bg-green-50 text-green-500 transition-colors hover:text-green-600 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                                         title="Add photo or video"
                                     >
-                                        <ImageIcon className="w-5 h-5" />
+                                        <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                                        <span className="text-[10px] sm:text-xs font-bold">Media</span>
                                     </button>
 
                                     {/* Poll Button */}
@@ -257,10 +258,11 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                                         type="button"
                                         onClick={() => handleNotImplemented('Poll feature')}
                                         disabled={isPosting}
-                                        className="w-9 h-9 rounded-full hover:bg-green-50 text-green-500 flex items-center justify-center transition-colors hover:text-green-600 disabled:opacity-50"
+                                        className="flex items-center gap-1 h-9 px-1.5 sm:px-2.5 rounded-full hover:bg-green-50 text-green-500 transition-colors hover:text-green-600 disabled:opacity-50 shrink-0"
                                         title="Create a poll"
                                     >
-                                        <BarChart3 className="w-5 h-5" />
+                                        <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                                        <span className="text-[10px] sm:text-xs font-bold">Poll</span>
                                     </button>
 
                                     {/* Event Button */}
@@ -268,10 +270,11 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                                         type="button"
                                         onClick={() => handleNotImplemented('Event feature')}
                                         disabled={isPosting}
-                                        className="w-9 h-9 rounded-full hover:bg-green-50 text-green-500 flex items-center justify-center transition-colors hover:text-green-600 disabled:opacity-50"
+                                        className="flex items-center gap-1 h-9 px-1.5 sm:px-2.5 rounded-full hover:bg-green-50 text-green-500 transition-colors hover:text-green-600 disabled:opacity-50 shrink-0"
                                         title="Create an event"
                                     >
-                                        <Calendar className="w-5 h-5" />
+                                        <Calendar className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                                        <span className="text-[10px] sm:text-xs font-bold">Event</span>
                                     </button>
                                 </div>
 
@@ -279,7 +282,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                                 <button
                                     type="submit"
                                     disabled={isPosting || isUploadingAny || (!postText.trim() && uploadedUrls.length === 0)}
-                                    className="font-bold py-2 px-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-white"
+                                    className="font-bold py-1 sm:py-2 px-4 sm:px-8 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs sm:text-base whitespace-nowrap"
                                     style={{ 
                                         backgroundColor: (isPosting || isUploadingAny || (!postText.trim() && uploadedUrls.length === 0)) 
                                             ? '#d1d5db' 

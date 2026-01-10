@@ -91,12 +91,12 @@ export default function HomePage() {
 
     return (
         <div className="min-h-screen bg-gray-100">
-            <div className="max-w-6xl mx-auto px-6 py-6">
-                <div className="flex gap-8">
+            <div className="max-w-6xl mx-auto px-2 sm:px-4 md:px-6 py-4 md:py-6">
+                <div className="flex flex-col lg:flex-row gap-4 md:gap-8">
                     {/* Main Content */}
-                    <div className="flex-1 max-w-4xl">
+                    <div className="flex-1 w-full max-w-4xl">
                         {/* Create Post Section */}
-                        <div className="mb-6">
+                        <div className="mb-4 md:mb-6">
                             <CreatePost onPostCreated={fetchFeed} />
                         </div>
 

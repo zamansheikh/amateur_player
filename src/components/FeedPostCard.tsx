@@ -173,9 +173,9 @@ export default function FeedPostCard({
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-200">
       {/* Post Header */}
       <div className="p-3 md:p-6 pb-2 md:pb-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-3 mb-3 md:mb-4">
+        <div className="flex items-center justify-between gap-3 mb-3 md:mb-4">
           <div
-            className="flex items-center gap-2 md:gap-3 cursor-pointer hover:bg-gray-50 p-1 md:p-2 rounded-lg transition-colors shrink-0"
+            className="flex items-center gap-2 md:gap-3 cursor-pointer hover:bg-gray-50 p-1 md:p-2 rounded-lg transition-colors shrink-0 min-w-0"
             onClick={handleUserClick}
           >
             <img
@@ -234,43 +234,46 @@ export default function FeedPostCard({
         <div className="flex items-center justify-between gap-2 md:gap-4">
           <div className="flex items-center gap-4 md:gap-6">
             {/* Like Action */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 group">
               <button
                 onClick={handleLike}
                 disabled={isLiking}
-                className={`group relative p-1.5 md:p-2 rounded-full transition-all duration-300 transform 
+                className={`flex items-center gap-1.5 p-1.5 md:p-2 rounded-full transition-all duration-300 transform 
                   disabled:opacity-50 disabled:cursor-not-allowed shrink-0
-                  hover:bg-red-50 hover:scale-125 active:scale-95
+                  hover:bg-red-50 hover:scale-110 active:scale-95
                   ${localPost.is_liked
                     ? "text-red-500"
                     : "text-gray-400 hover:text-red-500"
                   }`}
               >
-                <div className={`${localPost.is_liked ? "animate-like-pop" : "transition-transform duration-200"}`}>
-                  {localPost.is_liked ? (
-                    <Image
-                      src="/icons/like_icon.svg"
-                      alt="Unlike"
-                      unoptimized
-                      width={20}
-                      height={20}
-                      className="md:w-6 md:h-6 drop-shadow-sm"
-                    />
-                  ) : (
-                    <Image
-                      src="/icons/not_like_icon.svg"
-                      alt="Like"
-                      unoptimized
-                      width={20}
-                      height={20}
-                      className="md:w-6 md:h-6 grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100"
-                    />
+                <div className="relative">
+                  <div className={`${localPost.is_liked ? "animate-like-pop" : "transition-transform duration-200"}`}>
+                    {localPost.is_liked ? (
+                      <Image
+                        src="/icons/like_icon.svg"
+                        alt="Unlike"
+                        unoptimized
+                        width={20}
+                        height={20}
+                        className="md:w-6 md:h-6 drop-shadow-sm"
+                      />
+                    ) : (
+                      <Image
+                        src="/icons/not_like_icon.svg"
+                        alt="Like"
+                        unoptimized
+                        width={20}
+                        height={20}
+                        className="md:w-6 md:h-6 grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100"
+                      />
+                    )}
+                  </div>
+                  {/* Ping effect when liked */}
+                  {localPost.is_liked && (
+                    <span className="absolute inset-0 rounded-full bg-red-400 animate-ping-once pointer-events-none"></span>
                   )}
                 </div>
-                {/* Ping effect when liked - runs only once when activated */}
-                {localPost.is_liked && (
-                  <span className="absolute inset-0 rounded-full bg-red-400 animate-ping-once pointer-events-none"></span>
-                )}
+                <span className="text-xs md:text-sm font-semibold">Like</span>
               </button>
               <span className={`text-xs md:text-sm font-semibold transition-colors duration-200 ${localPost.is_liked ? "text-red-500" : "text-gray-600"}`}>
                 {localLikes}
@@ -282,7 +285,7 @@ export default function FeedPostCard({
               onClick={handleCommentClick}
               className="flex items-center gap-1 md:gap-2 group text-gray-600 hover:text-green-600 transition-all duration-200 hover:scale-110 active:scale-95"
             >
-              <div className="p-1.5 md:p-2 rounded-full group-hover:bg-green-50 transition-colors">
+              <div className="flex items-center gap-1.5 p-1.5 md:p-2 rounded-full group-hover:bg-green-50 transition-colors">
                 <Image
                   src="/icons/comment_icon.svg"
                   alt="Comment"
@@ -291,6 +294,7 @@ export default function FeedPostCard({
                   height={20}
                   className="md:w-6 md:h-6 shrink-0 opacity-70 group-hover:opacity-100 transition-opacity"
                 />
+                <span className="text-xs md:text-sm font-semibold">Comment</span>
               </div>
               <span className="text-xs md:text-sm font-medium whitespace-nowrap">
                 {localPost.comments?.length || 0}
@@ -308,7 +312,7 @@ export default function FeedPostCard({
               height={20}
               className="md:w-6 md:h-6 shrink-0 opacity-70 group-hover:opacity-100"
             />
-            <span className="text-xs md:text-sm font-medium hidden sm:inline">Share</span>
+            <span className="text-xs md:text-sm font-medium">Share</span>
           </button>
         </div>
       </div>

@@ -264,14 +264,15 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
             <div
-                className={`bg-white rounded-[20px] shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ${selectedFiles.length > 0
-                        ? 'w-full max-w-2xl max-h-[85vh]'
+                className={`bg-white rounded-t-[20px] sm:rounded-[20px] shadow-2xl overflow-hidden flex flex-col transition-all duration-300 w-full 
+                    ${selectedFiles.length > 0
+                        ? 'max-w-2xl max-h-[95vh] sm:max-h-[85vh]'
                         : isPollMode
-                            ? 'w-[488px] max-h-[90vh]'
-                            : 'w-[488px] max-h-[762px]'
-                    }`}
+                            ? 'sm:w-[488px] max-h-[95vh] sm:max-h-[90vh]'
+                            : 'sm:w-[488px] max-h-[95vh] sm:max-h-[762px]'
+                    } absolute bottom-0 sm:relative sm:bottom-auto`}
             >
                 {/* Modal Header */}
                 <div className="h-[56px] flex items-center justify-between px-4 border-b border-gray-200 flex-shrink-0">
@@ -524,11 +525,10 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                                         </h5>
                                         <div className={`grid gap-2 ${selectedFiles.length === 1 ? 'grid-cols-1' :
                                                 selectedFiles.length === 2 ? 'grid-cols-2' :
-                                                    selectedFiles.length === 3 ? 'grid-cols-3' :
-                                                        'grid-cols-4'
-                                            } max-h-32 overflow-y-auto p-1`}>
+                                                    'grid-cols-2 sm:grid-cols-3 md:grid-cols-4'
+                                            } max-h-48 sm:max-h-32 overflow-y-auto p-1`}>
                                             {selectedFiles.map((file, index) => (
-                                                <div key={index} className="relative group" style={{ aspectRatio: '1/1', height: '120px' }}>
+                                                <div key={index} className="relative group" style={{ aspectRatio: '1/1' }}>
                                                     {isVideo(file) ? (
                                                         <div className="relative w-full h-full">
                                                             <video
@@ -553,9 +553,9 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated, initia
                                                     <button
                                                         type="button"
                                                         onClick={() => removeFile(index)}
-                                                        className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg z-10"
+                                                        className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg z-10"
                                                     >
-                                                        <X className="w-3 h-3" />
+                                                        <X className="w-4 h-4" />
                                                     </button>
                                                 </div>
                                             ))}
