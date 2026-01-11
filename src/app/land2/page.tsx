@@ -176,9 +176,21 @@ export default function Landing2Page() {
             <nav className="bg-white border-b border-gray-200 sticky top-0 z-[100]">
                 <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 md:py-6">
                     <div className="flex items-center justify-between w-full">
-                        {/* Logo - Centered on mobile */}
-                        <div className="text-xl md:text-2xl font-black text-gray-900 tracking-tight flex-1 text-center md:text-left">
-                            BowlersNetwork
+                        {/* Logo and Brand Name - Desktop and Mobile */}
+                        <div className="flex items-center gap-2 md:gap-3">
+                            {/* Logo Image */}
+                            <Image
+                                src="/logo/logo.png"
+                                alt="BowlersNetwork Logo"
+                                width={40}
+                                height={40}
+                                className="w-8 h-8 md:w-10 md:h-10"
+                                priority
+                            />
+                            {/* Brand Text */}
+                            <span className="text-lg md:text-2xl font-black text-gray-900 tracking-tight">
+                                BowlersNetwork
+                            </span>
                         </div>
 
                         {/* Mobile Menu Toggle - Positioned right on mobile */}
