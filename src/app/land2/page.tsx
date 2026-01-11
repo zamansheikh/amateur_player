@@ -133,6 +133,16 @@ export default function Landing2Page() {
         };
     }, []);
 
+    const teamMembers = [
+        { src: '/team_headshots/Nahian Ferdouse.webp', name: 'Nahian Ferdouse', role: 'Director of Business', position: 'top' },
+        { src: '/team_headshots/mumit_prottoy.webp', name: 'Mumit Prottoy', role: 'Director of Technology', position: 'top' },
+        { src: '/team_headshots/Shuvo Headshot.webp', name: 'Asraful Alam Shuvo', role: 'Lead Product Experience & Growth', position: 'center' },
+        { src: '/team_headshots/Azmain Hossain Sabbir-Photo.webp', name: 'Azmain Sabbir', role: 'Brand Marketing Manager', position: 'center' },
+        { src: '/team_headshots/Sadia Durdana Adrita.webp', name: 'Sadia Durdana Adrita', role: 'Product Manager', position: 'center' },
+        { src: '/team_headshots/Hasibul Hasan Pranto.webp', name: 'Pranto', role: 'Creative Designer', position: 'top' },
+        { src: '/team_headshots/Brittany Kolatzny-Headshot.webp', name: 'Brittany Kolatzny', role: 'Director of Marketing', position: 'center' },
+    ];
+
     const boardMembers = [
         { key: 'norm', src: '/pro_teams/norm duke pic.webp', name: 'Norm Duke', title: 'Vice President', short: 'Hall of Famer and Vice President guiding strategy with precision, integrity, and respect for the game', description: 'Norm Duke is Vice President of BowlersNetwork.com and one of the most accomplished competitors in the history of the sport. A PBA Hall of Famer whose success spans multiple decades, Norm is respected for his precision, adaptability, and professionalism. Deeply committed to family and mentorship, Norm provides strategic guidance, player leadership, and a steady voice rooted in integrity and respect for the game.', bgClass: 'bg-blue-100', position: 'top' },
         { key: 'chuck', src: '/pro_teams/Chuck 1.webp', name: 'Chuck Gardner', title: 'Owner & Secretary-Treasurer', short: 'Youth-first leader and Bowl4Life founder committed to scholarships, stewardship, and integrity.', description: 'Chuck Gardner serves as Secretary and Treasurer of BowlersNetwork.com. Alongside his wife Deborah, he founded the Bowl4Life Foundation, which has awarded nearly $1 million in youth bowling scholarships nationwide.\n\nA member of the South Carolina USBC Hall of Fame, Chuck provides governance oversight, financial stewardship, and values-based leadership rooted in service, integrity, and family.', bgClass: 'bg-red-100', position: 'top' },
@@ -186,6 +196,7 @@ export default function Landing2Page() {
                                 height={40}
                                 className="w-8 h-8 md:w-10 md:h-10"
                                 priority
+                                unoptimized
                             />
                             {/* Brand Text */}
                             <span className="text-lg md:text-2xl font-black text-gray-900 tracking-tight">
@@ -1434,17 +1445,30 @@ export default function Landing2Page() {
                         </p>
                     </div>
 
-                    {/* Team Members Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-                        {[
-                            { src: '/team_headshots/Nahian Ferdouse.webp', name: 'Nahian Ferdouse', role: 'Director of Business', position: 'top' },
-                            { src: '/team_headshots/mumit_prottoy.webp', name: 'Mumit Prottoy', role: 'Director of Technology', position: 'top' },
-                            { src: '/team_headshots/Shuvo Headshot.webp', name: 'Asraful Alam Shuvo', role: 'Lead Product Experience & Growth', position: 'center' },
-                            { src: '/team_headshots/Azmain Hossain Sabbir-Photo.webp', name: 'Azmain Sabbir', role: 'Brand Marketing Manager', position: 'center' },
-                            { src: '/team_headshots/Sadia Durdana Adrita.webp', name: 'Sadia Durdana Adrita', role: 'Product Manager', position: 'center' },
-                            { src: '/team_headshots/Hasibul Hasan Pranto.webp', name: 'Pranto', role: 'Creative Designer', position: 'top' },
-                            { src: '/team_headshots/Brittany Kolatzny-Headshot.webp', name: 'Brittany Kolatzny', role: 'Director of Marketing', position: 'center' },
-                        ].map((member) => (
+                    {/* Team Members Grid - Asymmetric Layout */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                        {/* Left: First team member taking up 2 rows */}
+                        <div key={teamMembers[0].src} className="md:row-span-2 rounded-2xl overflow-hidden shadow-lg flex flex-col h-full">
+                            <div className="flex-1 h-96 md:h-full flex justify-center bg-gray-100">
+                                <Image
+                                    src={teamMembers[0].src}
+                                    alt={teamMembers[0].name}
+                                    width={300}
+                                    height={500}
+                                    unoptimized
+                                    className="h-full w-full object-cover"
+                                    style={{ objectPosition: teamMembers[0].position || 'center' }}
+                                />
+                            </div>
+                            <div className="bg-[#86D864] text-white p-5 flex-shrink-0">
+                                <h3 className="font-black text-base md:text-lg">{teamMembers[0].name}</h3>
+                                <p className="text-xs md:text-sm font-semibold">{teamMembers[0].role ?? 'Team Member'}</p>
+                            </div>
+                        </div>
+
+
+                        {/* Right: 3 columns grid for remaining team members */}
+                        {teamMembers.slice(1).map((member) => (
                             <div key={member.src} className="rounded-xl overflow-hidden shadow-lg">
                                 <div className="h-64 flex justify-center">
                                     <Image
