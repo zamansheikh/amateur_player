@@ -540,11 +540,11 @@ export default function Landing2Page() {
                 {/* Content Layout */}
                 <div className="relative z-10 w-full max-w-6xl flex flex-col md:flex-row items-center justify-between px-6 md:px-12 py-16 md:py-16 gap-8 md:gap-0">
                     {/* Left Side: Text Content */}
-                    <div className="flex flex-col items-center md:items-start justify-center w-full md:w-1/2 pl-0 md:pl-2 text-center md:text-left">
+                    <div className="flex flex-col items-center md:items-start justify-center w-full md:w-1/2 pl-4 md:pl-12 lg:pl-20 pr-4 md:pr-8 text-center md:text-left">
                         <h2 className="text-4xl md:text-6xl font-medium text-white leading-tight mb-4 tracking-tight">
                             Every Bowler<br />Is a Card
                         </h2>
-                        <p className="text-sm md:text-base text-white/90 mb-6 leading-relaxed max-w-sm">
+                        <p className="text-sm md:text-base text-white/90 mb-6 leading-relaxed max-w-sm md:max-w-md">
                             Your stats. Your journey. Your legacy — collected, traded, and showcased.
                         </p>
                         <button className="inline-flex items-center gap-2 bg-[#A3E635] text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-md hover:bg-[#92d02e] transition-colors uppercase tracking-wide">
