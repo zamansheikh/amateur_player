@@ -555,12 +555,12 @@ export default function Landing2Page() {
 
                     {/* Right Side: Mobile Mockup Overlapping */}
                     <div className="relative flex items-center justify-center md:justify-end w-full md:w-1/2">
-                        <div className="relative md:absolute right-auto md:-right-24 top-auto md:-top-44 w-full md:w-[820px] pointer-events-none">
+                        <div className="relative md:absolute right-auto md:-right-90 top-auto md:-top-82 w-full md:w-[1220px] pointer-events-none">
                             <Image
                                 src="/land2_opt/mobile_phone_mockup.webp"
                                 alt="Mobile Phone Mockup"
-                                width={1200}
-                                height={1000}
+                                width={1400}
+                                height={1400}
                                 unoptimized
                                 priority
                                 className="w-full h-auto drop-shadow-2xl"
