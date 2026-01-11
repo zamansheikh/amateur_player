@@ -1119,36 +1119,36 @@ export default function Landing2Page() {
                             <div className="mb-8">
                                 <p className="text-gray-900 font-black text-xs mb-2 tracking-widest">EMAIL</p>
                                 <a href="mailto:contact@company.com" className="text-gray-600 hover:text-[#86D864] transition-colors">
-                                    contact@company.com
+                                    info@bowlersnetwork.com
                                 </a>
                             </div>
 
                             {/* Phone */}
-                            <div className="mb-8">
+                            {/* <div className="mb-8">
                                 <p className="text-gray-900 font-black text-xs mb-2 tracking-widest">PHONE</p>
                                 <a href="tel:+11234567890" className="text-gray-600 hover:text-[#86D864] transition-colors">
                                     (123) 456-7890
                                 </a>
-                            </div>
+                            </div> */}
 
                             {/* Address */}
-                            <div className="mb-8 md:mb-12">
+                            {/* <div className="mb-8 md:mb-12">
                                 <p className="text-gray-900 font-black text-xs mb-2 tracking-widest">LOCATION</p>
                                 <p className="text-gray-600">
                                     Main St & Park Ave<br />
                                     Mansfield, OH 44902
                                 </p>
-                            </div>
+                            </div> */}
 
                             {/* Map */}
-                            <div className="mb-8 md:mb-12 relative h-64 rounded-xl overflow-hidden shadow-inner border-2 border-[#86D864]/20 bg-gray-50">
+                            {/* <div className="mb-8 md:mb-12 relative h-64 rounded-xl overflow-hidden shadow-inner border-2 border-[#86D864]/20 bg-gray-50">
                                 <div id="contact-map" className="w-full h-full" />
                                 {!mapLoaded && (
                                     <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
                                         <div className="w-8 h-8 border-4 border-[#86D864] border-t-transparent rounded-full animate-spin"></div>
                                     </div>
                                 )}
-                            </div>
+                            </div> */}
 
                             {/* Social Links */}
                             <div className="mb-8 md:mb-0">
