@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { X } from "lucide-react";
 
 // Define the role interface
 interface Role {
@@ -16,6 +17,8 @@ interface Role {
 
 export default function SelectYourRole() {
   const [selectedRole, setSelectedRole] = useState<string>('amateur');
+  const [showComingSoon, setShowComingSoon] = useState(false);
+  const [comingSoonRole, setComingSoonRole] = useState<string>('');
   const router = useRouter();
 
   const roles: Role[] = [
@@ -60,41 +63,41 @@ export default function SelectYourRole() {
       } else if (selectedRole === 'pro-player') {
         // Redirect to another website in the same tab
         window.location.href = 'https://pros.bowlersnetwork.com/';
-      }
-
-      else if (selectedRole === 'bowling-center') {
-        //Show a message that this role is not available yet
-        alert('This role is not available yet. Please select another role.');
-      }
-      else if (selectedRole === 'manufacturer') {
-        //Show a message that this role is not available yet
-        alert('This role is not available yet. Please select another role.');
+      } else if (selectedRole === 'bowling-center') {
+        setComingSoonRole('Bowling Center');
+        setShowComingSoon(true);
+      } else if (selectedRole === 'manufacturer') {
+        setComingSoonRole('Manufacturer');
+        setShowComingSoon(true);
       }
     }
   };
 
   return (
     <div className="min-h-screen w-full bg-gray-50 relative">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-8 md:py-12">
         {/* Header */}
-        <div className="flex flex-col items-center justify-center mb-12">
-          <Link href="/" className="mb-8">
+        <div className="flex flex-col items-center justify-center mb-8 md:mb-12">
+          <Link href="/" className="mb-6 md:mb-8">
             <Image
               src="/logo/logo.png"
               alt="Logo"
               width={80}
               height={80}
               unoptimized
-              className="w-20 h-20"
+              className="w-16 h-16 md:w-20 md:h-20"
             />
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 text-center">
             Select Your Role
           </h1>
+          <p className="text-sm md:text-base text-gray-600 text-center">
+            Choose your account type to get started
+          </p>
         </div>
 
         {/* Role Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-8 md:mb-12">
           {roles.map((role) => {
             const isSelected = role.id === selectedRole;
             return (
@@ -107,8 +110,8 @@ export default function SelectYourRole() {
                   }`}
               >
                 {/* Badge */}
-                <div className="absolute -top-3 left-6 z-10">
-                  <span className={`px-3 py-1 text-sm font-medium rounded-full shadow-sm ${role.badge === 'Free' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                <div className="absolute -top-3 left-4 md:left-6 z-10">
+                  <span className={`px-3 py-1 text-xs md:text-sm font-medium rounded-full shadow-sm ${role.badge === 'Free' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                     }`}>
                     {role.badge}
                   </span>
@@ -116,7 +119,7 @@ export default function SelectYourRole() {
 
                 {/* Card */}
                 <div
-                  className={`relative p-6 rounded-xl border-2 transition-all duration-300 ${isSelected
+                  className={`relative p-5 md:p-6 rounded-lg md:rounded-xl border-2 transition-all duration-300 ${isSelected
                       ? 'border-green-500 text-white shadow-lg'
                       : 'border-gray-200 bg-white text-gray-900 hover:border-gray-300 shadow-sm'
                     }`}
@@ -126,7 +129,7 @@ export default function SelectYourRole() {
                 >
                   {/* Radio Button and Title */}
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="relative">
+                    <div className="relative flex-shrink-0">
                       <input
                         type="radio"
                         name="role"
@@ -144,14 +147,14 @@ export default function SelectYourRole() {
                         )}
                       </div>
                     </div>
-                    <h2 className={`text-xl font-semibold ${isSelected ? 'text-white' : 'text-gray-900'
+                    <h2 className={`text-lg md:text-xl font-semibold ${isSelected ? 'text-white' : 'text-gray-900'
                       }`}>
                       {role.title}
                     </h2>
                   </div>
 
                   {/* Description */}
-                  <p className={`text-sm leading-relaxed ${isSelected ? 'text-green-100' : 'text-gray-600'
+                  <p className={`text-xs md:text-sm leading-relaxed ${isSelected ? 'text-green-100' : 'text-gray-600'
                     }`}>
                     {role.description}
                   </p>
@@ -166,7 +169,7 @@ export default function SelectYourRole() {
           <button
             onClick={handleContinue}
             disabled={!selectedRole}
-            className="text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105 shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="w-full md:w-auto text-white px-6 md:px-8 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105 shadow-lg disabled:bg-gray-300 disabled:cursor-not-allowed text-sm md:text-base"
             style={{
               backgroundColor: !selectedRole ? '#d1d5db' : '#8BC342',
             }}
@@ -185,6 +188,54 @@ export default function SelectYourRole() {
           </button>
         </div>
       </div>
+
+      {/* Coming Soon Modal */}
+      {showComingSoon && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-sm w-full mx-auto p-6 md:p-8 animate-in zoom-in-95 duration-200">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowComingSoon(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            {/* Content */}
+            <div className="text-center">
+              {/* Animated Coming Soon Icon */}
+              <div className="mb-6 flex justify-center">
+                <div className="relative">
+                  <div className="w-20 h-20 md:w-24 md:h-24 bg-gradient-to-br from-[#8BC342] to-[#425D1F] rounded-full flex items-center justify-center animate-pulse">
+                    <div className="text-4xl md:text-5xl">🚀</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Heading */}
+              <h2 className="text-2xl md:text-3xl font-black text-gray-900 mb-3">
+                Coming Soon!
+              </h2>
+
+              {/* Description */}
+              <p className="text-sm md:text-base text-gray-600 mb-2">
+                <span className="font-semibold text-gray-900">{comingSoonRole}</span> role is coming soon.
+              </p>
+              <p className="text-xs md:text-sm text-gray-500 mb-8">
+                We're working hard to bring this feature to you. Stay tuned!
+              </p>
+
+              {/* Button */}
+              <button
+                onClick={() => setShowComingSoon(false)}
+                className="w-full px-6 py-3 bg-gradient-to-r from-[#8BC342] to-[#7ac85a] text-white font-semibold rounded-lg hover:shadow-lg transition-all duration-300 text-sm md:text-base"
+              >
+                Got It!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
