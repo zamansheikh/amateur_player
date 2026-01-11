@@ -170,7 +170,7 @@ export default function Landing2Page() {
         if (user?.authenticated) {
             router.push('/home');
         } else {
-            router.push('/signin');
+            router.push('/select-your-role');
         }
     };
 
