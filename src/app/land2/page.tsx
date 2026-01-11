@@ -216,15 +216,15 @@ export default function Landing2Page() {
                             ))}
                         </div>
 
-                        {/* Desktop User Icon */}
+                        {/* Desktop Login Button */}
                         <div className="hidden md:flex items-center">
-                            <div 
+                            <button 
                                 onClick={handleProfileClick}
-                                className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-colors hover:scale-105" 
+                                className="px-6 py-2 font-bold text-sm text-white rounded-full transition-all hover:shadow-lg" 
                                 style={{ backgroundColor: '#86D864' }}
                             >
-                                <UserCircle className="w-6 h-6 text-white" />
-                            </div>
+                                LOGIN
+                            </button>
                         </div>
                     </div>
 
@@ -245,14 +245,14 @@ export default function Landing2Page() {
                                 ))}
                             </div>
                             
-                            {/* Profile Icon at bottom of menu */}
-                            <div 
+                            {/* Mobile Login Button */}
+                            <button 
                                 onClick={handleProfileClick}
-                                className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg cursor-pointer" 
+                                className="px-6 py-2 font-bold text-sm text-white rounded-full transition-all shadow-lg hover:shadow-xl" 
                                 style={{ backgroundColor: '#86D864' }}
                             >
-                                <UserCircle className="w-7 h-7 text-white" />
-                            </div>
+                                LOGIN
+                            </button>
                         </div>
                     )}
                 </div>
