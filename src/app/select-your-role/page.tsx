@@ -59,7 +59,7 @@ export default function SelectYourRole() {
         router.push(`/signin?role=${selectedRole}`);
       } else if (selectedRole === 'pro-player') {
         // Redirect to another website in the same tab
-        window.location.href = 'https://bowlersnet.vercel.app/signin';
+        window.location.href = 'https://pros.bowlersnetwork.com/';
       }
 
       else if (selectedRole === 'bowling-center') {
