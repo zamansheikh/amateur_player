@@ -1349,11 +1349,6 @@ export default function Landing2Page() {
                             <div key={member.key}>
                                 <div className="h-64 flex justify-center mb-4">
                                     <div className="relative h-full">
-                                        <div className="absolute top-4 left-4 z-10">
-                                            <span className="bg-[#86D864] text-white font-black text-xs px-3 py-1 rounded-full">
-                                                {member.title}
-                                            </span>
-                                        </div>
                                         <Image
                                             src={member.src}
                                             unoptimized
@@ -1366,6 +1361,11 @@ export default function Landing2Page() {
                                     </div>
                                 </div>
                                 <h3 className="text-gray-900 font-black text-lg mb-2">{member.name}</h3>
+                                <div className="mb-3">
+                                    <span className="bg-[#86D864] text-white font-black text-xs px-3 py-1 rounded-full">
+                                        {member.title}
+                                    </span>
+                                </div>
                                 <p className="text-gray-700 text-sm leading-relaxed mb-3">{member.short}</p>
                                 <a href="#" onClick={(e) => { e.preventDefault(); openModal(member); }} className="text-[#86D864] font-semibold text-sm hover:underline">
                                     Read More...
@@ -1437,12 +1437,12 @@ export default function Landing2Page() {
                     {/* Team Members Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
                         {[
-                            { src: '/team_headshots/Nahian Ferdouse.webp', name: 'Nahian Ferdouse', role: 'Business Intelligence Specialist', position: 'top' },
-                            { src: '/team_headshots/mumit_prottoy.webp', name: 'Mumit Prottoy', role: 'Lead Developer', position: 'top' },
-                            { src: '/team_headshots/Shuvo Headshot.webp', name: 'Asraful Alam Shuvo', role: 'Marketing Lead', position: 'center' },
-                            { src: '/team_headshots/Azmain Hossain Sabbir-Photo.webp', name: 'Azmain Hossain Sabbir', role: 'Marketing Specialist', position: 'center' },
-                            { src: '/team_headshots/Sadia Durdana Adrita.webp', name: 'Sadia Durdana Adrita', role: 'Content Specialist', position: 'center' },
-                            { src: '/team_headshots/Hasibul Hasan Pranto.webp', name: 'Hasibul Hasan Pranto', role: 'Creative Designer', position: 'top' },
+                            { src: '/team_headshots/Nahian Ferdouse.webp', name: 'Nahian Ferdouse', role: 'Director of Business', position: 'top' },
+                            { src: '/team_headshots/mumit_prottoy.webp', name: 'Mumit Prottoy', role: 'Director of Technology', position: 'top' },
+                            { src: '/team_headshots/Shuvo Headshot.webp', name: 'Asraful Alam Shuvo', role: 'Lead Product Experience & Growth', position: 'center' },
+                            { src: '/team_headshots/Azmain Hossain Sabbir-Photo.webp', name: 'Azmain Sabbir', role: 'Brand Marketing Manager', position: 'center' },
+                            { src: '/team_headshots/Sadia Durdana Adrita.webp', name: 'Sadia Durdana Adrita', role: 'Product Manager', position: 'center' },
+                            { src: '/team_headshots/Hasibul Hasan Pranto.webp', name: 'Pranto', role: 'Creative Designer', position: 'top' },
                             { src: '/team_headshots/Brittany Kolatzny-Headshot.webp', name: 'Brittany Kolatzny', role: 'Director of Marketing', position: 'center' },
                         ].map((member) => (
                             <div key={member.src} className="rounded-xl overflow-hidden shadow-lg">
