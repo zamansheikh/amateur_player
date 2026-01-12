@@ -7,6 +7,7 @@ import { Award, ChevronUp, ChevronDown, MessageCircle, Send, Loader2 } from "luc
 import { Discussion } from "@/types/chatter";
 import { api } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
+import AutoExpandingTextarea from "./AutoExpandingTextarea";
 
 interface DiscussionCardProps {
   discussion: Discussion;
@@ -286,8 +287,7 @@ export default function DiscussionCard({ discussion, onUpdate }: DiscussionCardP
                 )}
             </div>
             <div className="flex-1 relative">
-              <input
-                type="text"
+              <AutoExpandingTextarea
                 value={opinionText}
                 onChange={(e) => setOpinionText(e.target.value)}
                 onKeyDown={(e) => {
@@ -297,7 +297,9 @@ export default function DiscussionCard({ discussion, onUpdate }: DiscussionCardP
                   }
                 }}
                 placeholder="Share your opinion..."
-                className="w-full px-4 py-2 pr-10 bg-white border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent"
+                className="w-full px-4 py-2 pr-10 bg-white border border-gray-200 rounded-3xl text-sm focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent"
+                minRows={1}
+                maxRows={10}
               />
               <button
                 onClick={handleSubmitOpinion}
