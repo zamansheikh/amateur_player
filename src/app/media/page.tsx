@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { 
   Play, Mic, Camera, Trophy, Star, ChevronRight, Upload, Loader, 
   AlertCircle, Heart, ChevronDown, ChevronUp, MessageCircle, Share2, 
-  Volume2, VolumeX, ImageIcon 
+  Volume2, VolumeX, ImageIcon, ArrowLeft 
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -344,7 +344,11 @@ function ActionLink({ href, label, count, icon, variant = 'default', active }: A
   );
 }
 
-const SplitsTab = () => {
+interface SplitsTabProps {
+  onBack?: () => void;
+}
+
+const SplitsTab = ({ onBack }: SplitsTabProps) => {
   const [splits, setSplits] = useState<ProVideo[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -586,35 +590,34 @@ const SplitsTab = () => {
   if (error || splits.length === 0) {
     return (
       <div className="w-full min-h-screen bg-black flex flex-col">
-        {/* Upload/Manage Section */}
-        <div className="w-full px-4 py-6 bg-gradient-to-r from-green-600 to-emerald-600 border-b border-green-700">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-12 h-12 bg-green-700 bg-opacity-80 rounded-lg flex items-center justify-center">
-                    <Camera className="w-6 h-6 text-white" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-white">Share Your Splits</h2>
-                </div>
-              </div>
-              <div className="flex gap-2 items-center">
-                <Link
-                  href="/media/upload-video"
-                  className="inline-flex items-center gap-2 bg-white text-green-600 hover:bg-green-50 px-6 py-3 rounded-lg transition-all font-semibold shadow-lg hover:shadow-xl"
-                >
-                  <Upload className="w-5 h-5" />
-                  Upload Split
-                </Link>
-                <Link
-                  href="/media/my-media"
-                  className="inline-flex items-center gap-2 bg-white text-green-600 hover:bg-green-50 px-6 py-3 rounded-lg transition-all font-semibold shadow-lg hover:shadow-xl"
-                >
-                  <Loader className="w-5 h-5" />
-                  My Splits
-                </Link>
-              </div>
-            </div>
+        {/* Mobile/Desktop Header for Splits */}
+        <div className="w-full px-4 py-4 flex items-center justify-between bg-black/90 backdrop-blur-sm sticky top-0 z-50">
+          <div className="flex items-center gap-4">
+            {/* Back Button (Mobile Only) */}
+            <button 
+              onClick={onBack}
+              className="md:hidden p-2 -ml-2 text-white hover:bg-white/10 rounded-full transition-colors"
+            >
+              <ArrowLeft className="w-6 h-6" />
+            </button>
+            <h2 className="text-xl font-bold text-white hidden md:block">Splits</h2>
+          </div>
+          
+          <div className="flex gap-4 items-center">
+            <Link
+              href="/media/upload-video"
+              className="text-white hover:text-green-400 transition-colors p-2"
+              title="Upload Split"
+            >
+              <Upload className="w-6 h-6" />
+            </Link>
+            <Link
+              href="/media/my-media"
+              className="text-white hover:text-green-400 transition-colors p-2"
+               title="My Splits"
+            >
+              <Loader className="w-6 h-6" />
+            </Link>
           </div>
         </div>
 
@@ -634,35 +637,40 @@ const SplitsTab = () => {
 
   return (
     <div className="w-full min-h-screen bg-black flex flex-col">
-      {/* Upload/Manage Section */}
-      <div className="w-full px-4 py-6 bg-gradient-to-r from-green-600 to-emerald-600 border-b border-green-700">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-12 h-12 bg-green-700 bg-opacity-80 rounded-lg flex items-center justify-center">
-                  <Camera className="w-6 h-6 text-white" />
-                </div>
-                <h2 className="text-2xl font-bold text-white">Share Your Splits</h2>
-              </div>
+      {/* Mobile/Desktop Header for Splits */}
+      <div className="w-full px-4 py-4 flex items-center justify-between bg-black/90 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-800/50">
+        <div className="flex items-center gap-4">
+          {/* Back Button (Mobile Only) */}
+          <button 
+            onClick={onBack}
+            className="md:hidden p-2 -ml-2 text-white hover:bg-white/10 rounded-full transition-colors"
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+          
+          <div className="flex items-center gap-2">
+            <div className="md:hidden w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+               <Camera className="w-4 h-4 text-white" />
             </div>
-            <div className="flex gap-2 items-center">
-              <Link
-                href="/media/upload-video"
-                className="inline-flex items-center gap-2 bg-white text-green-600 hover:bg-green-50 px-6 py-3 rounded-lg transition-all font-semibold shadow-lg hover:shadow-xl"
-              >
-                <Upload className="w-5 h-5" />
-                Upload Split
-              </Link>
-              <Link
-                href="/media/my-media"
-                className="inline-flex items-center gap-2 bg-white text-green-600 hover:bg-green-50 px-6 py-3 rounded-lg transition-all font-semibold shadow-lg hover:shadow-xl"
-              >
-                <Loader className="w-5 h-5" />
-                My Splits
-              </Link>
-            </div>
+            <h2 className="text-xl font-bold text-white hidden md:block">Splits</h2>
           </div>
+        </div>
+        
+        <div className="flex gap-2 items-center">
+          <Link
+            href="/media/upload-video"
+             className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full transition-all text-sm font-medium backdrop-blur-sm"
+          >
+            <Upload className="w-4 h-4" />
+            <span className="hidden md:inline">Upload</span>
+          </Link>
+          <Link
+            href="/media/my-media"
+             className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full transition-all text-sm font-medium backdrop-blur-sm"
+          >
+            <Loader className="w-4 h-4" />
+             <span className="hidden md:inline">My Splits</span>
+          </Link>
         </div>
       </div>
 
@@ -1050,8 +1058,8 @@ export default function MediaPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Page Header (Tabs) */}
-      <div className="sticky top-0 z-30 bg-black/95 backdrop-blur-sm border-b border-gray-800">
+      {/* Page Header (Tabs) - Hidden on mobile when in Splits mode */}
+      <div className={`sticky top-0 z-30 bg-black/95 backdrop-blur-sm border-b border-gray-800 ${activeTab === 'splits' ? 'hidden md:block' : ''}`}>
         <div className="max-w-6xl mx-auto px-4 py-4">
             <div className="flex gap-1 bg-gray-900 p-1 rounded-xl">
             <button
@@ -1091,7 +1099,7 @@ export default function MediaPage() {
       {/* Tab Content */}
       <div className="">
         {activeTab === 'videos' && <VideosTab />}
-        {activeTab === 'splits' && <SplitsTab />}
+        {activeTab === 'splits' && <SplitsTab onBack={() => setActiveTab('videos')} />}
         {activeTab === 'photos' && <PhotosTab />}
       </div>
     </div>
