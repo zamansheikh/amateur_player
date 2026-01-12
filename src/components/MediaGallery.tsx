@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import { Play, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -19,6 +19,30 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
 
     // Determine if we're in a flexible height context (feed) or fixed height context (grid)
     const isFlexibleHeight = !!maxHeight;
+
+    const videoRef = useRef<HTMLVideoElement>(null);
+
+    // Auto-play video when in view
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        videoRef.current?.play().catch(() => { });
+                    } else {
+                        videoRef.current?.pause();
+                    }
+                });
+            },
+            { threshold: 0.5 }
+        );
+
+        if (videoRef.current) {
+            observer.observe(videoRef.current);
+        }
+
+        return () => observer.disconnect();
+    }, [media]);
 
     const closeLightbox = useCallback(() => {
         setLightboxOpen(false);
@@ -128,23 +152,32 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
         const combinedStyles = `${baseStyles} ${clickableStyles}`;
 
         if (isVideo(mediaUrl)) {
+            // Only autoplay the first item if it is a video (index === 0)
+            const isFirstVideo = index === 0;
+
             return (
-                <div 
-                    key={index} 
-                    className={combinedStyles} 
+                <div
+                    key={index}
+                    className={combinedStyles}
                     onClick={enableLightbox ? () => openLightbox(index) : undefined}
                 >
                     <video
+                        ref={isFirstVideo ? videoRef : null}
                         src={mediaUrl}
                         className="w-full h-full object-cover rounded-md border border-green-200"
                         muted
+                        loop
+                        playsInline
                         preload="metadata"
                     />
-                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-md">
-                        <div className="w-10 h-10 bg-white bg-opacity-90 rounded-full flex items-center justify-center hover:bg-opacity-100 transition-opacity">
-                            <Play className="w-5 h-5 text-gray-800 ml-0.5" />
+                    {/* Show play icon only for non-autoplay videos (index > 0) */}
+                    {!isFirstVideo && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-md">
+                            <div className="w-10 h-10 bg-white bg-opacity-90 rounded-full flex items-center justify-center hover:bg-opacity-100 transition-opacity">
+                                <Play className="w-5 h-5 text-gray-800 ml-0.5" />
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             );
         } else {

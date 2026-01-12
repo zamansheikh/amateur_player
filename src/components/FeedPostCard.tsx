@@ -223,7 +223,7 @@ export default function FeedPostCard({
             <MediaGallery
               media={post.media_urls}
               enableLightbox={enableMediaLightbox}
-            // maxHeight="400px"
+              maxHeight="400px"
             />
           </div>
         )}
