@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { 
   Play, Mic, Camera, Trophy, Star, ChevronRight, Upload, Loader, 
   AlertCircle, Heart, ChevronDown, ChevronUp, MessageCircle, Share2, 
-  Volume2, VolumeX, ImageIcon, ArrowLeft 
+  Volume2, VolumeX, ImageIcon, ArrowLeft, ArrowUpCircle
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -358,8 +358,15 @@ const SplitsTab = ({ onBack }: SplitsTabProps) => {
   const [duration, setDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [showSwipeHint, setShowSwipeHint] = useState(true);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const touchStartY = useRef<number | null>(null);
+
+  // Show swipe hint for 3 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => setShowSwipeHint(false), 4000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const togglePlay = () => {
     if (videoRef.current) {
@@ -543,13 +550,13 @@ const SplitsTab = ({ onBack }: SplitsTabProps) => {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartY.current = e.touches[0].clientY;
+  const handleSwipeStart = (y: number) => {
+    touchStartY.current = y;
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
+  const handleSwipeEnd = (y: number) => {
     if (touchStartY.current === null) return;
-    const delta = e.changedTouches[0].clientY - touchStartY.current;
+    const delta = y - touchStartY.current;
     if (Math.abs(delta) > 50) {
       if (delta > 0) {
         handlePrevious();
@@ -558,6 +565,22 @@ const SplitsTab = ({ onBack }: SplitsTabProps) => {
       }
     }
     touchStartY.current = null;
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    handleSwipeStart(e.touches[0].clientY);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    handleSwipeEnd(e.changedTouches[0].clientY);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    handleSwipeStart(e.clientY);
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    handleSwipeEnd(e.clientY);
   };
 
   if (isLoading) {
@@ -677,11 +700,25 @@ const SplitsTab = ({ onBack }: SplitsTabProps) => {
 
             {/* Video Card */}
             <div
-              className="relative w-full max-w-[420px] rounded-[32px] overflow-hidden shadow-[0px_20px_60px_rgba(0,0,0,0.55)] border border-white/10 bg-black flex-1 cursor-pointer"
+              className="relative w-full max-w-[420px] rounded-[32px] overflow-hidden shadow-[0px_20px_60px_rgba(0,0,0,0.55)] border border-white/10 bg-black flex-1 cursor-pointer select-none"
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
+              onMouseDown={handleMouseDown}
+              onMouseUp={handleMouseUp}
               onClick={togglePlay}
             >
+              {/* Swipe Hint Overlay */}
+              {showSwipeHint && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/40 pointer-events-none animate-fade-out">
+                  <div className="flex flex-col items-center animate-bounce">
+                    <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mb-3 shadow-xl border border-white/10">
+                      <ArrowUpCircle className="w-8 h-8 text-white" />
+                    </div>
+                    <p className="text-white font-bold text-lg drop-shadow-md tracking-wider">Swipe Up</p>
+                  </div>
+                </div>
+              )}
+
               <video
                 ref={videoRef}
                 className="w-full h-full object-cover"
