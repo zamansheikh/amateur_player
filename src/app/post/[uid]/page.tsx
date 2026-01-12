@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import axios from "axios";
 import { useCloudUpload } from "@/lib/useCloudUpload";
 import FeedPostCard from "@/components/FeedPostCard";
+import MediaGallery from "@/components/MediaGallery";
 import AutoExpandingTextarea from "@/components/AutoExpandingTextarea";
 
 interface Comment {
@@ -112,7 +113,18 @@ export default function PostDetailPage() {
   // Handle like/unlike
   const handleLike = async () => {
     if (!post || isLiking) return;
-    
+
+    // Optimistic update
+    const previousPost = { ...post };
+    const newIsLiked = !post.is_liked;
+    const newLikeCount = newIsLiked ? post.like_count + 1 : post.like_count - 1;
+
+    setPost({
+      ...post,
+      is_liked: newIsLiked,
+      like_count: newLikeCount
+    });
+
     try {
       setIsLiking(true);
       const response = await axios.get(
@@ -123,8 +135,8 @@ export default function PostDetailPage() {
           },
         }
       );
-      
-      // Update post with new like status
+
+      // Update post with new like status from server
       setPost(prev => prev ? {
         ...prev,
         is_liked: response.data.is_liked,
@@ -132,6 +144,8 @@ export default function PostDetailPage() {
       } : null);
     } catch (err) {
       console.error("Error toggling like:", err);
+      // Revert on error
+      setPost(previousPost);
     } finally {
       setIsLiking(false);
     }
@@ -296,40 +310,63 @@ export default function PostDetailPage() {
             
             {/* Post Media */}
             {post.media_urls && post.media_urls.length > 0 && (
-              <div className="space-y-3">
-                {post.media_urls.map((url, index) => (
-                  <div key={index} className="relative rounded-lg overflow-hidden">
-                    <Image
-                      src={url}
-                      alt={`Post media ${index + 1}`}
-                      width={600}
-                      height={400}
-                      className="w-full h-auto object-cover"
-                    />
-                  </div>
-                ))}
+              <div className="mt-4">
+                <MediaGallery 
+                  media={post.media_urls} 
+                  enableLightbox={true}
+                  maxHeight="600px"
+                />
               </div>
             )}
           </div>
 
           {/* Like Section */}
-          <div className="px-4 py-3 border-t border-b border-gray-200">
-            <button
-              onClick={handleLike}
-              disabled={isLiking}
-              className="flex items-center gap-2 transition-colors"
-            >
-              <Heart
-                className={`w-5 h-5 ${
-                  post.is_liked
-                    ? "fill-red-500 text-red-500"
-                    : "text-gray-500 hover:text-red-500"
-                }`}
-              />
-              <span className="text-sm font-medium text-gray-700">
+          <div className="px-4 py-3 border-t border-b border-gray-200 flex items-center">
+            <div className="flex items-center gap-2 group">
+              <button
+                onClick={handleLike}
+                disabled={isLiking}
+                className={`flex items-center gap-2 p-2 rounded-full transition-all duration-300 transform 
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  hover:bg-red-50 hover:scale-110 active:scale-95
+                  ${post.is_liked
+                    ? "text-red-500"
+                    : "text-gray-400 hover:text-red-500"
+                  }`}
+              >
+                <div className="relative">
+                  <div className={`${post.is_liked ? "animate-like-pop" : "transition-transform duration-200"}`}>
+                    {post.is_liked ? (
+                      <Image
+                        src="/icons/like_icon.svg"
+                        alt="Unlike"
+                        unoptimized
+                        width={24}
+                        height={24}
+                        className="drop-shadow-sm"
+                      />
+                    ) : (
+                      <Image
+                        src="/icons/not_like_icon.svg"
+                        alt="Like"
+                        unoptimized
+                        width={24}
+                        height={24}
+                        className="grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100"
+                      />
+                    )}
+                  </div>
+                  {/* Ping effect when liked */}
+                  {post.is_liked && (
+                    <span className="absolute inset-0 rounded-full bg-red-400 animate-ping-once pointer-events-none"></span>
+                  )}
+                </div>
+                <span className="text-sm font-semibold">Like</span>
+              </button>
+              <span className={`text-sm font-semibold transition-colors duration-200 ${post.is_liked ? "text-red-500" : "text-gray-600"}`}>
                 {post.like_count} {post.like_count === 1 ? "Like" : "Likes"}
               </span>
-            </button>
+            </div>
           </div>
 
           {/* Comments Section */}
