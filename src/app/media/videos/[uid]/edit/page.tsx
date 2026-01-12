@@ -116,17 +116,22 @@ export default function EditVideoPage({ params }: { params: Promise<{ uid: strin
 
         try {
             abortControllerRef.current = new AbortController();
+            
+            // Get token from AuthContext if possible, but edit page might not have it loaded yet, so check localStorage
             const token = localStorage.getItem('access_token');
-            const headers: Record<string, string> = {
-                'Content-Type': 'application/json',
-            };
+            console.log('[Thumbnail] Token available:', !!token);
 
-            if (token) {
-                headers['Authorization'] = `Bearer ${token}`;
+            if (!token) {
+                throw new Error('You must be logged in to upload a thumbnail. Please sign in again.');
             }
 
+            const headers: Record<string, string> = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            };
+
             // Step 1: Initiate singlepart upload
-            console.log('[Thumbnail] Initiating upload');
+            console.log('[Thumbnail] Initiating upload via local proxy...');
             const initiateResponse = await fetch('/api/cloud/upload/singlepart/requests/initiate', {
                 method: 'POST',
                 headers,
@@ -138,16 +143,28 @@ export default function EditVideoPage({ params }: { params: Promise<{ uid: strin
             });
 
             if (!initiateResponse.ok) {
-                const errorData = await initiateResponse.json();
-                throw new Error(errorData.errors?.[0] || 'Failed to initiate upload');
+                let errorMsg = 'Failed to initiate upload';
+                try {
+                    const errorData = await initiateResponse.json();
+                    errorMsg = errorData.errors?.[0] || errorData.message || `Proxy error: ${initiateResponse.status}`;
+                } catch (e) {
+                    errorMsg = `Proxy error: ${initiateResponse.status} ${initiateResponse.statusText}`;
+                }
+                throw new Error(errorMsg);
             }
 
-            const { key, public_url, presigned_url } = await initiateResponse.json();
+            const data = await initiateResponse.json();
+            const { key, public_url, presigned_url } = data;
+            
+            if (!presigned_url) {
+                throw new Error('Server did not provide an upload URL');
+            }
+
             uploadInfoRef.current = { key, public_url };
             console.log('[Thumbnail] Got presigned URL');
 
             // Step 2: Upload file to presigned URL
-            console.log('[Thumbnail] Uploading to presigned URL');
+            console.log('[Thumbnail] Uploading to presigned URL directly...');
             const uploadResponse = await fetch(presigned_url, {
                 method: 'PUT',
                 body: thumbnailFile,
@@ -155,8 +172,7 @@ export default function EditVideoPage({ params }: { params: Promise<{ uid: strin
             });
 
             if (!uploadResponse.ok) {
-                const errorText = await uploadResponse.text();
-                throw new Error(`Failed to upload: ${uploadResponse.status} ${uploadResponse.statusText}`);
+                throw new Error(`Failed to upload thumbnail to cloud: ${uploadResponse.status} ${uploadResponse.statusText}`);
             }
 
             setUploadProgress(100);

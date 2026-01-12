@@ -166,8 +166,7 @@ export class CloudUploadService {
                     headers['Authorization'] = `Bearer ${token}`;
                 }
 
-                const baseUrl = 'https://test.bowlersnetwork.com';
-                await fetch(`${baseUrl}/api/cloud/upload/singlepart/requests/abort`, {
+                await fetch('/api/cloud/upload/singlepart/requests/abort', {
                     method: 'POST',
                     headers,
                     body: JSON.stringify({
@@ -212,9 +211,8 @@ export class CloudUploadService {
         }
 
         const fileName = options?.fileName || file.name;
-        const baseUrl = 'https://test.bowlersnetwork.com';
 
-        const response = await fetch(`${baseUrl}/api/cloud/upload/singlepart/requests/initiate`, {
+        const response = await fetch('/api/cloud/upload/singlepart/requests/initiate', {
             method: 'POST',
             headers,
             body: JSON.stringify({

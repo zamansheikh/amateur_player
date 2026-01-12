@@ -270,17 +270,22 @@ export default function MediaUploadPage() {
 
         try {
             abortControllerRef.current = new AbortController();
-            const token = localStorage.getItem('access_token');
-            const headers: Record<string, string> = {
-                'Content-Type': 'application/json',
-            };
+            
+            // Get token from AuthContext first, then localStorage
+            const token = user?.access_token || localStorage.getItem('access_token');
+            console.log('[Upload] Token available:', !!token);
 
-            if (token) {
-                headers['Authorization'] = `Bearer ${token}`;
+            if (!token) {
+                throw new Error('You must be logged in to upload videos. Please sign in again.');
             }
 
+            const headers: Record<string, string> = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            };
+
             // Step 1: Initiate singlepart upload
-            console.log('[Upload] Initiating singlepart upload');
+            console.log('[Upload] Initiating singlepart upload to local proxy...');
             const initiateResponse = await fetch('/api/cloud/upload/singlepart/requests/initiate', {
                 method: 'POST',
                 headers,
@@ -292,16 +297,29 @@ export default function MediaUploadPage() {
             });
 
             if (!initiateResponse.ok) {
-                const errorData = await initiateResponse.json();
-                throw new Error(errorData.errors?.[0] || 'Failed to initiate upload');
+                let errorMsg = 'Failed to initiate upload';
+                try {
+                    const errorData = await initiateResponse.json();
+                    errorMsg = errorData.errors?.[0] || errorData.message || `Proxy error: ${initiateResponse.status}`;
+                } catch (e) {
+                    errorMsg = `Proxy error: ${initiateResponse.status} ${initiateResponse.statusText}`;
+                }
+                throw new Error(errorMsg);
             }
 
-            const { key, public_url, presigned_url } = await initiateResponse.json();
+            const data = await initiateResponse.json();
+            const { key, public_url, presigned_url } = data;
+            
+            if (!presigned_url) {
+                console.error('[Upload] Missing presigned_url in response:', data);
+                throw new Error('Server did not provide an upload URL');
+            }
+
             uploadInfoRef.current = { key, public_url };
-            console.log('[Upload] Got presigned URL for upload');
+            console.log('[Upload] Successfully initiated. Got key:', key);
 
             // Step 2: Upload video file to presigned URL
-            console.log('[Upload] Uploading video to presigned URL');
+            console.log('[Upload] Uploading video to presigned URL directly...');
             const uploadResponse = await fetch(presigned_url, {
                 method: 'PUT',
                 body: uploadState.videoFile,
@@ -310,7 +328,7 @@ export default function MediaUploadPage() {
 
             if (!uploadResponse.ok) {
                 const errorText = await uploadResponse.text();
-                throw new Error(`Failed to upload video: ${uploadResponse.status} ${uploadResponse.statusText} - ${errorText}`);
+                throw new Error(`Failed to upload video to cloud: ${uploadResponse.status} ${uploadResponse.statusText}`);
             }
 
             setUploadState(prev => ({
@@ -318,10 +336,10 @@ export default function MediaUploadPage() {
                 uploadProgress: 100,
             }));
 
-            console.log('[Upload] Video uploaded successfully:', public_url);
+            console.log('[Upload] Video uploaded to cloud successfully');
 
             // Step 3: Save video metadata to database
-            console.log('[Upload] Saving video metadata');
+            console.log('[Upload] Saving video metadata via local proxy...');
             const metadataResponse = await fetch('/api/tube/large-videos', {
                 method: 'POST',
                 headers,
@@ -336,9 +354,14 @@ export default function MediaUploadPage() {
             });
 
             if (!metadataResponse.ok) {
-                const errorData = await metadataResponse.json();
-                const errorMsg = errorData.errors?.[0] || errorData.message || metadataResponse.statusText;
-                throw new Error(`Failed to save video metadata: ${errorMsg}`);
+                let errorMsg = 'Failed to save video metadata';
+                try {
+                    const errorData = await metadataResponse.json();
+                    errorMsg = errorData.errors?.[0] || errorData.message || `Metadata error: ${metadataResponse.status}`;
+                } catch (e) {
+                    errorMsg = `Metadata error: ${metadataResponse.status} ${metadataResponse.statusText}`;
+                }
+                throw new Error(errorMsg);
             }
 
             console.log('[Upload] Video metadata saved successfully');

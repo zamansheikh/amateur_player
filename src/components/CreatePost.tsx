@@ -283,10 +283,10 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                         {/* Post Button */}
                         <button
                             type="submit"
-                            disabled={isPosting || isUploadingAny || (!postText.trim() && uploadedUrls.length === 0)}
+                            disabled={isPosting || isUploadingAny || (!postText.trim() && selectedFiles.length === 0)}
                             className="font-bold py-2 px-6 sm:px-10 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm sm:text-lg whitespace-nowrap"
                             style={{ 
-                                backgroundColor: (isPosting || isUploadingAny || (!postText.trim() && uploadedUrls.length === 0)) 
+                                backgroundColor: (isPosting || isUploadingAny || (!postText.trim() && selectedFiles.length === 0)) 
                                     ? '#d1d5db' 
                                     : '#8BC342' 
                             }}

@@ -218,17 +218,22 @@ export default function PhotoUploadPage() {
 
         try {
             abortControllerRef.current = new AbortController();
-            const token = localStorage.getItem('access_token');
-            const headers: Record<string, string> = {
-                'Content-Type': 'application/json',
-            };
+            
+            // Get token from AuthContext first, then localStorage
+            const token = user?.access_token || localStorage.getItem('access_token');
+            console.log('[Upload] Token available:', !!token);
 
-            if (token) {
-                headers['Authorization'] = `Bearer ${token}`;
+            if (!token) {
+                throw new Error('You must be logged in to upload photos. Please sign in again.');
             }
 
+            const headers: Record<string, string> = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            };
+
             // Step 1: Initiate singlepart upload
-            console.log('[Upload] Initiating singlepart upload');
+            console.log('[Upload] Initiating singlepart upload to local proxy...');
             const initiateResponse = await fetch('/api/cloud/upload/singlepart/requests/initiate', {
                 method: 'POST',
                 headers,
@@ -240,20 +245,33 @@ export default function PhotoUploadPage() {
             });
 
             if (!initiateResponse.ok) {
-                const errorData = await initiateResponse.json();
-                throw new Error(errorData.errors?.[0] || 'Failed to initiate upload');
+                let errorMsg = 'Failed to initiate upload';
+                try {
+                    const errorData = await initiateResponse.json();
+                    errorMsg = errorData.errors?.[0] || errorData.message || `Proxy error: ${initiateResponse.status}`;
+                } catch (e) {
+                    errorMsg = `Proxy error: ${initiateResponse.status} ${initiateResponse.statusText}`;
+                }
+                throw new Error(errorMsg);
             }
 
-            const { key, public_url, presigned_url } = await initiateResponse.json();
+            const data = await initiateResponse.json();
+            const { key, public_url, presigned_url } = data;
+            
+            if (!presigned_url) {
+                console.error('[Upload] Missing presigned_url in response:', data);
+                throw new Error('Server did not provide an upload URL');
+            }
+
             uploadInfoRef.current = { key, public_url };
-            console.log('[Upload] Got presigned URL for upload');
+            console.log('[Upload] Successfully initiated. Got key:', key);
 
             // Step 2: Upload photo file to presigned URL with progress tracking
-            console.log('[Upload] Uploading photo to presigned URL');
+            console.log('[Upload] Uploading photo to presigned URL directly...');
             await uploadWithProgress(uploadState.photoFile, presigned_url);
 
             // Step 3: Save photo metadata to database
-            console.log('[Upload] Saving photo metadata');
+            console.log('[Upload] Saving photo metadata via local proxy...');
             const metadataResponse = await fetch('/api/photos', {
                 method: 'POST',
                 headers,
@@ -266,9 +284,14 @@ export default function PhotoUploadPage() {
             });
 
             if (!metadataResponse.ok) {
-                const errorData = await metadataResponse.json();
-                const errorMsg = errorData.errors?.[0] || errorData.message || metadataResponse.statusText;
-                throw new Error(`Failed to save photo metadata: ${errorMsg}`);
+                let errorMsg = 'Failed to save photo metadata';
+                try {
+                    const errorData = await metadataResponse.json();
+                    errorMsg = errorData.errors?.[0] || errorData.message || `Metadata error: ${metadataResponse.status}`;
+                } catch (e) {
+                    errorMsg = `Metadata error: ${metadataResponse.status} ${metadataResponse.statusText}`;
+                }
+                throw new Error(errorMsg);
             }
 
             console.log('[Upload] Photo metadata saved successfully');
