@@ -14,7 +14,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
     useEffect(() => {
         if (!isLoading && (!user || !user.authenticated)) {
-            router.push('/no-access');
+            router.push('/signin');
         }
     }, [user, isLoading, router]);
 

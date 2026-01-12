@@ -4,7 +4,7 @@ export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Public routes that don't require authentication
-    const publicRoutes = ['/landing', '/', '/no-access', '/land2', '/signin', '/signup'];
+    const publicRoutes = ['/landing', '/', '/land2', '/signin', '/signup'];
 
     // Pro player routes are also public (for viewing pro profiles without login)
     const isProPlayerRoute = pathname.startsWith('/pro/');
@@ -24,13 +24,13 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/home', request.url));
     }
 
-    // If it's a protected route and user is not authenticated, redirect to no-access
+    // If it's a protected route and user is not authenticated, redirect to signin
     if (!isPublicRoute && !token) {
         // For client-side navigation, we'll let the AuthContext handle this
         // But for direct URL access, we redirect here
         const isDirectAccess = !request.headers.get('referer');
         if (isDirectAccess) {
-            return NextResponse.redirect(new URL('/no-access', request.url));
+            return NextResponse.redirect(new URL('/signin', request.url));
         }
     }
 

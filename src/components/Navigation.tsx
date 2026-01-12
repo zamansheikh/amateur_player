@@ -64,7 +64,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
     const { user, signout, isLoading } = useAuth();
 
     // Public routes that don't require authentication
-    const publicRoutes = ['/landing', '/landing/page', '/land2', '/select-your-role', '/complete-profile', '/no-access', '/signin', '/signup'];
+    const publicRoutes = ['/landing', '/landing/page', '/land2', '/select-your-role', '/complete-profile', '/signin', '/signup'];
 
     // Check if it's a pro player public route
     const isProPlayerRoute = pathname.startsWith('/pro/');

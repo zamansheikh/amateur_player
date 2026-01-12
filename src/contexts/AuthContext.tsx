@@ -237,7 +237,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem('user');
         deleteCookie('access_token');
         setUser(null);
-        router.push('/no-access');
+        router.push('/signin');
     };
 
     const signup = async (userData: {
