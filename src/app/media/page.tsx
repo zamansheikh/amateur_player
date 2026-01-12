@@ -53,7 +53,7 @@ const VideosTab = () => {
       setVideoError(null);
       try {
         const response = await axios.get<ProVideo[]>(
-          '/api/tube/large-videos/feed',
+          `${BASE_URL}/api/tube/large-vidoes/feed`,
           {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
@@ -396,7 +396,7 @@ const SplitsTab = () => {
       setError(null);
       try {
         const response = await axios.get<ProVideo[]>(
-          '/api/tube/large-videos/feed',
+          `${BASE_URL}/api/tube/large-vidoes/feed`,
           {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
@@ -854,7 +854,7 @@ const PhotosTab = () => {
       setError(null);
       try {
         const response = await axios.get<Photo[]>(
-          '/api/photos/feed',
+          `${BASE_URL}/api/photos/feed`,
           {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
