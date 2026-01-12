@@ -120,11 +120,25 @@ export default function DiscussionCard({ discussion, onUpdate }: DiscussionCardP
                 </div>
                 <h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 mb-2 sm:mb-3 line-clamp-2">{localDiscussion.title}</h2>
                 <p className="text-gray-700 text-xs sm:text-sm md:text-base mb-2 sm:mb-3 line-clamp-3">{localDiscussion.description}</p>
-                <div className="flex items-center gap-2 text-xs text-gray-500">
+                
+                <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
                   <span>{localDiscussion.created}</span>
                   <span>•</span>
                   <span>{localDiscussion.opinions.length} {localDiscussion.opinions.length === 1 ? 'opinion' : 'opinions'}</span>
                 </div>
+
+                {/* Add Opinion Button */}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setIsExpanded(!isExpanded);
+                  }}
+                  className="flex items-center gap-2 text-[#8BC342] hover:text-[#6fa332] font-semibold text-xs sm:text-sm mb-3 transition-colors"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  {isExpanded ? 'Hide opinion box' : 'Add your opinion'}
+                </button>
               </div>
 
               {/* Pro badge */}
