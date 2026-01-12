@@ -358,24 +358,8 @@ const SplitsTab = ({ onBack }: SplitsTabProps) => {
   const [duration, setDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [contentHeight, setContentHeight] = useState(0);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const touchStartY = useRef<number | null>(null);
-
-  // Calculate available height (account for global header/nav chrome)
-  useEffect(() => {
-    const HEADER_OFFSET = 140; // space used by GlobalHeader + paddings
-    const updateHeight = () => {
-      const height = typeof window !== 'undefined'
-        ? Math.max(window.innerHeight - HEADER_OFFSET, 480)
-        : 640;
-      setContentHeight(height);
-    };
-
-    updateHeight();
-    window.addEventListener('resize', updateHeight);
-    return () => window.removeEventListener('resize', updateHeight);
-  }, []);
 
   const togglePlay = () => {
     if (videoRef.current) {
@@ -636,14 +620,14 @@ const SplitsTab = ({ onBack }: SplitsTabProps) => {
   const isLiked = likedSplits.has(currentSplit.id);
 
   return (
-    <div className="w-full min-h-screen bg-black flex flex-col">
+    <div className="fixed inset-0 z-[100] bg-black flex flex-col">
       {/* Mobile/Desktop Header for Splits */}
       <div className="w-full px-4 py-4 flex items-center justify-between bg-black/90 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-800/50">
         <div className="flex items-center gap-4">
-          {/* Back Button (Mobile Only) */}
+          {/* Back Button (Visible on all screens in full screen mode) */}
           <button 
             onClick={onBack}
-            className="md:hidden p-2 -ml-2 text-white hover:bg-white/10 rounded-full transition-colors"
+            className="p-2 -ml-2 text-white hover:bg-white/10 rounded-full transition-colors"
           >
             <ArrowLeft className="w-6 h-6" />
           </button>
@@ -675,18 +659,12 @@ const SplitsTab = ({ onBack }: SplitsTabProps) => {
       </div>
 
       {/* Main Content */}
-      <div
-        className="flex-1 overflow-hidden bg-gradient-to-b from-gray-950 via-gray-900 to-black text-white"
-        style={{ height: contentHeight || undefined }}
-      >
-        <div
-          className="h-full max-w-6xl mx-auto px-4 py-4 flex flex-col lg:flex-row gap-6 overflow-hidden"
-          style={{ height: contentHeight || undefined }}
-        >
+      <div className="flex-1 overflow-hidden bg-gradient-to-b from-gray-950 via-gray-900 to-black text-white">
+        <div className="h-full max-w-6xl mx-auto px-4 py-4 flex flex-col lg:flex-row gap-6 overflow-hidden">
           {/* Left section: context + video */}
           <div className="flex-1 flex flex-col items-center overflow-hidden">
             {/* Header */}
-            <div className="w-full max-w-xl flex items-center justify-between mb-4">
+            <div className="w-full max-w-xl flex items-center justify-between mb-4 shrink-0">
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-gray-400">Now Playing</p>
                 <h1 className="text-2xl font-bold">Splits</h1>
@@ -700,7 +678,6 @@ const SplitsTab = ({ onBack }: SplitsTabProps) => {
             {/* Video Card */}
             <div
               className="relative w-full max-w-[420px] rounded-[32px] overflow-hidden shadow-[0px_20px_60px_rgba(0,0,0,0.55)] border border-white/10 bg-black flex-1 cursor-pointer"
-              style={{ height: contentHeight ? `${contentHeight - 80}px` : 'calc(100vh - 220px)' }}
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
               onClick={togglePlay}
@@ -1058,8 +1035,8 @@ export default function MediaPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Page Header (Tabs) - Hidden on mobile when in Splits mode */}
-      <div className={`sticky top-0 z-30 bg-black/95 backdrop-blur-sm border-b border-gray-800 ${activeTab === 'splits' ? 'hidden md:block' : ''}`}>
+      {/* Page Header (Tabs) - Hidden when in Splits mode (Full Screen) */}
+      <div className={`sticky top-0 z-30 bg-black/95 backdrop-blur-sm border-b border-gray-800 ${activeTab === 'splits' ? 'hidden' : ''}`}>
         <div className="max-w-6xl mx-auto px-4 py-4">
             <div className="flex gap-1 bg-gray-900 p-1 rounded-xl">
             <button
