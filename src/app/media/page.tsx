@@ -353,6 +353,7 @@ const SplitsTab = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
   const [contentHeight, setContentHeight] = useState(0);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const touchStartY = useRef<number | null>(null);
@@ -371,6 +372,22 @@ const SplitsTab = () => {
     window.addEventListener('resize', updateHeight);
     return () => window.removeEventListener('resize', updateHeight);
   }, []);
+
+  const togglePlay = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play().catch(() => { });
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const toggleMute = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsMuted(prev => !prev);
+  }
 
   // Fetch splits (using same API as video feed)
   useEffect(() => {
@@ -427,10 +444,12 @@ const SplitsTab = () => {
     if (videoRef.current && splits.length > 0) {
       setCurrentTime(0);
       setDuration(0);
+      setIsPlaying(true);
       // Fallback for url property variations
       videoRef.current.src = splits[currentIndex].video_url || splits[currentIndex].url || '';
       videoRef.current.play().catch(() => {
         // Auto-play might be blocked, user can click to play
+        setIsPlaying(false);
       });
     }
   }, [currentIndex, splits]);
@@ -672,10 +691,11 @@ const SplitsTab = () => {
 
             {/* Video Card */}
             <div
-              className="relative w-full max-w-[420px] rounded-[32px] overflow-hidden shadow-[0px_20px_60px_rgba(0,0,0,0.55)] border border-white/10 bg-black flex-1"
+              className="relative w-full max-w-[420px] rounded-[32px] overflow-hidden shadow-[0px_20px_60px_rgba(0,0,0,0.55)] border border-white/10 bg-black flex-1 cursor-pointer"
               style={{ height: contentHeight ? `${contentHeight - 80}px` : 'calc(100vh - 220px)' }}
               onTouchStart={handleTouchStart}
               onTouchEnd={handleTouchEnd}
+              onClick={togglePlay}
             >
               <video
                 ref={videoRef}
@@ -686,6 +706,15 @@ const SplitsTab = () => {
                 controls={false}
               />
 
+              {/* Play/Pause Overlay Icon */}
+              {!isPlaying && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
+                  <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-full flex items-center justify-center">
+                    <Play className="w-8 h-8 text-white fill-white ml-1" />
+                  </div>
+                </div>
+              )}
+
               {/* Gradient overlays for readability */}
               <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black/60 to-transparent pointer-events-none" />
               <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
@@ -695,8 +724,8 @@ const SplitsTab = () => {
                 <div className="mb-3 flex items-center justify-between text-sm text-gray-300">
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => setIsMuted(prev => !prev)}
-                      className="w-9 h-9 rounded-full bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center hover:bg-white/20 transition"
+                      onClick={toggleMute}
+                      className="w-9 h-9 rounded-full bg-white/10 backdrop-blur border border-white/10 flex items-center justify-center hover:bg-white/20 transition z-10"
                     >
                       {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                     </button>

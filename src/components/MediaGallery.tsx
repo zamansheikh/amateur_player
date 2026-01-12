@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
-import { Play, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Play, X, ChevronLeft, ChevronRight, Volume2, VolumeX } from 'lucide-react';
 
 interface MediaGalleryProps {
     media: string[];
@@ -16,11 +16,21 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
     const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
     const [touchStart, setTouchStart] = useState<number | null>(null);
     const [touchEnd, setTouchEnd] = useState<number | null>(null);
+    const [isMuted, setIsMuted] = useState(true);
 
     // Determine if we're in a flexible height context (feed) or fixed height context (grid)
     const isFlexibleHeight = !!maxHeight;
 
     const videoRef = useRef<HTMLVideoElement>(null);
+
+    const toggleMute = (e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent opening lightbox
+        if (videoRef.current) {
+            const newMutedState = !isMuted;
+            videoRef.current.muted = newMutedState;
+            setIsMuted(newMutedState);
+        }
+    };
 
     // Auto-play video when in view
     useEffect(() => {
@@ -165,11 +175,22 @@ export default function MediaGallery({ media, className = "", enableLightbox = t
                         ref={isFirstVideo ? videoRef : null}
                         src={mediaUrl}
                         className="w-full h-full object-cover rounded-md border border-green-200"
-                        muted
+                        muted={isMuted}
                         loop
                         playsInline
                         preload="metadata"
                     />
+                    
+                    {/* Mute/Unmute Toggle for the first video */}
+                    {isFirstVideo && (
+                        <button
+                            onClick={toggleMute}
+                            className="absolute bottom-3 right-3 p-2 bg-black/50 hover:bg-black/70 text-white rounded-full transition-all z-10"
+                        >
+                            {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                        </button>
+                    )}
+
                     {/* Show play icon only for non-autoplay videos (index > 0) */}
                     {!isFirstVideo && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-md">
