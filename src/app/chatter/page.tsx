@@ -10,7 +10,7 @@ import DiscussionCard from '@/components/DiscussionCard';
 
 export default function ChatterPage() {
     const { user } = useAuth();
-    const [activeTab, setActiveTab] = useState<'about' | 'discussions' | 'new'>('about');
+    const [activeTab, setActiveTab] = useState<'about' | 'discussions' | 'new'>('discussions');
     const [discussions, setDiscussions] = useState<Discussion[]>([]);
     const [topics, setTopics] = useState<Topic[]>([]);
     const [loading, setLoading] = useState(false);
