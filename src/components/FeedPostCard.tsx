@@ -30,6 +30,7 @@ export default function FeedPostCard({
   const [isCommentsExpanded, setIsCommentsExpanded] = useState(false);
   const [commentText, setCommentText] = useState("");
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [showShareToast, setShowShareToast] = useState(false);
   const router = useRouter();
 
   // Initialize following state
@@ -41,6 +42,11 @@ export default function FeedPostCard({
 
   const handlePostClick = () => {
     router.push(`/post/${post.uid}`);
+  };
+
+  const handleShareClick = () => {
+    setShowShareToast(true);
+    setTimeout(() => setShowShareToast(false), 3000);
   };
 
   const handleLike = async () => {
@@ -303,7 +309,10 @@ export default function FeedPostCard({
           </div>
 
           {/* Share Action */}
-          <button className="flex items-center gap-1 md:gap-2 p-1.5 md:p-2 rounded-full text-gray-600 hover:text-blue-500 hover:bg-blue-50 transition-all duration-200 hover:scale-110 active:scale-95 shrink-0 group">
+          <button 
+            onClick={handleShareClick}
+            className="flex items-center gap-1 md:gap-2 p-1.5 md:p-2 rounded-full text-gray-600 hover:text-blue-500 hover:bg-blue-50 transition-all duration-200 hover:scale-110 active:scale-95 shrink-0 group"
+          >
             <Image
               src="/icons/share_icon.svg"
               alt="Share"
@@ -316,6 +325,16 @@ export default function FeedPostCard({
           </button>
         </div>
       </div>
+
+      {/* Share Toast */}
+      {showShareToast && (
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in-up">
+          <div className="bg-blue-600 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 border border-blue-400 backdrop-blur-sm">
+            <Send className="w-4 h-4" />
+            <span className="text-sm font-medium">Share feature is coming soon!</span>
+          </div>
+        </div>
+      )}
 
       {/* Comments Section */}
       {isCommentsExpanded && (
