@@ -8,6 +8,7 @@ import { Home, BarChart3, MessageCircle, Settings, Package, Menu, CalendarDays, 
 import { useAuth } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import GlobalHeader from '@/components/GlobalHeader';
+import NotificationBanner from '@/components/NotificationBanner';
 
 // Profile Completion Check Component
 function ProfileCompletionCheck({ children }: { children: React.ReactNode }) {
@@ -373,6 +374,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
                         </div>
 
                         <main className="flex-1 overflow-y-auto">
+                            <NotificationBanner />
                             <GlobalHeader />
                             {children}
                         </main>
