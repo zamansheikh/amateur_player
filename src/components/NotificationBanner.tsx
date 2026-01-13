@@ -21,7 +21,7 @@ export default function NotificationBanner() {
     if (!isVisible) return null;
 
     return (
-        <div className="bg-red-100 border-b border-red-200 text-red-800 px-4 py-3 relative transition-all duration-300">
+        <div className="bg-blue-100 border-b border-blue-200 text-blue-800 px-4 py-3 relative transition-all duration-300">
             <div className="max-w-7xl mx-auto flex items-center pr-8">
                 <p className="text-sm md:text-base font-medium">
                     A wrong access link went out earlier and caused some profile glitches. The issue is already fixed and cleanup is in progress. Thanks for your patience. Apologies for the inconvenience.
@@ -29,7 +29,7 @@ export default function NotificationBanner() {
             </div>
             <button
                 onClick={handleClose}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-red-200 rounded-full transition-colors text-red-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-blue-200 rounded-full transition-colors text-blue-600"
                 aria-label="Close"
             >
                 <X size={20} />
