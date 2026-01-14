@@ -179,6 +179,7 @@ function Pin({ number, position, isStanding, isKnocked, isDisabled, onTap }: Pin
                 alt="Bowling Pin"
                 width={36}
                 height={36}
+                unoptimized
                 className={`${isKnocked ? 'text-red-500' : 'text-green-500'}`}
                 style={{
                     filter: isKnocked
