@@ -40,6 +40,204 @@ interface ProVideo {
   viewer_liked?: boolean;
 }
 
+// --- Sub-Component: AutoPlay Video Card ---
+const AutoPlayVideoCard = ({ video }: { video: ProVideo }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isInView, setIsInView] = useState(false);
+  const [isTouch, setIsTouch] = useState(false);
+
+  useEffect(() => {
+    setIsTouch(window.matchMedia('(pointer: coarse)').matches);
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { threshold: 0.6 } 
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const shouldPlay = isTouch ? isInView : isHovered;
+    
+    if (shouldPlay) {
+        if (videoRef.current && videoRef.current.paused) {
+            videoRef.current.play()
+                .then(() => setIsPlaying(true))
+                .catch(() => setIsPlaying(false));
+        }
+    } else {
+        if (videoRef.current && !videoRef.current.paused) {
+            videoRef.current.pause();
+            videoRef.current.currentTime = 0;
+            setIsPlaying(false);
+        }
+    }
+  }, [isTouch, isInView, isHovered]);
+
+  return (
+    <Link
+      href={`/media/videos/${video.uid}`}
+      className="bg-gray-900 rounded-lg overflow-hidden hover:bg-gray-800 transition-all duration-200 transform hover:scale-105 cursor-pointer group block"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div ref={containerRef} className="relative h-40">
+        <video
+           ref={videoRef}
+           src={video.video_url || video.url}
+           muted
+           loop
+           playsInline
+           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${isPlaying ? 'opacity-100' : 'opacity-0'}`}
+        />
+        <img
+          src={video.thumbnail_url || '/thumbnail.svg'}
+          alt={video.title}
+          loading="lazy"
+          onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/thumbnail.svg'; }}
+          className={`w-full h-full object-cover transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}
+        />
+        
+        {/* Play Icon Overlays - Hide when playing */}
+        <div className={`absolute inset-0 bg-gradient-to-br from-green-600/30 to-emerald-700/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none ${isPlaying ? '!opacity-0' : ''}`}>
+           <Play className="w-12 h-12 text-white/80 group-hover:scale-110 transition-transform" />
+        </div>
+        
+        <div className="absolute top-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+          {video.duration_str}
+        </div>
+        
+        {video.viewer_liked && (
+          <div className="absolute bottom-2 right-2 bg-red-600 text-white p-1.5 rounded-full">
+            <Heart className="w-4 h-4 fill-current" />
+          </div>
+        )}
+      </div>
+      
+      <div className="p-4">
+        <h4 className="text-white font-semibold mb-2 line-clamp-2 group-hover:text-green-400 transition-colors">
+          {video.title}
+        </h4>
+        <p className="text-gray-400 text-sm line-clamp-2 mb-2">{video.description}</p>
+        <div className="flex items-center justify-between">
+          <p className="text-gray-500 text-xs">{video.uploaded}</p>
+          {(video.likes_count !== undefined && video.likes_count > 0) && (
+            <div className="flex items-center gap-1 text-gray-400 text-xs">
+              <Heart className={`w-3 h-3 ${video.viewer_liked ? 'text-red-500 fill-current' : ''}`} />
+              <span>{video.likes_count}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
+};
+
+// --- Sub-Component: Featured AutoPlay Video Card ---
+const FeaturedAutoPlayVideo = ({ video }: { video: ProVideo }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isInView, setIsInView] = useState(false);
+  const [isTouch, setIsTouch] = useState(false);
+
+  useEffect(() => {
+    setIsTouch(window.matchMedia('(pointer: coarse)').matches);
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsInView(entry.isIntersecting);
+      },
+      { threshold: 0.6 } 
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const shouldPlay = isTouch ? isInView : isHovered;
+    
+    if (shouldPlay) {
+        if (videoRef.current && videoRef.current.paused) {
+            videoRef.current.play()
+                .then(() => setIsPlaying(true))
+                .catch(() => setIsPlaying(false));
+        }
+    } else {
+        if (videoRef.current && !videoRef.current.paused) {
+            videoRef.current.pause();
+            videoRef.current.currentTime = 0;
+            setIsPlaying(false);
+        }
+    }
+  }, [isTouch, isInView, isHovered]);
+
+  return (
+    <div className="bg-gray-900 rounded-lg overflow-hidden shadow-2xl">
+      <div 
+        ref={containerRef} 
+        className="relative h-96 md:h-[500px]"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <Link href={`/media/videos/${video.uid}`} className="absolute inset-0 block group">
+          <video
+             ref={videoRef}
+             src={video.video_url || video.url}
+             muted
+             loop
+             playsInline
+             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${isPlaying ? 'opacity-100' : 'opacity-0'}`}
+          />
+          <img
+            src={video.thumbnail_url || '/thumbnail.svg'}
+            alt={video.title}
+            loading="lazy"
+            onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/thumbnail.svg'; }}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}
+          />
+          
+          <div className={`absolute inset-0 bg-black/10 group-hover:bg-black/30 flex items-center justify-center pointer-events-none transition-all duration-300 ${isPlaying ? '!bg-transparent' : ''}`}>
+            <div className={`text-center text-white px-6 transition-opacity duration-300 ${isPlaying ? 'opacity-0' : 'opacity-100'}`}>
+              <div className="w-24 h-24 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4 scale-100 transition-transform duration-300">
+                <Play className="w-12 h-12 text-white ml-1 opacity-80 group-hover:opacity-100 transition-opacity" />
+              </div>
+              <h3 className="text-2xl font-bold mb-2 line-clamp-2">{video.title}</h3>
+              <p className="text-gray-300 line-clamp-3">{video.description}</p>
+              <button className="mt-4 bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-medium transition-colors pointer-events-auto">
+                Watch Now
+              </button>
+            </div>
+          </div>
+        </Link>
+      </div>
+      <div className="p-6 text-white bg-gray-900">
+          <h4 className="text-xl font-bold mb-2">{video.title}</h4>
+          <p className="text-gray-300">{video.description}</p>
+      </div>
+    </div>
+  );
+};
+
 // --- Sub-Component: Videos Tab ---
 const VideosTab = () => {
   const [proVideos, setProVideos] = useState<ProVideo[]>([]);
@@ -141,59 +339,19 @@ const VideosTab = () => {
       {/* Featured Video Section */}
       <div className="px-4 py-8">
         <div className="max-w-7xl mx-auto">
-          <div className="bg-gray-900 rounded-lg overflow-hidden shadow-2xl">
-            <div className="relative h-96 md:h-[500px]">
-              {featuredVideo ? (
-                <Link href={`/media/videos/${featuredVideo.uid}`} className="absolute inset-0 block group">
-                  <img
-                    src={featuredVideo.thumbnail_url || '/thumbnail.svg'}
-                    alt={featuredVideo.title}
-                    loading="lazy"
-                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/thumbnail.svg'; }}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/10 group-hover:bg-black/30 flex items-center justify-center pointer-events-none transition-colors">
-                    <div className="text-center text-white px-6">
-                      <div className="w-24 h-24 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Play className="w-12 h-12 text-white ml-1 opacity-80 group-hover:opacity-100 transition-opacity" />
-                      </div>
-                      <h3 className="text-2xl font-bold mb-2 line-clamp-2">{featuredVideo.title}</h3>
-                      <p className="text-gray-300 line-clamp-3">{featuredVideo.description}</p>
-                      <button className="mt-4 bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-medium transition-colors">
-                        Watch Now
-                      </button>
-                    </div>
-                  </div>
-                </Link>
-              ) : (
-                <div className="absolute inset-0 bg-gradient-to-r from-gray-800 to-gray-700 flex items-center justify-center">
-                  <div className="text-center text-white">
-                    <div className="w-24 h-24 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Play className="w-12 h-12 text-white ml-1" />
-                    </div>
-                    <h3 className="text-2xl font-bold mb-2">Featured: PBA Championship Finals</h3>
-                    <p className="text-gray-300">Watch the most exciting moments from recent tournaments</p>
-                    <button className="mt-4 bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-medium transition-colors">
-                      Watch Now
-                    </button>
-                  </div>
+          {isLoadingVideos ? (
+             <div className="bg-gray-900 rounded-lg overflow-hidden shadow-2xl animate-pulse">
+                <div className="h-96 md:h-[500px] bg-gray-800 flex items-center justify-center">
+                    <Loader className="w-12 h-12 text-green-600 animate-spin" />
                 </div>
-              )}
-            </div>
-            <div className="p-6 text-white">
-              {featuredVideo ? (
-                <>
-                  <h4 className="text-xl font-bold mb-2">{featuredVideo.title}</h4>
-                  <p className="text-gray-300">{featuredVideo.description}</p>
-                </>
-              ) : (
-                <>
-                  <h4 className="text-xl font-bold mb-2">Championship Highlights</h4>
-                  <p className="text-gray-300">Experience the best strikes, spares, and incredible shots from professional bowling&apos;s biggest stage.</p>
-                </>
-              )}
-            </div>
-          </div>
+                 <div className="p-6">
+                    <div className="h-6 bg-gray-800 rounded w-1/3 mb-4"></div>
+                    <div className="h-4 bg-gray-800 rounded w-2/3"></div>
+                 </div>
+             </div>
+          ) : featuredVideo ? (
+             <FeaturedAutoPlayVideo video={featuredVideo} />
+          ) : null}
         </div>
       </div>
 
@@ -224,52 +382,7 @@ const VideosTab = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {proVideos.map((video) => (
-                <Link
-                  key={video.uid}
-                  href={`/media/videos/${video.uid}`}
-                  className="bg-gray-900 rounded-lg overflow-hidden hover:bg-gray-800 transition-all duration-200 transform hover:scale-105 cursor-pointer group"
-                >
-                  <div className="relative h-40">
-                    <img
-                      src={video.thumbnail_url || '/thumbnail.svg'}
-                      alt={video.title}
-                      loading="lazy"
-                      onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/thumbnail.svg'; }}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-br from-green-600/30 to-emerald-700/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                      <Play className="w-12 h-12 text-white/80 group-hover:scale-110 transition-transform" />
-                    </div>
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center pointer-events-none">
-                      {video.thumbnail_url && (
-                        <Play className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                      )}
-                    </div>
-                    <div className="absolute top-2 right-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
-                      {video.duration_str}
-                    </div>
-                    {video.viewer_liked && (
-                      <div className="absolute bottom-2 right-2 bg-red-600 text-white p-1.5 rounded-full">
-                        <Heart className="w-4 h-4 fill-current" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <h4 className="text-white font-semibold mb-2 line-clamp-2 group-hover:text-green-400 transition-colors">
-                      {video.title}
-                    </h4>
-                    <p className="text-gray-400 text-sm line-clamp-2 mb-2">{video.description}</p>
-                    <div className="flex items-center justify-between">
-                      <p className="text-gray-500 text-xs">{video.uploaded}</p>
-                      {(video.likes_count !== undefined && video.likes_count > 0) && (
-                        <div className="flex items-center gap-1 text-gray-400 text-xs">
-                          <Heart className={`w-3 h-3 ${video.viewer_liked ? 'text-red-500 fill-current' : ''}`} />
-                          <span>{video.likes_count}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </Link>
+                <AutoPlayVideoCard key={video.uid} video={video} />
               ))}
             </div>
           )}

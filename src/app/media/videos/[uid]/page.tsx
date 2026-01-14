@@ -147,6 +147,22 @@ export default function VideoPage() {
         }
     };
 
+    // Auto-play effect
+    useEffect(() => {
+        if (video && videoRef.current) {
+            const playVideo = async () => {
+                try {
+                    await videoRef.current?.play();
+                    setIsPlaying(true);
+                } catch (err) {
+                    console.log('Autoplay failed (likely blocked by browser), falling back to controls', err);
+                    setIsPlaying(false);
+                }
+            };
+            playVideo();
+        }
+    }, [video]);
+
     if (isLoading) {
         return (
             <div className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -215,10 +231,13 @@ export default function VideoPage() {
                         <div className="relative w-full bg-gray-800">
                             <video
                                 ref={videoRef}
-                                src={video.url}
+                                src={video.url || video.url}
                                 poster={video.thumbnail_url || '/thumbnail.svg'}
                                 controls
-                                preload="metadata"
+                                autoPlay
+                                playsInline
+                                muted
+                                preload="auto"
                                 className="w-full h-auto"
                                 style={{ maxHeight: '600px' }}
                                 controlsList="nodownload"
@@ -235,9 +254,12 @@ export default function VideoPage() {
                                     className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 hover:bg-opacity-30 transition-colors"
                                     onClick={() => {
                                         try {
-                                            videoRef.current?.play();
+                                            if (videoRef.current) {
+                                                videoRef.current.muted = false; // Unmute on manual click
+                                                videoRef.current.play();
+                                            }
                                         } catch (e) {
-                                            console.error('Auto-play prevented', e);
+                                            console.error('Play prevented', e);
                                         }
                                     }}
                                 >
