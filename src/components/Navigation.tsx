@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Home, BarChart3, MessageCircle, Settings, Package, Menu, CalendarDays, X, LogOut, Users, Trophy, Target, MessageSquare, Play, Gift, ShoppingCart, Zap, Map, Lightbulb } from 'lucide-react';
+import { Home, BarChart3, MessageCircle, Settings, Package, Menu, CalendarDays, X, LogOut, Users, Trophy, Target, MessageSquare, Play, Gift, ShoppingCart, Zap, Map, Lightbulb, MapPin } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import GlobalHeader from '@/components/GlobalHeader';
@@ -46,16 +46,17 @@ const navigation = [
     { name: 'Chatter', href: '/chatter', icon: Lightbulb },
     { name: 'Trading Cards', href: '/trading-cards', icon: Zap },
     // { name: 'Roadmap', href: '/roadmap', icon: Map },
-    // { name: 'Overview', href: '/overview', icon: BarChart3 },
-    // { name: 'Events', href: '/events', icon: CalendarDays },
+    { name: 'Overview', href: '/overview', icon: BarChart3 },
+    { name: 'Events', href: '/events', icon: CalendarDays },
     { name: 'Media', href: '/media', icon: Play },
     // { name: 'Products', href: '/products', icon: Package },
+    { name: 'Centers', href: '/centers', icon: MapPin },
     { name: 'Xchange', href: '/xchange', icon: ShoppingCart },
-    // { name: 'Perks', href: '/perks', icon: Gift },
+    { name: 'Perks', href: '/perks', icon: Gift },
     { name: 'Messages', href: '/messages', icon: MessageCircle },
     { name: 'My Teams', href: '/teams', icon: Users },
-    // { name: 'Analytics', href: '/analytics', icon: Target },
-    // { name: 'Tournaments', href: '/tournaments', icon: Settings },
+    { name: 'Analytics', href: '/analytics', icon: Target },
+    { name: 'Tournaments', href: '/tournaments', icon: Settings },
     { name: 'Feedback', href: '/feedback', icon: MessageSquare },
 ];
 
