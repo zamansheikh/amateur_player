@@ -50,6 +50,7 @@ const navigation = [
     { name: 'Events', href: '/events', icon: CalendarDays },
     { name: 'Media', href: '/media', icon: Play },
     // { name: 'Products', href: '/products', icon: Package },
+    { name: 'Games', href: '/games', icon: Target },
     { name: 'Centers', href: '/centers', icon: MapPin },
     { name: 'Xchange', href: '/xchange', icon: ShoppingCart },
     { name: 'Perks', href: '/perks', icon: Gift },

@@ -34,3 +34,32 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to fetch centers' }, { status: 500 });
   }
 }
+
+export async function POST(request: NextRequest) {
+  try {
+    const base = process.env.NEXT_PUBLIC_API_URL || 'https://test.bowlersnetwork.com';
+    const url = `${base}/api/centers`;
+
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+
+    // Forward auth header
+    const auth = request.headers.get('authorization');
+    if (auth) headers['Authorization'] = auth;
+
+    const body = await request.json();
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(body),
+    });
+
+    const data = await res.json();
+    return NextResponse.json(data, { status: res.status });
+  } catch (error) {
+    console.error('Proxy POST /api/centers error:', error);
+    return NextResponse.json({ error: 'Failed to create center' }, { status: 500 });
+  }
+}

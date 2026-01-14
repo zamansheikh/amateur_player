@@ -15,7 +15,9 @@ import {
   Layers,
   Loader2,
   Link as LinkIcon,
+  Plus,
 } from "lucide-react";
+import AddCenterModal from "@/components/AddCenterModal";
 
 const FALLBACK_LOGO = "/logo/logo.png";
 
@@ -30,6 +32,7 @@ export default function CentersPage() {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [state, setState] = useState<FetchState>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -150,6 +153,11 @@ export default function CentersPage() {
     setExpandedId((prev) => (prev === id ? null : id));
   };
 
+  const handleCenterAdded = (newCenter: BowlingCenter) => {
+    setCenters((prev) => [newCenter, ...prev]);
+    setAllCenters((prev) => [newCenter, ...prev]);
+  };
+
   const isLoading = state === "loading";
 
   return (
@@ -159,7 +167,7 @@ export default function CentersPage() {
         <div className="relative max-w-7xl mx-auto px-4 py-8 md:py-12">
           <div className="flex items-start justify-between gap-6">
             <div className="space-y-2">
-              <p className="text-sm uppercase tracking-wide text-green-50">Pro Network</p>
+              {/* <p className="text-sm uppercase tracking-wide text-green-50">Pro Network</p> */}
               <h1 className="text-3xl md:text-4xl font-bold">Centers</h1>
               <p className="text-green-50 max-w-2xl">
                 Explore bowling centers across the network, quickly search by name, ZIP, or admin contact, and drill into details on demand.
@@ -175,6 +183,13 @@ export default function CentersPage() {
                 </div>
               </div>
             </div>
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-white text-green-700 rounded-lg hover:bg-green-50 transition-colors font-medium shadow-sm shrink-0"
+            >
+              <Plus className="w-5 h-5" />
+              <span className="hidden md:inline">Add Center</span>
+            </button>
           </div>
         </div>
       </div>
@@ -340,6 +355,12 @@ export default function CentersPage() {
           })}
         </div>
       </div>
+
+      <AddCenterModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSuccess={handleCenterAdded}
+      />
     </div>
   );
 }
