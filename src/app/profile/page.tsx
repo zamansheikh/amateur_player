@@ -6,10 +6,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCloudUpload } from '@/lib/useCloudUpload';
 import { useMapboxGeocoding } from '@/lib/useMapboxGeocoding';
 import { GeocodingResult } from '@/lib/mapboxGeocodingService';
-import { BowlingCenter } from '@/types';
+import { BowlingCenter, FeedPost } from '@/types';
 import AddressModal from '@/components/AddressModal';
 import HomeCenterModal from '@/components/HomeCenterModal';
 import FollowersModal from '@/components/FollowersModal';
+import FeedPostCard from '@/components/FeedPostCard';
+import { api } from '@/lib/api';
 import axios from 'axios';
 
 export default function ProfilePage() {
@@ -81,6 +83,21 @@ export default function ProfilePage() {
         account: false
     });
 
+    const [posts, setPosts] = useState<FeedPost[]>([]);
+    const [postsLoading, setPostsLoading] = useState(false);
+
+    const fetchUserPosts = async () => {
+        try {
+            setPostsLoading(true);
+            const response = await api.get('/api/posts/v2');
+            setPosts(response.data || []);
+        } catch (err) {
+            console.error('Error fetching user posts:', err);
+        } finally {
+            setPostsLoading(false);
+        }
+    };
+
     const toggleSection = (section: keyof typeof expandedSections) => {
         setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
     };
@@ -145,6 +162,12 @@ export default function ProfilePage() {
             fetchBowlingStats();
         }
     }, [user]);
+
+    useEffect(() => {
+        if (activeTab === 'posts') {
+            fetchUserPosts();
+        }
+    }, [activeTab]);
 
     // Fetch bowling stats
     const fetchBowlingStats = async () => {
@@ -1321,8 +1344,36 @@ export default function ProfilePage() {
 
                         {/* Posts Tab */}
                         {activeTab === 'posts' && (
-                            <div className="text-center py-12">
-                                <p className="text-gray-500">Posts feature coming soon...</p>
+                            <div className="space-y-6">
+                                {postsLoading ? (
+                                    <div className="text-center py-12">
+                                        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-green-600 border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" role="status">
+                                            <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Loading...</span>
+                                        </div>
+                                    </div>
+                                ) : posts.length > 0 ? (
+                                    <div className="space-y-6 max-w-2xl mx-auto">
+                                        {posts.map((post) => (
+                                            <FeedPostCard 
+                                                key={post.post_id} 
+                                                post={post} 
+                                                onPostChange={(updatedPost) => {
+                                                    setPosts(prevPosts => 
+                                                        prevPosts.map(p => p.post_id === updatedPost.post_id ? updatedPost : p)
+                                                    );
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-12">
+                                        <div className="bg-gray-50 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                                            <Edit2 className="w-8 h-8 text-gray-400" />
+                                        </div>
+                                        <h3 className="text-lg font-medium text-gray-900 mb-2">No posts yet</h3>
+                                        <p className="text-gray-500 mb-6">Share your bowling journey with the community!</p>
+                                    </div>
+                                )}
                             </div>
                         )}
 
