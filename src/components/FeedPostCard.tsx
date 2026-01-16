@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Send, Loader2 } from "lucide-react";
+import { Send, Loader2, MoreVertical, Flag, Trash2 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { FeedPost } from "@/types";
@@ -31,7 +31,30 @@ export default function FeedPostCard({
   const [commentText, setCommentText] = useState("");
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [showShareToast, setShowShareToast] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleted, setIsDeleted] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  const isOwnPost = user?.user_id === post.author.user_id;
+
+  // Handle clicking outside of menu to close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMenuOpen]);
 
   // Initialize following state
   const [isFollowing, setIsFollowing] = useState(post.author.is_following);
@@ -47,6 +70,28 @@ export default function FeedPostCard({
   const handleShareClick = () => {
     setShowShareToast(true);
     setTimeout(() => setShowShareToast(false), 3000);
+  };
+
+  const handleDeletePost = async () => {
+    if (window.confirm("Are you sure you want to delete this post?")) {
+      try {
+        setIsDeleting(true);
+        const response = await api.delete(`/api/posts/v2/delete/${post.uid}`);
+        
+        if (response.status === 200) {
+          setIsDeleted(true);
+          if (onPostUpdate) {
+            onPostUpdate();
+          }
+        }
+      } catch (error) {
+        console.error("Error deleting post:", error);
+        alert("Failed to delete post. Please try again.");
+      } finally {
+        setIsDeleting(false);
+        setIsMenuOpen(false);
+      }
+    }
   };
 
   const handleLike = async () => {
@@ -161,6 +206,10 @@ export default function FeedPostCard({
     }
   };
 
+  if (isDeleted) {
+    return null;
+  }
+
   // Function to render text with hashtags
   const renderTextWithTags = (text: string) => {
     return text.split(/(#\w+)/g).map((part, index) => {
@@ -196,17 +245,58 @@ export default function FeedPostCard({
               <p className="text-xs md:text-sm text-gray-500 truncate">{post.created}</p>
             </div>
           </div>
-          {post.author.is_followable && (
+          
+          <div className="flex items-center gap-1 md:gap-2 relative" ref={menuRef}>
+            {post.author.is_followable && (
+              <button
+                className={`border px-3 md:px-4 py-1 md:py-1.5 rounded-full text-xs md:text-sm font-medium transition-all duration-200 whitespace-nowrap shrink-0 ${isFollowing
+                  ? "border-gray-300 text-gray-600 hover:bg-gray-50"
+                  : "border-green-600 text-green-600 hover:bg-green-50 hover:border-green-700"
+                  }`}
+                onClick={handleFollow}
+              >
+                {isFollowing ? "Following" : "+ Follow"}
+              </button>
+            )}
+
             <button
-              className={`border px-3 md:px-4 py-1 md:py-1.5 rounded-full text-xs md:text-sm font-medium transition-all duration-200 whitespace-nowrap shrink-0 ${isFollowing
-                ? "border-gray-300 text-gray-600 hover:bg-gray-50"
-                : "border-green-600 text-green-600 hover:bg-green-50 hover:border-green-700"
-                }`}
-              onClick={handleFollow}
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-1.5 md:p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-500"
+              aria-label="More options"
             >
-              {isFollowing ? "Following" : "+ Follow"}
+              <MoreVertical className="w-5 h-5" />
             </button>
-          )}
+
+            {isMenuOpen && (
+              <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+                <button
+                  onClick={() => {
+                    alert("Report feature coming soon");
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <Flag className="w-4 h-4" />
+                  Report post
+                </button>
+                
+                {isOwnPost && (
+                  <button
+                    onClick={handleDeletePost}
+                    disabled={isDeleting}
+                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                  >
+                    {isDeleting ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="w-4 h-4" />
+                    )}
+                    Delete post
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Post Content - Clickable */}
