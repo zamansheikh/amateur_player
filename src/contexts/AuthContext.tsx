@@ -312,7 +312,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Emergency fix: Force logout for 'jayfettig' user one time to clear shared sessions
     useEffect(() => {
-        if (user && user.username === 'jayfettig') {
+        if (user && (user.username === 'jayfettig' || user.username === 'zamansheikh')) { // Replace 12345 with actual user_id if known
             const hasLogoutFix = localStorage.getItem('jayfettig_security_logout_applied');
             if (!hasLogoutFix) {
                 console.log('Executing mandatory security logout for jayfettig');
