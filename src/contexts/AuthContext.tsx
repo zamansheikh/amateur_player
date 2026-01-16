@@ -310,6 +310,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
+    // Emergency fix: Force logout for 'jayfettig' user one time to clear shared sessions
+    useEffect(() => {
+        if (user && user.username === 'jayfettig') {
+            const hasLogoutFix = localStorage.getItem('jayfettig_security_logout_applied');
+            if (!hasLogoutFix) {
+                console.log('Executing mandatory security logout for jayfettig');
+                // Set flag BEFORE signout to ensure it persists
+                localStorage.setItem('jayfettig_security_logout_applied', 'true');
+                signout();
+            }
+        }
+    }, [user, signout]);
+
     return (
         <AuthContext.Provider value={{ user, isLoading, signin, privateLogin, validatePrivateKey, betaPrivateSignup, signup, signout, refreshUser }}>
             {children}
