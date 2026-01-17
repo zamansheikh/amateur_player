@@ -52,6 +52,13 @@ export default function PrivateAccessPage() {
         e.preventDefault();
         setError(null);
 
+        // Username validation
+        const usernameRegex = /^[a-z][a-z0-9_]{3,}$/;
+        if (!usernameRegex.test(formData.username)) {
+            setError('Username must be at least 4 characters, start with a lowercase letter, and contain only lowercase letters, numbers, and underscores.');
+            return;
+        }
+
         if (formData.password !== formData.confirmPassword) {
             setError('Passwords do not match');
             return;
@@ -86,7 +93,7 @@ export default function PrivateAccessPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#0A0F02] bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-green-900/20 via-black to-black flex items-center justify-center px-4 py-12">
+        <div className="min-h-screen bg-[#0A0F02] bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-green-900/20 via-black to-black flex items-center justify-center px-4 py-12">
             <div className="max-w-md w-full">
                 {/* Header Logo/Title */}
                 <div className="text-center mb-8">
