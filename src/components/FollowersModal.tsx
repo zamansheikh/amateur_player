@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Loader, UserPlus, UserCheck } from 'lucide-react';
+import { X, Loader, User } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import axios from 'axios';
 
@@ -32,7 +33,6 @@ export default function FollowersModal({ isOpen, onClose, type, accessToken }: F
     const [users, setUsers] = useState<FollowUser[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [following, setFollowing] = useState<Set<number>>(new Set());
 
     useEffect(() => {
         if (isOpen) {
@@ -57,30 +57,6 @@ export default function FollowersModal({ isOpen, onClose, type, accessToken }: F
             setError(`Failed to load ${type}`);
         } finally {
             setLoading(false);
-        }
-    };
-
-    const handleFollowToggle = async (userId: number) => {
-        try {
-            await axios.get(`https://test.bowlersnetwork.com/api/follow/${userId}`, {
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            // Toggle following state locally
-            setFollowing(prev => {
-                const newSet = new Set(prev);
-                if (newSet.has(userId)) {
-                    newSet.delete(userId);
-                } else {
-                    newSet.add(userId);
-                }
-                return newSet;
-            });
-        } catch (err) {
-            console.error('Error toggling follow:', err);
         }
     };
 
@@ -145,27 +121,15 @@ export default function FollowersModal({ isOpen, onClose, type, accessToken }: F
                                             </div>
                                         </div>
 
-                                        {/* Follow Button */}
-                                        <button
-                                            onClick={() => handleFollowToggle(user.user_id)}
-                                            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all flex-shrink-0 flex items-center gap-1 ${
-                                                following.has(user.user_id)
-                                                    ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                                    : 'bg-[#8BC342] text-white hover:bg-[#6fa332]'
-                                            }`}
+                                        {/* Visit Profile Button */}
+                                        <Link
+                                            href={`/profile/${user.username}`}
+                                            onClick={onClose}
+                                            className="px-3 py-1.5 text-xs font-medium rounded-lg transition-all flex-shrink-0 flex items-center gap-1 bg-[#8BC342] text-white hover:bg-[#6fa332]"
                                         >
-                                            {following.has(user.user_id) ? (
-                                                <>
-                                                    <UserCheck className="w-3 h-3" />
-                                                    Following
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <UserPlus className="w-3 h-3" />
-                                                    Follow
-                                                </>
-                                            )}
-                                        </button>
+                                            <User className="w-3 h-3" />
+                                            Visit Profile
+                                        </Link>
                                     </div>
                                 </div>
                             ))}
