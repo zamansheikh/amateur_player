@@ -20,6 +20,7 @@ interface ProPlayer {
         is_tournament_director: boolean;
     };
     profile_picture_url: string;
+    cover_picture_url?: string;
     is_followable: boolean;
     is_following: boolean;
     follower_count: number;
@@ -83,9 +84,18 @@ export default function ProsPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {players.map((player) => (
                         <div key={player.user_id} className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border border-gray-100 flex flex-col">
-                            {/* Card Header / Banner Placeholder */}
+                            {/* Card Header / Banner */}
                             <div className="h-24 bg-gradient-to-r from-gray-800 to-gray-900 relative">
-                                <div className="absolute inset-0 bg-[#8BC342] opacity-10 pattern-grid"></div>
+                                {player.cover_picture_url ? (
+                                    <Image
+                                        src={player.cover_picture_url}
+                                        alt={`${player.name} cover`}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                ) : (
+                                    <div className="absolute inset-0 bg-[#8BC342] opacity-10 pattern-grid"></div>
+                                )}
                             </div>
 
                             {/* Profile Content */}
@@ -115,7 +125,7 @@ export default function ProsPage() {
                                 {/* Stats / Role Badge */}
                                 <div className="flex gap-2 mb-6">
                                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        Professional
+                                        Pro
                                     </span>
                                     {player.follower_count > 0 && (
                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
