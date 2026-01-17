@@ -11,6 +11,7 @@ import AddressModal from '@/components/AddressModal';
 import HomeCenterModal from '@/components/HomeCenterModal';
 import FollowersModal from '@/components/FollowersModal';
 import FeedPostCard from '@/components/FeedPostCard';
+import ImageCropperModal from '@/components/ImageCropperModal';
 import { api } from '@/lib/api';
 import axios from 'axios';
 
@@ -50,6 +51,11 @@ export default function ProfilePage() {
     const videoInputRef = useRef<HTMLInputElement>(null);
     const addressDebounceTimer = useRef<NodeJS.Timeout | undefined>(undefined);
     const addressSuggestionsRef = useRef<HTMLDivElement>(null);
+
+    // Image cropping state
+    const [cropModalOpen, setCropModalOpen] = useState(false);
+    const [tempImageSrc, setTempImageSrc] = useState<string | null>(null);
+    const [activeCropType, setActiveCropType] = useState<'profile' | 'cover'>('profile');
 
     // Optimistic UI state
     const [displayAddress, setDisplayAddress] = useState<{address: string, zipcode: string} | null>(null);
@@ -309,9 +315,26 @@ export default function ProfilePage() {
             return;
         }
 
+        const reader = new FileReader();
+        reader.addEventListener('load', () => {
+            setTempImageSrc(reader.result?.toString() || null);
+            setActiveCropType(type);
+            setCropModalOpen(true);
+        });
+        reader.readAsDataURL(file);
+        
+        // Clear input value so selecting the same file works again
+        e.target.value = '';
+    };
+
+    const handleCropComplete = async (croppedBlob: Blob) => {
+        const type = activeCropType;
         const uploadService = type === 'profile' ? profileUpload : coverUpload;
         const apiEndpoint = type === 'profile' ? '/api/profile/media/profile-picture' : '/api/profile/media/cover-picture';
         const urlField = type === 'profile' ? 'profile_picture_url' : 'cover_picture_url';
+
+        // Create a File object from the Blob
+        const file = new File([croppedBlob], `cropped-${type}.jpg`, { type: 'image/jpeg' });
 
         try {
             // Step 1: Upload to cloud storage
@@ -1419,6 +1442,15 @@ export default function ProfilePage() {
                     onClose={() => setFollowingModalOpen(false)}
                     type="following"
                     accessToken={user?.access_token || ''}
+                />
+                
+                <ImageCropperModal
+                    isOpen={cropModalOpen}
+                    onClose={() => setCropModalOpen(false)}
+                    imageSrc={tempImageSrc}
+                    onCropComplete={handleCropComplete}
+                    aspectRatio={activeCropType === 'profile' ? 1 : 2.62}
+                    title={activeCropType === 'profile' ? 'Crop Profile Picture' : 'Crop Cover Photo'}
                 />
             </div>
         </div>
