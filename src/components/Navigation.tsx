@@ -47,6 +47,7 @@ const navigation = [
     { name: 'Trading Cards', href: '/trading-cards', icon: Zap },
     // { name: 'Roadmap', href: '/roadmap', icon: Map },
     { name: 'Overview', href: '/overview', icon: BarChart3 },
+    { name: 'Pros', href: '/pros', icon: Trophy },
     { name: 'Events', href: '/events', icon: CalendarDays },
     { name: 'Media', href: '/media', icon: Play },
     // { name: 'Products', href: '/products', icon: Package },
