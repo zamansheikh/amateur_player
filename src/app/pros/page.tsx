@@ -127,7 +127,7 @@ export default function ProsPage() {
                                 {/* Action Button */}
                                 <div className="mt-auto w-full">
                                     <Link 
-                                        href={`/pro/${player.username}`}
+                                        href={`/profile/${player.username}`}
                                         className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-[#8BC342] text-white font-medium rounded-xl hover:bg-[#7ac85a] transition-colors focus:ring-4 focus:ring-green-500/20"
                                     >
                                         <User className="w-4 h-4" />
