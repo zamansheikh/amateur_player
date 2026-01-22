@@ -230,7 +230,7 @@ export default function AddressModal({
                         <div className="space-y-6 max-w-2xl mx-auto">
                             {/* Search Type Toggle */}
                             <div className="flex gap-1 p-1 bg-gray-100 rounded-lg shrink-0">
-                                {/* <button
+                                <button
                                     onClick={() => setSearchType('address')}
                                     className={`flex-1 px-4 py-2 rounded-md text-sm font-semibold transition ${searchType === 'address'
                                             ? 'bg-white text-green-700 shadow-sm'
@@ -238,12 +238,12 @@ export default function AddressModal({
                                         }`}
                                 >
                                     Search by Address
-                                </button> */}
+                                </button>
                                 <button
                                     onClick={() => setSearchType('zipcode')}
                                     className={`flex-1 px-4 py-2 rounded-md text-sm font-semibold transition ${searchType === 'zipcode'
-                                        ? 'bg-white text-green-700 shadow-sm'
-                                        : 'text-gray-500 hover:text-gray-800'
+                                            ? 'bg-white text-green-700 shadow-sm'
+                                            : 'text-gray-500 hover:text-gray-800'
                                         }`}
                                 >
                                     By Zip Code
