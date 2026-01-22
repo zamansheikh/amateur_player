@@ -8,33 +8,21 @@ import { useCloudUpload } from "@/lib/useCloudUpload";
 import AddressModal from "@/components/AddressModal";
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from "next/navigation";
 
 import {
   Calendar,
   Clock,
-  Users,
-  Trophy,
   MapPin,
-  Filter,
-  Search,
   ChevronLeft,
   ChevronRight,
   Plus,
-  Eye,
   Star,
-  Target,
-  Award,
-  DollarSign,
-  CalendarDays,
-  ArrowRight,
-  Timer,
-  Flag,
   Trash2,
-  Edit2,
   X,
   Upload,
   Loader2,
-  LayoutList
+  LayoutList,
 } from "lucide-react";
 
 // --- Interfaces ---
@@ -110,10 +98,10 @@ interface CalendarDay {
 
 export default function EventsPage() {
   const { user } = useAuth();
+  const router = useRouter();
   
   // View State
   const [viewMode, setViewMode] = useState<'calendar' | 'manage'>('calendar');
-  const [calendarView, setCalendarView] = useState<'month' | 'week' | 'day'>('month');
   
   // Data State
   const [events, setEvents] = useState<PlayerEvent[]>([]);
@@ -125,8 +113,6 @@ export default function EventsPage() {
   // Calendar Logic State
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [filterType, setFilterType] = useState<string>('all');
-  const [searchTerm, setSearchTerm] = useState('');
 
   // Create/Edit Modal State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -181,6 +167,10 @@ export default function EventsPage() {
 
   useEffect(() => {
     fetchFeedEvents();
+    // Set selected date to today initially if not set
+    if (!selectedDate) {
+        setSelectedDate(new Date());
+    }
   }, []);
 
   useEffect(() => {
@@ -278,6 +268,44 @@ export default function EventsPage() {
   ];
 
   // --- Handlers ---
+
+  const handleInterestToggle = async (eventId: number, currentInterested: boolean) => {
+    if(!user) {
+        alert("Please login to show interest");
+        return;
+    }
+
+    // Optimistic Update
+    setEvents(prev => prev.map(e => {
+        if (e.event_id === eventId) {
+            return {
+                ...e,
+                is_interested: !currentInterested,
+                total_interested: currentInterested ? Math.max(0, e.total_interested - 1) : e.total_interested + 1
+            };
+        }
+        return e;
+    }));
+
+    try {
+        await api.get(`/api/events/v1/interest/${eventId}`);
+        // Optionally refetch or rely on optimism. 
+    } catch (err) {
+        console.error("Error toggling interest:", err);
+        // Revert
+        setEvents(prev => prev.map(e => {
+            if (e.event_id === eventId) {
+                return {
+                    ...e,
+                    is_interested: currentInterested,
+                    total_interested: currentInterested ? e.total_interested + 1 : Math.max(0, e.total_interested - 1)
+                };
+            }
+            return e;
+        }));
+        alert("Something went wrong");
+    }
+  };
 
   const handleCreateEvent = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -460,7 +488,7 @@ export default function EventsPage() {
         {/* --- Calendar View --- */}
         {viewMode === 'calendar' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 order-2 lg:order-1">
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 {/* Calendar Controls */}
                 <div className="flex items-center justify-between mb-6">
@@ -506,7 +534,7 @@ export default function EventsPage() {
                           !day.isCurrentMonth ? 'bg-gray-50 text-gray-400' : 'bg-white hover:bg-gray-50'
                         } ${day.isToday ? 'ring-2 ring-[#8BC342] ring-inset' : ''} ${
                           selectedDate && format(selectedDate, 'yyyy-MM-dd') === format(new Date(currentDate.getFullYear(), currentDate.getMonth(), day.date), 'yyyy-MM-dd') && day.isCurrentMonth
-                             ? 'bg-green-50' 
+                             ? 'bg-green-50 ring-2 ring-green-300 ring-inset' 
                              : ''
                         }`}
                       >
@@ -540,40 +568,61 @@ export default function EventsPage() {
             </div>
 
             {/* Sidebar / Selected Date */}
-            <div className="space-y-6">
+            <div className="space-y-6 lg:col-span-1 order-1 lg:order-2">
                {selectedDate ? (
-                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                   <h3 className="text-lg font-bold text-gray-900 mb-4">
+                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-24">
+                   <h3 className="text-lg font-bold text-gray-900 mb-4 sticky top-0 bg-white z-10 py-2">
                      {format(selectedDate, 'EEEE, MMMM do')}
                    </h3>
-                   <div className="space-y-4 max-h-[500px] overflow-y-auto">
+                   <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
                      {getSelectedDateEvents().length === 0 ? (
                        <p className="text-gray-500 text-sm">No events scheduled for this day.</p>
                      ) : (
                        getSelectedDateEvents().map(event => (
-                         <div key={event.id} className="p-3 border border-gray-100 rounded-lg hover:shadow-sm transition-shadow">
-                            <div className="flex justify-between items-start mb-1">
-                               <h4 className="font-semibold text-gray-900 text-sm line-clamp-1">{event.title}</h4>
-                               <span className="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full whitespace-nowrap">
-                                 {event.time}
-                               </span>
-                            </div>
-                            <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-2">
+                         <div key={event.id} className="group p-3 border border-gray-100 rounded-lg hover:shadow-md transition-all bg-white">
+                            <Link href={`/events/${event.id}`}>
+                               <div className="flex justify-between items-start mb-1 cursor-pointer">
+                                  <h4 className="font-semibold text-gray-900 text-sm line-clamp-2 group-hover:text-[#8BC342] transition-colors">{event.title}</h4>
+                                  <span className="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full whitespace-nowrap shrink-0 ml-2">
+                                    {event.time}
+                                  </span>
+                               </div>
+                            </Link>
+                            
+                            <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-3">
                                <MapPin className="w-3 h-3" />
                                <span className="truncate">{event.location}</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                               <div className="relative w-5 h-5 rounded-full overflow-hidden bg-gray-200">
-                                   <Image 
-                                      src={event.rawEvent.user.profile_picture_url || '/default-avatar.png'}
-                                      alt={event.organizer}
-                                      fill
-                                      className="object-cover"
-                                   />
-                               </div>
-                               <span className="text-xs text-gray-600 truncate">
-                                 By {event.organizer}
-                               </span>
+                            
+                            <div className="flex items-center justify-between pt-2 border-t border-gray-50 mt-2">
+                                <div className="flex items-center gap-2">
+                                   <div className="relative w-5 h-5 rounded-full overflow-hidden bg-gray-200 border border-gray-100">
+                                       <Image 
+                                          src={event.rawEvent.user.profile_picture_url || '/default-avatar.png'}
+                                          alt={event.organizer}
+                                          fill
+                                          className="object-cover"
+                                       />
+                                   </div>
+                                   <span className="text-xs text-gray-600 truncate max-w-[80px]">
+                                     {event.organizer}
+                                   </span>
+                                </div>
+                                
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleInterestToggle(event.rawEvent.event_id, event.rawEvent.is_interested);
+                                    }}
+                                    className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full transition-colors ${
+                                        event.rawEvent.is_interested 
+                                        ? 'bg-[#8BC342] text-white hover:bg-[#7ac85a]' 
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    }`}
+                                >
+                                    <Star className={`w-3 h-3 ${event.rawEvent.is_interested ? 'fill-current' : ''}`} />
+                                    <span>{event.rawEvent.total_interested}</span>
+                                </button>
                             </div>
                          </div>
                        ))
@@ -581,7 +630,7 @@ export default function EventsPage() {
                    </div>
                  </div>
                ) : (
-                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex flex-col items-center justify-center text-center h-48">
+                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex flex-col items-center justify-center text-center h-48 sticky top-24">
                     <Calendar className="w-10 h-10 text-gray-300 mb-2" />
                     <p className="text-gray-500 text-sm">Select a date to view events</p>
                  </div>
@@ -618,9 +667,9 @@ export default function EventsPage() {
             ) : (
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                  {myEvents.map(event => (
-                    <div key={event.event_id} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                    <div key={event.event_id} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
                        {/* Banner/Flyer */}
-                       <div className="h-40 bg-gray-100 relative">
+                       <div className="h-40 bg-gray-100 relative cursor-pointer" onClick={() => router.push(`/events/${event.event_id}`)}>
                           {event.flyer_url ? (
                              <Image 
                                src={event.flyer_url}
@@ -633,11 +682,14 @@ export default function EventsPage() {
                                <Calendar className="w-10 h-10" />
                              </div>
                           )}
-                          <div className="absolute top-2 right-2 bg-white/90 backdrop-blur rounded-lg p-1 shadow-sm">
-                             <button
-                               onClick={() => handleDeleteEvent(event.event_id)}
-                               className="p-1.5 text-red-500 hover:bg-red-50 rounded-md transition-colors"
-                               title="Delete Event"
+                          <div className="absolute top-2 right-2 flex gap-1">
+                              <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteEvent(event.event_id);
+                                }}
+                                className="bg-white/90 backdrop-blur rounded-lg p-1.5 text-red-500 hover:bg-red-50 transition-colors shadow-sm"
+                                title="Delete Event"
                              >
                                 <Trash2 className="w-4 h-4" />
                              </button>
@@ -645,27 +697,35 @@ export default function EventsPage() {
                        </div>
                        
                        <div className="p-5">
-                          <div className="flex items-start justify-between mb-2">
-                             <div className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-md text-center min-w-[50px]">
-                                {format(new Date(event.event_datetime), 'MMM')}<br/>
-                                <span className="text-lg">{format(new Date(event.event_datetime), 'dd')}</span>
-                             </div>
-                             <div className="flex-1 ml-3">
-                                <h3 className="font-bold text-gray-900 line-clamp-1">{event.title}</h3>
-                                <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
-                                    <Clock className="w-3 h-3" />
-                                    {format(new Date(event.event_datetime), 'h:mm a')}
+                          <Link href={`/events/${event.event_id}`}>
+                             <div className="flex items-start justify-between mb-2">
+                                <div className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-md text-center min-w-[50px] shrink-0">
+                                    {format(new Date(event.event_datetime), 'MMM')}<br/>
+                                    <span className="text-lg">{format(new Date(event.event_datetime), 'dd')}</span>
+                                </div>
+                                <div className="flex-1 ml-3 min-w-0">
+                                    <h3 className="font-bold text-gray-900 line-clamp-1 group-hover:text-[#8BC342] transition-colors">{event.title}</h3>
+                                    <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
+                                        <Clock className="w-3 h-3" />
+                                        {format(new Date(event.event_datetime), 'h:mm a')}
+                                    </div>
                                 </div>
                              </div>
-                          </div>
+                          </Link>
                           
                           <p className="text-sm text-gray-600 line-clamp-2 mb-4 h-10">
                             {event.description}
                           </p>
                           
-                          <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 p-2 rounded-lg">
-                             <MapPin className="w-3 h-3 shrink-0" />
-                             <span className="truncate">{event.location.address_str}</span>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 p-2 rounded-lg max-w-[70%]">
+                                <MapPin className="w-3 h-3 shrink-0" />
+                                <span className="truncate">{event.location.address_str}</span>
+                            </div>
+                            <div className="flex items-center gap-1 text-yellow-500 text-xs font-medium">
+                                <Star className="w-3 h-3 fill-current" />
+                                {event.total_interested}
+                            </div>
                           </div>
                        </div>
                     </div>
