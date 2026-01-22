@@ -13,7 +13,7 @@ import {
   MapPin,
   ChevronLeft,
   Share2,
-  Star,
+  ThumbsUp,
   User,
   ExternalLink,
   FileText,
@@ -197,7 +197,7 @@ export default function EventDetailsPage() {
         <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 relative">
            {event.flyer_url ? (
              isPdf ? (
-               <div className="aspect-[16/9] bg-gray-100 flex flex-col items-center justify-center gap-4 py-12">
+               <div className="aspect-video bg-gray-100 flex flex-col items-center justify-center gap-4 py-12">
                    <FileText className="w-16 h-16 text-gray-400" />
                    <div className="text-center">
                       <p className="text-gray-900 font-medium mb-2">Event Flyer (PDF)</p>
@@ -213,7 +213,7 @@ export default function EventDetailsPage() {
                    </div>
                </div>
              ) : (
-               <div className="relative aspect-[16/9] md:aspect-[21/9] bg-gray-100">
+               <div className="relative aspect-video md:aspect-21/9 bg-gray-100">
                   <Image 
                      src={event.flyer_url}
                      alt={event.title}
@@ -224,7 +224,7 @@ export default function EventDetailsPage() {
                </div>
              )
            ) : (
-             <div className="aspect-[16/9] md:aspect-[21/9] bg-gray-100 flex flex-col items-center justify-center">
+             <div className="aspect-video md:aspect-21/9 bg-gray-100 flex flex-col items-center justify-center">
                  <Calendar className="w-16 h-16 text-gray-300 mb-2" />
                  <p className="text-gray-400">No event flyer available</p>
              </div>
@@ -280,7 +280,7 @@ export default function EventDetailsPage() {
                          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
-                     <Star className={`w-5 h-5 ${event.is_interested ? 'fill-white' : ''}`} />
+                     <ThumbsUp className={`w-5 h-5 ${event.is_interested ? 'fill-white' : ''}`} />
                      {event.is_interested ? 'Interested' : 'Interested?'}
                   </button>
                   <p className="text-center text-sm text-gray-500">

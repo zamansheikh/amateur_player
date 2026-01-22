@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/lib/api";
 import { format } from "date-fns";
 import { useCloudUpload } from "@/lib/useCloudUpload";
+import { useMapboxGeocoding } from '@/lib/useMapboxGeocoding';
 import AddressModal from "@/components/AddressModal";
 import Link from 'next/link';
 import Image from 'next/image';
@@ -18,9 +19,12 @@ import {
   ChevronRight,
   Plus,
   Star,
+  Search,
+  ThumbsUp,
   Trash2,
   X,
   Upload,
+  User,
   Loader2,
   LayoutList,
   FileText,
@@ -100,16 +104,98 @@ interface CalendarDay {
 export default function EventsPage() {
   const { user } = useAuth();
   const router = useRouter();
-  
+
   // View State
   const [viewMode, setViewMode] = useState<'calendar' | 'feed' | 'manage'>('calendar');
-  
+
   // Data State
   const [events, setEvents] = useState<PlayerEvent[]>([]);
   const [myEvents, setMyEvents] = useState<PlayerEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMyEvents, setLoadingMyEvents] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Search/Filter State
+  const [filters, setFilters] = useState({
+    name: '',
+    location: '',
+    radius: '50', // Default 50 miles
+  });
+
+  // Geocoding for Radius Filter
+  const { geocode } = useMapboxGeocoding();
+  const [filterCoords, setFilterCoords] = useState<{ lat: number, lng: number } | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (!filters.location) {
+        setFilterCoords(null);
+        return;
+      }
+
+      // Only geocode if we have a location string
+      try {
+        const result = await geocode(filters.location);
+        if (result.success && result.latitude && result.longitude) {
+          setFilterCoords({ lat: result.latitude, lng: result.longitude });
+        }
+      } catch (error) {
+        console.error("Geocoding failed for filter:", error);
+      }
+    }, 1000); // Debounce 1s
+
+    return () => clearTimeout(timer);
+  }, [filters.location, geocode]);
+
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 3959; // Radius of the Earth in miles
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * (Math.PI / 180)) *
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in miles
+  };
+
+  // Frontend Filtering Logic
+  const filteredEvents = useMemo(() => {
+    return events.filter(event => {
+      // Filter by Name
+      const matchesName = !filters.name ||
+        event.title.toLowerCase().includes(filters.name.toLowerCase()) ||
+        event.description.toLowerCase().includes(filters.name.toLowerCase());
+
+      // Filter by Location 
+      let matchesLocation = true;
+
+      // If we have geocoded coordinates for the filter, use radius logic
+      if (filters.location && filterCoords && event.location.lat && event.location.long) {
+        const eventLat = parseFloat(event.location.lat);
+        const eventLng = parseFloat(event.location.long);
+
+        if (!isNaN(eventLat) && !isNaN(eventLng)) {
+          const distance = calculateDistance(filterCoords.lat, filterCoords.lng, eventLat, eventLng);
+          matchesLocation = distance <= parseFloat(filters.radius);
+        } else {
+          // Fallback to string match if event location is invalid
+          matchesLocation =
+            event.location.address_str.toLowerCase().includes(filters.location.toLowerCase()) ||
+            (!!event.location.zipcode && event.location.zipcode.includes(filters.location));
+        }
+      } else {
+        // Fallback or while loading coords: text match
+        matchesLocation = !filters.location || !event.location ||
+          event.location.address_str.toLowerCase().includes(filters.location.toLowerCase()) ||
+          (!!event.location.zipcode && event.location.zipcode.includes(filters.location));
+      }
+
+      return matchesName && matchesLocation;
+    });
+  }, [events, filters, filterCoords]);
 
   // Calendar Logic State
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -118,7 +204,7 @@ export default function EventsPage() {
   // Create/Edit Modal State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
-  
+
   // Form State
   const flyerUpload = useCloudUpload();
   const [createForm, setCreateForm] = useState({
@@ -170,9 +256,9 @@ export default function EventsPage() {
     fetchFeedEvents();
     // Set selected date to today initially if not set
     if (!selectedDate) {
-        setSelectedDate(new Date());
+      setSelectedDate(new Date());
     }
-  }, []);
+  }, []); // Only fetch once on mount
 
   useEffect(() => {
     if (viewMode === 'manage') {
@@ -186,7 +272,7 @@ export default function EventsPage() {
     return playerEvents.map(event => {
       const eventDate = new Date(event.event_datetime);
       const isPast = eventDate < new Date();
-      
+
       return {
         id: event.event_id.toString(),
         title: event.title,
@@ -204,7 +290,7 @@ export default function EventsPage() {
     });
   };
 
-  const calendarEvents = convertEventsToCalendarEvents(events);
+  const calendarEvents = convertEventsToCalendarEvents(filteredEvents);
 
   const generateCalendar = () => {
     const year = currentDate.getFullYear();
@@ -271,40 +357,40 @@ export default function EventsPage() {
   // --- Handlers ---
 
   const handleInterestToggle = async (eventId: number, currentInterested: boolean) => {
-    if(!user) {
-        alert("Please login to show interest");
-        return;
+    if (!user) {
+      alert("Please login to show interest");
+      return;
     }
 
     // Optimistic Update
     setEvents(prev => prev.map(e => {
-        if (e.event_id === eventId) {
-            return {
-                ...e,
-                is_interested: !currentInterested,
-                total_interested: currentInterested ? Math.max(0, e.total_interested - 1) : e.total_interested + 1
-            };
-        }
-        return e;
+      if (e.event_id === eventId) {
+        return {
+          ...e,
+          is_interested: !currentInterested,
+          total_interested: currentInterested ? Math.max(0, e.total_interested - 1) : e.total_interested + 1
+        };
+      }
+      return e;
     }));
 
     try {
-        await api.get(`/api/events/v1/interest/${eventId}`);
-        // Optionally refetch or rely on optimism. 
+      await api.get(`/api/events/v1/interest/${eventId}`);
+      // Optionally refetch or rely on optimism. 
     } catch (err) {
-        console.error("Error toggling interest:", err);
-        // Revert
-        setEvents(prev => prev.map(e => {
-            if (e.event_id === eventId) {
-                return {
-                    ...e,
-                    is_interested: currentInterested,
-                    total_interested: currentInterested ? e.total_interested + 1 : Math.max(0, e.total_interested - 1)
-                };
-            }
-            return e;
-        }));
-        alert("Something went wrong");
+      console.error("Error toggling interest:", err);
+      // Revert
+      setEvents(prev => prev.map(e => {
+        if (e.event_id === eventId) {
+          return {
+            ...e,
+            is_interested: currentInterested,
+            total_interested: currentInterested ? e.total_interested + 1 : Math.max(0, e.total_interested - 1)
+          };
+        }
+        return e;
+      }));
+      alert("Something went wrong");
     }
   };
 
@@ -347,7 +433,7 @@ export default function EventsPage() {
       };
 
       await api.post('/api/events/v1', payload);
-      
+
       // Cleanup and refresh
       setIsCreateModalOpen(false);
       resetForm();
@@ -406,7 +492,7 @@ export default function EventsPage() {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setFlyerFile(file);
-      
+
       if (file.type === 'application/pdf') {
         setFlyerPreview('pdf-placeholder'); // Special marker for PDF
       } else {
@@ -434,10 +520,10 @@ export default function EventsPage() {
   };
 
   const selectDate = (day: CalendarDay) => {
-      if (day.isCurrentMonth) {
-          const newSelectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day.date);
-          setSelectedDate(newSelectedDate);
-      }
+    if (day.isCurrentMonth) {
+      const newSelectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day.date);
+      setSelectedDate(newSelectedDate);
+    }
   };
 
   return (
@@ -450,42 +536,39 @@ export default function EventsPage() {
               <h1 className="text-2xl font-bold text-gray-900">Events</h1>
               <p className="text-sm text-gray-600">Discover and manage bowling events</p>
             </div>
-            
+
             <div className="flex items-center gap-3">
               {/* View Toggle */}
               <div className="bg-gray-100 p-1 rounded-lg flex items-center">
                 <button
                   onClick={() => setViewMode('calendar')}
-                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                    viewMode === 'calendar' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'
-                  }`}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'calendar' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'
+                    }`}
                 >
                   <Calendar className="w-4 h-4 inline-block mr-2" />
                   Calendar
                 </button>
                 <button
                   onClick={() => setViewMode('feed')}
-                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                    viewMode === 'feed' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'
-                  }`}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'feed' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'
+                    }`}
                 >
-                  <LayoutList className="w-4 h-4 inline-block mr-2" />
-                  Events Feed
+                  <ThumbsUp className="w-4 h-4 inline-block mr-2" />
+                  All Events
                 </button>
                 <button
                   onClick={() => setViewMode('manage')}
-                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                    viewMode === 'manage' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'
-                  }`}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === 'manage' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'
+                    }`}
                 >
-                  <Star className="w-4 h-4 inline-block mr-2" />
+                  <User className="w-4 h-4 inline-block mr-2" />
                   My Events
                 </button>
               </div>
 
               {/* Create/Action Button */}
               {user && (
-                 <button 
+                <button
                   onClick={() => setIsCreateModalOpen(true)}
                   className="bg-[#8BC342] hover:bg-[#7ac85a] text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors"
                 >
@@ -499,7 +582,7 @@ export default function EventsPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        
+
         {/* --- Calendar View --- */}
         {viewMode === 'calendar' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -512,19 +595,19 @@ export default function EventsPage() {
                       {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
                     </h2>
                     <div className="flex items-center gap-1">
-                       <button onClick={() => navigateMonth('prev')} className="p-1 hover:bg-gray-100 rounded">
-                         <ChevronLeft className="w-5 h-5 text-gray-600" />
-                       </button>
-                       <button onClick={() => navigateMonth('next')} className="p-1 hover:bg-gray-100 rounded">
-                         <ChevronRight className="w-5 h-5 text-gray-600" />
-                       </button>
+                      <button onClick={() => navigateMonth('prev')} className="p-1 hover:bg-gray-100 rounded">
+                        <ChevronLeft className="w-5 h-5 text-gray-600" />
+                      </button>
+                      <button onClick={() => navigateMonth('next')} className="p-1 hover:bg-gray-100 rounded">
+                        <ChevronRight className="w-5 h-5 text-gray-600" />
+                      </button>
                     </div>
                   </div>
                   <button onClick={() => {
-                        const today = new Date();
-                        setCurrentDate(today);
-                        setSelectedDate(today);
-                    }} className="text-sm font-medium text-[#8BC342]">
+                    const today = new Date();
+                    setCurrentDate(today);
+                    setSelectedDate(today);
+                  }} className="text-sm font-medium text-[#8BC342]">
                     Today
                   </button>
                 </div>
@@ -545,36 +628,34 @@ export default function EventsPage() {
                       <div
                         key={idx}
                         onClick={() => selectDate(day)}
-                        className={`min-h-[100px] border border-gray-100 rounded-lg p-2 cursor-pointer transition-colors ${
-                          !day.isCurrentMonth ? 'bg-gray-50 text-gray-400' : 'bg-white hover:bg-gray-50'
-                        } ${day.isToday ? 'ring-2 ring-[#8BC342] ring-inset' : ''} ${
-                          selectedDate && format(selectedDate, 'yyyy-MM-dd') === format(new Date(currentDate.getFullYear(), currentDate.getMonth(), day.date), 'yyyy-MM-dd') && day.isCurrentMonth
-                             ? 'bg-green-50 ring-2 ring-green-300 ring-inset' 
-                             : ''
-                        }`}
+                        className={`min-h-[100px] border border-gray-100 rounded-lg p-2 cursor-pointer transition-colors ${!day.isCurrentMonth ? 'bg-gray-50 text-gray-400' : 'bg-white hover:bg-gray-50'
+                          } ${day.isToday ? 'ring-2 ring-[#8BC342] ring-inset' : ''} ${selectedDate && format(selectedDate, 'yyyy-MM-dd') === format(new Date(currentDate.getFullYear(), currentDate.getMonth(), day.date), 'yyyy-MM-dd') && day.isCurrentMonth
+                            ? 'bg-green-50 ring-2 ring-green-300 ring-inset'
+                            : ''
+                          }`}
                       >
-                         <div className="flex justify-between items-start">
-                           <span className={`text-sm font-medium ${day.isToday ? 'text-[#8BC342]' : ''}`}>
-                             {day.date}
-                           </span>
-                           {day.events.length > 0 && day.isCurrentMonth && (
-                             <span className="bg-[#8BC342] text-white text-[10px] px-1.5 py-0.5 rounded-full">
-                               {day.events.length}
-                             </span>
-                           )}
-                         </div>
-                         <div className="mt-1 space-y-1">
-                           {day.events.slice(0, 2).map((evt, i) => (
-                             <div key={i} className="text-[10px] truncate bg-green-100 text-green-800 px-1 rounded">
-                               {evt.time} {evt.title}
-                             </div>
-                           ))}
-                           {day.events.length > 2 && (
-                             <div className="text-[10px] text-gray-400 pl-1">
-                               +{day.events.length - 2} more
-                             </div>
-                           )}
-                         </div>
+                        <div className="flex justify-between items-start">
+                          <span className={`text-sm font-medium ${day.isToday ? 'text-[#8BC342]' : ''}`}>
+                            {day.date}
+                          </span>
+                          {day.events.length > 0 && day.isCurrentMonth && (
+                            <span className="bg-[#8BC342] text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                              {day.events.length}
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-1 space-y-1">
+                          {day.events.slice(0, 2).map((evt, i) => (
+                            <div key={i} className="text-[10px] truncate bg-green-100 text-green-800 px-1 rounded">
+                              {evt.time} {evt.title}
+                            </div>
+                          ))}
+                          {day.events.length > 2 && (
+                            <div className="text-[10px] text-gray-400 pl-1">
+                              +{day.events.length - 2} more
+                            </div>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -584,72 +665,71 @@ export default function EventsPage() {
 
             {/* Sidebar / Selected Date */}
             <div className="space-y-6 lg:col-span-1 order-1 lg:order-2">
-               {selectedDate ? (
-                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-24">
-                   <h3 className="text-lg font-bold text-gray-900 mb-4 sticky top-0 bg-white z-10 py-2">
-                     {format(selectedDate, 'EEEE, MMMM do')}
-                   </h3>
-                   <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
-                     {getSelectedDateEvents().length === 0 ? (
-                       <p className="text-gray-500 text-sm">No events scheduled for this day.</p>
-                     ) : (
-                       getSelectedDateEvents().map(event => (
-                         <div key={event.id} className="group p-3 border border-gray-100 rounded-lg hover:shadow-md transition-all bg-white">
-                            <Link href={`/events/${event.id}`}>
-                               <div className="flex justify-between items-start mb-1 cursor-pointer">
-                                  <h4 className="font-semibold text-gray-900 text-sm line-clamp-2 group-hover:text-[#8BC342] transition-colors">{event.title}</h4>
-                                  <span className="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full whitespace-nowrap shrink-0 ml-2">
-                                    {event.time}
-                                  </span>
-                               </div>
-                            </Link>
-                            
-                            <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-3">
-                               <MapPin className="w-3 h-3" />
-                               <span className="truncate">{event.location}</span>
+              {selectedDate ? (
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-24">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4 sticky top-0 bg-white z-10 py-2">
+                    {format(selectedDate, 'EEEE, MMMM do')}
+                  </h3>
+                  <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
+                    {getSelectedDateEvents().length === 0 ? (
+                      <p className="text-gray-500 text-sm">No events scheduled for this day.</p>
+                    ) : (
+                      getSelectedDateEvents().map(event => (
+                        <div key={event.id} className="group p-3 border border-gray-100 rounded-lg hover:shadow-md transition-all bg-white">
+                          <Link href={`/events/${event.id}`}>
+                            <div className="flex justify-between items-start mb-1 cursor-pointer">
+                              <h4 className="font-semibold text-gray-900 text-sm line-clamp-2 group-hover:text-[#8BC342] transition-colors">{event.title}</h4>
+                              <span className="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full whitespace-nowrap shrink-0 ml-2">
+                                {event.time}
+                              </span>
                             </div>
-                            
-                            <div className="flex items-center justify-between pt-2 border-t border-gray-50 mt-2">
-                                <div className="flex items-center gap-2">
-                                   <div className="relative w-5 h-5 rounded-full overflow-hidden bg-gray-200 border border-gray-100">
-                                       <Image 
-                                          src={event.rawEvent.user.profile_picture_url || '/default-avatar.png'}
-                                          alt={event.organizer}
-                                          fill
-                                          className="object-cover"
-                                       />
-                                   </div>
-                                   <span className="text-xs text-gray-600 truncate max-w-[80px]">
-                                     {event.organizer}
-                                   </span>
-                                </div>
-                                
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleInterestToggle(event.rawEvent.event_id, event.rawEvent.is_interested);
-                                    }}
-                                    className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-bold transition-all ${
-                                        event.rawEvent.is_interested 
-                                        ? 'bg-[#8BC342] text-white hover:bg-[#7ac85a]' 
-                                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-100'
-                                    }`}
-                                >
-                                    <Star className={`w-3.5 h-3.5 ${event.rawEvent.is_interested ? 'fill-current' : ''}`} />
-                                    <span>{event.rawEvent.is_interested ? 'Interested' : 'Interested?'} ({event.rawEvent.total_interested})</span>
-                                </button>
+                          </Link>
+
+                          <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-3">
+                            <MapPin className="w-3 h-3" />
+                            <span className="truncate">{event.location}</span>
+                          </div>
+
+                          <div className="flex items-center justify-between pt-2 border-t border-gray-50 mt-2">
+                            <div className="flex items-center gap-2">
+                              <div className="relative w-5 h-5 rounded-full overflow-hidden bg-gray-200 border border-gray-100">
+                                <Image
+                                  src={event.rawEvent.user.profile_picture_url || '/default-avatar.png'}
+                                  alt={event.organizer}
+                                  fill
+                                  className="object-cover"
+                                />
+                              </div>
+                              <span className="text-xs text-gray-600 truncate max-w-20">
+                                {event.organizer}
+                              </span>
                             </div>
-                         </div>
-                       ))
-                     )}
-                   </div>
-                 </div>
-               ) : (
-                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex flex-col items-center justify-center text-center h-48 sticky top-24">
-                    <Calendar className="w-10 h-10 text-gray-300 mb-2" />
-                    <p className="text-gray-500 text-sm">Select a date to view events</p>
-                 </div>
-               )}
+
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleInterestToggle(event.rawEvent.event_id, event.rawEvent.is_interested);
+                              }}
+                              className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-bold transition-all ${event.rawEvent.is_interested
+                                ? 'bg-[#8BC342] text-white hover:bg-[#7ac85a]'
+                                : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-100'
+                                }`}
+                            >
+                              <Star className={`w-3.5 h-3.5 ${event.rawEvent.is_interested ? 'fill-current' : ''}`} />
+                              <span>{event.rawEvent.is_interested ? 'Interested' : 'Interested?'} ({event.rawEvent.total_interested})</span>
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 flex flex-col items-center justify-center text-center h-48 sticky top-24">
+                  <Calendar className="w-10 h-10 text-gray-300 mb-2" />
+                  <p className="text-gray-500 text-sm">Select a date to view events</p>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -657,19 +737,65 @@ export default function EventsPage() {
         {/* --- Events Feed View --- */}
         {viewMode === 'feed' && (
           <div className="space-y-6">
+            {/* Search/Filter Bar */}
+            <div className="bg-white rounded-xl border border-gray-200 p-4 mb-2 shadow-sm">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Search by Name */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search by event name..."
+                    className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent transition-all"
+                    value={filters.name}
+                    onChange={(e) => setFilters(prev => ({ ...prev, name: e.target.value }))}
+                  />
+                </div>
+
+                {/* Search by Location */}
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="City, State or Zip Code"
+                    className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent transition-all"
+                    value={filters.location}
+                    onChange={(e) => setFilters(prev => ({ ...prev, location: e.target.value }))}
+                  />
+                </div>
+
+                {/* Radius */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-gray-500 whitespace-nowrap">Show within</span>
+                  <select
+                    className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#8BC342] transition-all"
+                    value={filters.radius}
+                    onChange={(e) => setFilters(prev => ({ ...prev, radius: e.target.value }))}
+                  >
+                    <option value="10">10 Miles</option>
+                    <option value="25">25 Miles</option>
+                    <option value="50">50 Miles</option>
+                    <option value="100">100 Miles</option>
+                    <option value="250">250 Miles</option>
+                    <option value="500">500 Miles</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
             {loading ? (
               <div className="flex justify-center py-20">
                 <Loader2 className="w-8 h-8 animate-spin text-[#8BC342]" />
               </div>
-            ) : events.length === 0 ? (
+            ) : filteredEvents.length === 0 ? (
               <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
                 <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900">No events found</h3>
-                <p className="text-gray-500 mb-6">Check back later for new events</p>
+                <p className="text-gray-500 mb-6">Try adjusting your filters or check back later</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {events.map(event => (
+                {filteredEvents.map(event => (
                   <div key={event.event_id} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow group flex flex-col">
                     {/* Banner/Flyer */}
                     <div className="h-48 bg-gray-100 relative cursor-pointer" onClick={() => router.push(`/events/${event.event_id}`)}>
@@ -680,7 +806,7 @@ export default function EventsPage() {
                             <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">PDF Flyer Attached</span>
                           </div>
                         ) : (
-                          <Image 
+                          <Image
                             src={event.flyer_url}
                             alt={event.title}
                             fill
@@ -693,61 +819,60 @@ export default function EventsPage() {
                         </div>
                       )}
                     </div>
-                    
+
                     <div className="p-5 flex-1 flex flex-col">
                       <div className="flex items-start justify-between mb-4">
-                         <div className="bg-green-50 text-[#8BC342] text-xs font-bold px-2.5 py-1.5 rounded-lg text-center min-w-[55px] shrink-0 border border-green-100 shadow-sm transition-transform group-hover:scale-105">
-                             {format(new Date(event.event_datetime), 'MMM')}<br/>
-                             <span className="text-xl leading-none">{format(new Date(event.event_datetime), 'dd')}</span>
-                         </div>
-                         <div className="flex-1 ml-4 min-w-0">
-                             <Link href={`/events/${event.event_id}`}>
-                               <h3 className="font-bold text-gray-900 text-lg line-clamp-1 group-hover:text-[#8BC342] transition-colors leading-tight">{event.title}</h3>
-                             </Link>
-                             <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-2 font-semibold">
-                                 <Clock className="w-3.5 h-3.5 text-gray-400" />
-                                 {format(new Date(event.event_datetime), 'h:mm a')}
-                             </div>
-                         </div>
+                        <div className="bg-green-50 text-[#8BC342] text-xs font-bold px-2.5 py-1.5 rounded-lg text-center min-w-[55px] shrink-0 border border-green-100 shadow-sm transition-transform group-hover:scale-105">
+                          {format(new Date(event.event_datetime), 'MMM')}<br />
+                          <span className="text-xl leading-none">{format(new Date(event.event_datetime), 'dd')}</span>
+                        </div>
+                        <div className="flex-1 ml-4 min-w-0">
+                          <Link href={`/events/${event.event_id}`}>
+                            <h3 className="font-bold text-gray-900 text-lg line-clamp-1 group-hover:text-[#8BC342] transition-colors leading-tight">{event.title}</h3>
+                          </Link>
+                          <div className="flex items-center gap-1.5 text-xs text-gray-500 mt-2 font-semibold">
+                            <Clock className="w-3.5 h-3.5 text-gray-400" />
+                            {format(new Date(event.event_datetime), 'h:mm a')}
+                          </div>
+                        </div>
                       </div>
-                      
+
                       <p className="text-sm text-gray-600 line-clamp-2 mb-6 flex-1">
                         {event.description}
                       </p>
-                      
+
                       <div className="space-y-4 pt-4 border-t border-gray-50 mt-auto">
                         <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 p-2.5 rounded-lg">
-                            <MapPin className="w-4 h-4 shrink-0 text-[#8BC342]" />
-                            <span className="truncate">{event.location.address_str}</span>
+                          <MapPin className="w-4 h-4 shrink-0 text-[#8BC342]" />
+                          <span className="truncate">{event.location.address_str}</span>
                         </div>
-                        
-                        <div className="flex items-center justify-between">
-                           <div className="flex items-center gap-2.5">
-                             <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-white ring-1 ring-gray-100 bg-gray-50">
-                               <Image 
-                                 src={event.user.profile_picture_url || '/default-avatar.png'}
-                                 alt={event.user.name}
-                                 fill
-                                 className="object-cover"
-                               />
-                             </div>
-                             <span className="text-xs font-bold text-gray-700">{event.user.name}</span>
-                           </div>
 
-                           <button
-                             onClick={(e) => {
-                               e.stopPropagation();
-                               handleInterestToggle(event.event_id, event.is_interested);
-                             }}
-                             className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all shadow-sm ${
-                               event.is_interested 
-                               ? 'bg-[#8BC342] text-white shadow-green-100 hover:bg-[#7ac85a]' 
-                               : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
-                             }`}
-                           >
-                             <Star className={`w-3.5 h-3.5 ${event.is_interested ? 'fill-current' : ''}`} />
-                             {event.is_interested ? 'Interested' : 'Interested?'} ({event.total_interested})
-                           </button>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2.5">
+                            <div className="relative w-7 h-7 rounded-full overflow-hidden border-2 border-white ring-1 ring-gray-100 bg-gray-50">
+                              <Image
+                                src={event.user.profile_picture_url || '/default-avatar.png'}
+                                alt={event.user.name}
+                                fill
+                                className="object-cover"
+                              />
+                            </div>
+                            <span className="text-xs font-bold text-gray-700">{event.user.name}</span>
+                          </div>
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleInterestToggle(event.event_id, event.is_interested);
+                            }}
+                            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all shadow-sm ${event.is_interested
+                              ? 'bg-[#8BC342] text-white shadow-green-100'
+                              : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                              }`}
+                          >
+                            <ThumbsUp className={`w-3.5 h-3.5 ${event.is_interested ? 'fill-current' : ''}`} />
+                            {event.is_interested ? 'Interested' : 'Interested?'} ({event.total_interested})
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -762,101 +887,101 @@ export default function EventsPage() {
         {viewMode === 'manage' && (
           <div className="space-y-6">
             {!user ? (
-               <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
-                  <h3 className="text-lg font-medium text-gray-900">Sign in to manage events</h3>
-                  <p className="text-gray-500 mt-2">You need to be logged in to create and manage your own events.</p>
-               </div>
+              <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
+                <h3 className="text-lg font-medium text-gray-900">Sign in to manage events</h3>
+                <p className="text-gray-500 mt-2">You need to be logged in to create and manage your own events.</p>
+              </div>
             ) : loadingMyEvents ? (
-               <div className="flex justify-center py-20">
-                 <Loader2 className="w-8 h-8 animate-spin text-[#8BC342]" />
-               </div>
+              <div className="flex justify-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-[#8BC342]" />
+              </div>
             ) : myEvents.length === 0 ? (
-               <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
-                 <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                 <h3 className="text-lg font-semibold text-gray-900">No events created yet</h3>
-                 <p className="text-gray-500 mb-6">Create your first event to get started</p>
-                 <button 
+              <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
+                <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900">No events created yet</h3>
+                <p className="text-gray-500 mb-6">Create your first event to get started</p>
+                <button
                   onClick={() => setIsCreateModalOpen(true)}
                   className="bg-[#8BC342] hover:bg-[#7ac85a] text-white px-6 py-2 rounded-lg font-medium inline-flex items-center gap-2"
                 >
                   <Plus className="w-5 h-5" />
                   Create Event
                 </button>
-               </div>
+              </div>
             ) : (
-               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                 {myEvents.map(event => (
-                    <div key={event.event_id} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
-                       {/* Banner/Flyer */}
-                       <div className="h-40 bg-gray-100 relative cursor-pointer" onClick={() => router.push(`/events/${event.event_id}`)}>
-                          {event.flyer_url ? (
-                             event.flyer_url.toLowerCase().endsWith('.pdf') ? (
-                                <div className="flex flex-col items-center justify-center h-full gap-2 bg-gray-50">
-                                   <FileText className="w-8 h-8 text-[#8BC342]" />
-                                   <span className="text-xs font-bold text-gray-500 uppercase">PDF Flyer</span>
-                                </div>
-                             ) : (
-                                <Image 
-                                  src={event.flyer_url}
-                                  alt={event.title}
-                                  fill
-                                  className="object-cover"
-                                />
-                             )
-                          ) : (
-                             <div className="flex items-center justify-center h-full text-gray-400">
-                               <Calendar className="w-10 h-10" />
-                             </div>
-                          )}
-                          <div className="absolute top-2 right-2 flex gap-1">
-                              <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeleteEvent(event.event_id);
-                                }}
-                                className="bg-white/90 backdrop-blur rounded-lg p-1.5 text-red-500 hover:bg-red-50 transition-colors shadow-sm"
-                                title="Delete Event"
-                             >
-                                <Trash2 className="w-4 h-4" />
-                             </button>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {myEvents.map(event => (
+                  <div key={event.event_id} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
+                    {/* Banner/Flyer */}
+                    <div className="h-40 bg-gray-100 relative cursor-pointer" onClick={() => router.push(`/events/${event.event_id}`)}>
+                      {event.flyer_url ? (
+                        event.flyer_url.toLowerCase().endsWith('.pdf') ? (
+                          <div className="flex flex-col items-center justify-center h-full gap-2 bg-gray-50">
+                            <FileText className="w-8 h-8 text-[#8BC342]" />
+                            <span className="text-xs font-bold text-gray-500 uppercase">PDF Flyer</span>
                           </div>
-                       </div>
-                       
-                       <div className="p-5">
-                          <Link href={`/events/${event.event_id}`}>
-                             <div className="flex items-start justify-between mb-2">
-                                <div className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-md text-center min-w-[50px] shrink-0">
-                                    {format(new Date(event.event_datetime), 'MMM')}<br/>
-                                    <span className="text-lg">{format(new Date(event.event_datetime), 'dd')}</span>
-                                </div>
-                                <div className="flex-1 ml-3 min-w-0">
-                                    <h3 className="font-bold text-gray-900 line-clamp-1 group-hover:text-[#8BC342] transition-colors">{event.title}</h3>
-                                    <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
-                                        <Clock className="w-3 h-3" />
-                                        {format(new Date(event.event_datetime), 'h:mm a')}
-                                    </div>
-                                </div>
-                             </div>
-                          </Link>
-                          
-                          <p className="text-sm text-gray-600 line-clamp-2 mb-4 h-10">
-                            {event.description}
-                          </p>
-                          
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 p-2 rounded-lg max-w-[70%]">
-                                <MapPin className="w-3 h-3 shrink-0 text-[#8BC342]" />
-                                <span className="truncate">{event.location.address_str}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 text-[#8BC342] text-xs font-bold border border-green-100 bg-green-50 px-2.5 py-1.5 rounded-lg shadow-sm">
-                                <Star className="w-3.5 h-3.5 fill-current" />
-                                <span>Interested: {event.total_interested}</span>
-                            </div>
-                          </div>
-                       </div>
+                        ) : (
+                          <Image
+                            src={event.flyer_url}
+                            alt={event.title}
+                            fill
+                            className="object-cover"
+                          />
+                        )
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-gray-400">
+                          <Calendar className="w-10 h-10" />
+                        </div>
+                      )}
+                      <div className="absolute top-2 right-2 flex gap-1">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteEvent(event.event_id);
+                          }}
+                          className="bg-white/90 backdrop-blur rounded-lg p-1.5 text-red-500 hover:bg-red-50 transition-colors shadow-sm"
+                          title="Delete Event"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
-                 ))}
-               </div>
+
+                    <div className="p-5">
+                      <Link href={`/events/${event.event_id}`}>
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-md text-center min-w-[50px] shrink-0">
+                            {format(new Date(event.event_datetime), 'MMM')}<br />
+                            <span className="text-lg">{format(new Date(event.event_datetime), 'dd')}</span>
+                          </div>
+                          <div className="flex-1 ml-3 min-w-0">
+                            <h3 className="font-bold text-gray-900 line-clamp-1 group-hover:text-[#8BC342] transition-colors">{event.title}</h3>
+                            <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
+                              <Clock className="w-3 h-3" />
+                              {format(new Date(event.event_datetime), 'h:mm a')}
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+
+                      <p className="text-sm text-gray-600 line-clamp-2 mb-4 h-10">
+                        {event.description}
+                      </p>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 p-2 rounded-lg max-w-[70%]">
+                          <MapPin className="w-3 h-3 shrink-0 text-[#8BC342]" />
+                          <span className="truncate">{event.location.address_str}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-[#8BC342] text-xs font-bold border border-green-100 bg-green-50 px-2.5 py-1.5 rounded-lg shadow-sm">
+                          <Star className="w-3.5 h-3.5 fill-current" />
+                          <span>Interested: {event.total_interested}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         )}
@@ -866,163 +991,162 @@ export default function EventsPage() {
       {isCreateModalOpen && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
-                <h2 className="text-xl font-bold text-gray-900">Create New Event</h2>
-                <button onClick={() => setIsCreateModalOpen(false)} className="text-gray-400 hover:text-gray-600">
-                   <X className="w-6 h-6" />
-                </button>
-             </div>
-             
-             <form onSubmit={handleCreateEvent} className="p-6 space-y-6">
-                
-                {/* Title & Desc */}
-                <div className="space-y-4">
-                   <div>
-                     <label className="block text-sm font-medium text-gray-700 mb-1">Event Title</label>
-                     <input
-                       type="text"
-                       required
-                       value={createForm.title}
-                       onChange={e => setCreateForm({...createForm, title: e.target.value})}
-                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8BC342] focus:border-transparent outline-none"
-                       placeholder="e.g. Saturday Night Tournament"
-                     />
-                   </div>
-                   <div>
-                     <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                     <textarea
-                       rows={3}
-                       required
-                       value={createForm.description}
-                       onChange={e => setCreateForm({...createForm, description: e.target.value})}
-                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8BC342] focus:border-transparent outline-none resize-none"
-                       placeholder="Tell people about your event..."
-                     />
-                   </div>
-                </div>
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+              <h2 className="text-xl font-bold text-gray-900">Create New Event</h2>
+              <button onClick={() => setIsCreateModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
 
-                {/* Date & Time */}
-                <div className="grid grid-cols-2 gap-4">
-                   <div>
-                     <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                     <input
-                       type="date"
-                       required
-                       value={createForm.date}
-                       onChange={e => setCreateForm({...createForm, date: e.target.value})}
-                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8BC342] focus:border-transparent outline-none"
-                     />
-                   </div>
-                   <div>
-                     <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-                     <input
-                       type="time"
-                       required
-                       value={createForm.time}
-                       onChange={e => setCreateForm({...createForm, time: e.target.value})}
-                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8BC342] focus:border-transparent outline-none"
-                     />
-                   </div>
-                </div>
+            <form onSubmit={handleCreateEvent} className="p-6 space-y-6">
 
-                {/* Location */}
+              {/* Title & Desc */}
+              <div className="space-y-4">
                 <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                   {createForm.location.address_str ? (
-                      <div className="flex items-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                         <MapPin className="w-5 h-5 text-gray-500" />
-                         <span className="flex-1 text-sm text-gray-700">{createForm.location.address_str}</span>
-                         <button
-                           type="button"
-                           onClick={() => setIsAddressModalOpen(true)}
-                           className="text-sm text-[#8BC342] font-medium hover:underline"
-                         >
-                           Change
-                         </button>
-                      </div>
-                   ) : (
-                      <button
-                        type="button"
-                        onClick={() => setIsAddressModalOpen(true)}
-                        className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-[#8BC342] hover:text-[#8BC342] transition-colors flex items-center justify-center gap-2"
-                      >
-                         <MapPin className="w-5 h-5" />
-                         Select Location
-                      </button>
-                   )}
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Event Title</label>
+                  <input
+                    type="text"
+                    required
+                    value={createForm.title}
+                    onChange={e => setCreateForm({ ...createForm, title: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8BC342] focus:border-transparent outline-none"
+                    placeholder="e.g. Saturday Night Tournament"
+                  />
                 </div>
-
-                {/* Flyer Upload */}
                 <div>
-                   <label className="block text-sm font-medium text-gray-700 mb-1">Event Flyer (Optional)</label>
-                   <div 
-                      className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                       flyerPreview ? 'border-[#8BC342] bg-green-50' : 'border-gray-300 hover:border-[#8BC342]'
-                      }`}
-                   >
-                      <input
-                        type="file"
-                        accept="image/*,application/pdf"
-                        onChange={handleFileSelect}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                      />
-                      {flyerPreview ? (
-                         <div className="relative w-full h-40 flex flex-col items-center justify-center">
-                            {flyerPreview === 'pdf-placeholder' ? (
-                               <div className="flex flex-col items-center gap-2">
-                                  <FileText className="w-12 h-12 text-[#8BC342]" />
-                                  <span className="text-sm font-medium text-gray-700">{flyerFile?.name}</span>
-                                  <span className="text-xs text-gray-500">PDF Document Selected</span>
-                               </div>
-                            ) : (
-                               <Image src={flyerPreview} alt="Preview" fill className="object-contain" />
-                            )}
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity rounded-lg">
-                               <p className="text-white font-medium">Click to change</p>
-                            </div>
-                         </div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <textarea
+                    rows={3}
+                    required
+                    value={createForm.description}
+                    onChange={e => setCreateForm({ ...createForm, description: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8BC342] focus:border-transparent outline-none resize-none"
+                    placeholder="Tell people about your event..."
+                  />
+                </div>
+              </div>
+
+              {/* Date & Time */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                  <input
+                    type="date"
+                    required
+                    value={createForm.date}
+                    onChange={e => setCreateForm({ ...createForm, date: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8BC342] focus:border-transparent outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                  <input
+                    type="time"
+                    required
+                    value={createForm.time}
+                    onChange={e => setCreateForm({ ...createForm, time: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8BC342] focus:border-transparent outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Location */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                {createForm.location.address_str ? (
+                  <div className="flex items-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                    <MapPin className="w-5 h-5 text-gray-500" />
+                    <span className="flex-1 text-sm text-gray-700">{createForm.location.address_str}</span>
+                    <button
+                      type="button"
+                      onClick={() => setIsAddressModalOpen(true)}
+                      className="text-sm text-[#8BC342] font-medium hover:underline"
+                    >
+                      Change
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setIsAddressModalOpen(true)}
+                    className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-[#8BC342] hover:text-[#8BC342] transition-colors flex items-center justify-center gap-2"
+                  >
+                    <MapPin className="w-5 h-5" />
+                    Select Location
+                  </button>
+                )}
+              </div>
+
+              {/* Flyer Upload */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Event Flyer (Optional)</label>
+                <div
+                  className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${flyerPreview ? 'border-[#8BC342] bg-green-50' : 'border-gray-300 hover:border-[#8BC342]'
+                    }`}
+                >
+                  <input
+                    type="file"
+                    accept="image/*,application/pdf"
+                    onChange={handleFileSelect}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  />
+                  {flyerPreview ? (
+                    <div className="relative w-full h-40 flex flex-col items-center justify-center">
+                      {flyerPreview === 'pdf-placeholder' ? (
+                        <div className="flex flex-col items-center gap-2">
+                          <FileText className="w-12 h-12 text-[#8BC342]" />
+                          <span className="text-sm font-medium text-gray-700">{flyerFile?.name}</span>
+                          <span className="text-xs text-gray-500">PDF Document Selected</span>
+                        </div>
                       ) : (
-                         <div className="space-y-2">
-                            <Upload className="w-8 h-8 text-gray-400 mx-auto" />
-                            <p className="text-sm text-gray-500">Click to upload or drag and drop</p>
-                            <p className="text-xs text-gray-400">PNG, JPG up to 10MB</p>
-                         </div>
+                        <Image src={flyerPreview} alt="Preview" fill className="object-contain" />
                       )}
-                      
-                      {flyerUpload.isUploading && (
-                         <div className="absolute inset-0 bg-white/80 z-20 flex flex-col items-center justify-center">
-                            <Loader2 className="w-6 h-6 animate-spin text-[#8BC342] mb-2" />
-                            <span className="text-sm font-medium">Uploading... {flyerUpload.progress}%</span>
-                         </div>
-                      )}
-                   </div>
-                </div>
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity rounded-lg">
+                        <p className="text-white font-medium">Click to change</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      <Upload className="w-8 h-8 text-gray-400 mx-auto" />
+                      <p className="text-sm text-gray-500">Click to upload or drag and drop</p>
+                      <p className="text-xs text-gray-400">PNG, JPG up to 10MB</p>
+                    </div>
+                  )}
 
-                {/* Footer */}
-                <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-                   <button
-                     type="button"
-                     onClick={() => setIsCreateModalOpen(false)}
-                     className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition-colors"
-                   >
-                     Cancel
-                   </button>
-                   <button
-                     type="submit"
-                     disabled={isSubmitting || flyerUpload.isUploading}
-                     className="bg-[#8BC342] hover:bg-[#7ac85a] disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-bold shadow-sm transition-all flex items-center gap-2"
-                   >
-                     {isSubmitting ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          Creating...
-                        </>
-                     ) : (
-                        'Create Event'
-                     )}
-                   </button>
+                  {flyerUpload.isUploading && (
+                    <div className="absolute inset-0 bg-white/80 z-20 flex flex-col items-center justify-center">
+                      <Loader2 className="w-6 h-6 animate-spin text-[#8BC342] mb-2" />
+                      <span className="text-sm font-medium">Uploading... {flyerUpload.progress}%</span>
+                    </div>
+                  )}
                 </div>
-             </form>
+              </div>
+
+              {/* Footer */}
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setIsCreateModalOpen(false)}
+                  className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting || flyerUpload.isUploading}
+                  className="bg-[#8BC342] hover:bg-[#7ac85a] disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-bold shadow-sm transition-all flex items-center gap-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    'Create Event'
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
