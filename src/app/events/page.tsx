@@ -23,6 +23,7 @@ import {
   Upload,
   Loader2,
   LayoutList,
+  FileText,
 } from "lucide-react";
 
 // --- Interfaces ---
@@ -405,7 +406,12 @@ export default function EventsPage() {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setFlyerFile(file);
-      setFlyerPreview(URL.createObjectURL(file));
+      
+      if (file.type === 'application/pdf') {
+        setFlyerPreview('pdf-placeholder'); // Special marker for PDF
+      } else {
+        setFlyerPreview(URL.createObjectURL(file));
+      }
     }
   };
 
@@ -671,12 +677,19 @@ export default function EventsPage() {
                        {/* Banner/Flyer */}
                        <div className="h-40 bg-gray-100 relative cursor-pointer" onClick={() => router.push(`/events/${event.event_id}`)}>
                           {event.flyer_url ? (
-                             <Image 
-                               src={event.flyer_url}
-                               alt={event.title}
-                               fill
-                               className="object-cover"
-                             />
+                             event.flyer_url.toLowerCase().endsWith('.pdf') ? (
+                                <div className="flex flex-col items-center justify-center h-full gap-2 bg-gray-50">
+                                   <FileText className="w-8 h-8 text-[#8BC342]" />
+                                   <span className="text-xs font-bold text-gray-500 uppercase">PDF Flyer</span>
+                                </div>
+                             ) : (
+                                <Image 
+                                  src={event.flyer_url}
+                                  alt={event.title}
+                                  fill
+                                  className="object-cover"
+                                />
+                             )
                           ) : (
                              <div className="flex items-center justify-center h-full text-gray-400">
                                <Calendar className="w-10 h-10" />
@@ -831,18 +844,26 @@ export default function EventsPage() {
                    <label className="block text-sm font-medium text-gray-700 mb-1">Event Flyer (Optional)</label>
                    <div 
                       className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                       flyerPreview ? 'border-green-300 bg-green-50' : 'border-gray-300 hover:border-[#8BC342]'
+                       flyerPreview ? 'border-[#8BC342] bg-green-50' : 'border-gray-300 hover:border-[#8BC342]'
                       }`}
                    >
                       <input
                         type="file"
-                        accept="image/*"
+                        accept="image/*,application/pdf"
                         onChange={handleFileSelect}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                       />
                       {flyerPreview ? (
-                         <div className="relative w-full h-40">
-                            <Image src={flyerPreview} alt="Preview" fill className="object-contain" />
+                         <div className="relative w-full h-40 flex flex-col items-center justify-center">
+                            {flyerPreview === 'pdf-placeholder' ? (
+                               <div className="flex flex-col items-center gap-2">
+                                  <FileText className="w-12 h-12 text-[#8BC342]" />
+                                  <span className="text-sm font-medium text-gray-700">{flyerFile?.name}</span>
+                                  <span className="text-xs text-gray-500">PDF Document Selected</span>
+                               </div>
+                            ) : (
+                               <Image src={flyerPreview} alt="Preview" fill className="object-contain" />
+                            )}
                             <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity rounded-lg">
                                <p className="text-white font-medium">Click to change</p>
                             </div>
