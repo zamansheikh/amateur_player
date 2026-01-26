@@ -390,6 +390,7 @@ export interface Brand {
     name: string;
     formal_name: string;
     logo_url: string;
+    is_fav?: boolean;
 }
 
 export interface UserStats {

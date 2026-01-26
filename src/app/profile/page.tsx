@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { Camera, Play, MapPin, UserCheck, Heart, Share2, AlertCircle, X, Lock, Globe, Edit2, Mail, Shield, Video, ImageIcon, Upload, Loader, Search, ChevronDown, Dumbbell, Building2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCloudUpload } from '@/lib/useCloudUpload';
@@ -758,7 +759,12 @@ export default function ProfilePage() {
                                     {/* Favorite Brands */}
                                     {user?.favorite_brands && user.favorite_brands.length > 0 && (
                                         <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-100 mb-6">
-                                            <h3 className="text-lg font-bold mb-4">Favorite Brands</h3>
+                                            <div className="flex items-center justify-between mb-4">
+                                                <h3 className="text-lg font-bold">Favorite Brands</h3>
+                                                <Link href="/brand-feed" className="text-sm text-green-600 hover:text-green-700 font-medium">
+                                                    See all brands
+                                                </Link>
+                                            </div>
                                             <div className="flex flex-wrap gap-2 items-center">
                                                 {user.favorite_brands.map((brand) => (
                                                     <div key={brand.brand_id} className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition group cursor-pointer">

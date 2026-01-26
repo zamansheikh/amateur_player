@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { Home, BarChart3, MessageCircle, Settings, Package, Menu, CalendarDays, X, LogOut, Users, Trophy, Target, MessageSquare, Play, Gift, ShoppingCart, Zap, Map, Lightbulb, MapPin } from 'lucide-react';
+import { Home, BarChart3, MessageCircle, Settings, Package, Menu, CalendarDays, X, LogOut, Users, Trophy, Target, MessageSquare, Play, Gift, ShoppingCart, Zap, Map, Lightbulb, MapPin, Tag } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import GlobalHeader from '@/components/GlobalHeader';
@@ -48,6 +48,7 @@ const navigation = [
     // { name: 'Roadmap', href: '/roadmap', icon: Map },
     { name: 'Overview', href: '/overview', icon: BarChart3 },
     { name: 'Pros', href: '/pros', icon: Trophy },
+    { name: 'Brand Feed', href: '/brand-feed', icon: Tag },
     { name: 'Events', href: '/events', icon: CalendarDays },
     { name: 'Media', href: '/media', icon: Play },
     // { name: 'Products', href: '/products', icon: Package },
