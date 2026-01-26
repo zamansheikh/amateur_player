@@ -48,7 +48,7 @@ const navigation = [
     // { name: 'Roadmap', href: '/roadmap', icon: Map },
     { name: 'Overview', href: '/overview', icon: BarChart3 },
     { name: 'Pros', href: '/pros', icon: Trophy },
-    { name: 'Brand Feed', href: '/brand-feed', icon: Tag },
+    { name: 'Brands', href: '/brand-feed', icon: Tag },
     { name: 'Events', href: '/events', icon: CalendarDays },
     { name: 'Media', href: '/media', icon: Play },
     // { name: 'Products', href: '/products', icon: Package },
