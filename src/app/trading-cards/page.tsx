@@ -71,7 +71,9 @@ interface UserMinimal {
 export default function TradingCardsPage() {
   const router = useRouter();
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<'feed' | 'collection'>('feed');
   const [cards, setCards] = useState<Card[]>([]);
+  const [collectionCards, setCollectionCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
@@ -82,12 +84,17 @@ export default function TradingCardsPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    fetchCards();
-  }, []);
+    if (activeTab === 'feed') {
+      fetchCards();
+    } else {
+      fetchCollectionCards();
+    }
+  }, [activeTab]);
 
   const fetchCards = async () => {
     try {
       setLoading(true);
+      setError("");
       const response = await api.get("/api/cards/feed");
       setCards(response.data);
       if (response.data.length > 0) {
@@ -97,6 +104,24 @@ export default function TradingCardsPage() {
     } catch (err: any) {
       console.error("Error fetching cards:", err);
       setError("Failed to load trading cards");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCollectionCards = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const response = await api.get("/api/cards/collections");
+      setCollectionCards(response.data);
+      if (response.data.length > 0) {
+        // Set initial index to 2 (or last index if fewer than 3 cards) to show cards on both sides
+        setCurrentIndex(Math.min(2, response.data.length - 1));
+      }
+    } catch (err: any) {
+      console.error("Error fetching collection cards:", err);
+      setError("Failed to load your collection");
     } finally {
       setLoading(false);
     }
@@ -151,11 +176,11 @@ export default function TradingCardsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
       {/* Header Section */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between py-4 border-b border-gray-100">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center shadow-sm">
                 <Sparkles className="w-5 h-5 text-white" />
@@ -175,6 +200,36 @@ export default function TradingCardsPage() {
             >
               <Sparkles className="w-4 h-4" />
               Create Your Card
+            </button>
+          </div>
+
+          {/* Tabs */}
+          <div className="flex gap-0">
+            <button
+              onClick={() => {
+                setActiveTab('feed');
+                setCurrentIndex(0);
+              }}
+              className={`px-6 py-4 font-medium text-sm transition-colors border-b-2 ${
+                activeTab === 'feed'
+                  ? 'text-green-600 border-b-green-600'
+                  : 'text-gray-600 border-b-transparent hover:text-gray-900'
+              }`}
+            >
+              Feed
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('collection');
+                setCurrentIndex(0);
+              }}
+              className={`px-6 py-4 font-medium text-sm transition-colors border-b-2 ${
+                activeTab === 'collection'
+                  ? 'text-green-600 border-b-green-600'
+                  : 'text-gray-600 border-b-transparent hover:text-gray-900'
+              }`}
+            >
+              My Collection
             </button>
           </div>
         </div>
@@ -202,29 +257,41 @@ export default function TradingCardsPage() {
               Try Again
             </button>
           </div>
-        ) : cards.length === 0 ? (
+        ) : (activeTab === 'feed' ? cards : collectionCards).length === 0 ? (
           <div className="text-center py-20">
             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <Sparkles className="w-10 h-10 text-gray-400" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">
-              No Cards Found
+              {activeTab === 'feed' ? 'No Cards Found' : 'No Cards in Your Collection'}
             </h3>
             <p className="text-gray-500 mb-8">
-              Be the first to create a trading card!
+              {activeTab === 'feed'
+                ? 'Be the first to create a trading card!'
+                : 'Start collecting cards from the feed!'}
             </p>
-            <button
-              onClick={() => router.push("/trading-cards/generate")}
-              className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-lg transition"
-            >
-              Create Your Card
-            </button>
+            {activeTab === 'feed' && (
+              <button
+                onClick={() => router.push("/trading-cards/generate")}
+                className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-lg transition"
+              >
+                Create Your Card
+              </button>
+            )}
+            {activeTab === 'collection' && (
+              <button
+                onClick={() => setActiveTab('feed')}
+                className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-lg transition"
+              >
+                Browse Feed
+              </button>
+            )}
           </div>
         ) : (
           <div className="relative w-full h-[700px] flex flex-col items-center justify-center">
             {/* Carousel Container */}
             <div className="relative w-full h-full flex items-center justify-center perspective-1000">
-              {cards.map((card, index) => {
+              {(activeTab === 'feed' ? cards : collectionCards).map((card, index) => {
                 const userMinimal = userInfo[card.metadata.user_id];
                 const isHovered = hoveredCard === card.metadata.card_id;
 
@@ -408,36 +475,64 @@ export default function TradingCardsPage() {
             </div>
 
             {/* Navigation Controls */}
-            <div className="absolute bottom-8 flex items-center gap-8 z-50">
+            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex items-center gap-4 sm:gap-6 lg:gap-8 z-50 w-full px-4 max-w-2xl">
               <button
                 onClick={prevCard}
-                className="p-3 rounded-full bg-white/90 shadow-lg hover:bg-white hover:scale-110 transition-all text-gray-800 disabled:opacity-50"
+                className="p-2 sm:p-3 rounded-full bg-white/90 shadow-lg hover:bg-white hover:scale-110 transition-all text-gray-800 disabled:opacity-50 flex-shrink-0"
                 disabled={currentIndex === 0}
               >
-                <ChevronLeft className="w-6 h-6" />
+                <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
 
-              {/* Indicators */}
-              <div className="flex gap-2">
-                {cards.map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setCurrentIndex(idx)}
-                    className={`w-2 h-2 rounded-full transition-all ${
-                      idx === currentIndex
-                        ? "w-6 bg-green-500"
-                        : "bg-gray-300 hover:bg-gray-400"
-                    }`}
-                  />
-                ))}
+              {/* Indicators - Show text counter and limited dots */}
+              <div className="flex-1 flex flex-col items-center gap-2 min-w-0">
+                <div className="text-xs sm:text-sm font-medium text-gray-700 whitespace-nowrap">
+                  {currentIndex + 1} / {(activeTab === 'feed' ? cards : collectionCards).length}
+                </div>
+                <div className="flex gap-1 sm:gap-1.5 flex-wrap justify-center w-full">
+                  {(activeTab === 'feed' ? cards : collectionCards).length > 7 ? (
+                    // Show limited indicator dots (max 7) for large collections
+                    Array.from({ length: 7 }).map((_, dotIdx) => {
+                      const totalCards = (activeTab === 'feed' ? cards : collectionCards).length;
+                      const step = Math.ceil(totalCards / 7);
+                      const cardIdx = dotIdx * step;
+                      const isActive = currentIndex >= cardIdx && currentIndex < cardIdx + step;
+                      
+                      return (
+                        <button
+                          key={dotIdx}
+                          onClick={() => setCurrentIndex(Math.min(cardIdx, totalCards - 1))}
+                          className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all flex-shrink-0 ${
+                            isActive
+                              ? "w-4 sm:w-6 bg-green-500"
+                              : "bg-gray-300 hover:bg-gray-400"
+                          }`}
+                        />
+                      );
+                    })
+                  ) : (
+                    // Show all dots for small collections
+                    (activeTab === 'feed' ? cards : collectionCards).map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setCurrentIndex(idx)}
+                        className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-all flex-shrink-0 ${
+                          idx === currentIndex
+                            ? "w-4 sm:w-6 bg-green-500"
+                            : "bg-gray-300 hover:bg-gray-400"
+                        }`}
+                      />
+                    ))
+                  )}
+                </div>
               </div>
 
               <button
                 onClick={nextCard}
-                className="p-3 rounded-full bg-white/90 shadow-lg hover:bg-white hover:scale-110 transition-all text-gray-800 disabled:opacity-50"
-                disabled={currentIndex === cards.length - 1}
+                className="p-2 sm:p-3 rounded-full bg-white/90 shadow-lg hover:bg-white hover:scale-110 transition-all text-gray-800 disabled:opacity-50 flex-shrink-0"
+                disabled={currentIndex === (activeTab === 'feed' ? cards : collectionCards).length - 1}
               >
-                <ChevronRight className="w-6 h-6" />
+                <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             </div>
           </div>
