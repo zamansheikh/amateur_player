@@ -67,17 +67,17 @@ export default function MyCardsPage() {
             <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
           </div>
         ) : (
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 place-items-center">
             {myCards.length > 0 ? (
               myCards.map((card) => (
                 <div
                   key={card.metadata.card_id}
-                  className="relative aspect-9/14 w-full overflow-hidden rounded-xl"
+                  className="relative w-[320px] h-[450px]"
                 >
                   <iframe
                     title={`Card ${card.metadata.card_id}`}
                     src={card.card_html_url}
-                    className="h-full w-full border-0"
+                    className="h-full w-full rounded-xl shadow-2xl border-0"
                     sandbox="allow-scripts allow-same-origin"
                     scrolling="no"
                   ></iframe>
