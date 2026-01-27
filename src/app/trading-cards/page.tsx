@@ -12,6 +12,7 @@ import {
   Trophy,
   ChevronLeft,
   ChevronRight,
+  Plus,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -84,12 +85,14 @@ export default function TradingCardsPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    if (activeTab === 'feed') {
-      fetchCards();
-    } else {
-      fetchCollectionCards();
+    if (user) {
+      if (activeTab === 'feed') {
+        fetchCards();
+      } else {
+        fetchCollectionCards();
+      }
     }
-  }, [activeTab]);
+  }, [activeTab, user]);
 
   const fetchCards = async () => {
     try {
@@ -194,13 +197,21 @@ export default function TradingCardsPage() {
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => router.push("/trading-cards/generate")}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors shadow-sm text-sm"
-            >
-              <Sparkles className="w-4 h-4" />
-              Create Your Card
-            </button>
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => router.push('/my-cards')}
+                className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+              >
+                My Cards
+              </button>
+              <button
+                onClick={() => router.push('/card-customizer')}
+                className="inline-flex items-center justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+              >
+                <Plus className="-ml-1 mr-2 h-5 w-5" />
+                Create Your Card
+              </button>
+            </div>
           </div>
 
           {/* Tabs */}
