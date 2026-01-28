@@ -78,6 +78,9 @@ export default function TradingCardsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [collectingIds, setCollectingIds] = useState<Record<number, boolean>>(
+    {}
+  );
   const [userInfo, setUserInfo] = useState<{ [key: number]: UserMinimal }>({});
   const [loadingUsers, setLoadingUsers] = useState<{ [key: number]: boolean }>(
     {}
@@ -153,6 +156,51 @@ export default function TradingCardsPage() {
   const handleCardHover = (cardId: number, userId: number) => {
     setHoveredCard(cardId);
     fetchUserInfo(userId);
+  };
+
+  const updateCardCollections = (
+    cardId: number,
+    isCollected: boolean,
+    collectionsCount: number
+  ) => {
+    const updateList = (list: Card[]) =>
+      list.map((card) =>
+        card.metadata.card_id === cardId
+          ? {
+              ...card,
+              metadata: {
+                ...card.metadata,
+                is_collected_by_viewer: isCollected,
+                collections_count: collectionsCount,
+              },
+            }
+          : card
+      );
+
+    setCards((prev) => updateList(prev));
+    setCollectionCards((prev) => updateList(prev));
+  };
+
+  const handleCollectToggle = async (
+    cardId: number,
+    isCurrentlyCollected: boolean
+  ) => {
+    if (collectingIds[cardId]) return;
+    setCollectingIds((prev) => ({ ...prev, [cardId]: true }));
+    try {
+      const response = await api.get(`/api/cards/collect/${cardId}`);
+      const { is_collected, collections_count } = response.data || {};
+      if (
+        typeof is_collected === "boolean" &&
+        typeof collections_count === "number"
+      ) {
+        updateCardCollections(cardId, is_collected, collections_count);
+      }
+    } catch (err) {
+      console.error("Error collecting card:", err);
+    } finally {
+      setCollectingIds((prev) => ({ ...prev, [cardId]: false }));
+    }
   };
 
   const nextCard = () => {
@@ -332,8 +380,8 @@ export default function TradingCardsPage() {
                     onClick={() => !isActive && setCurrentIndex(index)}
                   >
                     <div
-                      className="relative group"
-                      style={{ width: "320px", height: "450px" }}
+                      className="relative group flex flex-col items-center"
+                      style={{ width: "320px" }}
                       onMouseEnter={() =>
                         handleCardHover(
                           card.metadata.card_id,
@@ -342,6 +390,7 @@ export default function TradingCardsPage() {
                       }
                       onMouseLeave={() => setHoveredCard(null)}
                     >
+                      <div className="relative" style={{ width: "320px", height: "450px" }}>
                       {/* Shadow Effect */}
                       <div
                         className={`absolute -inset-3 rounded-3xl bg-gradient-to-br from-green-400/20 to-blue-500/20 blur-2xl transition-all duration-500 pointer-events-none -z-10 ${
@@ -361,6 +410,34 @@ export default function TradingCardsPage() {
                         style={{ overflow: "hidden" }}
                         sandbox="allow-scripts allow-same-origin allow-forms"
                       />
+                      </div>
+
+                      {/* Collect/Uncollect Button */}
+                      <button
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleCollectToggle(
+                            card.metadata.card_id,
+                            card.metadata.is_collected_by_viewer
+                          );
+                        }}
+                        className={`mt-3 px-4 py-2 rounded-full text-xs font-semibold shadow-lg transition ${
+                          card.metadata.is_collected_by_viewer
+                            ? "bg-gray-900 text-white hover:bg-gray-800"
+                            : "bg-green-600 text-white hover:bg-green-700"
+                        } ${
+                          collectingIds[card.metadata.card_id]
+                            ? "opacity-70 cursor-not-allowed"
+                            : ""
+                        }`}
+                        disabled={collectingIds[card.metadata.card_id]}
+                      >
+                        {collectingIds[card.metadata.card_id]
+                          ? "Working..."
+                          : card.metadata.is_collected_by_viewer
+                            ? "Uncollect"
+                            : "Collect"}
+                      </button>
 
                       {/* Top Badge */}
                       {card.metadata.collections_count > 0 && (
