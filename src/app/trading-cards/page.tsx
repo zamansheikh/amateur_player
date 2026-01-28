@@ -275,7 +275,7 @@ export default function TradingCardsPage() {
                   : 'text-gray-600 border-b-transparent hover:text-gray-900'
               }`}
             >
-              Feed
+              Cards
             </button>
             <button
               onClick={() => {
