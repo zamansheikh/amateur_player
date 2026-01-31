@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { api } from '@/lib/api';
 import { FeedPost } from '@/types';
 import CreatePost from '@/components/CreatePost';
@@ -14,6 +14,18 @@ export default function FeedV3Page() {
     const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
+
+    const observer = useRef<IntersectionObserver | null>(null);
+    const lastPostElementRef = useCallback((node: HTMLDivElement | null) => {
+        if (loadingMore) return;
+        if (observer.current) observer.current.disconnect();
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && hasMore) {
+                setPage(prevPage => prevPage + 1);
+            }
+        });
+        if (node) observer.current.observe(node);
+    }, [loadingMore, hasMore]);
 
     const fetchFeed = async (pageNum: number, isLoadMore = false) => {
         try {
@@ -74,14 +86,12 @@ export default function FeedV3Page() {
     };
 
     useEffect(() => {
-        fetchFeed(1, false);
-    }, []);
-
-    const handleLoadMore = () => {
-        const nextPage = page + 1;
-        setPage(nextPage);
-        fetchFeed(nextPage, true);
-    };
+        if (page === 1) {
+            fetchFeed(1, false);
+        } else {
+            fetchFeed(page, true);
+        }
+    }, [page]);
 
     const handlePostChange = (updatedPost: FeedPost) => {
         setPosts(prevPosts =>
@@ -94,6 +104,8 @@ export default function FeedV3Page() {
     const reloadFeed = () => {
         setPage(1);
         setHasMore(true);
+        // If page was already 1, it won't trigger the useEffect [page] if we just set it to 1.
+        // But since we are likely already at page 1 or higher, we can force a fetch if needed.
         fetchFeed(1, false);
     };
 
@@ -165,39 +177,40 @@ export default function FeedV3Page() {
                                     <p className="text-gray-400">Be the first to share something!</p>
                                 </div>
                             ) : (
-                                posts.map((post) => (
-                                    <FeedPostCard
-                                        key={post.post_id}
-                                        post={post}
-                                        onPostChange={handlePostChange}
-                                    />
-                                ))
+                                posts.map((post, index) => {
+                                    if (posts.length === index + 1) {
+                                        return (
+                                            <div ref={lastPostElementRef} key={post.post_id}>
+                                                <FeedPostCard
+                                                    post={post}
+                                                    onPostChange={handlePostChange}
+                                                />
+                                            </div>
+                                        );
+                                    } else {
+                                        return (
+                                            <FeedPostCard
+                                                key={post.post_id}
+                                                post={post}
+                                                onPostChange={handlePostChange}
+                                            />
+                                        );
+                                    }
+                                })
                             )}
                         </div>
 
-                        {/* Load More Button */}
-                        {posts.length > 0 && hasMore && (
-                            <div className="text-center mt-8 pb-8">
-                                <button
-                                    onClick={handleLoadMore}
-                                    disabled={loadingMore}
-                                    className="text-green-600 hover:text-green-700 font-medium disabled:opacity-50 flex items-center justify-center gap-2 mx-auto"
-                                >
-                                    {loadingMore ? (
-                                        <>
-                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
-                                            Loading...
-                                        </>
-                                    ) : (
-                                        'Load more posts'
-                                    )}
-                                </button>
+                        {/* Loading More Indicator */}
+                        {loadingMore && (
+                            <div className="text-center py-8">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+                                <p className="text-gray-600 mt-2">Loading more posts...</p>
                             </div>
                         )}
 
                         {posts.length > 0 && !hasMore && (
                             <div className="text-center mt-8 pb-8">
-                                <p className="text-gray-500">You've reached the end!</p>
+                                <p className="text-gray-500 font-medium italic">You've reached the end of the feed!</p>
                             </div>
                         )}
                     </div>
