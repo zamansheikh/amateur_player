@@ -65,7 +65,7 @@ export default function ReachEngagementCard() {
                     onClick={() => setActiveTab('reach')}
                     className={`flex-1 py-2 px-4 text-sm font-semibold rounded-xl transition-all ${
                         activeTab === 'reach'
-                            ? 'bg-white text-black shadow-sm ring-1 ring-gray-200'
+                            ? 'bg-white text-[#8BC342] shadow-sm ring-1 ring-gray-200'
                             : 'text-gray-500 hover:text-gray-700'
                     }`}
                 >
@@ -75,7 +75,7 @@ export default function ReachEngagementCard() {
                     onClick={() => setActiveTab('engagement')}
                     className={`flex-1 py-2 px-4 text-sm font-semibold rounded-xl transition-all ${
                         activeTab === 'engagement'
-                            ? 'bg-white text-black shadow-sm ring-1 ring-gray-200'
+                            ? 'bg-white text-[#8BC342] shadow-sm ring-1 ring-gray-200'
                             : 'text-gray-500 hover:text-gray-700'
                     }`}
                 >
