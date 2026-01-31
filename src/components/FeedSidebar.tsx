@@ -7,6 +7,7 @@ import { api } from '@/lib/api';
 import { tournamentApi } from '@/lib/api';
 import { Tournament } from '@/types';
 import EventCard from './EventCard';
+import ReachEngagementCard from './ReachEngagementCard';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import axios from 'axios';
@@ -366,6 +367,9 @@ export default function FeedSidebar() {
                     Show more
                 </button>
             </div> */}
+
+            {/* Reach & Engagement Card */}
+            <ReachEngagementCard />
 
             {/* Upcoming Events Section */}
             <div className="bg-white rounded-xl p-4 shadow-sm">
