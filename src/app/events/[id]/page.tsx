@@ -276,8 +276,8 @@ export default function EventDetailsPage() {
                 onClick={handleInterest}
                 disabled={!user || interestLoading}
                 className={`flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl font-bold transition-all ${event.is_interested
-                    ? 'bg-[#8BC342] text-white shadow-lg shadow-green-200'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? 'bg-[#8BC342] text-white shadow-lg shadow-green-200'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
               >
                 <ThumbsUp className={`w-5 h-5 ${event.is_interested ? 'fill-white' : ''}`} />
@@ -365,6 +365,15 @@ function InviteModal({ isOpen, onClose, eventId, defaultLat, defaultLong }: {
 }) {
   const [step, setInviteStep] = useState<'filter' | 'confirm'>('filter');
   const [loading, setLoading] = useState(false);
+
+  // Track which filters are enabled
+  const [enabledFilters, setEnabledFilters] = useState({
+    age: true,
+    gender: true,
+    bowling_average: true,
+    geo_radius: true
+  });
+
   const [inviteFilter, setInviteFilter] = useState({
     age: { min_age: 20, max_age: 30 },
     gender: { role: 'Male' },
@@ -376,24 +385,44 @@ function InviteModal({ isOpen, onClose, eventId, defaultLat, defaultLong }: {
   const handleFilter = async () => {
     try {
       setLoading(true);
-      const payload = {
-        age: {
+
+      // Dynamically build payload based on enabled filters
+      const payload: any = {};
+
+      if (enabledFilters.age) {
+        payload.age = {
           min_age: Number(inviteFilter.age.min_age),
           max_age: Number(inviteFilter.age.max_age)
-        },
-        gender: {
+        };
+      }
+
+      if (enabledFilters.gender) {
+        payload.gender = {
           role: inviteFilter.gender.role
-        },
-        bowling_average: {
+        };
+      }
+
+      if (enabledFilters.bowling_average) {
+        payload.bowling_average = {
           min_avg: Number(inviteFilter.bowling_average.min_avg),
           max_avg: Number(inviteFilter.bowling_average.max_avg)
-        },
-        geo_radius: {
+        };
+      }
+
+      if (enabledFilters.geo_radius) {
+        payload.geo_radius = {
           center_lat: Number(inviteFilter.geo_radius.center_lat),
           center_long: Number(inviteFilter.geo_radius.center_long),
           radius: Number(inviteFilter.geo_radius.radius)
-        }
-      };
+        };
+      }
+
+      // Validate at least one filter is present
+      if (Object.keys(payload).length === 0) {
+        alert("Please select at least one filter criterion (Age, Gender, Average, or Location).");
+        setLoading(false);
+        return;
+      }
 
       const response = await api.post('/api/filter', payload);
       setFilterResult(response.data);
@@ -445,77 +474,116 @@ function InviteModal({ isOpen, onClose, eventId, defaultLat, defaultLong }: {
           {step === 'filter' ? (
             <div className="space-y-6">
               {/* Age Filter */}
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Age Range</h3>
-                <div className="flex gap-4">
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-gray-900">Age Range</h3>
                   <input
-                    type="number"
-                    placeholder="Min"
-                    className="w-full p-2 border border-gray-300 rounded-lg"
-                    value={inviteFilter.age.min_age}
-                    onChange={(e) => setInviteFilter(prev => ({ ...prev, age: { ...prev.age, min_age: parseInt(e.target.value) || 0 } }))}
-                  />
-                  <input
-                    type="number"
-                    placeholder="Max"
-                    className="w-full p-2 border border-gray-300 rounded-lg"
-                    value={inviteFilter.age.max_age}
-                    onChange={(e) => setInviteFilter(prev => ({ ...prev, age: { ...prev.age, max_age: parseInt(e.target.value) || 0 } }))}
+                    type="checkbox"
+                    checked={enabledFilters.age}
+                    onChange={(e) => setEnabledFilters(prev => ({ ...prev, age: e.target.checked }))}
+                    className="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                   />
                 </div>
+                {enabledFilters.age && (
+                  <div className="flex gap-4">
+                    <input
+                      type="number"
+                      placeholder="Min"
+                      className="w-full p-2 border border-gray-300 rounded-lg"
+                      value={inviteFilter.age.min_age}
+                      onChange={(e) => setInviteFilter(prev => ({ ...prev, age: { ...prev.age, min_age: parseInt(e.target.value) || 0 } }))}
+                    />
+                    <input
+                      type="number"
+                      placeholder="Max"
+                      className="w-full p-2 border border-gray-300 rounded-lg"
+                      value={inviteFilter.age.max_age}
+                      onChange={(e) => setInviteFilter(prev => ({ ...prev, age: { ...prev.age, max_age: parseInt(e.target.value) || 0 } }))}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Gender Filter */}
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Gender</h3>
-                <select
-                  className="w-full p-2 border border-gray-300 rounded-lg bg-white"
-                  value={inviteFilter.gender.role}
-                  onChange={(e) => setInviteFilter(prev => ({ ...prev, gender: { ...prev.gender, role: e.target.value } }))}
-                >
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Both">Both</option>
-                </select>
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-gray-900">Gender</h3>
+                  <input
+                    type="checkbox"
+                    checked={enabledFilters.gender}
+                    onChange={(e) => setEnabledFilters(prev => ({ ...prev, gender: e.target.checked }))}
+                    className="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                  />
+                </div>
+                {enabledFilters.gender && (
+                  <select
+                    className="w-full p-2 border border-gray-300 rounded-lg bg-white"
+                    value={inviteFilter.gender.role}
+                    onChange={(e) => setInviteFilter(prev => ({ ...prev, gender: { ...prev.gender, role: e.target.value } }))}
+                  >
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                  </select>
+                )}
               </div>
 
               {/* Bowling Avg Filter */}
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Bowling Average</h3>
-                <div className="flex gap-4">
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-gray-900">Bowling Average</h3>
                   <input
-                    type="number"
-                    placeholder="Min"
-                    className="w-full p-2 border border-gray-300 rounded-lg"
-                    value={inviteFilter.bowling_average.min_avg}
-                    onChange={(e) => setInviteFilter(prev => ({ ...prev, bowling_average: { ...prev.bowling_average, min_avg: parseInt(e.target.value) || 0 } }))}
-                  />
-                  <input
-                    type="number"
-                    placeholder="Max"
-                    className="w-full p-2 border border-gray-300 rounded-lg"
-                    value={inviteFilter.bowling_average.max_avg}
-                    onChange={(e) => setInviteFilter(prev => ({ ...prev, bowling_average: { ...prev.bowling_average, max_avg: parseInt(e.target.value) || 0 } }))}
+                    type="checkbox"
+                    checked={enabledFilters.bowling_average}
+                    onChange={(e) => setEnabledFilters(prev => ({ ...prev, bowling_average: e.target.checked }))}
+                    className="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                   />
                 </div>
+                {enabledFilters.bowling_average && (
+                  <div className="flex gap-4">
+                    <input
+                      type="number"
+                      placeholder="Min"
+                      className="w-full p-2 border border-gray-300 rounded-lg"
+                      value={inviteFilter.bowling_average.min_avg}
+                      onChange={(e) => setInviteFilter(prev => ({ ...prev, bowling_average: { ...prev.bowling_average, min_avg: parseInt(e.target.value) || 0 } }))}
+                    />
+                    <input
+                      type="number"
+                      placeholder="Max"
+                      className="w-full p-2 border border-gray-300 rounded-lg"
+                      value={inviteFilter.bowling_average.max_avg}
+                      onChange={(e) => setInviteFilter(prev => ({ ...prev, bowling_average: { ...prev.bowling_average, max_avg: parseInt(e.target.value) || 0 } }))}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Radius Filter */}
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Location Radius (Miles)</h3>
-                <div className="space-y-2">
-                  <div className="flex gap-2 text-sm text-gray-500 mb-1">
-                    <span>Center:</span>
-                    <span>{inviteFilter.geo_radius.center_lat.toFixed(4)}, {inviteFilter.geo_radius.center_long.toFixed(4)}</span>
-                  </div>
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-gray-900">Location Radius</h3>
                   <input
-                    type="number"
-                    placeholder="Radius in miles"
-                    className="w-full p-2 border border-gray-300 rounded-lg"
-                    value={inviteFilter.geo_radius.radius}
-                    onChange={(e) => setInviteFilter(prev => ({ ...prev, geo_radius: { ...prev.geo_radius, radius: parseInt(e.target.value) || 0 } }))}
+                    type="checkbox"
+                    checked={enabledFilters.geo_radius}
+                    onChange={(e) => setEnabledFilters(prev => ({ ...prev, geo_radius: e.target.checked }))}
+                    className="w-5 h-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                   />
                 </div>
+                {enabledFilters.geo_radius && (
+                  <div className="space-y-2">
+                    <div className="flex gap-2 text-sm text-gray-500 mb-1">
+                      <span>Center:</span>
+                      <span>{inviteFilter.geo_radius.center_lat.toFixed(4)}, {inviteFilter.geo_radius.center_long.toFixed(4)}</span>
+                    </div>
+                    <input
+                      type="number"
+                      placeholder="Radius in miles"
+                      className="w-full p-2 border border-gray-300 rounded-lg"
+                      value={inviteFilter.geo_radius.radius}
+                      onChange={(e) => setInviteFilter(prev => ({ ...prev, geo_radius: { ...prev.geo_radius, radius: parseInt(e.target.value) || 0 } }))}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           ) : (
