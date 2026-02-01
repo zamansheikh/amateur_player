@@ -209,6 +209,7 @@ export default function EventsPage() {
   const flyerUpload = useCloudUpload();
   const [createForm, setCreateForm] = useState({
     title: '',
+    event_type: 'Podcast',
     description: '',
     date: '',
     time: '',
@@ -420,6 +421,7 @@ export default function EventsPage() {
       const payload = {
         meta: {
           title: createForm.title,
+          event_type: createForm.event_type,
           description: createForm.description,
           flyer_url: finalFlyerUrl
         },
@@ -477,6 +479,7 @@ export default function EventsPage() {
   const resetForm = () => {
     setCreateForm({
       title: '',
+      event_type: 'Podcast',
       description: '',
       date: '',
       time: '',
@@ -1012,6 +1015,23 @@ export default function EventsPage() {
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8BC342] focus:border-transparent outline-none"
                     placeholder="e.g. Saturday Night Tournament"
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Event Type</label>
+                  <select
+                    required
+                    value={createForm.event_type}
+                    onChange={e => setCreateForm({ ...createForm, event_type: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8BC342] focus:border-transparent outline-none bg-white"
+                  >
+                    <option value="Podcast">Podcast</option>
+                    <option value="Tournament">Tournament</option>
+                    <option value="Practice">Practice</option>
+                    <option value="Charity Event">Charity Event</option>
+                    <option value="Sweeper">Sweeper</option>
+                    <option value="Senior Event">Senior Event</option>
+                    <option value="Youth Event">Youth Event</option>
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>

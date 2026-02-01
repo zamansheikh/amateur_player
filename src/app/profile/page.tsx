@@ -22,7 +22,7 @@ export default function ProfilePage() {
     const coverUpload = useCloudUpload();
     const videoUpload = useCloudUpload();
     const { geocodeMultiple, results: addressSuggestions, isLoading: isGeocodingLoading } = useMapboxGeocoding();
-    
+
     const [editMode, setEditMode] = useState({
         name: false,
         bio: false,
@@ -59,8 +59,8 @@ export default function ProfilePage() {
     const [activeCropType, setActiveCropType] = useState<'profile' | 'cover'>('profile');
 
     // Optimistic UI state
-    const [displayAddress, setDisplayAddress] = useState<{address: string, zipcode: string} | null>(null);
-    const [displayHomeCenter, setDisplayHomeCenter] = useState<{name: string, address: string, id: number, is_public: boolean} | null>(null);
+    const [displayAddress, setDisplayAddress] = useState<{ address: string, zipcode: string } | null>(null);
+    const [displayHomeCenter, setDisplayHomeCenter] = useState<{ name: string, address: string, id: number, is_public: boolean } | null>(null);
 
     const [formData, setFormData] = useState({
         first_name: '',
@@ -119,7 +119,7 @@ export default function ProfilePage() {
                 const desc = user.ball_handling_style.description;
                 if (desc.includes('Righty')) handedness = 'Righty';
                 else if (desc.includes('Lefty')) handedness = 'Lefty';
-                
+
                 if (desc.includes('One handed')) ball_carry = 'One handed';
                 else if (desc.includes('Two handed')) ball_carry = 'Two handed';
             }
@@ -155,7 +155,7 @@ export default function ProfilePage() {
                     zipcode: user.address_data.zipcode
                 });
             }
-            
+
             if (user.home_center_data?.center) {
                 setDisplayHomeCenter({
                     name: user.home_center_data.center.name,
@@ -188,7 +188,7 @@ export default function ProfilePage() {
             };
 
             const response = await axios.get(`${baseUrl}/api/stats/bowling`, { headers });
-            
+
             if (response.data && response.data.bowling_stat) {
                 setBowlingStats(response.data.bowling_stat);
             }
@@ -211,7 +211,7 @@ export default function ProfilePage() {
             if (field === 'name') {
                 await axios.post(
                     `${baseUrl}/api/profile/update/name`,
-                    { 
+                    {
                         first_name: formData.first_name,
                         last_name: formData.last_name
                     },
@@ -220,49 +220,51 @@ export default function ProfilePage() {
             } else if (field === 'bio') {
                 await axios.post(
                     `${baseUrl}/api/profile/bio`,
-                    { 
-                        content: formData.bio, 
-                        is_public: privacySettings.bio 
+                    {
+                        content: formData.bio,
+                        is_public: privacySettings.bio
                     },
                     { headers }
                 );
             } else if (field === 'gender') {
                 await axios.post(
                     `${baseUrl}/api/profile/gender`,
-                    { 
-                        role: formData.gender, 
-                        is_public: privacySettings.gender 
+                    {
+                        role: formData.gender,
+                        is_public: privacySettings.gender
                     },
                     { headers }
                 );
             } else if (field === 'ballHandling') {
                 await axios.post(
                     `${baseUrl}/api/profile/ball-handling-style`,
-                    { 
+                    {
                         handedness: formData.handedness,
                         ball_carry: formData.ball_carry,
-                        is_public: privacySettings.ballHandling 
+                        is_public: privacySettings.ballHandling
                     },
                     { headers }
                 );
             } else if (field === 'birthdate') {
                 await axios.post(
                     `${baseUrl}/api/profile/birth-date`,
-                    { 
-                        date: formData.birthdate, 
-                        is_public: privacySettings.birthdate 
+                    {
+                        date: formData.birthdate,
+                        is_public: privacySettings.birthdate
                     },
                     { headers }
                 );
             } else if (field === 'address') {
                 await axios.post(
                     `${baseUrl}/api/profile/address`,
-                    { 
-                        address_str: formData.address,
-                        zipcode: formData.zipcode || '',
-                        lat: formData.latitude || '0',
-                        long: formData.longitude || '0',
-                        is_public: privacySettings.address 
+                    {
+                        location: {
+                            address_str: formData.address,
+                            zipcode: formData.zipcode || '',
+                            lat: formData.latitude || '0',
+                            long: formData.longitude || '0'
+                        },
+                        is_public: privacySettings.address
                     },
                     { headers }
                 );
@@ -271,7 +273,7 @@ export default function ProfilePage() {
             await refreshUser();
             setUploadMessage({ type: 'success', text: `${field.charAt(0).toUpperCase() + field.slice(1)} updated successfully!` });
             setEditMode(prev => ({ ...prev, [field]: false }));
-            
+
             // Clear success message after 3 seconds
             setTimeout(() => setUploadMessage(null), 3000);
         } catch (error: any) {
@@ -323,7 +325,7 @@ export default function ProfilePage() {
             setCropModalOpen(true);
         });
         reader.readAsDataURL(file);
-        
+
         // Clear input value so selecting the same file works again
         e.target.value = '';
     };
@@ -340,7 +342,7 @@ export default function ProfilePage() {
         try {
             // Step 1: Upload to cloud storage
             const uploadResult = await uploadService.uploadFile(file, 'cdn');
-            
+
             if (!uploadResult.success) {
                 setUploadMessage({ type: 'error', text: `Failed to upload: ${uploadResult.error}` });
                 return;
@@ -361,7 +363,7 @@ export default function ProfilePage() {
             if (response.status === 200 || response.status === 201) {
                 await refreshUser();
                 setUploadMessage({ type: 'success', text: `${type === 'profile' ? 'Profile picture' : 'Cover photo'} updated successfully!` });
-                
+
                 // Clear success message after 3 seconds
                 setTimeout(() => setUploadMessage(null), 3000);
             }
@@ -393,7 +395,7 @@ export default function ProfilePage() {
         try {
             // Step 1: Upload to cloud storage
             const uploadResult = await videoUpload.uploadFile(file, 'cdn');
-            
+
             if (!uploadResult.success) {
                 setUploadMessage({ type: 'error', text: `Failed to upload video: ${uploadResult.error}` });
                 return;
@@ -414,7 +416,7 @@ export default function ProfilePage() {
             if (response.status === 200 || response.status === 201) {
                 await refreshUser();
                 setUploadMessage({ type: 'success', text: 'Intro video updated successfully!' });
-                
+
                 // Clear success message after 3 seconds
                 setTimeout(() => setUploadMessage(null), 3000);
             }
@@ -443,7 +445,7 @@ export default function ProfilePage() {
     // Address search with debounce
     const handleAddressSearch = async (query: string) => {
         setAddressSearchQuery(query);
-        
+
         if (addressDebounceTimer.current) {
             clearTimeout(addressDebounceTimer.current);
         }
@@ -454,11 +456,11 @@ export default function ProfilePage() {
         }
 
         addressDebounceTimer.current = setTimeout(async () => {
-            const results = await geocodeMultiple(query, { 
+            const results = await geocodeMultiple(query, {
                 types: ['address', 'place', 'postcode'],
-                limit: 5 
+                limit: 5
             });
-            
+
             if (results.length > 0) {
                 setShowAddressSuggestions(true);
             }
@@ -541,10 +543,10 @@ export default function ProfilePage() {
             {/* Cover Photo Section */}
             <div className="relative h-64 bg-linear-to-r from-green-600 to-green-400 overflow-hidden group">
                 {user?.cover_photo_url && (
-                    <img 
-                        src={user.cover_photo_url} 
-                        alt="Cover" 
-                        className="w-full h-full object-cover" 
+                    <img
+                        src={user.cover_photo_url}
+                        alt="Cover"
+                        className="w-full h-full object-cover"
                     />
                 )}
                 <button
@@ -555,12 +557,12 @@ export default function ProfilePage() {
                     {coverUpload.isUploading ? (
                         <>
                             <Loader className="w-5 h-5 animate-spin" />
-                                <span className="text-sm">{coverUpload.progress}%</span>
-                            </>
-                        ) : (
-                            <Camera className="w-5 h-5" />
-                        )}
-                    </button>
+                            <span className="text-sm">{coverUpload.progress}%</span>
+                        </>
+                    ) : (
+                        <Camera className="w-5 h-5" />
+                    )}
+                </button>
                 {coverUpload.isUploading && (
                     <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-3">
                         <div className="flex items-center justify-between text-white text-sm mb-2">
@@ -597,10 +599,10 @@ export default function ProfilePage() {
                                 <div className="relative -mt-24 sm:-mt-32 group shrink-0">
                                     <div className="w-40 h-40 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white flex items-center justify-center">
                                         {user?.profile_picture_url ? (
-                                            <img 
-                                                src={user.profile_picture_url} 
-                                                alt={user.name} 
-                                                className="w-full h-full object-cover" 
+                                            <img
+                                                src={user.profile_picture_url}
+                                                alt={user.name}
+                                                className="w-full h-full object-cover"
                                             />
                                         ) : (
                                             <span style={{ color: '#8BC342' }} className="text-5xl font-bold">
@@ -679,9 +681,9 @@ export default function ProfilePage() {
                                             {user?.is_pro && (
                                                 <div className="flex items-center">
                                                     <svg className="w-6 h-6 text-[#8BC342]" viewBox="0 0 24 24" fill="currentColor">
-                                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                                                        <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.2"/>
-                                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                                                        <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.2" />
+                                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                                                     </svg>
                                                 </div>
                                             )}
@@ -850,11 +852,10 @@ export default function ProfilePage() {
 
                         {/* Upload Message */}
                         {uploadMessage && (
-                            <div className={`mb-6 p-4 rounded-lg flex items-start gap-3 ${
-                                uploadMessage.type === 'success'
-                                    ? 'bg-green-50 border border-green-200 text-green-700'
-                                    : 'bg-red-50 border border-red-200 text-red-700'
-                            }`}>
+                            <div className={`mb-6 p-4 rounded-lg flex items-start gap-3 ${uploadMessage.type === 'success'
+                                ? 'bg-green-50 border border-green-200 text-green-700'
+                                : 'bg-red-50 border border-red-200 text-red-700'
+                                }`}>
                                 <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
                                 <p className="text-sm">{uploadMessage.text}</p>
                             </div>
@@ -870,51 +871,46 @@ export default function ProfilePage() {
                             <div className="flex overflow-x-auto">
                                 <button
                                     onClick={() => setActiveTab('info')}
-                                    className={`px-6 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition ${
-                                        activeTab === 'info'
-                                            ? 'border-green-600 text-green-600'
-                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                    }`}
+                                    className={`px-6 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition ${activeTab === 'info'
+                                        ? 'border-green-600 text-green-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                        }`}
                                 >
                                     Info
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('cards')}
-                                    className={`px-6 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition ${
-                                        activeTab === 'cards'
-                                            ? 'border-green-600 text-green-600'
-                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                    }`}
+                                    className={`px-6 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition ${activeTab === 'cards'
+                                        ? 'border-green-600 text-green-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                        }`}
                                 >
                                     Cards
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('stats')}
-                                    className={`px-6 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition ${
-                                        activeTab === 'stats'
-                                            ? 'border-green-600 text-green-600'
-                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                    }`}
+                                    className={`px-6 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition ${activeTab === 'stats'
+                                        ? 'border-green-600 text-green-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                        }`}
                                 >
                                     Stats
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('posts')}
-                                    className={`px-6 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition ${
-                                        activeTab === 'posts'
-                                            ? 'border-green-600 text-green-600'
-                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                    }`}
+                                    className={`px-6 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition ${activeTab === 'posts'
+                                        ? 'border-green-600 text-green-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                        }`}
                                 >
                                     Posts
                                 </button>
                                 <button
                                     onClick={() => setActiveTab('media')}
-                                    className={`px-6 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition ${
-                                        activeTab === 'media'
-                                            ? 'border-green-600 text-green-600'
-                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                    }`}
+                                    className={`px-6 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition ${activeTab === 'media'
+                                        ? 'border-green-600 text-green-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                        }`}
                                 >
                                     Media
                                 </button>
@@ -927,180 +923,74 @@ export default function ProfilePage() {
                         {/* Info Tab */}
                         {activeTab === 'info' && (
                             <div className="space-y-6">
-                                    {/* Email */}
-                                    <div className="flex items-start justify-between pb-6 border-b border-gray-200 last:border-0">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <Mail className="w-4 h-4 text-gray-500" />
-                                                <label className="text-sm font-semibold text-gray-700">Email</label>
-                                            </div>
-                                            <p className="text-gray-600">{user?.email || 'Not provided'}</p>
-                                            <div className="flex items-center gap-2 mt-2">
-                                                <span className="text-xs text-gray-500">Private (cannot be changed)</span>
-                                            </div>
+                                {/* Email */}
+                                <div className="flex items-start justify-between pb-6 border-b border-gray-200 last:border-0">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <Mail className="w-4 h-4 text-gray-500" />
+                                            <label className="text-sm font-semibold text-gray-700">Email</label>
+                                        </div>
+                                        <p className="text-gray-600">{user?.email || 'Not provided'}</p>
+                                        <div className="flex items-center gap-2 mt-2">
+                                            <span className="text-xs text-gray-500">Private (cannot be changed)</span>
                                         </div>
                                     </div>
+                                </div>
 
-                                    {/* Gender */}
-                                    <div className="flex items-start justify-between pb-6 border-b border-gray-200 last:border-0 group">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <label className="text-sm font-semibold text-gray-700">Gender</label>
-                                            </div>
-                                            {editMode.gender ? (
-                                                <div className="space-y-2">
-                                                    <select
-                                                        value={formData.gender}
-                                                        onChange={(e) => setFormData(prev => ({ ...prev, gender: e.target.value }))}
-                                                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-                                                    >
-                                                        <option value="">Select gender</option>
-                                                        <option value="Male">Male</option>
-                                                        <option value="Female">Female</option>
-                                                    </select>
-                                                    <div className="flex items-center gap-2 mt-2">
-                                                        <input
-                                                            type="checkbox"
-                                                            id="gender-privacy"
-                                                            checked={privacySettings.gender}
-                                                            onChange={(e) => setPrivacySettings(prev => ({ ...prev, gender: e.target.checked }))}
-                                                            className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-                                                        />
-                                                        <label htmlFor="gender-privacy" className="text-sm text-gray-600 flex items-center gap-1">
-                                                            {privacySettings.gender ? (
-                                                                <><Globe className="w-3 h-3 text-green-600" /> Make this public</>
-                                                            ) : (
-                                                                <><Lock className="w-3 h-3 text-gray-500" /> Make this public</>
-                                                            )}
-                                                        </label>
-                                                    </div>
-                                                    <div className="flex justify-end gap-2">
-                                                        <button
-                                                            onClick={() => setEditMode(prev => ({ ...prev, gender: false }))}
-                                                            className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded"
-                                                        >
-                                                            Cancel
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleSaveField('gender')}
-                                                            className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
-                                                        >
-                                                            Save
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <div>
-                                                    <div className="flex items-center justify-between">
-                                                        <p className="text-gray-600">{(user?.gender_data?.role === 'Women' ? 'Female' : user?.gender_data?.role) || 'Not provided'}</p>
-                                                        <button
-                                                            onClick={() => setEditMode(prev => ({ ...prev, gender: true }))}
-                                                            className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1 hover:bg-gray-100 rounded transition text-gray-500"
-                                                        >
-                                                            <Edit2 className="w-4 h-4" />
-                                                        </button>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 mt-2">
-                                                        <span className="text-xs flex items-center gap-1">
-                                                            {privacySettings.gender ? (
-                                                                <><Globe className="w-3 h-3 text-green-600" /> <span className="text-green-600 font-medium">Public</span></>
-                                                            ) : (
-                                                                <><Lock className="w-3 h-3 text-gray-500" /> <span className="text-gray-500 font-medium">Private</span></>
-                                                            )}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            )}
+                                {/* Gender */}
+                                <div className="flex items-start justify-between pb-6 border-b border-gray-200 last:border-0 group">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <label className="text-sm font-semibold text-gray-700">Gender</label>
                                         </div>
-                                    </div>
-
-                                    {/* Birthdate */}
-                                    <div className="flex items-start justify-between pb-6 border-b border-gray-200 last:border-0 group">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <label className="text-sm font-semibold text-gray-700">Birthdate</label>
-                                            </div>
-                                            {editMode.birthdate ? (
-                                                <div className="space-y-2">
+                                        {editMode.gender ? (
+                                            <div className="space-y-2">
+                                                <select
+                                                    value={formData.gender}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, gender: e.target.value }))}
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                >
+                                                    <option value="">Select gender</option>
+                                                    <option value="Male">Male</option>
+                                                    <option value="Female">Female</option>
+                                                </select>
+                                                <div className="flex items-center gap-2 mt-2">
                                                     <input
-                                                        type="date"
-                                                        value={formData.birthdate}
-                                                        onChange={(e) => setFormData(prev => ({ ...prev, birthdate: e.target.value }))}
-                                                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                        type="checkbox"
+                                                        id="gender-privacy"
+                                                        checked={privacySettings.gender}
+                                                        onChange={(e) => setPrivacySettings(prev => ({ ...prev, gender: e.target.checked }))}
+                                                        className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
                                                     />
-                                                    <div className="flex items-center gap-2">
-                                                        <input
-                                                            type="checkbox"
-                                                            id="birthdate-privacy"
-                                                            checked={privacySettings.birthdate}
-                                                            onChange={(e) => setPrivacySettings(prev => ({ ...prev, birthdate: e.target.checked }))}
-                                                            className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-                                                        />
-                                                        <label htmlFor="birthdate-privacy" className="text-sm text-gray-600 flex items-center gap-1">
-                                                            {privacySettings.birthdate ? (
-                                                                <><Globe className="w-3 h-3 text-green-600" /> Make this public</>
-                                                            ) : (
-                                                                <><Lock className="w-3 h-3 text-gray-500" /> Make this public</>
-                                                            )}
-                                                        </label>
-                                                    </div>
-                                                    <div className="flex justify-end gap-2">
-                                                        <button
-                                                            onClick={() => setEditMode(prev => ({ ...prev, birthdate: false }))}
-                                                            className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded"
-                                                        >
-                                                            Cancel
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleSaveField('birthdate')}
-                                                            className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
-                                                        >
-                                                            Save
-                                                        </button>
-                                                    </div>
+                                                    <label htmlFor="gender-privacy" className="text-sm text-gray-600 flex items-center gap-1">
+                                                        {privacySettings.gender ? (
+                                                            <><Globe className="w-3 h-3 text-green-600" /> Make this public</>
+                                                        ) : (
+                                                            <><Lock className="w-3 h-3 text-gray-500" /> Make this public</>
+                                                        )}
+                                                    </label>
                                                 </div>
-                                            ) : (
-                                                <div>
-                                                    <div className="flex items-center justify-between">
-                                                        <p className="text-gray-600">{user?.birthdate_data?.date || 'Not provided'}</p>
-                                                        <button
-                                                            onClick={() => setEditMode(prev => ({ ...prev, birthdate: true }))}
-                                                            className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1 hover:bg-gray-100 rounded transition text-gray-500"
-                                                        >
-                                                            <Edit2 className="w-4 h-4" />
-                                                        </button>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 mt-2">
-                                                        <span className="text-xs flex items-center gap-1">
-                                                            {privacySettings.birthdate ? (
-                                                                <><Globe className="w-3 h-3 text-green-600" /> <span className="text-green-600 font-medium">Public</span></>
-                                                            ) : (
-                                                                <><Lock className="w-3 h-3 text-gray-500" /> <span className="text-gray-500 font-medium">Private</span></>
-                                                            )}
-                                                        </span>
-                                                    </div>
+                                                <div className="flex justify-end gap-2">
+                                                    <button
+                                                        onClick={() => setEditMode(prev => ({ ...prev, gender: false }))}
+                                                        className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleSaveField('gender')}
+                                                        className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+                                                    >
+                                                        Save
+                                                    </button>
                                                 </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Address */}
-                                    <div className="flex items-start justify-between pb-6 border-b border-gray-200 last:border-0 group">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <MapPin className="w-4 h-4 text-gray-500" />
-                                                <label className="text-sm font-semibold text-gray-700">Address</label>
                                             </div>
+                                        ) : (
                                             <div>
                                                 <div className="flex items-center justify-between">
-                                                    <div className="space-y-1">
-                                                        <p className="text-gray-600">{displayAddress?.address || user?.address_data?.address_str || 'Not provided'}</p>
-                                                        {(displayAddress?.zipcode || user?.address_data?.zipcode) && (
-                                                            <p className="text-sm text-gray-500">Zipcode: {displayAddress?.zipcode || user?.address_data?.zipcode}</p>
-                                                        )}
-                                                    </div>
+                                                    <p className="text-gray-600">{(user?.gender_data?.role === 'Women' ? 'Female' : user?.gender_data?.role) || 'Not provided'}</p>
                                                     <button
-                                                        onClick={() => setAddressModalOpen(true)}
+                                                        onClick={() => setEditMode(prev => ({ ...prev, gender: true }))}
                                                         className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1 hover:bg-gray-100 rounded transition text-gray-500"
                                                     >
                                                         <Edit2 className="w-4 h-4" />
@@ -1108,7 +998,7 @@ export default function ProfilePage() {
                                                 </div>
                                                 <div className="flex items-center gap-2 mt-2">
                                                     <span className="text-xs flex items-center gap-1">
-                                                        {privacySettings.address ? (
+                                                        {privacySettings.gender ? (
                                                             <><Globe className="w-3 h-3 text-green-600" /> <span className="text-green-600 font-medium">Public</span></>
                                                         ) : (
                                                             <><Lock className="w-3 h-3 text-gray-500" /> <span className="text-gray-500 font-medium">Private</span></>
@@ -1116,123 +1006,61 @@ export default function ProfilePage() {
                                                     </span>
                                                 </div>
                                             </div>
-                                        </div>
+                                        )}
                                     </div>
+                                </div>
 
-                                    {/* Ball Handling Style */}
-                                    <div className="flex items-start justify-between pb-6 border-b border-gray-200 last:border-0 group">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <Dumbbell className="w-4 h-4 text-gray-500" />
-                                                <label className="text-sm font-semibold text-gray-700">Ball Handling</label>
-                                            </div>
-                                            {editMode.ballHandling ? (
-                                                <div className="space-y-3">
-                                                    <div className="grid grid-cols-2 gap-3">
-                                                        <div>
-                                                            <label className="text-xs text-gray-500 mb-1 block">Handedness</label>
-                                                            <select
-                                                                value={formData.handedness}
-                                                                onChange={(e) => setFormData(prev => ({ ...prev, handedness: e.target.value }))}
-                                                                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
-                                                            >
-                                                                <option value="">Select</option>
-                                                                <option value="Righty">Righty</option>
-                                                                <option value="Lefty">Lefty</option>
-                                                            </select>
-                                                        </div>
-                                                        <div>
-                                                            <label className="text-xs text-gray-500 mb-1 block">Style</label>
-                                                            <select
-                                                                value={formData.ball_carry}
-                                                                onChange={(e) => setFormData(prev => ({ ...prev, ball_carry: e.target.value }))}
-                                                                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
-                                                            >
-                                                                <option value="">Select</option>
-                                                                <option value="One handed">One handed</option>
-                                                                <option value="Two handed">Two handed</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 mt-2">
-                                                        <input
-                                                            type="checkbox"
-                                                            id="ballHandling-privacy"
-                                                            checked={privacySettings.ballHandling}
-                                                            onChange={(e) => setPrivacySettings(prev => ({ ...prev, ballHandling: e.target.checked }))}
-                                                            className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-                                                        />
-                                                        <label htmlFor="ballHandling-privacy" className="text-sm text-gray-600 flex items-center gap-1">
-                                                            {privacySettings.ballHandling ? (
-                                                                <><Globe className="w-3 h-3 text-green-600" /> Make this public</>
-                                                            ) : (
-                                                                <><Lock className="w-3 h-3 text-gray-500" /> Make this public</>
-                                                            )}
-                                                        </label>
-                                                    </div>
-                                                    <div className="flex justify-end gap-2">
-                                                        <button
-                                                            onClick={() => setEditMode(prev => ({ ...prev, ballHandling: false }))}
-                                                            className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded"
-                                                        >
-                                                            Cancel
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleSaveField('ballHandling')}
-                                                            className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
-                                                        >
-                                                            Save
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <div>
-                                                    <div className="flex items-center justify-between">
-                                                        <p className="text-gray-600">
-                                                            {user?.ball_handling_style?.description || 
-                                                             (formData.ball_carry && formData.handedness ? `${formData.ball_carry} ${formData.handedness}` : 'Not provided')}
-                                                        </p>
-                                                        <button
-                                                            onClick={() => setEditMode(prev => ({ ...prev, ballHandling: true }))}
-                                                            className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1 hover:bg-gray-100 rounded transition text-gray-500"
-                                                        >
-                                                            <Edit2 className="w-4 h-4" />
-                                                        </button>
-                                                    </div>
-                                                    <div className="flex items-center gap-2 mt-2">
-                                                        <span className="text-xs flex items-center gap-1">
-                                                            {privacySettings.ballHandling ? (
-                                                                <><Globe className="w-3 h-3 text-green-600" /> <span className="text-green-600 font-medium">Public</span></>
-                                                            ) : (
-                                                                <><Lock className="w-3 h-3 text-gray-500" /> <span className="text-gray-500 font-medium">Private</span></>
-                                                            )}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            )}
+                                {/* Birthdate */}
+                                <div className="flex items-start justify-between pb-6 border-b border-gray-200 last:border-0 group">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <label className="text-sm font-semibold text-gray-700">Birthdate</label>
                                         </div>
-                                    </div>
-
-                                    {/* Home Center */}
-                                    <div className="flex items-start justify-between pb-6 border-b border-gray-200 last:border-0 group">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-2">
-                                                <Building2 className="w-4 h-4 text-gray-500" />
-                                                <label className="text-sm font-semibold text-gray-700">Home Center</label>
+                                        {editMode.birthdate ? (
+                                            <div className="space-y-2">
+                                                <input
+                                                    type="date"
+                                                    value={formData.birthdate}
+                                                    onChange={(e) => setFormData(prev => ({ ...prev, birthdate: e.target.value }))}
+                                                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                />
+                                                <div className="flex items-center gap-2">
+                                                    <input
+                                                        type="checkbox"
+                                                        id="birthdate-privacy"
+                                                        checked={privacySettings.birthdate}
+                                                        onChange={(e) => setPrivacySettings(prev => ({ ...prev, birthdate: e.target.checked }))}
+                                                        className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                                                    />
+                                                    <label htmlFor="birthdate-privacy" className="text-sm text-gray-600 flex items-center gap-1">
+                                                        {privacySettings.birthdate ? (
+                                                            <><Globe className="w-3 h-3 text-green-600" /> Make this public</>
+                                                        ) : (
+                                                            <><Lock className="w-3 h-3 text-gray-500" /> Make this public</>
+                                                        )}
+                                                    </label>
+                                                </div>
+                                                <div className="flex justify-end gap-2">
+                                                    <button
+                                                        onClick={() => setEditMode(prev => ({ ...prev, birthdate: false }))}
+                                                        className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleSaveField('birthdate')}
+                                                        className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+                                                    >
+                                                        Save
+                                                    </button>
+                                                </div>
                                             </div>
+                                        ) : (
                                             <div>
                                                 <div className="flex items-center justify-between">
-                                                    <div className="space-y-1">
-                                                        <p className="text-gray-600">{displayHomeCenter?.name || user?.home_center_data?.center?.name || 'Not selected'}</p>
-                                                        {(displayHomeCenter?.address || user?.home_center_data?.center?.address_str) && (
-                                                            <p className="text-sm text-gray-500 flex items-center gap-1">
-                                                                <MapPin className="w-3 h-3" />
-                                                                {displayHomeCenter?.address || user?.home_center_data?.center?.address_str}
-                                                            </p>
-                                                        )}
-                                                    </div>
+                                                    <p className="text-gray-600">{user?.birthdate_data?.date || 'Not provided'}</p>
                                                     <button
-                                                        onClick={() => setHomeCenterModalOpen(true)}
+                                                        onClick={() => setEditMode(prev => ({ ...prev, birthdate: true }))}
                                                         className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1 hover:bg-gray-100 rounded transition text-gray-500"
                                                     >
                                                         <Edit2 className="w-4 h-4" />
@@ -1240,17 +1068,185 @@ export default function ProfilePage() {
                                                 </div>
                                                 <div className="flex items-center gap-2 mt-2">
                                                     <span className="text-xs flex items-center gap-1">
-                                                        {(displayHomeCenter?.is_public ?? user?.home_center_data?.is_public) ? (
+                                                        {privacySettings.birthdate ? (
                                                             <><Globe className="w-3 h-3 text-green-600" /> <span className="text-green-600 font-medium">Public</span></>
                                                         ) : (
                                                             <><Lock className="w-3 h-3 text-gray-500" /> <span className="text-gray-500 font-medium">Private</span></>
                                                         )}
                                                     </span>
                                                 </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Address */}
+                                <div className="flex items-start justify-between pb-6 border-b border-gray-200 last:border-0 group">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <MapPin className="w-4 h-4 text-gray-500" />
+                                            <label className="text-sm font-semibold text-gray-700">Address</label>
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center justify-between">
+                                                <div className="space-y-1">
+                                                    <p className="text-gray-600">{displayAddress?.address || user?.address_data?.address_str || 'Not provided'}</p>
+                                                    {(displayAddress?.zipcode || user?.address_data?.zipcode) && (
+                                                        <p className="text-sm text-gray-500">Zipcode: {displayAddress?.zipcode || user?.address_data?.zipcode}</p>
+                                                    )}
+                                                </div>
+                                                <button
+                                                    onClick={() => setAddressModalOpen(true)}
+                                                    className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1 hover:bg-gray-100 rounded transition text-gray-500"
+                                                >
+                                                    <Edit2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                            <div className="flex items-center gap-2 mt-2">
+                                                <span className="text-xs flex items-center gap-1">
+                                                    {privacySettings.address ? (
+                                                        <><Globe className="w-3 h-3 text-green-600" /> <span className="text-green-600 font-medium">Public</span></>
+                                                    ) : (
+                                                        <><Lock className="w-3 h-3 text-gray-500" /> <span className="text-gray-500 font-medium">Private</span></>
+                                                    )}
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Ball Handling Style */}
+                                <div className="flex items-start justify-between pb-6 border-b border-gray-200 last:border-0 group">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <Dumbbell className="w-4 h-4 text-gray-500" />
+                                            <label className="text-sm font-semibold text-gray-700">Ball Handling</label>
+                                        </div>
+                                        {editMode.ballHandling ? (
+                                            <div className="space-y-3">
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <div>
+                                                        <label className="text-xs text-gray-500 mb-1 block">Handedness</label>
+                                                        <select
+                                                            value={formData.handedness}
+                                                            onChange={(e) => setFormData(prev => ({ ...prev, handedness: e.target.value }))}
+                                                            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                                                        >
+                                                            <option value="">Select</option>
+                                                            <option value="Righty">Righty</option>
+                                                            <option value="Lefty">Lefty</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-xs text-gray-500 mb-1 block">Style</label>
+                                                        <select
+                                                            value={formData.ball_carry}
+                                                            onChange={(e) => setFormData(prev => ({ ...prev, ball_carry: e.target.value }))}
+                                                            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                                                        >
+                                                            <option value="">Select</option>
+                                                            <option value="One handed">One handed</option>
+                                                            <option value="Two handed">Two handed</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2 mt-2">
+                                                    <input
+                                                        type="checkbox"
+                                                        id="ballHandling-privacy"
+                                                        checked={privacySettings.ballHandling}
+                                                        onChange={(e) => setPrivacySettings(prev => ({ ...prev, ballHandling: e.target.checked }))}
+                                                        className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                                                    />
+                                                    <label htmlFor="ballHandling-privacy" className="text-sm text-gray-600 flex items-center gap-1">
+                                                        {privacySettings.ballHandling ? (
+                                                            <><Globe className="w-3 h-3 text-green-600" /> Make this public</>
+                                                        ) : (
+                                                            <><Lock className="w-3 h-3 text-gray-500" /> Make this public</>
+                                                        )}
+                                                    </label>
+                                                </div>
+                                                <div className="flex justify-end gap-2">
+                                                    <button
+                                                        onClick={() => setEditMode(prev => ({ ...prev, ballHandling: false }))}
+                                                        className="px-3 py-1 text-sm text-gray-600 hover:bg-gray-100 rounded"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleSaveField('ballHandling')}
+                                                        className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700"
+                                                    >
+                                                        Save
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div>
+                                                <div className="flex items-center justify-between">
+                                                    <p className="text-gray-600">
+                                                        {user?.ball_handling_style?.description ||
+                                                            (formData.ball_carry && formData.handedness ? `${formData.ball_carry} ${formData.handedness}` : 'Not provided')}
+                                                    </p>
+                                                    <button
+                                                        onClick={() => setEditMode(prev => ({ ...prev, ballHandling: true }))}
+                                                        className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1 hover:bg-gray-100 rounded transition text-gray-500"
+                                                    >
+                                                        <Edit2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                                <div className="flex items-center gap-2 mt-2">
+                                                    <span className="text-xs flex items-center gap-1">
+                                                        {privacySettings.ballHandling ? (
+                                                            <><Globe className="w-3 h-3 text-green-600" /> <span className="text-green-600 font-medium">Public</span></>
+                                                        ) : (
+                                                            <><Lock className="w-3 h-3 text-gray-500" /> <span className="text-gray-500 font-medium">Private</span></>
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Home Center */}
+                                <div className="flex items-start justify-between pb-6 border-b border-gray-200 last:border-0 group">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <Building2 className="w-4 h-4 text-gray-500" />
+                                            <label className="text-sm font-semibold text-gray-700">Home Center</label>
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center justify-between">
+                                                <div className="space-y-1">
+                                                    <p className="text-gray-600">{displayHomeCenter?.name || user?.home_center_data?.center?.name || 'Not selected'}</p>
+                                                    {(displayHomeCenter?.address || user?.home_center_data?.center?.address_str) && (
+                                                        <p className="text-sm text-gray-500 flex items-center gap-1">
+                                                            <MapPin className="w-3 h-3" />
+                                                            {displayHomeCenter?.address || user?.home_center_data?.center?.address_str}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                                <button
+                                                    onClick={() => setHomeCenterModalOpen(true)}
+                                                    className="opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1 hover:bg-gray-100 rounded transition text-gray-500"
+                                                >
+                                                    <Edit2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                            <div className="flex items-center gap-2 mt-2">
+                                                <span className="text-xs flex items-center gap-1">
+                                                    {(displayHomeCenter?.is_public ?? user?.home_center_data?.is_public) ? (
+                                                        <><Globe className="w-3 h-3 text-green-600" /> <span className="text-green-600 font-medium">Public</span></>
+                                                    ) : (
+                                                        <><Lock className="w-3 h-3 text-gray-500" /> <span className="text-gray-500 font-medium">Private</span></>
+                                                    )}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         )}
 
                         {/* Cards Tab */}
@@ -1383,11 +1379,11 @@ export default function ProfilePage() {
                                 ) : posts.length > 0 ? (
                                     <div className="space-y-6 max-w-2xl mx-auto">
                                         {posts.map((post) => (
-                                            <FeedPostCard 
-                                                key={post.post_id} 
-                                                post={post} 
+                                            <FeedPostCard
+                                                key={post.post_id}
+                                                post={post}
                                                 onPostChange={(updatedPost) => {
-                                                    setPosts(prevPosts => 
+                                                    setPosts(prevPosts =>
                                                         prevPosts.map(p => p.post_id === updatedPost.post_id ? updatedPost : p)
                                                     );
                                                 }}
@@ -1449,7 +1445,7 @@ export default function ProfilePage() {
                     type="following"
                     accessToken={user?.access_token || ''}
                 />
-                
+
                 <ImageCropperModal
                     isOpen={cropModalOpen}
                     onClose={() => setCropModalOpen(false)}
@@ -1496,10 +1492,12 @@ export default function ProfilePage() {
             await axios.post(
                 `${baseUrl}/api/profile/address`,
                 {
-                    address_str: address.address,
-                    zipcode: address.zipcode,
-                    lat: address.latitude,
-                    long: address.longitude,
+                    location: {
+                        address_str: address.address,
+                        zipcode: address.zipcode,
+                        lat: address.latitude,
+                        long: address.longitude
+                    },
                     is_public: privacySettings.address
                 },
                 { headers }
@@ -1549,7 +1547,7 @@ export default function ProfilePage() {
 
             setUploadMessage({ type: 'success', text: 'Home center updated successfully!' });
             setTimeout(() => setUploadMessage(null), 3000);
-            
+
             // Optionally refresh user data to show updated center
             // You might want to call a refresh function here
         } catch (error) {
@@ -1561,4 +1559,3 @@ export default function ProfilePage() {
         }
     }
 }
-              
