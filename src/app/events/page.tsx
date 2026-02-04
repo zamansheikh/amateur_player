@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { api } from "@/lib/api";
+import { BowlingCenter } from "@/types"; // Import BowlingCenter type
 import { format } from "date-fns";
 import { useCloudUpload } from "@/lib/useCloudUpload";
 import { useMapboxGeocoding } from '@/lib/useMapboxGeocoding';
@@ -17,6 +18,7 @@ import {
   MapPin,
   ChevronLeft,
   ChevronRight,
+  ChevronDown, // Import ChevronDown
   Plus,
   Star,
   Search,
@@ -29,6 +31,7 @@ import {
   LayoutList,
   FileText,
   Mail, // Imported Mail icon
+  Building2, // Import Building2 icon
 } from "lucide-react";
 
 // --- Interfaces ---
@@ -65,7 +68,8 @@ interface PlayerEvent {
   title: string;
   description: string;
   event_datetime: string;
-  location: EventLocation;
+  location?: EventLocation; // Location is optional if center is provided
+  center?: BowlingCenter;   // Center is optional if location is provided
   total_interested: number;
   is_interested: boolean;
   flyer_url?: string;
@@ -176,24 +180,34 @@ export default function EventsPage() {
       let matchesLocation = true;
 
       // If we have geocoded coordinates for the filter, use radius logic
-      if (filters.location && filterCoords && event.location.lat && event.location.long) {
-        const eventLat = parseFloat(event.location.lat);
-        const eventLng = parseFloat(event.location.long);
+      // Check if event has valid coordinates (location OR center)
+      const lat = event.location?.lat || event.center?.lat;
+      const long = event.location?.long || event.center?.long;
+
+      if (filters.location && filterCoords && lat && long) {
+        const eventLat = parseFloat(lat);
+        const eventLng = parseFloat(long);
 
         if (!isNaN(eventLat) && !isNaN(eventLng)) {
           const distance = calculateDistance(filterCoords.lat, filterCoords.lng, eventLat, eventLng);
           matchesLocation = distance <= parseFloat(filters.radius);
         } else {
-          // Fallback to string match if event location is invalid
+          // Fallback to string match if coordinates invalid
+          const address = event.location?.address_str || event.center?.address_str || '';
+          const zipcode = event.location?.zipcode || event.center?.zipcode || '';
+
           matchesLocation =
-            event.location.address_str.toLowerCase().includes(filters.location.toLowerCase()) ||
-            (!!event.location.zipcode && event.location.zipcode.includes(filters.location));
+            address.toLowerCase().includes(filters.location.toLowerCase()) ||
+            (!!zipcode && zipcode.includes(filters.location));
         }
       } else {
         // Fallback or while loading coords: text match
-        matchesLocation = !filters.location || !event.location ||
-          event.location.address_str.toLowerCase().includes(filters.location.toLowerCase()) ||
-          (!!event.location.zipcode && event.location.zipcode.includes(filters.location));
+        const address = event.location?.address_str || event.center?.address_str || '';
+        const zipcode = event.location?.zipcode || event.center?.zipcode || '';
+
+        matchesLocation = !filters.location ||
+          address.toLowerCase().includes(filters.location.toLowerCase()) ||
+          (!!zipcode && zipcode.includes(filters.location));
       }
 
       return matchesName && matchesLocation;
@@ -207,6 +221,13 @@ export default function EventsPage() {
   // Create/Edit Modal State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+
+  // Center Selection State
+  const [centers, setCenters] = useState<BowlingCenter[]>([]);
+  const [isLoadingCenters, setIsLoadingCenters] = useState(false);
+  const [centerSearch, setCenterSearch] = useState(''); // Search state for centers
+  const [isCenterDropdownOpen, setIsCenterDropdownOpen] = useState(false);
+  const [locationMode, setLocationMode] = useState<'custom' | 'center'>('center'); // Default to center for better data quality
 
   // Form State
   const flyerUpload = useCloudUpload();
@@ -222,6 +243,7 @@ export default function EventsPage() {
       lat: '',
       long: ''
     },
+    center_id: '', // New field for selected center ID
     flyer_url: ''
   });
   const [flyerFile, setFlyerFile] = useState<File | null>(null);
@@ -256,6 +278,18 @@ export default function EventsPage() {
     }
   };
 
+  const fetchCenters = async () => {
+    try {
+      setIsLoadingCenters(true);
+      const response = await api.get('/api/centers');
+      setCenters(response.data || []);
+    } catch (err) {
+      console.error('Error fetching centers:', err);
+    } finally {
+      setIsLoadingCenters(false);
+    }
+  };
+
   const fetchInvitations = async () => {
     if (!user) return;
     try {
@@ -285,12 +319,23 @@ export default function EventsPage() {
     }
   }, [viewMode]);
 
+  // Fetch centers when modal opens
+  useEffect(() => {
+    if (isCreateModalOpen && centers.length === 0) {
+      fetchCenters();
+    }
+  }, [isCreateModalOpen]);
+
   // --- Calendar Helpers ---
 
   const convertEventsToCalendarEvents = (playerEvents: PlayerEvent[]): CalendarEvent[] => {
     return playerEvents.map(event => {
       const eventDate = new Date(event.event_datetime);
       const isPast = eventDate < new Date();
+
+      // Determine location string safely
+      const locationStr = event.location?.address_str ||
+        (event.center ? `${event.center.name}, ${event.center.address_str}` : 'Unknown Location');
 
       return {
         id: event.event_id.toString(),
@@ -299,7 +344,7 @@ export default function EventsPage() {
         date: event.event_datetime.split('T')[0],
         time: format(eventDate, 'h:mm a'),
         description: event.description,
-        location: event.location.address_str,
+        location: locationStr,
         participants: event.total_interested,
         organizer: event.user.name,
         status: isPast ? 'completed' : 'upcoming',
@@ -415,10 +460,8 @@ export default function EventsPage() {
 
   const handleCreateEvent = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!createForm.location.lat) {
-      alert('Please select a location');
-      return;
-    }
+
+    // Validation moved to specific modes below
 
     setIsSubmitting(true);
     try {
@@ -436,7 +479,7 @@ export default function EventsPage() {
       // Combine date and time
       const dateTime = new Date(`${createForm.date}T${createForm.time || '00:00'}`);
 
-      const payload = {
+      const payload: any = {
         meta: {
           title: createForm.title,
           event_type: createForm.event_type,
@@ -444,13 +487,34 @@ export default function EventsPage() {
           flyer_url: finalFlyerUrl
         },
         event_datetime: dateTime.toISOString(),
-        location: {
+      };
+
+      if (locationMode === 'center') {
+        if (!createForm.center_id) {
+          alert('Please select a bowling center');
+          setIsSubmitting(false);
+          return;
+        }
+        payload.location = null;
+        payload.center = { center_id: createForm.center_id };
+
+        // Optional: Can fallback to center's location for geocoding if needed by backend, 
+        // but user spec says location: null when center is selected.
+      } else {
+        if (!createForm.location.lat) {
+          alert('Please select a location');
+          setIsSubmitting(false);
+          return;
+        }
+        // Payload adjustments for custom location
+        payload.center = { center_id: null }; // Explicitly nullify center ID as requested
+        payload.location = {
           address_str: createForm.location.address_str,
           zipcode: createForm.location.zipcode,
           lat: createForm.location.lat,
           long: createForm.location.long
-        }
-      };
+        };
+      }
 
       await api.post('/api/events/v1', payload);
 
@@ -502,6 +566,7 @@ export default function EventsPage() {
       date: '',
       time: '',
       location: { address_str: '', zipcode: '', lat: '', long: '' },
+      center_id: '',
       flyer_url: ''
     });
     setFlyerFile(null);
@@ -873,7 +938,7 @@ export default function EventsPage() {
                       <div className="space-y-4 pt-4 border-t border-gray-50 mt-auto">
                         <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 p-2.5 rounded-lg">
                           <MapPin className="w-4 h-4 shrink-0 text-[#8BC342]" />
-                          <span className="truncate">{event.location.address_str}</span>
+                          <span className="truncate">{event.location?.address_str || event.center?.address_str || 'Unknown Location'}</span>
                         </div>
 
                         <div className="flex items-center justify-between">
@@ -1000,7 +1065,7 @@ export default function EventsPage() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 p-2 rounded-lg max-w-[70%]">
                           <MapPin className="w-3 h-3 shrink-0 text-[#8BC342]" />
-                          <span className="truncate">{event.location.address_str}</span>
+                          <span className="truncate">{event.location?.address_str || event.center?.address_str || 'Unknown Location'}</span>
                         </div>
                         <div className="flex items-center gap-1.5 text-[#8BC342] text-xs font-bold border border-green-100 bg-green-50 px-2.5 py-1.5 rounded-lg shadow-sm">
                           <Star className="w-3.5 h-3.5 fill-current" />
@@ -1084,7 +1149,7 @@ export default function EventsPage() {
                       <div className="space-y-4 pt-4 border-t border-gray-50 mt-auto">
                         <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 p-2.5 rounded-lg">
                           <MapPin className="w-4 h-4 shrink-0 text-[#8BC342]" />
-                          <span className="truncate">{event.location.address_str}</span>
+                          <span className="truncate">{event.location?.address_str || event.center?.address_str || 'Unknown Location'}</span>
                         </div>
 
                         <div className="flex items-center justify-between">
@@ -1207,27 +1272,124 @@ export default function EventsPage() {
               {/* Location */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                {createForm.location.address_str ? (
-                  <div className="flex items-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                    <MapPin className="w-5 h-5 text-gray-500" />
-                    <span className="flex-1 text-sm text-gray-700">{createForm.location.address_str}</span>
+
+                {/* Location Type Toggle */}
+                <div className="flex bg-gray-100 p-1 rounded-lg mb-3">
+                  <button
+                    type="button"
+                    onClick={() => setLocationMode('center')}
+                    className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${locationMode === 'center' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'
+                      }`}
+                  >
+                    <Building2 className="w-4 h-4 inline-block mr-2" />
+                    Bowling Center
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLocationMode('custom')}
+                    className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${locationMode === 'custom' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'
+                      }`}
+                  >
+                    <MapPin className="w-4 h-4 inline-block mr-2" />
+                    Custom Location
+                  </button>
+                </div>
+
+                {locationMode === 'center' ? (
+                  <div className="relative">
+                    {/* Selected Center Display / Trigger */}
+                    <button
+                      type="button"
+                      onClick={() => setIsCenterDropdownOpen(!isCenterDropdownOpen)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-left flex items-center justify-between focus:ring-2 focus:ring-[#8BC342] focus:border-transparent"
+                    >
+                      <span className={`block truncate ${createForm.center_id ? 'text-gray-900' : 'text-gray-500'}`}>
+                        {createForm.center_id
+                          ? centers.find(c => c.id.toString() === createForm.center_id.toString())?.name || 'Unknown Center'
+                          : 'Select a Bowling Center...'}
+                      </span>
+                      <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isCenterDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {/* Dropdown Menu */}
+                    {isCenterDropdownOpen && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-40"
+                          onClick={() => setIsCenterDropdownOpen(false)}
+                        />
+                        <div className="absolute z-50 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+                          {/* Search Sticky Header */}
+                          <div className="sticky top-0 bg-white p-2 border-b border-gray-100 z-10">
+                            <div className="relative">
+                              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                              <input
+                                type="text"
+                                placeholder="Search centers..."
+                                className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent"
+                                value={centerSearch}
+                                onChange={(e) => setCenterSearch(e.target.value)}
+                                autoFocus
+                              />
+                            </div>
+                          </div>
+
+                          {/* Options List */}
+                          {isLoadingCenters ? (
+                            <div className="px-4 py-2 text-sm text-gray-500">Loading centers...</div>
+                          ) : centers.filter(c => c.name.toLowerCase().includes(centerSearch.toLowerCase()) || c.address_str.toLowerCase().includes(centerSearch.toLowerCase())).length === 0 ? (
+                            <div className="px-4 py-2 text-sm text-gray-500">No centers match your search</div>
+                          ) : (
+                            centers
+                              .filter(c =>
+                                c.name.toLowerCase().includes(centerSearch.toLowerCase()) ||
+                                c.address_str.toLowerCase().includes(centerSearch.toLowerCase())
+                              )
+                              .map(center => (
+                                <div
+                                  key={center.id}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setCreateForm({ ...createForm, center_id: center.id.toString() });
+                                    setIsCenterDropdownOpen(false);
+                                  }}
+                                  className={`cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-green-50 ${createForm.center_id === center.id.toString() ? 'bg-green-50 text-[#8BC342] font-medium' : 'text-gray-900'
+                                    }`}
+                                >
+                                  <span className="block truncate">{center.name}</span>
+                                  <span className="block truncate text-xs text-gray-500">{center.address_str}</span>
+                                </div>
+                              ))
+                          )}
+                        </div>
+                      </>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">Select a registered center for automatic verification and linking.</p>
+                  </div>
+                ) : (
+                  createForm.location.address_str ? (
+                    <div className="flex items-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                      <MapPin className="w-5 h-5 text-gray-500" />
+                      <span className="flex-1 text-sm text-gray-700">{createForm.location.address_str}</span>
+                      <button
+                        type="button"
+                        onClick={() => setIsAddressModalOpen(true)}
+                        className="text-sm text-[#8BC342] font-medium hover:underline"
+                      >
+                        Change
+                      </button>
+                    </div>
+                  ) : (
                     <button
                       type="button"
                       onClick={() => setIsAddressModalOpen(true)}
-                      className="text-sm text-[#8BC342] font-medium hover:underline"
+                      className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-[#8BC342] hover:text-[#8BC342] transition-colors flex items-center justify-center gap-2"
                     >
-                      Change
+                      <MapPin className="w-5 h-5" />
+                      Select Location
                     </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setIsAddressModalOpen(true)}
-                    className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-[#8BC342] hover:text-[#8BC342] transition-colors flex items-center justify-center gap-2"
-                  >
-                    <MapPin className="w-5 h-5" />
-                    Select Location
-                  </button>
+                  )
                 )}
               </div>
 
