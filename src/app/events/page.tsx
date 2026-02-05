@@ -238,7 +238,32 @@ export default function EventsPage() {
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
 
   // Manage Events Local Search
-  const [manageSearch, setManageSearch] = useState('');
+  const [manageFilters, setManageFilters] = useState({
+    name: '',
+    location: '',
+    radius: '50',
+  });
+  const [manageFilterCoords, setManageFilterCoords] = useState<{ lat: number, lng: number } | null>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (!manageFilters.location) {
+        setManageFilterCoords(null);
+        return;
+      }
+
+      try {
+        const result = await geocode(manageFilters.location);
+        if (result.success && result.latitude && result.longitude) {
+          setManageFilterCoords({ lat: result.latitude, lng: result.longitude });
+        }
+      } catch (error) {
+        console.error("Geocoding failed for manage filter:", error);
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [manageFilters.location, geocode]);
 
   // Form State
   const flyerUpload = useCloudUpload();
@@ -264,13 +289,45 @@ export default function EventsPage() {
 
   // Manage Events Filtering Logic
   const filteredMyEvents = useMemo(() => {
-    if (!manageSearch) return myEvents;
-    const lowerSearch = manageSearch.toLowerCase();
-    return myEvents.filter(event => 
-      event.title.toLowerCase().includes(lowerSearch) || 
-      event.description.toLowerCase().includes(lowerSearch)
-    );
-  }, [myEvents, manageSearch]);
+    return myEvents.filter(event => {
+      // Filter by Name
+      const matchesName = !manageFilters.name ||
+        event.title.toLowerCase().includes(manageFilters.name.toLowerCase()) ||
+        event.description.toLowerCase().includes(manageFilters.name.toLowerCase());
+
+      // Filter by Location 
+      let matchesLocation = true;
+
+      const lat = event.location?.lat || event.center?.lat;
+      const long = event.location?.long || event.center?.long;
+
+      if (manageFilters.location && manageFilterCoords && lat && long) {
+        const eventLat = parseFloat(lat);
+        const eventLng = parseFloat(long);
+
+        if (!isNaN(eventLat) && !isNaN(eventLng)) {
+          const distance = calculateDistance(manageFilterCoords.lat, manageFilterCoords.lng, eventLat, eventLng);
+          matchesLocation = distance <= parseFloat(manageFilters.radius);
+        } else {
+          const address = event.location?.address_str || event.center?.address_str || '';
+          const zipcode = event.location?.zipcode || event.center?.zipcode || '';
+
+          matchesLocation =
+            address.toLowerCase().includes(manageFilters.location.toLowerCase()) ||
+            (!!zipcode && zipcode.includes(manageFilters.location));
+        }
+      } else {
+        const address = event.location?.address_str || event.center?.address_str || '';
+        const zipcode = event.location?.zipcode || event.center?.zipcode || '';
+
+        matchesLocation = !manageFilters.location ||
+          address.toLowerCase().includes(manageFilters.location.toLowerCase()) ||
+          (!!zipcode && zipcode.includes(manageFilters.location));
+      }
+
+      return matchesName && matchesLocation;
+    });
+  }, [myEvents, manageFilters, manageFilterCoords]);
 
   // --- Data Fetching ---
 
@@ -1044,18 +1101,50 @@ export default function EventsPage() {
         {/* --- Manage Events View --- */}
         {viewMode === 'manage' && (
           <div className="space-y-6">
-            {/* Manage Events Search */}
+            {/* Manage Events Search/Filter Bar */}
             {user && (
               <div className="bg-white rounded-xl border border-gray-200 p-4 mb-2 shadow-sm">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search your events by title or description..."
-                    className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent transition-all"
-                    value={manageSearch}
-                    onChange={(e) => setManageSearch(e.target.value)}
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Search by Name */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search your events..."
+                      className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent transition-all"
+                      value={manageFilters.name}
+                      onChange={(e) => setManageFilters(prev => ({ ...prev, name: e.target.value }))}
+                    />
+                  </div>
+
+                  {/* Search by Location */}
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="City, State or Zip Code"
+                      className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent transition-all"
+                      value={manageFilters.location}
+                      onChange={(e) => setManageFilters(prev => ({ ...prev, location: e.target.value }))}
+                    />
+                  </div>
+
+                  {/* Radius */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-gray-500 whitespace-nowrap">Show within</span>
+                    <select
+                      className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#8BC342] transition-all"
+                      value={manageFilters.radius}
+                      onChange={(e) => setManageFilters(prev => ({ ...prev, radius: e.target.value }))}
+                    >
+                      <option value="10">10 Miles</option>
+                      <option value="25">25 Miles</option>
+                      <option value="50">50 Miles</option>
+                      <option value="100">100 Miles</option>
+                      <option value="250">250 Miles</option>
+                      <option value="500">500 Miles</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             )}
