@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import { useCloudUpload } from "@/lib/useCloudUpload";
 import { useMapboxGeocoding } from '@/lib/useMapboxGeocoding';
 import AddressModal from "@/components/AddressModal";
+import AddCenterModal from "@/components/AddCenterModal";
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from "next/navigation";
@@ -220,7 +221,9 @@ export default function EventsPage() {
 
   // Create/Edit Modal State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [createStep, setCreateStep] = useState(1); // 1 = Details, 2 = Invitations
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+  const [isAddCenterModalOpen, setIsAddCenterModalOpen] = useState(false);
 
   // Center Selection State
   const [centers, setCenters] = useState<BowlingCenter[]>([]);
@@ -228,6 +231,14 @@ export default function EventsPage() {
   const [centerSearch, setCenterSearch] = useState(''); // Search state for centers
   const [isCenterDropdownOpen, setIsCenterDropdownOpen] = useState(false);
   const [locationMode, setLocationMode] = useState<'custom' | 'center'>('center'); // Default to center for better data quality
+
+  // User Selection for Invitations
+  const [allUsers, setAllUsers] = useState<EventUser[]>([]);
+  const [invitationSearch, setInvitationSearch] = useState('');
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+
+  // Manage Events Local Search
+  const [manageSearch, setManageSearch] = useState('');
 
   // Form State
   const flyerUpload = useCloudUpload();
@@ -244,11 +255,22 @@ export default function EventsPage() {
       long: ''
     },
     center_id: '', // New field for selected center ID
-    flyer_url: ''
+    flyer_url: '',
+    invitedUserIds: [] as string[]
   });
   const [flyerFile, setFlyerFile] = useState<File | null>(null);
   const [flyerPreview, setFlyerPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Manage Events Filtering Logic
+  const filteredMyEvents = useMemo(() => {
+    if (!manageSearch) return myEvents;
+    const lowerSearch = manageSearch.toLowerCase();
+    return myEvents.filter(event => 
+      event.title.toLowerCase().includes(lowerSearch) || 
+      event.description.toLowerCase().includes(lowerSearch)
+    );
+  }, [myEvents, manageSearch]);
 
   // --- Data Fetching ---
 
@@ -290,6 +312,28 @@ export default function EventsPage() {
     }
   };
 
+  const fetchAllUsers = async () => {
+    try {
+      setIsLoadingUsers(true);
+      const response = await api.get('/api/profile/all');
+      const users = response.data || [];
+      // Filter out current user if user object is available
+      if (user) {
+        // Try multiple ID fields just in case 'id', 'user_id', 'userId'
+        const currentUserId = (user as any).user_id || (user as any).id;
+        if (currentUserId) {
+           setAllUsers(users.filter((u: any) => u.user_id !== currentUserId));
+           return;
+        }
+      }
+      setAllUsers(users);
+    } catch (err) {
+      console.error('Error fetching users:', err);
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
+
   const fetchInvitations = async () => {
     if (!user) return;
     try {
@@ -325,6 +369,13 @@ export default function EventsPage() {
       fetchCenters();
     }
   }, [isCreateModalOpen]);
+
+  // Fetch users when invitation step (step 2) is active
+  useEffect(() => {
+    if (createStep === 2 && allUsers.length === 0) {
+      fetchAllUsers();
+    }
+  }, [createStep]);
 
   // --- Calendar Helpers ---
 
@@ -487,6 +538,7 @@ export default function EventsPage() {
           flyer_url: finalFlyerUrl
         },
         event_datetime: dateTime.toISOString(),
+        invitations: createForm.invitedUserIds.length > 0 ? createForm.invitedUserIds : null,
       };
 
       if (locationMode === 'center') {
@@ -558,6 +610,16 @@ export default function EventsPage() {
     setIsAddressModalOpen(false);
   };
 
+  const handleCenterAdded = (newCenter: BowlingCenter) => {
+    setCenters(prev => [...prev, newCenter]);
+    setCreateForm(prev => ({
+      ...prev,
+      center_id: newCenter.id.toString()
+    }));
+    setIsCenterDropdownOpen(false);
+    setIsAddCenterModalOpen(false);
+  };
+
   const resetForm = () => {
     setCreateForm({
       title: '',
@@ -567,8 +629,10 @@ export default function EventsPage() {
       time: '',
       location: { address_str: '', zipcode: '', lat: '', long: '' },
       center_id: '',
-      flyer_url: ''
+      flyer_url: '',
+      invitedUserIds: []
     });
+    setCreateStep(1);
     setFlyerFile(null);
     setFlyerPreview(null);
     flyerUpload.reset();
@@ -980,6 +1044,22 @@ export default function EventsPage() {
         {/* --- Manage Events View --- */}
         {viewMode === 'manage' && (
           <div className="space-y-6">
+            {/* Manage Events Search */}
+            {user && (
+              <div className="bg-white rounded-xl border border-gray-200 p-4 mb-2 shadow-sm">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search your events by title or description..."
+                    className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent transition-all"
+                    value={manageSearch}
+                    onChange={(e) => setManageSearch(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+
             {!user ? (
               <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
                 <h3 className="text-lg font-medium text-gray-900">Sign in to manage events</h3>
@@ -1002,9 +1082,15 @@ export default function EventsPage() {
                   Create Event
                 </button>
               </div>
+            ) : filteredMyEvents.length === 0 ? (
+                 <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
+                    <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900">No events found</h3>
+                    <p className="text-gray-500">Try adjusting your search terms</p>
+                 </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {myEvents.map(event => (
+                {filteredMyEvents.map(event => (
                   <div key={event.event_id} className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
                     {/* Banner/Flyer */}
                     <div className="h-40 bg-gray-100 relative cursor-pointer" onClick={() => router.push(`/events/${event.event_id}`)}>
@@ -1192,280 +1278,462 @@ export default function EventsPage() {
       {/* --- Create Event Modal --- */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+            {/* Header - Fixed */}
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between shrink-0 bg-white rounded-t-xl z-10">
               <h2 className="text-xl font-bold text-gray-900">Create New Event</h2>
               <button onClick={() => setIsCreateModalOpen(false)} className="text-gray-400 hover:text-gray-600">
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateEvent} className="p-6 space-y-6">
-
-              {/* Title & Desc */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Event Title</label>
-                  <input
-                    type="text"
-                    required
-                    value={createForm.title}
-                    onChange={e => setCreateForm({ ...createForm, title: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8BC342] focus:border-transparent outline-none"
-                    placeholder="e.g. Saturday Night Tournament"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Event Type</label>
-                  <select
-                    required
-                    value={createForm.event_type}
-                    onChange={e => setCreateForm({ ...createForm, event_type: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8BC342] focus:border-transparent outline-none bg-white"
-                  >
-                    <option value="Podcast">Podcast</option>
-                    <option value="Tournament">Tournament</option>
-                    <option value="Practice">Practice</option>
-                    <option value="Charity Event">Charity Event</option>
-                    <option value="Sweeper">Sweeper</option>
-                    <option value="Senior Event">Senior Event</option>
-                    <option value="Youth Event">Youth Event</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                  <textarea
-                    rows={3}
-                    required
-                    value={createForm.description}
-                    onChange={e => setCreateForm({ ...createForm, description: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8BC342] focus:border-transparent outline-none resize-none"
-                    placeholder="Tell people about your event..."
-                  />
-                </div>
-              </div>
-
-              {/* Date & Time */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                  <input
-                    type="date"
-                    required
-                    value={createForm.date}
-                    onChange={e => setCreateForm({ ...createForm, date: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8BC342] focus:border-transparent outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-                  <input
-                    type="time"
-                    required
-                    value={createForm.time}
-                    onChange={e => setCreateForm({ ...createForm, time: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8BC342] focus:border-transparent outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* Location */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-
-                {/* Location Type Toggle */}
-                <div className="flex bg-gray-100 p-1 rounded-lg mb-3">
-                  <button
-                    type="button"
-                    onClick={() => setLocationMode('center')}
-                    className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${locationMode === 'center' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'
-                      }`}
-                  >
-                    <Building2 className="w-4 h-4 inline-block mr-2" />
-                    Bowling Center
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setLocationMode('custom')}
-                    className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${locationMode === 'custom' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'
-                      }`}
-                  >
-                    <MapPin className="w-4 h-4 inline-block mr-2" />
-                    Custom Location
-                  </button>
-                </div>
-
-                {locationMode === 'center' ? (
-                  <div className="relative">
-                    {/* Selected Center Display / Trigger */}
-                    <button
-                      type="button"
-                      onClick={() => setIsCenterDropdownOpen(!isCenterDropdownOpen)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-left flex items-center justify-between focus:ring-2 focus:ring-[#8BC342] focus:border-transparent"
-                    >
-                      <span className={`block truncate ${createForm.center_id ? 'text-gray-900' : 'text-gray-500'}`}>
-                        {createForm.center_id
-                          ? centers.find(c => c.id.toString() === createForm.center_id.toString())?.name || 'Unknown Center'
-                          : 'Select a Bowling Center...'}
-                      </span>
-                      <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isCenterDropdownOpen ? 'rotate-180' : ''}`} />
-                    </button>
-
-                    {/* Dropdown Menu */}
-                    {isCenterDropdownOpen && (
-                      <>
-                        <div
-                          className="fixed inset-0 z-40"
-                          onClick={() => setIsCenterDropdownOpen(false)}
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (createStep === 1) {
+                setCreateStep(2);
+              } else {
+                handleCreateEvent(e);
+              }
+            }} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+            
+              {/* Content - Scrollable */}
+              <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+                {createStep === 1 ? (
+                   <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6">
+                    {/* Title & Desc */}
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Event Title</label>
+                        <input
+                          type="text"
+                          required
+                          value={createForm.title}
+                          onChange={e => setCreateForm({ ...createForm, title: e.target.value })}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8BC342] focus:border-transparent outline-none"
+                          placeholder="e.g. Saturday Night Tournament"
                         />
-                        <div className="absolute z-50 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
-                          {/* Search Sticky Header */}
-                          <div className="sticky top-0 bg-white p-2 border-b border-gray-100 z-10">
-                            <div className="relative">
-                              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                              <input
-                                type="text"
-                                placeholder="Search centers..."
-                                className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent"
-                                value={centerSearch}
-                                onChange={(e) => setCenterSearch(e.target.value)}
-                                autoFocus
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Event Type</label>
+                        <select
+                          required
+                          value={createForm.event_type}
+                          onChange={e => setCreateForm({ ...createForm, event_type: e.target.value })}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8BC342] focus:border-transparent outline-none bg-white"
+                        >
+                          <option value="Podcast">Podcast</option>
+                          <option value="Tournament">Tournament</option>
+                          <option value="Practice">Practice</option>
+                          <option value="Charity Event">Charity Event</option>
+                          <option value="Sweeper">Sweeper</option>
+                          <option value="Senior Event">Senior Event</option>
+                          <option value="Youth Event">Youth Event</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea
+                          rows={3}
+                          required
+                          value={createForm.description}
+                          onChange={e => setCreateForm({ ...createForm, description: e.target.value })}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8BC342] focus:border-transparent outline-none resize-none"
+                          placeholder="Tell people about your event..."
+                        />
+                      </div>
+                    </div>
+
+                    {/* Date & Time */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                        <input
+                          type="date"
+                          required
+                          value={createForm.date}
+                          onChange={e => setCreateForm({ ...createForm, date: e.target.value })}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8BC342] focus:border-transparent outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                        <input
+                          type="time"
+                          required
+                          value={createForm.time}
+                          onChange={e => setCreateForm({ ...createForm, time: e.target.value })}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#8BC342] focus:border-transparent outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Location */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+
+                      {/* Location Type Toggle */}
+                      <div className="flex bg-gray-100 p-1 rounded-lg mb-3">
+                        <button
+                          type="button"
+                          onClick={() => setLocationMode('center')}
+                          className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${locationMode === 'center' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'
+                            }`}
+                        >
+                          <Building2 className="w-4 h-4 inline-block mr-2" />
+                          Bowling Center
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setLocationMode('custom')}
+                          className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${locationMode === 'custom' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'
+                            }`}
+                        >
+                          <MapPin className="w-4 h-4 inline-block mr-2" />
+                          Custom Location
+                        </button>
+                      </div>
+
+                      {locationMode === 'center' ? (
+                        <div className="relative">
+                          {/* Selected Center Display / Trigger */}
+                          <button
+                            type="button"
+                            onClick={() => setIsCenterDropdownOpen(!isCenterDropdownOpen)}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-left flex items-center justify-between focus:ring-2 focus:ring-[#8BC342] focus:border-transparent"
+                          >
+                            <span className={`block truncate ${createForm.center_id ? 'text-gray-900' : 'text-gray-500'}`}>
+                              {createForm.center_id
+                                ? centers.find(c => c.id.toString() === createForm.center_id.toString())?.name || 'Unknown Center'
+                                : 'Select a Bowling Center...'}
+                            </span>
+                            <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isCenterDropdownOpen ? 'rotate-180' : ''}`} />
+                          </button>
+
+                          {/* Dropdown Menu */}
+                          {isCenterDropdownOpen && (
+                            <>
+                              <div
+                                className="fixed inset-0 z-40"
+                                onClick={() => setIsCenterDropdownOpen(false)}
                               />
+                              <div className="absolute z-50 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+                                {/* Search Sticky Header */}
+                                <div className="sticky top-0 bg-white p-2 border-b border-gray-100 z-10">
+                                  <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                    <input
+                                      type="text"
+                                      placeholder="Search centers..."
+                                      className="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent"
+                                      value={centerSearch}
+                                      onChange={(e) => setCenterSearch(e.target.value)}
+                                      autoFocus
+                                    />
+                                  </div>
+                                </div>
+
+                                {/* Options List */}
+                                {isLoadingCenters ? (
+                                  <div className="px-4 py-2 text-sm text-gray-500">Loading centers...</div>
+                                ) : centers.filter(c => c.name.toLowerCase().includes(centerSearch.toLowerCase()) || c.address_str.toLowerCase().includes(centerSearch.toLowerCase())).length === 0 ? (
+                                  <div className="p-2">
+                                    <div className="px-2 py-2 text-sm text-gray-500">No centers match your search</div>
+                                    <button
+                                      type="button"
+                                      onClick={() => setIsAddCenterModalOpen(true)}
+                                      className="w-full text-left px-2 py-2 text-sm text-[#8BC342] font-medium hover:bg-green-50 rounded-lg flex items-center gap-2 transition-colors"
+                                    >
+                                      <Plus className="w-4 h-4" />
+                                      Add New Center
+                                    </button>
+                                  </div>
+                                ) : (
+                                  centers
+                                    .filter(c =>
+                                      c.name.toLowerCase().includes(centerSearch.toLowerCase()) ||
+                                      c.address_str.toLowerCase().includes(centerSearch.toLowerCase())
+                                    )
+                                    .map(center => (
+                                      <div
+                                        key={center.id}
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          setCreateForm({ ...createForm, center_id: center.id.toString() });
+                                          setIsCenterDropdownOpen(false);
+                                        }}
+                                        className={`cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-green-50 ${createForm.center_id === center.id.toString() ? 'bg-green-50 text-[#8BC342] font-medium' : 'text-gray-900'
+                                          }`}
+                                      >
+                                        <span className="block truncate">{center.name}</span>
+                                        <span className="block truncate text-xs text-gray-500">{center.address_str}</span>
+                                      </div>
+                                    ))
+                                )}
+                              </div>
+                            </>
+                          )}
+                          <p className="text-xs text-gray-500 mt-1">Select a registered center for automatic verification and linking.</p>
+                        </div>
+                      ) : (
+                        createForm.location.address_str ? (
+                          <div className="flex items-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                            <MapPin className="w-5 h-5 text-gray-500" />
+                            <span className="flex-1 text-sm text-gray-700">{createForm.location.address_str}</span>
+                            <button
+                              type="button"
+                              onClick={() => setIsAddressModalOpen(true)}
+                              className="text-sm text-[#8BC342] font-medium hover:underline"
+                            >
+                              Change
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setIsAddressModalOpen(true)}
+                            className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-[#8BC342] hover:text-[#8BC342] transition-colors flex items-center justify-center gap-2"
+                          >
+                            <MapPin className="w-5 h-5" />
+                            Select Location
+                          </button>
+                        )
+                      )}
+                    </div>
+
+                    {/* Flyer Upload */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Event Flyer (Optional)</label>
+                      <div
+                        className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${flyerPreview ? 'border-[#8BC342] bg-green-50' : 'border-gray-300 hover:border-[#8BC342]'
+                          }`}
+                      >
+                        <input
+                          type="file"
+                          accept="image/*,application/pdf"
+                          onChange={handleFileSelect}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        />
+                        {flyerPreview ? (
+                          <div className="relative w-full h-40 flex flex-col items-center justify-center">
+                            {flyerPreview === 'pdf-placeholder' ? (
+                              <div className="flex flex-col items-center gap-2">
+                                <FileText className="w-12 h-12 text-[#8BC342]" />
+                                <span className="text-sm font-medium text-gray-700">{flyerFile?.name}</span>
+                                <span className="text-xs text-gray-500">PDF Document Selected</span>
+                              </div>
+                            ) : (
+                              <Image src={flyerPreview} alt="Preview" fill className="object-contain" />
+                            )}
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity rounded-lg">
+                              <p className="text-white font-medium">Click to change</p>
                             </div>
                           </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <Upload className="w-8 h-8 text-gray-400 mx-auto" />
+                            <p className="text-sm text-gray-500">Click to upload or drag and drop</p>
+                            <p className="text-xs text-gray-400">PNG, JPG up to 10MB</p>
+                          </div>
+                        )}
 
-                          {/* Options List */}
-                          {isLoadingCenters ? (
-                            <div className="px-4 py-2 text-sm text-gray-500">Loading centers...</div>
-                          ) : centers.filter(c => c.name.toLowerCase().includes(centerSearch.toLowerCase()) || c.address_str.toLowerCase().includes(centerSearch.toLowerCase())).length === 0 ? (
-                            <div className="px-4 py-2 text-sm text-gray-500">No centers match your search</div>
-                          ) : (
-                            centers
-                              .filter(c =>
-                                c.name.toLowerCase().includes(centerSearch.toLowerCase()) ||
-                                c.address_str.toLowerCase().includes(centerSearch.toLowerCase())
-                              )
-                              .map(center => (
-                                <div
-                                  key={center.id}
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    setCreateForm({ ...createForm, center_id: center.id.toString() });
-                                    setIsCenterDropdownOpen(false);
-                                  }}
-                                  className={`cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-green-50 ${createForm.center_id === center.id.toString() ? 'bg-green-50 text-[#8BC342] font-medium' : 'text-gray-900'
-                                    }`}
-                                >
-                                  <span className="block truncate">{center.name}</span>
-                                  <span className="block truncate text-xs text-gray-500">{center.address_str}</span>
-                                </div>
-                              ))
-                          )}
-                        </div>
-                      </>
-                    )}
-                    <p className="text-xs text-gray-500 mt-1">Select a registered center for automatic verification and linking.</p>
+                        {flyerUpload.isUploading && (
+                          <div className="absolute inset-0 bg-white/80 z-20 flex flex-col items-center justify-center">
+                            <Loader2 className="w-6 h-6 animate-spin text-[#8BC342] mb-2" />
+                            <span className="text-sm font-medium">Uploading... {flyerUpload.progress}%</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 ) : (
-                  createForm.location.address_str ? (
-                    <div className="flex items-center gap-2 p-3 bg-gray-50 border border-gray-200 rounded-lg">
-                      <MapPin className="w-5 h-5 text-gray-500" />
-                      <span className="flex-1 text-sm text-gray-700">{createForm.location.address_str}</span>
-                      <button
-                        type="button"
-                        onClick={() => setIsAddressModalOpen(true)}
-                        className="text-sm text-[#8BC342] font-medium hover:underline"
-                      >
-                        Change
-                      </button>
+                  <div className="flex-1 flex flex-col min-h-0 p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 shrink-0">Select users to invite</h3>
+
+                    {/* Selected Users Area */}
+                    {createForm.invitedUserIds.length > 0 && (
+                      <div className="mb-4 shrink-0">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-gray-700">Selected ({createForm.invitedUserIds.length})</span>
+                          <button
+                            type="button"
+                            onClick={() => setCreateForm(prev => ({ ...prev, invitedUserIds: [] }))}
+                            className="text-xs text-red-500 hover:text-red-600 font-medium"
+                          >
+                            Clear all
+                          </button>
+                        </div>
+                        <div className="flex flex-wrap gap-2 max-h-[100px] overflow-y-auto p-2.5 border border-gray-200 rounded-lg bg-gray-50 custom-scrollbar">
+                          {createForm.invitedUserIds.map(id => {
+                            const user = allUsers.find(u => String(u.user_id) === id);
+                            if (!user) return null;
+                            return (
+                              <div key={id} className="flex items-center gap-2 bg-white border border-gray-200 rounded-full pl-1.5 pr-2 py-1 shadow-sm group hover:border-red-200 transition-colors">
+                                <div className="relative w-5 h-5 rounded-full overflow-hidden bg-gray-200 shrink-0">
+                                  <Image
+                                    src={user.profile_picture_url || '/default-avatar.png'}
+                                    alt={user.name}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                </div>
+                                <span className="text-xs font-medium text-gray-700 max-w-[100px] truncate">{user.name}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setCreateForm(prev => ({
+                                      ...prev,
+                                      invitedUserIds: prev.invitedUserIds.filter(uid => uid !== id)
+                                    }));
+                                  }}
+                                  className="text-gray-400 group-hover:text-red-500 transition-colors focus:outline-none"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Search Input */}
+                    <div className="relative mb-3 shrink-0">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="text"
+                        placeholder="Search users to invite..."
+                        className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent"
+                        value={invitationSearch}
+                        onChange={(e) => setInvitationSearch(e.target.value)}
+                        autoFocus
+                      />
                     </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => setIsAddressModalOpen(true)}
-                      className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-[#8BC342] hover:text-[#8BC342] transition-colors flex items-center justify-center gap-2"
-                    >
-                      <MapPin className="w-5 h-5" />
-                      Select Location
-                    </button>
-                  )
+
+                    {/* Suggestions List (Fixed Area) */}
+                    <div className="flex-1 overflow-y-auto border border-gray-100 rounded-lg bg-gray-50 p-2 min-h-0 bg-white">
+                      {isLoadingUsers ? (
+                        <div className="flex justify-center py-8">
+                          <Loader2 className="w-6 h-6 animate-spin text-[#8BC342]" />
+                        </div>
+                      ) : (
+                        <div className="space-y-1">
+                          {allUsers
+                            .filter(u => {
+                              const isNotSelected = !createForm.invitedUserIds.includes(String(u.user_id));
+                              const matchesSearch = !invitationSearch ||
+                                u.name.toLowerCase().includes(invitationSearch.toLowerCase()) ||
+                                u.username.toLowerCase().includes(invitationSearch.toLowerCase());
+                              return isNotSelected && matchesSearch;
+                            })
+                            .map(u => (
+                              <button
+                                key={u.user_id}
+                                type="button"
+                                onClick={() => {
+                                  setCreateForm(prev => ({
+                                    ...prev,
+                                    invitedUserIds: [...prev.invitedUserIds, String(u.user_id)]
+                                  }));
+                                }}
+                                className="w-full flex items-center gap-3 p-2 hover:bg-gray-50 hover:shadow-sm rounded-lg cursor-pointer transition-all border border-transparent hover:border-gray-100 text-left group"
+                              >
+                                <div className="relative w-9 h-9 rounded-full overflow-hidden bg-gray-200 shrink-0 border border-gray-100">
+                                  <Image
+                                    src={u.profile_picture_url || '/default-avatar.png'}
+                                    alt={u.name}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-gray-900 text-sm truncate group-hover:text-[#8BC342] transition-colors">{u.name}</p>
+                                  <p className="text-xs text-gray-500 truncate">@{u.username}</p>
+                                </div>
+                                <div className="w-6 h-6 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center group-hover:bg-[#8BC342] group-hover:text-white transition-colors">
+                                  <Plus className="w-4 h-4" />
+                                </div>
+                              </button>
+                            ))
+                          }
+
+                          {/* Empty State */}
+                          {allUsers.filter(u => !createForm.invitedUserIds.includes(String(u.user_id))).length === 0 && (
+                            <p className="text-center text-gray-500 py-12 text-sm flex flex-col items-center">
+                              <User className="w-8 h-8 text-gray-300 mb-2" />
+                              All users selected
+                            </p>
+                          )}
+
+                          {allUsers.filter(u => !createForm.invitedUserIds.includes(String(u.user_id))).length > 0 &&
+                            allUsers.filter(u => {
+                              const isNotSelected = !createForm.invitedUserIds.includes(String(u.user_id));
+                              const matchesSearch = !invitationSearch ||
+                                u.name.toLowerCase().includes(invitationSearch.toLowerCase()) ||
+                                u.username.toLowerCase().includes(invitationSearch.toLowerCase());
+                              return isNotSelected && matchesSearch;
+                            }).length === 0 && (
+                              <p className="text-center text-gray-500 py-8 text-sm">No users found matching "{invitationSearch}"</p>
+                            )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
 
-              {/* Flyer Upload */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Event Flyer (Optional)</label>
-                <div
-                  className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${flyerPreview ? 'border-[#8BC342] bg-green-50' : 'border-gray-300 hover:border-[#8BC342]'
-                    }`}
-                >
-                  <input
-                    type="file"
-                    accept="image/*,application/pdf"
-                    onChange={handleFileSelect}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                  />
-                  {flyerPreview ? (
-                    <div className="relative w-full h-40 flex flex-col items-center justify-center">
-                      {flyerPreview === 'pdf-placeholder' ? (
-                        <div className="flex flex-col items-center gap-2">
-                          <FileText className="w-12 h-12 text-[#8BC342]" />
-                          <span className="text-sm font-medium text-gray-700">{flyerFile?.name}</span>
-                          <span className="text-xs text-gray-500">PDF Document Selected</span>
-                        </div>
+              {/* Footer - Fixed */}
+              <div className="flex justify-end gap-3 p-6 border-t border-gray-100 shrink-0 bg-white">
+                {createStep === 1 ? (
+
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setIsCreateModalOpen(false)}
+                      className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={flyerUpload.isUploading}
+                      className="bg-[#8BC342] hover:bg-[#7ac85a] disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-bold shadow-sm transition-all flex items-center gap-2"
+                    >
+                      Next: Invite Users
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setCreateStep(1)}
+                      className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      Back
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="bg-[#8BC342] hover:bg-[#7ac85a] disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-bold shadow-sm transition-all flex items-center gap-2"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Creating...
+                        </>
                       ) : (
-                        <Image src={flyerPreview} alt="Preview" fill className="object-contain" />
+                        'Create Event'
                       )}
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 hover:opacity-100 transition-opacity rounded-lg">
-                        <p className="text-white font-medium">Click to change</p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <Upload className="w-8 h-8 text-gray-400 mx-auto" />
-                      <p className="text-sm text-gray-500">Click to upload or drag and drop</p>
-                      <p className="text-xs text-gray-400">PNG, JPG up to 10MB</p>
-                    </div>
-                  )}
-
-                  {flyerUpload.isUploading && (
-                    <div className="absolute inset-0 bg-white/80 z-20 flex flex-col items-center justify-center">
-                      <Loader2 className="w-6 h-6 animate-spin text-[#8BC342] mb-2" />
-                      <span className="text-sm font-medium">Uploading... {flyerUpload.progress}%</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-                <button
-                  type="button"
-                  onClick={() => setIsCreateModalOpen(false)}
-                  className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting || flyerUpload.isUploading}
-                  className="bg-[#8BC342] hover:bg-[#7ac85a] disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-bold shadow-sm transition-all flex items-center gap-2"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Creating...
-                    </>
-                  ) : (
-                    'Create Event'
-                  )}
-                </button>
+                    </button>
+                  </>
+                )}
               </div>
             </form>
           </div>
         </div>
       )}
+
+
 
       {/* --- Address Modal --- */}
       <AddressModal
@@ -1473,6 +1741,13 @@ export default function EventsPage() {
         onClose={() => setIsAddressModalOpen(false)}
         onSave={handleLocationSelect}
         title="Select Event Location"
+      />
+
+      {/* --- Add Center Modal --- */}
+      <AddCenterModal
+        isOpen={isAddCenterModalOpen}
+        onClose={() => setIsAddCenterModalOpen(false)}
+        onSuccess={handleCenterAdded}
       />
     </div>
   );
