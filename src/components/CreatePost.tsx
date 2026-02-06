@@ -2,6 +2,7 @@
 
 import { ImageIcon, BarChart3, Calendar, X } from 'lucide-react';
 import { useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCloudUpload } from '@/lib/useCloudUpload';
 import { api } from '@/lib/api';
@@ -13,6 +14,7 @@ interface CreatePostProps {
 
 export default function CreatePost({ onPostCreated }: CreatePostProps) {
     const { user } = useAuth();
+    const router = useRouter();
     const [isExpanded, setIsExpanded] = useState(false);
     const [postText, setPostText] = useState('');
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -58,6 +60,10 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
     const handleNotImplemented = (feature: string) => {
         setNotImplementedMessage(feature);
         setTimeout(() => setNotImplementedMessage(''), 2000);
+    };
+
+    const handleEventClick = () => {
+        router.push('/events');
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -270,10 +276,10 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                             {/* Event Button */}
                             <button
                                 type="button"
-                                onClick={() => handleNotImplemented('Event feature')}
+                                onClick={handleEventClick}
                                 disabled={isPosting}
                                 className="flex items-center gap-1.5 h-10 px-2 sm:px-3 rounded-full hover:bg-green-50 text-green-500 transition-colors hover:text-green-600 disabled:opacity-50 shrink-0"
-                                title="Create an event"
+                                title="Go to Events"
                             >
                                 <Calendar className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
                                 <span className="text-xs sm:text-sm font-bold">Event</span>
