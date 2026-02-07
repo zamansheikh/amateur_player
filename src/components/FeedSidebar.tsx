@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, User, TrendingUp, Hash, Gift, Star, ArrowRight, Calendar, Trophy, Loader2 } from 'lucide-react';
+import { Search, User, TrendingUp, Hash, Gift, Star, ArrowRight, Calendar, Trophy, Loader2, MapPin } from 'lucide-react';
 import { api } from '@/lib/api';
 import { tournamentApi } from '@/lib/api';
 import { Tournament } from '@/types';
@@ -51,14 +51,18 @@ export default function FeedSidebar() {
     const [followingUsers, setFollowingUsers] = useState<Set<number>>(new Set());
     const [tournaments, setTournaments] = useState<Tournament[]>([]);
     const [tournamentsLoading, setTournamentsLoading] = useState(true);
-    
+
+    // Upcoming Event state
+    const [upcomingEvent, setUpcomingEvent] = useState<any>(null);
+    const [upcomingEventLoading, setUpcomingEventLoading] = useState(true);
+
     // Search related state
     const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
     const [filteredUsers, setFilteredUsers] = useState<UserProfile[]>([]);
     const [isSearchLoading, setIsSearchLoading] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
     const searchRef = useRef<HTMLDivElement>(null);
-    
+
     const router = useRouter();
     const { user } = useAuth();
 
@@ -108,13 +112,13 @@ export default function FeedSidebar() {
         }
 
         const query = searchQuery.toLowerCase();
-        const filtered = allUsers.filter(u => 
+        const filtered = allUsers.filter(u =>
             u.name.toLowerCase().includes(query) ||
             u.username.toLowerCase().includes(query) ||
             u.email.toLowerCase().includes(query) ||
             u.user_id.toString().includes(query)
         ).slice(0, 5); // Limit to 5 results
-        
+
         setFilteredUsers(filtered);
         setShowDropdown(true);
     }, [searchQuery, allUsers]);
@@ -140,6 +144,23 @@ export default function FeedSidebar() {
         };
 
         fetchTournaments();
+
+        // Fetch upcoming event
+        const fetchUpcomingEvent = async () => {
+            try {
+                setUpcomingEventLoading(true);
+                const response = await api.get('/api/events/v1/upcoming');
+                if (response.data?.event) {
+                    setUpcomingEvent(response.data.event);
+                }
+            } catch (err) {
+                console.error('Error fetching upcoming event:', err);
+            } finally {
+                setUpcomingEventLoading(false);
+            }
+        };
+
+        fetchUpcomingEvent();
 
         // Mock suggested users
         setSuggestedUsers([
@@ -386,22 +407,68 @@ export default function FeedSidebar() {
                     </Link>
                 </div>
 
-                {tournamentsLoading ? (
+                {upcomingEventLoading ? (
                     <div className="flex items-center justify-center py-4">
                         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
                     </div>
-                ) : tournaments.length > 0 ? (
-                    <div className="space-y-3">
-                        {tournaments.map((tournament) => (
-                            <EventCard key={tournament.id} tournament={tournament} />
-                        ))}
-                    </div>
+                ) : upcomingEvent ? (
+                    <Link href={`/events/${upcomingEvent.event_id}`} className="block">
+                        <div className="border border-gray-100 rounded-lg p-3 hover:shadow-md transition-all hover:border-green-200 cursor-pointer">
+                            {/* Event Header */}
+                            <div className="flex items-start justify-between mb-2">
+                                <div className="flex-1 min-w-0">
+                                    <h4 className="font-semibold text-gray-900 text-sm line-clamp-1">
+                                        {upcomingEvent.title}
+                                    </h4>
+                                    <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
+                                        <MapPin className="w-3 h-3" />
+                                        <span className="truncate">
+                                            {upcomingEvent.location?.address_str || 'Location TBD'}
+                                        </span>
+                                    </div>
+                                </div>
+                                <span className="text-green-600 text-xs font-semibold whitespace-nowrap ml-2">
+                                    {new Date(upcomingEvent.event_datetime).toLocaleTimeString('en-US', {
+                                        hour: 'numeric',
+                                        minute: '2-digit',
+                                        hour12: true
+                                    })}
+                                </span>
+                            </div>
+
+                            {/* Event Host */}
+                            <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-200">
+                                        {upcomingEvent.user?.profile_picture_url ? (
+                                            <img
+                                                src={upcomingEvent.user.profile_picture_url}
+                                                alt={upcomingEvent.user.name}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center bg-green-100 text-green-600">
+                                                <User className="w-3 h-3" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <span className="text-xs text-gray-600">
+                                        {upcomingEvent.user?.name || 'Unknown Host'}
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-1 text-xs text-gray-500">
+                                    <Star className="w-3 h-3" />
+                                    <span>Interested? ({upcomingEvent.total_interested || 0})</span>
+                                </div>
+                            </div>
+                        </div>
+                    </Link>
                 ) : (
                     <div className="text-center py-4">
-                        <Trophy className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                        <p className="text-gray-500 text-sm">No upcoming tournaments</p>
+                        <Calendar className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                        <p className="text-gray-500 text-sm">No upcoming events</p>
                         <Link
-                            href="/tournaments"
+                            href="/events"
                             className="text-green-600 hover:text-green-700 font-medium text-sm mt-1 inline-block"
                         >
                             Browse all →
