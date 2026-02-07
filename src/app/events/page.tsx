@@ -2008,9 +2008,9 @@ export default function EventsPage() {
                         {/* Filter Actions */}
                         <div className="pt-2">
                           {filterResult ? (
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                               <div className="flex items-center gap-3 mb-3">
-                                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+                                <div className="w-12 h-12 bg-green-100 text-[#8BC342] rounded-full flex items-center justify-center">
                                   <Users className="w-6 h-6" />
                                 </div>
                                 <div>
@@ -2040,7 +2040,7 @@ export default function EventsPage() {
                               type="button"
                               onClick={handleFilterUsers}
                               disabled={isFiltering}
-                              className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white py-2.5 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-colors"
+                              className="w-full bg-[#8BC342] hover:bg-[#7ac85a] disabled:opacity-50 text-white py-2.5 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-colors"
                             >
                               {isFiltering ? (
                                 <>
