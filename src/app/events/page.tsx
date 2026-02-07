@@ -28,6 +28,7 @@ import {
   X,
   Upload,
   User,
+  Users,
   Loader2,
   LayoutList,
   FileText,
@@ -235,6 +236,23 @@ export default function EventsPage() {
   // User Selection for Invitations
   const [allUsers, setAllUsers] = useState<EventUser[]>([]);
   const [invitationSearch, setInvitationSearch] = useState('');
+  const [inviteTab, setInviteTab] = useState<'search' | 'filtered'>('search');
+
+  // Filtered invite state
+  const [enabledFilters, setEnabledFilters] = useState({
+    age: true,
+    gender: true,
+    bowling_average: true,
+    geo_radius: true
+  });
+  const [inviteFilters, setInviteFilters] = useState({
+    age: { min_age: 20, max_age: 30 },
+    gender: { role: 'Male' },
+    bowling_average: { min_avg: 150, max_avg: 200 },
+    geo_radius: { center_lat: 0, center_long: 0, radius: 25 }
+  });
+  const [filterResult, setFilterResult] = useState<{ total_users: number, result: number[] } | null>(null);
+  const [isFiltering, setIsFiltering] = useState(false);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
 
   // Manage Events Local Search
@@ -379,8 +397,8 @@ export default function EventsPage() {
         // Try multiple ID fields just in case 'id', 'user_id', 'userId'
         const currentUserId = (user as any).user_id || (user as any).id;
         if (currentUserId) {
-           setAllUsers(users.filter((u: any) => u.user_id !== currentUserId));
-           return;
+          setAllUsers(users.filter((u: any) => u.user_id !== currentUserId));
+          return;
         }
       }
       setAllUsers(users);
@@ -402,6 +420,62 @@ export default function EventsPage() {
     } finally {
       setLoadingInvitations(false);
     }
+  };
+
+  // Filtered Invite Handlers
+  const handleFilterUsers = async () => {
+    try {
+      setIsFiltering(true);
+      const payload: any = {};
+
+      if (enabledFilters.age) {
+        payload.age = { min_age: Number(inviteFilters.age.min_age), max_age: Number(inviteFilters.age.max_age) };
+      }
+      if (enabledFilters.gender) {
+        payload.gender = { role: inviteFilters.gender.role };
+      }
+      if (enabledFilters.bowling_average) {
+        payload.bowling_average = { min_avg: Number(inviteFilters.bowling_average.min_avg), max_avg: Number(inviteFilters.bowling_average.max_avg) };
+      }
+      if (enabledFilters.geo_radius) {
+        // Use event location or center coordinates
+        const selectedCenter = centers.find(c => c.id.toString() === createForm.center_id);
+        const lat = createForm.location.lat ? parseFloat(createForm.location.lat) :
+          (selectedCenter?.lat ? parseFloat(selectedCenter.lat) : inviteFilters.geo_radius.center_lat);
+        const long = createForm.location.long ? parseFloat(createForm.location.long) :
+          (selectedCenter?.long ? parseFloat(selectedCenter.long) : inviteFilters.geo_radius.center_long);
+
+        payload.geo_radius = { center_lat: lat, center_long: long, radius: Number(inviteFilters.geo_radius.radius) };
+      }
+
+      if (Object.keys(payload).length === 0) {
+        alert("Please select at least one filter.");
+        return;
+      }
+
+      const response = await api.post('/api/filter', payload);
+      setFilterResult(response.data);
+    } catch (error) {
+      console.error("Filter error:", error);
+      alert("Failed to filter users.");
+    } finally {
+      setIsFiltering(false);
+    }
+  };
+
+  const handleAddFilteredUsers = () => {
+    if (!filterResult || filterResult.result.length === 0) return;
+
+    // Merge with existing invited users (avoid duplicates)
+    const newIds = filterResult.result.map(id => String(id));
+    setCreateForm(prev => ({
+      ...prev,
+      invitedUserIds: [...new Set([...prev.invitedUserIds, ...newIds])]
+    }));
+
+    // Reset filter result after adding
+    setFilterResult(null);
+    alert(`Added ${filterResult.total_users} users to invite list!`);
   };
 
   useEffect(() => {
@@ -693,6 +767,8 @@ export default function EventsPage() {
     setFlyerFile(null);
     setFlyerPreview(null);
     flyerUpload.reset();
+    setInviteTab('search');
+    setFilterResult(null);
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1172,11 +1248,11 @@ export default function EventsPage() {
                 </button>
               </div>
             ) : filteredMyEvents.length === 0 ? (
-                 <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
-                    <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-900">No events found</h3>
-                    <p className="text-gray-500">Try adjusting your search terms</p>
-                 </div>
+              <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
+                <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900">No events found</h3>
+                <p className="text-gray-500">Try adjusting your search terms</p>
+              </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredMyEvents.map(event => (
@@ -1384,11 +1460,11 @@ export default function EventsPage() {
                 handleCreateEvent(e);
               }
             }} className="flex flex-col flex-1 min-h-0 overflow-hidden">
-            
+
               {/* Content - Scrollable */}
               <div className="flex-1 overflow-hidden flex flex-col min-h-0">
                 {createStep === 1 ? (
-                   <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6">
+                  <div className="p-6 overflow-y-auto custom-scrollbar flex-1 space-y-6">
                     {/* Title & Desc */}
                     <div className="space-y-4">
                       <div>
@@ -1655,7 +1731,23 @@ export default function EventsPage() {
                         <div className="flex flex-wrap gap-2 max-h-[100px] overflow-y-auto p-2.5 border border-gray-200 rounded-lg bg-gray-50 custom-scrollbar">
                           {createForm.invitedUserIds.map(id => {
                             const user = allUsers.find(u => String(u.user_id) === id);
-                            if (!user) return null;
+                            if (!user) return (
+                              <div key={id} className="flex items-center gap-2 bg-white border border-gray-200 rounded-full pl-2 pr-2 py-1 shadow-sm">
+                                <span className="text-xs font-medium text-gray-500">User #{id}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setCreateForm(prev => ({
+                                      ...prev,
+                                      invitedUserIds: prev.invitedUserIds.filter(uid => uid !== id)
+                                    }));
+                                  }}
+                                  className="text-gray-400 hover:text-red-500 transition-colors focus:outline-none"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            );
                             return (
                               <div key={id} className="flex items-center gap-2 bg-white border border-gray-200 rounded-full pl-1.5 pr-2 py-1 shadow-sm group hover:border-red-200 transition-colors">
                                 <div className="relative w-5 h-5 rounded-full overflow-hidden bg-gray-200 shrink-0">
@@ -1686,87 +1778,286 @@ export default function EventsPage() {
                       </div>
                     )}
 
-                    {/* Search Input */}
-                    <div className="relative mb-3 shrink-0">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input
-                        type="text"
-                        placeholder="Search users to invite..."
-                        className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent"
-                        value={invitationSearch}
-                        onChange={(e) => setInvitationSearch(e.target.value)}
-                        autoFocus
-                      />
+                    {/* Invite Type Tabs */}
+                    <div className="flex bg-gray-100 p-1 rounded-lg mb-4 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setInviteTab('search')}
+                        className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-2 ${inviteTab === 'search' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'
+                          }`}
+                      >
+                        <Search className="w-4 h-4" />
+                        Search Invite
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setInviteTab('filtered')}
+                        className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all flex items-center justify-center gap-2 ${inviteTab === 'filtered' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-900'
+                          }`}
+                      >
+                        <Users className="w-4 h-4" />
+                        Filtered Invite
+                      </button>
                     </div>
 
-                    {/* Suggestions List (Fixed Area) */}
-                    <div className="flex-1 overflow-y-auto border border-gray-100 rounded-lg bg-gray-50 p-2 min-h-0 bg-white">
-                      {isLoadingUsers ? (
-                        <div className="flex justify-center py-8">
-                          <Loader2 className="w-6 h-6 animate-spin text-[#8BC342]" />
+                    {/* Tab Content */}
+                    {inviteTab === 'search' ? (
+                      <>
+                        {/* Search Input */}
+                        <div className="relative mb-3 shrink-0">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                          <input
+                            type="text"
+                            placeholder="Search users to invite..."
+                            className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent"
+                            value={invitationSearch}
+                            onChange={(e) => setInvitationSearch(e.target.value)}
+                            autoFocus
+                          />
                         </div>
-                      ) : (
-                        <div className="space-y-1">
-                          {allUsers
-                            .filter(u => {
-                              const isNotSelected = !createForm.invitedUserIds.includes(String(u.user_id));
-                              const matchesSearch = !invitationSearch ||
-                                u.name.toLowerCase().includes(invitationSearch.toLowerCase()) ||
-                                u.username.toLowerCase().includes(invitationSearch.toLowerCase());
-                              return isNotSelected && matchesSearch;
-                            })
-                            .map(u => (
-                              <button
-                                key={u.user_id}
-                                type="button"
-                                onClick={() => {
-                                  setCreateForm(prev => ({
-                                    ...prev,
-                                    invitedUserIds: [...prev.invitedUserIds, String(u.user_id)]
-                                  }));
-                                }}
-                                className="w-full flex items-center gap-3 p-2 hover:bg-gray-50 hover:shadow-sm rounded-lg cursor-pointer transition-all border border-transparent hover:border-gray-100 text-left group"
-                              >
-                                <div className="relative w-9 h-9 rounded-full overflow-hidden bg-gray-200 shrink-0 border border-gray-100">
-                                  <Image
-                                    src={u.profile_picture_url || '/default-avatar.png'}
-                                    alt={u.name}
-                                    fill
-                                    className="object-cover"
-                                  />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="font-medium text-gray-900 text-sm truncate group-hover:text-[#8BC342] transition-colors">{u.name}</p>
-                                  <p className="text-xs text-gray-500 truncate">@{u.username}</p>
-                                </div>
-                                <div className="w-6 h-6 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center group-hover:bg-[#8BC342] group-hover:text-white transition-colors">
-                                  <Plus className="w-4 h-4" />
-                                </div>
-                              </button>
-                            ))
-                          }
 
-                          {/* Empty State */}
-                          {allUsers.filter(u => !createForm.invitedUserIds.includes(String(u.user_id))).length === 0 && (
-                            <p className="text-center text-gray-500 py-12 text-sm flex flex-col items-center">
-                              <User className="w-8 h-8 text-gray-300 mb-2" />
-                              All users selected
-                            </p>
+                        {/* Suggestions List */}
+                        <div className="flex-1 overflow-y-auto border border-gray-100 rounded-lg bg-gray-50 p-2 min-h-0 bg-white">
+                          {isLoadingUsers ? (
+                            <div className="flex justify-center py-8">
+                              <Loader2 className="w-6 h-6 animate-spin text-[#8BC342]" />
+                            </div>
+                          ) : (
+                            <div className="space-y-1">
+                              {allUsers
+                                .filter(u => {
+                                  const isNotSelected = !createForm.invitedUserIds.includes(String(u.user_id));
+                                  const matchesSearch = !invitationSearch ||
+                                    u.name.toLowerCase().includes(invitationSearch.toLowerCase()) ||
+                                    u.username.toLowerCase().includes(invitationSearch.toLowerCase());
+                                  return isNotSelected && matchesSearch;
+                                })
+                                .map(u => (
+                                  <button
+                                    key={u.user_id}
+                                    type="button"
+                                    onClick={() => {
+                                      setCreateForm(prev => ({
+                                        ...prev,
+                                        invitedUserIds: [...prev.invitedUserIds, String(u.user_id)]
+                                      }));
+                                    }}
+                                    className="w-full flex items-center gap-3 p-2 hover:bg-gray-50 hover:shadow-sm rounded-lg cursor-pointer transition-all border border-transparent hover:border-gray-100 text-left group"
+                                  >
+                                    <div className="relative w-9 h-9 rounded-full overflow-hidden bg-gray-200 shrink-0 border border-gray-100">
+                                      <Image
+                                        src={u.profile_picture_url || '/default-avatar.png'}
+                                        alt={u.name}
+                                        fill
+                                        className="object-cover"
+                                      />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="font-medium text-gray-900 text-sm truncate group-hover:text-[#8BC342] transition-colors">{u.name}</p>
+                                      <p className="text-xs text-gray-500 truncate">@{u.username}</p>
+                                    </div>
+                                    <div className="w-6 h-6 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center group-hover:bg-[#8BC342] group-hover:text-white transition-colors">
+                                      <Plus className="w-4 h-4" />
+                                    </div>
+                                  </button>
+                                ))
+                              }
+
+                              {/* Empty State */}
+                              {allUsers.filter(u => !createForm.invitedUserIds.includes(String(u.user_id))).length === 0 && (
+                                <p className="text-center text-gray-500 py-12 text-sm flex flex-col items-center">
+                                  <User className="w-8 h-8 text-gray-300 mb-2" />
+                                  All users selected
+                                </p>
+                              )}
+
+                              {allUsers.filter(u => !createForm.invitedUserIds.includes(String(u.user_id))).length > 0 &&
+                                allUsers.filter(u => {
+                                  const isNotSelected = !createForm.invitedUserIds.includes(String(u.user_id));
+                                  const matchesSearch = !invitationSearch ||
+                                    u.name.toLowerCase().includes(invitationSearch.toLowerCase()) ||
+                                    u.username.toLowerCase().includes(invitationSearch.toLowerCase());
+                                  return isNotSelected && matchesSearch;
+                                }).length === 0 && (
+                                  <p className="text-center text-gray-500 py-8 text-sm">No users found matching "{invitationSearch}"</p>
+                                )}
+                            </div>
                           )}
-
-                          {allUsers.filter(u => !createForm.invitedUserIds.includes(String(u.user_id))).length > 0 &&
-                            allUsers.filter(u => {
-                              const isNotSelected = !createForm.invitedUserIds.includes(String(u.user_id));
-                              const matchesSearch = !invitationSearch ||
-                                u.name.toLowerCase().includes(invitationSearch.toLowerCase()) ||
-                                u.username.toLowerCase().includes(invitationSearch.toLowerCase());
-                              return isNotSelected && matchesSearch;
-                            }).length === 0 && (
-                              <p className="text-center text-gray-500 py-8 text-sm">No users found matching "{invitationSearch}"</p>
-                            )}
                         </div>
-                      )}
-                    </div>
+                      </>
+                    ) : (
+                      /* Filtered Invite Tab */
+                      <div className="flex-1 overflow-y-auto space-y-4 min-h-0">
+                        {/* Age Filter */}
+                        <div className="p-4 bg-gray-50 rounded-lg">
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="font-semibold text-gray-900 text-sm">Age Range</h4>
+                            <input
+                              type="checkbox"
+                              checked={enabledFilters.age}
+                              onChange={(e) => setEnabledFilters(prev => ({ ...prev, age: e.target.checked }))}
+                              className="w-4 h-4 text-[#8BC342] rounded border-gray-300 focus:ring-[#8BC342]"
+                            />
+                          </div>
+                          {enabledFilters.age && (
+                            <div className="flex gap-3">
+                              <input
+                                type="number"
+                                placeholder="Min"
+                                className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                                value={inviteFilters.age.min_age}
+                                onChange={(e) => setInviteFilters(prev => ({ ...prev, age: { ...prev.age, min_age: parseInt(e.target.value) || 0 } }))}
+                              />
+                              <input
+                                type="number"
+                                placeholder="Max"
+                                className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                                value={inviteFilters.age.max_age}
+                                onChange={(e) => setInviteFilters(prev => ({ ...prev, age: { ...prev.age, max_age: parseInt(e.target.value) || 0 } }))}
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Gender Filter */}
+                        <div className="p-4 bg-gray-50 rounded-lg">
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="font-semibold text-gray-900 text-sm">Gender</h4>
+                            <input
+                              type="checkbox"
+                              checked={enabledFilters.gender}
+                              onChange={(e) => setEnabledFilters(prev => ({ ...prev, gender: e.target.checked }))}
+                              className="w-4 h-4 text-[#8BC342] rounded border-gray-300 focus:ring-[#8BC342]"
+                            />
+                          </div>
+                          {enabledFilters.gender && (
+                            <select
+                              className="w-full p-2 border border-gray-300 rounded-lg bg-white text-sm"
+                              value={inviteFilters.gender.role}
+                              onChange={(e) => setInviteFilters(prev => ({ ...prev, gender: { ...prev.gender, role: e.target.value } }))}
+                            >
+                              <option value="Male">Male</option>
+                              <option value="Female">Female</option>
+                            </select>
+                          )}
+                        </div>
+
+                        {/* Bowling Average Filter */}
+                        <div className="p-4 bg-gray-50 rounded-lg">
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="font-semibold text-gray-900 text-sm">Bowling Average</h4>
+                            <input
+                              type="checkbox"
+                              checked={enabledFilters.bowling_average}
+                              onChange={(e) => setEnabledFilters(prev => ({ ...prev, bowling_average: e.target.checked }))}
+                              className="w-4 h-4 text-[#8BC342] rounded border-gray-300 focus:ring-[#8BC342]"
+                            />
+                          </div>
+                          {enabledFilters.bowling_average && (
+                            <div className="flex gap-3">
+                              <input
+                                type="number"
+                                placeholder="Min"
+                                className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                                value={inviteFilters.bowling_average.min_avg}
+                                onChange={(e) => setInviteFilters(prev => ({ ...prev, bowling_average: { ...prev.bowling_average, min_avg: parseInt(e.target.value) || 0 } }))}
+                              />
+                              <input
+                                type="number"
+                                placeholder="Max"
+                                className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                                value={inviteFilters.bowling_average.max_avg}
+                                onChange={(e) => setInviteFilters(prev => ({ ...prev, bowling_average: { ...prev.bowling_average, max_avg: parseInt(e.target.value) || 0 } }))}
+                              />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Location Radius Filter */}
+                        <div className="p-4 bg-gray-50 rounded-lg">
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="font-semibold text-gray-900 text-sm">Location Radius</h4>
+                            <input
+                              type="checkbox"
+                              checked={enabledFilters.geo_radius}
+                              onChange={(e) => setEnabledFilters(prev => ({ ...prev, geo_radius: e.target.checked }))}
+                              className="w-4 h-4 text-[#8BC342] rounded border-gray-300 focus:ring-[#8BC342]"
+                            />
+                          </div>
+                          {enabledFilters.geo_radius && (
+                            <div className="space-y-2">
+                              <p className="text-xs text-gray-500">
+                                {createForm.location.lat || createForm.center_id
+                                  ? 'Using event location as center point'
+                                  : 'Set event location in Step 1 to use this filter'}
+                              </p>
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="number"
+                                  placeholder="Radius in miles"
+                                  className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                                  value={inviteFilters.geo_radius.radius}
+                                  onChange={(e) => setInviteFilters(prev => ({ ...prev, geo_radius: { ...prev.geo_radius, radius: parseInt(e.target.value) || 0 } }))}
+                                />
+                                <span className="text-sm text-gray-500 whitespace-nowrap">miles</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Filter Actions */}
+                        <div className="pt-2">
+                          {filterResult ? (
+                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                              <div className="flex items-center gap-3 mb-3">
+                                <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+                                  <Users className="w-6 h-6" />
+                                </div>
+                                <div>
+                                  <p className="font-bold text-gray-900">{filterResult.total_users} Users Found</p>
+                                  <p className="text-sm text-gray-500">Matching your filter criteria</p>
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                <button
+                                  type="button"
+                                  onClick={handleAddFilteredUsers}
+                                  className="flex-1 bg-[#8BC342] hover:bg-[#7ac85a] text-white py-2 px-4 rounded-lg font-bold text-sm transition-colors"
+                                >
+                                  Add to Invite List
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setFilterResult(null)}
+                                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium text-sm transition-colors"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={handleFilterUsers}
+                              disabled={isFiltering}
+                              className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white py-2.5 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-colors"
+                            >
+                              {isFiltering ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                  Finding Users...
+                                </>
+                              ) : (
+                                <>
+                                  <Search className="w-4 h-4" />
+                                  Find Users
+                                </>
+                              )}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
