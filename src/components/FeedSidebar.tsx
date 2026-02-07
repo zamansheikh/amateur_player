@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, User, TrendingUp, Hash, Gift, Star, ArrowRight, Calendar, Trophy, Loader2, MapPin } from 'lucide-react';
+import { Search, User, TrendingUp, Hash, Gift, Star, ArrowRight, Calendar, Trophy, Loader2, MapPin, ThumbsUp } from 'lucide-react';
 import { api } from '@/lib/api';
 import { tournamentApi } from '@/lib/api';
 import { Tournament } from '@/types';
@@ -55,6 +55,7 @@ export default function FeedSidebar() {
     // Upcoming Event state
     const [upcomingEvent, setUpcomingEvent] = useState<any>(null);
     const [upcomingEventLoading, setUpcomingEventLoading] = useState(true);
+    const [interestLoading, setInterestLoading] = useState(false);
 
     // Search related state
     const [allUsers, setAllUsers] = useState<UserProfile[]>([]);
@@ -260,6 +261,49 @@ export default function FeedSidebar() {
         setSearchQuery('');
     };
 
+    // Handle interest toggle for upcoming event
+    const handleInterestToggle = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (!user) {
+            alert("Please login to show interest");
+            return;
+        }
+
+        if (!upcomingEvent || interestLoading) return;
+
+        const currentInterested = upcomingEvent.is_interested;
+
+        // Optimistic update
+        setUpcomingEvent((prev: any) => ({
+            ...prev,
+            is_interested: !currentInterested,
+            total_interested: currentInterested
+                ? Math.max(0, prev.total_interested - 1)
+                : prev.total_interested + 1
+        }));
+
+        setInterestLoading(true);
+
+        try {
+            await api.get(`/api/events/v1/interest/${upcomingEvent.event_id}`);
+        } catch (err) {
+            console.error("Error toggling interest:", err);
+            // Revert on error
+            setUpcomingEvent((prev: any) => ({
+                ...prev,
+                is_interested: currentInterested,
+                total_interested: currentInterested
+                    ? prev.total_interested + 1
+                    : Math.max(0, prev.total_interested - 1)
+            }));
+            alert("Failed to update interest status.");
+        } finally {
+            setInterestLoading(false);
+        }
+    };
+
     return (
         <div className="w-80 space-y-6">
             {/* Search Bar */}
@@ -428,7 +472,10 @@ export default function FeedSidebar() {
                                     </div>
                                 </div>
                                 <span className="text-green-600 text-xs font-semibold whitespace-nowrap ml-2">
-                                    {new Date(upcomingEvent.event_datetime).toLocaleTimeString('en-US', {
+                                    {new Date(upcomingEvent.event_datetime).toLocaleDateString('en-US', {
+                                        month: 'short',
+                                        day: 'numeric'
+                                    })} • {new Date(upcomingEvent.event_datetime).toLocaleTimeString('en-US', {
                                         hour: 'numeric',
                                         minute: '2-digit',
                                         hour12: true
@@ -457,8 +504,17 @@ export default function FeedSidebar() {
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-1 text-xs text-gray-500">
-                                    <Star className="w-3 h-3" />
-                                    <span>Interested? ({upcomingEvent.total_interested || 0})</span>
+                                    <button
+                                        onClick={handleInterestToggle}
+                                        disabled={!user || interestLoading}
+                                        className={`flex items-center gap-1 px-2 py-1 rounded-lg font-bold transition-all ${upcomingEvent.is_interested
+                                            ? 'bg-green-100 text-green-700'
+                                            : 'bg-gray-100 text-gray-600 hover:bg-green-50 hover:text-green-600'
+                                            } ${interestLoading ? 'opacity-50' : ''}`}
+                                    >
+                                        <ThumbsUp className={`w-3 h-3 ${upcomingEvent.is_interested ? 'fill-current' : ''}`} />
+                                        <span>{upcomingEvent.is_interested ? 'Interested' : 'Interested?'} ({upcomingEvent.total_interested || 0})</span>
+                                    </button>
                                 </div>
                             </div>
                         </div>
