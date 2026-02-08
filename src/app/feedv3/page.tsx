@@ -2,13 +2,12 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { api } from '@/lib/api';
-import { FeedPost } from '@/types';
-import CreatePost from '@/components/CreatePost';
-import FeedPostCard from '@/components/FeedPostCard';
+import { FeedV3Post, PaginatedResponse } from '@/types/feedv3';
+import { FeedV3PostCard, CreatePostV3 } from '@/components/feedv3';
 import FeedSidebar from '@/components/FeedSidebar';
 
 export default function FeedV3Page() {
-    const [posts, setPosts] = useState<FeedPost[]>([]);
+    const [posts, setPosts] = useState<FeedV3Post[]>([]);
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -35,45 +34,15 @@ export default function FeedV3Page() {
                 setLoading(true);
             }
 
-            // API returns { results: [], next: string | null, count: number, ... }
-            const response = await api.get(`/api/posts/v3/feed?page=${pageNum}`);
+            // Using the FeedV3 API endpoint
+            const response = await api.get<PaginatedResponse<FeedV3Post>>(
+                `/api/newsfeed/v1/feed/?page=${pageNum}&page_size=20`
+            );
 
             const data = response.data;
-            const rawPosts = data.results || [];
-
-            // Map raw API response to FeedPost type
-            const newPosts: FeedPost[] = rawPosts.map((post: any) => ({
-                post_id: post.default_post_id,
-                uid: post.metadata?.uid || '',
-                author: post.metadata?.author || {
-                    user_id: 0,
-                    name: 'Unknown',
-                    first_name: '',
-                    last_name: '',
-                    username: '',
-                    email: '',
-                    roles: { is_pro: false, is_center_admin: false, is_tournament_director: false },
-                    profile_picture_url: '',
-                    is_followable: false,
-                    is_following: false,
-                    follower_count: 0
-                },
-                text: post.text,
-                media_urls: post.media_urls || [],
-                created: post.metadata?.created || '',
-                like_count: post.metadata?.likes_count || 0,
-                is_liked: post.metadata?.has_liked || false,
-                comments: post.metadata?.latest_comments?.map((comment: any) => ({
-                    post_id: post.default_post_id,
-                    comment_id: comment.comment_id,
-                    user: comment.user,
-                    text: comment.text,
-                    media_urls: comment.media_url ? [comment.media_url] : []
-                })) || []
-            }));
+            const newPosts = data.results || [];
 
             setHasMore(!!data.next);
-
             setPosts(prevPosts => isLoadMore ? [...prevPosts, ...newPosts] : newPosts);
             setError(null);
         } catch (err) {
@@ -93,10 +62,10 @@ export default function FeedV3Page() {
         }
     }, [page]);
 
-    const handlePostChange = (updatedPost: FeedPost) => {
+    const handlePostChange = (updatedPost: FeedV3Post) => {
         setPosts(prevPosts =>
             prevPosts.map(post =>
-                post.post_id === updatedPost.post_id ? updatedPost : post
+                post.id === updatedPost.id ? updatedPost : post
             )
         );
     };
@@ -104,8 +73,6 @@ export default function FeedV3Page() {
     const reloadFeed = () => {
         setPage(1);
         setHasMore(true);
-        // If page was already 1, it won't trigger the useEffect [page] if we just set it to 1.
-        // But since we are likely already at page 1 or higher, we can force a fetch if needed.
         fetchFeed(1, false);
     };
 
@@ -166,7 +133,7 @@ export default function FeedV3Page() {
                     <div className="flex-1 w-full max-w-4xl">
                         {/* Create Post Section */}
                         <div className="mb-4 md:mb-6">
-                            <CreatePost onPostCreated={reloadFeed} />
+                            <CreatePostV3 onPostCreated={reloadFeed} />
                         </div>
 
                         {/* Posts Feed */}
@@ -180,19 +147,21 @@ export default function FeedV3Page() {
                                 posts.map((post, index) => {
                                     if (posts.length === index + 1) {
                                         return (
-                                            <div ref={lastPostElementRef} key={post.post_id}>
-                                                <FeedPostCard
+                                            <div ref={lastPostElementRef} key={post.id}>
+                                                <FeedV3PostCard
                                                     post={post}
                                                     onPostChange={handlePostChange}
+                                                    onPostUpdate={reloadFeed}
                                                 />
                                             </div>
                                         );
                                     } else {
                                         return (
-                                            <FeedPostCard
-                                                key={post.post_id}
+                                            <FeedV3PostCard
+                                                key={post.id}
                                                 post={post}
                                                 onPostChange={handlePostChange}
+                                                onPostUpdate={reloadFeed}
                                             />
                                         );
                                     }
