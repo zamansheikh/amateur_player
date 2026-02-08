@@ -73,7 +73,7 @@ export default function FeedV3PostCard({
     };
 
     const handlePostClick = () => {
-        router.push(`/post/${post.uid}`);
+        router.push(`/postv3/${post.uid}`);
     };
 
     const handleShareClick = () => {
