@@ -253,13 +253,31 @@ export default function FeedV3PostCard({
     }
 
     // Function to render text with hashtags
+    // Function to render text with hashtags and links
     const renderTextWithTags = (text: string) => {
-        return text.split(/(#\w+)/g).map((part, index) => {
+        // Regex to capture hashtags and URLs
+        const regex = /((?:#\w+)|(?:https?:\/\/[^\s]+))/g;
+
+        return text.split(regex).map((part, index) => {
             if (part.startsWith("#")) {
                 return (
                     <span key={index} className="text-green-600 font-medium">
                         {part}
                     </span>
+                );
+            }
+            if (part.startsWith("http")) {
+                return (
+                    <a
+                        key={index}
+                        href={part}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-500 hover:underline break-all"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {part}
+                    </a>
                 );
             }
             return part;

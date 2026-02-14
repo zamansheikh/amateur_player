@@ -41,7 +41,7 @@ function ProfileCompletionCheck({ children }: { children: React.ReactNode }) {
 }
 
 const navigation = [
-    { name: 'Newsfeed', href: '/home', icon: Home },
+    { name: 'Newsfeed', href: '/feedv3', icon: Home },
     // { name: 'Pro Players', href: '/pro-players', icon: Trophy },
     { name: 'Chatter', href: '/chatter', icon: Lightbulb },
     { name: 'Trading Cards', href: '/trading-cards', icon: Zap },
@@ -52,7 +52,7 @@ const navigation = [
     { name: 'Events', href: '/events', icon: CalendarDays },
     { name: 'Media', href: '/media', icon: Play },
     // { name: 'Products', href: '/products', icon: Package },
-    { name: 'Feedv3', href: '/feedv3', icon: Home },
+    // { name: 'Feedv3', href: '/feedv3', icon: Home },
     { name: 'Games', href: '/games', icon: Target },
     { name: 'Centers', href: '/centers', icon: MapPin },
     { name: 'Xchange', href: '/xchange', icon: ShoppingCart },
@@ -70,7 +70,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
     const { user, signout, isLoading } = useAuth();
 
     // Public routes that don't require authentication
-    const publicRoutes = ['/landing', '/landing/page', '/land2', '/select-your-role', '/complete-profile', '/signin', '/signup'];
+    const publicRoutes = ['/landing', '/select-your-role', '/complete-profile', '/signin', '/signup'];
 
     // Check if it's a pro player public route
     const isProPlayerRoute = pathname.startsWith('/pro/');
@@ -82,9 +82,11 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
     const isPublicRoute = publicRoutes.includes(pathname) || isProPlayerRoute || isPrivateAccessRoute;
 
     // Landing page route - show only the landing page without navigation
-    if (pathname === '/landing' || pathname === '/landing/page') {
+    if (pathname === '/landing' || pathname === '/select-your-role') {
         return <>{children}</>;
     }
+
+
 
     // Pro player public routes - handle all cases for pro routes
     if (isProPlayerRoute) {
@@ -270,8 +272,8 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
 
                     {/* Desktop sidebar */}
                     <div className="hidden lg:flex lg:flex-shrink-0">
-                        <div className="flex flex-col w-64">
-                            <div className="flex flex-col flex-grow border-r border-gray-800" style={{ backgroundColor: '#111B05' }}>
+                        <div className="flex flex-col w-64 h-full">
+                            <div className="flex flex-col h-full border-r border-gray-800 overflow-hidden" style={{ backgroundColor: '#111B05' }}>
                                 {/* Logo */}
                                 <div className="flex items-center gap-3 px-6 py-6 border-b border-gray-800">
                                     <Image
@@ -286,7 +288,7 @@ export default function Navigation({ children }: { children: React.ReactNode }) 
                                 </div>
 
                                 {/* Navigation */}
-                                <nav className="flex-1 px-4 py-6 space-y-1">
+                                <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto scrollbar-thin min-h-0">
                                     {navigation.map((item) => {
                                         const isActive = pathname === item.href;
                                         return (

@@ -27,17 +27,12 @@ export default function SharedPostPreview({ originalPost }: SharedPostPreviewPro
                         </p>
                     )}
                     {content.media_urls && content.media_urls.length > 0 && (
-                        <div className="rounded-lg overflow-hidden">
+                        <div className="rounded-lg overflow-hidden mt-2">
                             <MediaGallery
-                                media={content.media_urls.slice(0, 1)}
+                                media={content.media_urls}
                                 enableLightbox={false}
-                                maxHeight="150px"
+                                maxHeight="300px"
                             />
-                            {content.media_urls.length > 1 && (
-                                <div className="text-xs text-gray-500 mt-1">
-                                    +{content.media_urls.length - 1} more
-                                </div>
-                            )}
                         </div>
                     )}
                 </>
