@@ -52,6 +52,7 @@ const navigation = [
     { name: 'Events', href: '/events', icon: CalendarDays },
     { name: 'Media', href: '/media', icon: Play },
     // { name: 'Products', href: '/products', icon: Package },
+    { name: 'Feedv3', href: '/feedv3', icon: Home },
     { name: 'Games', href: '/games', icon: Target },
     { name: 'Centers', href: '/centers', icon: MapPin },
     { name: 'Xchange', href: '/xchange', icon: ShoppingCart },
