@@ -1,27 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Send, Loader2, Heart, Trash2, Edit2, Reply, ChevronDown, ChevronUp } from "lucide-react";
 import { api } from "@/lib/api";
 import { useAuth } from "@/contexts/AuthContext";
-import { FeedV3Comment, LikeResponse } from "@/types/feedv3";
+import { FeedV3Comment, LikeResponse, PaginatedResponse } from "@/types/feedv3";
 import AutoExpandingTextarea from "../AutoExpandingTextarea";
 
 interface CommentsSectionV3Props {
     postId: number;
-    comments: FeedV3Comment[];
+    pageSize?: number; // 5 for feed, 15 for post details
     onCommentAdded: () => void;
     onViewAllClick: () => void;
 }
 
 export default function CommentsSectionV3({
     postId,
-    comments,
+    pageSize = 5,
     onCommentAdded,
     onViewAllClick,
 }: CommentsSectionV3Props) {
     const { user } = useAuth();
-    const [localComments, setLocalComments] = useState<FeedV3Comment[]>(comments);
+    const [localComments, setLocalComments] = useState<FeedV3Comment[]>([]);
+    const [isLoadingComments, setIsLoadingComments] = useState(false);
+    const [totalComments, setTotalComments] = useState(0);
+    const [hasMore, setHasMore] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
     const [commentText, setCommentText] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [replyTo, setReplyTo] = useState<FeedV3Comment | null>(null);
@@ -29,6 +33,35 @@ export default function CommentsSectionV3({
     const [editText, setEditText] = useState("");
     const [expandedReplies, setExpandedReplies] = useState<Set<number>>(new Set());
     const [likingComments, setLikingComments] = useState<Set<number>>(new Set());
+
+    // Fetch comments from API
+    const fetchComments = useCallback(async (page: number = 1) => {
+        try {
+            setIsLoadingComments(true);
+            const response = await api.get<PaginatedResponse<FeedV3Comment>>(
+                `/api/newsfeed/v1/${postId}/comments/?page=${page}&page_size=${pageSize}`
+            );
+
+            if (page === 1) {
+                setLocalComments(response.data.results);
+            } else {
+                setLocalComments(prev => [...prev, ...response.data.results]);
+            }
+
+            setTotalComments(response.data.count);
+            setHasMore(!!response.data.next);
+            setCurrentPage(page);
+        } catch (err) {
+            console.error("Error fetching comments:", err);
+        } finally {
+            setIsLoadingComments(false);
+        }
+    }, [postId, pageSize]);
+
+    // Fetch comments on mount
+    useEffect(() => {
+        fetchComments(1);
+    }, [fetchComments]);
 
     const handleSubmitComment = async () => {
         if (!commentText.trim() || isSubmitting) return;
@@ -43,26 +76,10 @@ export default function CommentsSectionV3({
                 payload.parent_id = replyTo.id;
             }
 
-            const response = await api.post(`/api/newsfeed/v1/${postId}/comments/`, payload);
-            const newComment = response.data as FeedV3Comment;
+            await api.post(`/api/newsfeed/v1/${postId}/comments/`, payload);
 
-            if (replyTo) {
-                // Add reply to parent comment
-                setLocalComments(prev =>
-                    prev.map(comment =>
-                        comment.id === replyTo.id
-                            ? {
-                                ...comment,
-                                replies: [...(comment.replies || []), newComment],
-                            }
-                            : comment
-                    )
-                );
-                setExpandedReplies(prev => new Set(prev).add(replyTo.id));
-            } else {
-                // Add new top-level comment
-                setLocalComments(prev => [newComment, ...prev]);
-            }
+            // Refresh comments from server to get accurate data
+            await fetchComments(1);
 
             setCommentText("");
             setReplyTo(null);
@@ -325,17 +342,41 @@ export default function CommentsSectionV3({
 
     return (
         <div className="px-3 md:px-6 py-3 md:py-4 border-t border-gray-100 bg-gray-50">
-            {/* Existing Comments */}
+            {/* Loading state */}
+            {isLoadingComments && localComments.length === 0 && (
+                <div className="flex items-center justify-center py-4">
+                    <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+                    <span className="ml-2 text-sm text-gray-500">Loading comments...</span>
+                </div>
+            )}
+
+            {/* Comments list */}
             {localComments.length > 0 && (
                 <div className="space-y-4 mb-4">
-                    {localComments.slice(0, 3).map(comment => renderComment(comment))}
+                    {localComments.map(comment => renderComment(comment))}
 
-                    {localComments.length > 3 && (
+                    {/* Load more / View all */}
+                    {hasMore && (
                         <button
-                            onClick={onViewAllClick}
-                            className="text-sm text-green-600 hover:text-green-700 font-medium"
+                            onClick={() => {
+                                if (pageSize <= 5) {
+                                    // In feed mode, navigate to full post
+                                    onViewAllClick();
+                                } else {
+                                    // In post details, load next page
+                                    fetchComments(currentPage + 1);
+                                }
+                            }}
+                            disabled={isLoadingComments}
+                            className="text-sm text-green-600 hover:text-green-700 font-medium flex items-center gap-1"
                         >
-                            View all {localComments.length} comments
+                            {isLoadingComments ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : null}
+                            {pageSize <= 5
+                                ? `View all ${totalComments} comments`
+                                : `Load more comments (${localComments.length}/${totalComments})`
+                            }
                         </button>
                     )}
                 </div>

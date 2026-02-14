@@ -591,9 +591,9 @@ export default function FeedV3PostCard({
             {isCommentsExpanded && (
                 <CommentsSectionV3
                     postId={post.id}
-                    comments={localPost.latest_comments}
+                    pageSize={5}
                     onCommentAdded={() => {
-                        // Refresh post to get updated comments
+                        // Refresh post to get updated comment count
                         api.get(`/api/newsfeed/v1/${post.id}/`).then(response => {
                             setLocalPost(response.data);
                         });

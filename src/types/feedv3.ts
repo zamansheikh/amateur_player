@@ -109,7 +109,7 @@ export interface FeedV3Post {
     comments_count: number;
     shares_count: number;
     has_liked: boolean;
-    latest_comments: FeedV3Comment[];
+    latest_comments?: FeedV3Comment[];
     content: DefaultContent | PollContent | SharedContent;
 }
 

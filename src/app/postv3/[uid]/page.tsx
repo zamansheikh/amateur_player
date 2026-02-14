@@ -74,7 +74,7 @@ export default function PostV3DetailPage() {
         try {
             setIsLoadingComments(true);
             const response = await api.get<PaginatedResponse<FeedV3Comment>>(
-                `/api/newsfeed/v1/${post.id}/comments/?page=${page}&page_size=20`
+                `/api/newsfeed/v1/${post.id}/comments/?page=${page}&page_size=15`
             );
 
             if (page === 1) {
