@@ -25,6 +25,8 @@ interface FeedV3PostCardProps {
     onPostUpdate?: () => void;
     onPostChange?: (updatedPost: FeedV3Post) => void;
     enableMediaLightbox?: boolean;
+    initialCommentsExpanded?: boolean;
+    commentsPageSize?: number;
 }
 
 export default function FeedV3PostCard({
@@ -32,12 +34,14 @@ export default function FeedV3PostCard({
     onPostUpdate,
     onPostChange,
     enableMediaLightbox = false,
+    initialCommentsExpanded = false,
+    commentsPageSize = 5,
 }: FeedV3PostCardProps) {
     const { user } = useAuth();
     const [localLikes, setLocalLikes] = useState(post.likes_count);
     const [isLiking, setIsLiking] = useState(false);
     const [localPost, setLocalPost] = useState(post);
-    const [isCommentsExpanded, setIsCommentsExpanded] = useState(false);
+    const [isCommentsExpanded, setIsCommentsExpanded] = useState(initialCommentsExpanded);
     const [commentText, setCommentText] = useState("");
     const [isSubmittingComment, setIsSubmittingComment] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
@@ -68,12 +72,13 @@ export default function FeedV3PostCard({
         };
     }, [isMenuOpen]);
 
-    const handleUserClick = () => {
+    const handleUserClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
         router.push(`/profile/${post.author.username}`);
     };
 
     const handlePostClick = () => {
-        router.push(`/postv3/${post.uid}`);
+        router.push(`/postv3/${post.id}`);
     };
 
     const handleShareClick = () => {
@@ -267,10 +272,24 @@ export default function FeedV3PostCard({
 
         if (isDefaultContent(content)) {
             return (
-                <>
+                <div className="cursor-pointer" onClick={handlePostClick}>
+                    {/* Title */}
+                    {content.title && (
+                        <h3 className="font-semibold text-gray-900 text-base md:text-lg mb-1">
+                            {content.title}
+                        </h3>
+                    )}
+
+                    {/* Description */}
+                    {content.description && (
+                        <p className="text-gray-600 text-sm mb-2">
+                            {content.description}
+                        </p>
+                    )}
+
                     {/* Text Content */}
                     {content.text && (
-                        <div className="mb-3 md:mb-4 cursor-pointer" onClick={handlePostClick}>
+                        <div className="mb-3 md:mb-4">
                             <p className="text-gray-800 leading-relaxed text-sm md:text-[15px] line-height-6 overflow-wrap break-word">
                                 {renderTextWithTags(content.text)}
                             </p>
@@ -280,8 +299,10 @@ export default function FeedV3PostCard({
                     {/* Media Gallery */}
                     {content.media_urls && content.media_urls.length > 0 && (
                         <div
-                            className={`max-h-fit overflow-hidden ${enableMediaLightbox ? "" : "cursor-pointer"}`}
-                            onClick={enableMediaLightbox ? undefined : handlePostClick}
+                            className={`max-h-fit overflow-hidden`}
+                            onClick={(e) => {
+                                if (enableMediaLightbox) e.stopPropagation();
+                            }}
                         >
                             <MediaGallery
                                 media={content.media_urls}
@@ -290,24 +311,26 @@ export default function FeedV3PostCard({
                             />
                         </div>
                     )}
-                </>
+                </div>
             );
         }
 
         if (isPollContent(content)) {
             return (
-                <PollCard
-                    postId={post.id}
-                    content={content}
-                    onVote={handlePollVote}
-                    post={localPost}
-                />
+                <div className="cursor-pointer" onClick={handlePostClick}>
+                    <PollCard
+                        postId={post.id}
+                        content={content}
+                        onVote={handlePollVote}
+                        post={localPost}
+                    />
+                </div>
             );
         }
 
         if (isSharedContent(content)) {
             return (
-                <>
+                <div className="cursor-pointer" onClick={handlePostClick}>
                     {/* Share description */}
                     {content.description && (
                         <div className="mb-3 md:mb-4">
@@ -319,7 +342,7 @@ export default function FeedV3PostCard({
 
                     {/* Original post preview */}
                     <SharedPostPreview originalPost={content.original} />
-                </>
+                </div>
             );
         }
 
@@ -329,7 +352,7 @@ export default function FeedV3PostCard({
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-200">
             {/* Post Header */}
-            <div className="p-3 md:p-6 pb-2 md:pb-4">
+            <div className="p-3 md:p-6 pb-2 md:pb-4 cursor-pointer" onClick={handlePostClick}>
                 <div className="flex items-center justify-between gap-3 mb-3 md:mb-4">
                     <div
                         className="flex items-center gap-2 md:gap-3 cursor-pointer hover:bg-gray-50 p-1 md:p-2 rounded-lg transition-colors shrink-0 min-w-0"
@@ -348,7 +371,7 @@ export default function FeedV3PostCard({
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-1 md:gap-2 relative" ref={menuRef}>
+                    <div className="flex items-center gap-1 md:gap-2 relative" ref={menuRef} onClick={(e) => e.stopPropagation()}>
                         {/* Post type badge */}
                         {post.post_type !== 'default' && (
                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${post.post_type === 'poll'
@@ -591,7 +614,7 @@ export default function FeedV3PostCard({
             {isCommentsExpanded && (
                 <CommentsSectionV3
                     postId={post.id}
-                    pageSize={5}
+                    pageSize={commentsPageSize}
                     onCommentAdded={() => {
                         // Refresh post to get updated comment count
                         api.get(`/api/newsfeed/v1/${post.id}/`).then(response => {

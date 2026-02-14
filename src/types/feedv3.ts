@@ -24,6 +24,8 @@ export interface FeedV3Author {
 
 // Content types for different post types
 export interface DefaultContent {
+    title?: string;
+    description?: string;
     text: string;
     media_urls: string[];
 }

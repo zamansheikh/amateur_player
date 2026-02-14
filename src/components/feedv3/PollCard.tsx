@@ -161,7 +161,7 @@ export default function PollCard({ postId, content, post, onVote }: PollCardProp
             </div>
 
             {/* Poll Options */}
-            <div className="space-y-3 mb-4">
+            <div className="space-y-3 mb-4" onClick={(e) => e.stopPropagation()}>
                 {pollContent.options.map((option) => {
                     const isSelected = selectedOptions.includes(option.id);
                     const isWinner = pollContent.analytics?.options_breakdown?.find(
@@ -224,7 +224,7 @@ export default function PollCard({ postId, content, post, onVote }: PollCardProp
 
             {/* Vote Button */}
             {!pollContent.has_expired && (
-                <div className="flex gap-2">
+                <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
                     {!hasVoted ? (
                         <button
                             onClick={handleVote}
