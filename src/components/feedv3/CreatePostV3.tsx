@@ -248,7 +248,7 @@ export default function CreatePostV3({ onPostCreated }: CreatePostV3Props) {
                                         type="button"
                                         onClick={() => setPostMode('poll')}
                                         className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${postMode === 'poll'
-                                            ? 'bg-purple-100 text-purple-700'
+                                            ? 'bg-lime-100 text-lime-700'
                                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                             }`}
                                     >
@@ -300,7 +300,7 @@ export default function CreatePostV3({ onPostCreated }: CreatePostV3Props) {
                                         value={pollDescription}
                                         onChange={(e) => setPollDescription(e.target.value)}
                                         placeholder="Add a description (optional)"
-                                        className="w-full text-sm text-gray-600 placeholder-gray-400 border border-gray-200 rounded-lg p-3 resize-none focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                        className="w-full text-sm text-gray-600 placeholder-gray-400 border border-gray-200 rounded-lg p-3 resize-none focus:outline-none focus:ring-2 focus:ring-[#8BC342]"
                                         rows={2}
                                         disabled={isPosting}
                                     />
@@ -316,7 +316,7 @@ export default function CreatePostV3({ onPostCreated }: CreatePostV3Props) {
                                                     onChange={(e) => updatePollOption(index, e.target.value)}
                                                     placeholder={`Option ${index + 1}`}
                                                     maxLength={100}
-                                                    className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                                    className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8BC342]"
                                                     disabled={isPosting}
                                                 />
                                                 {pollOptions.length > 2 && (
@@ -335,7 +335,7 @@ export default function CreatePostV3({ onPostCreated }: CreatePostV3Props) {
                                             <button
                                                 type="button"
                                                 onClick={addPollOption}
-                                                className="flex items-center gap-2 text-purple-600 hover:text-purple-700 text-sm font-medium"
+                                                className="flex items-center gap-2 text-[#8BC342] hover:text-[#6fa332] text-sm font-medium"
                                             >
                                                 <Plus className="w-4 h-4" />
                                                 Add option
@@ -351,7 +351,7 @@ export default function CreatePostV3({ onPostCreated }: CreatePostV3Props) {
                                             <select
                                                 value={pollType}
                                                 onChange={(e) => setPollType(e.target.value as 'single' | 'multiple')}
-                                                className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                                className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#8BC342]"
                                                 disabled={isPosting}
                                             >
                                                 <option value="single">Single choice</option>
@@ -366,7 +366,7 @@ export default function CreatePostV3({ onPostCreated }: CreatePostV3Props) {
                                             <select
                                                 value={pollExpiryHours}
                                                 onChange={(e) => setPollExpiryHours(Number(e.target.value))}
-                                                className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                                className="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#8BC342]"
                                                 disabled={isPosting}
                                             >
                                                 <option value={1}>1 hour</option>
@@ -447,7 +447,7 @@ export default function CreatePostV3({ onPostCreated }: CreatePostV3Props) {
                                 type="button"
                                 onClick={handlePhotoVideoClick}
                                 disabled={isPosting || postMode === 'poll'}
-                                className={`flex items-center gap-1.5 h-10 px-2 sm:px-3 rounded-full hover:bg-green-50 text-green-500 transition-colors hover:text-green-600 disabled:opacity-50 disabled:cursor-not-allowed shrink-0 ${postMode === 'poll' ? 'opacity-50' : ''}`}
+                                className={`flex items-center gap-1.5 h-10 px-2 sm:px-3 rounded-full hover:bg-lime-50 text-[#8BC342] transition-colors hover:text-[#6fa332] disabled:opacity-50 disabled:cursor-not-allowed shrink-0 ${postMode === 'poll' ? 'opacity-50' : ''}`}
                                 title="Add photo or video"
                             >
                                 <ImageIcon className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
@@ -460,8 +460,8 @@ export default function CreatePostV3({ onPostCreated }: CreatePostV3Props) {
                                 onClick={handlePollClick}
                                 disabled={isPosting}
                                 className={`flex items-center gap-1.5 h-10 px-2 sm:px-3 rounded-full transition-colors shrink-0 ${postMode === 'poll'
-                                    ? 'bg-purple-100 text-purple-600'
-                                    : 'text-purple-500 hover:bg-purple-50 hover:text-purple-600'
+                                    ? 'bg-lime-100 text-[#8BC342]'
+                                    : 'text-[#8BC342] hover:bg-lime-50 hover:text-[#6fa332]'
                                     } disabled:opacity-50`}
                                 title="Create a poll"
                             >
@@ -474,7 +474,7 @@ export default function CreatePostV3({ onPostCreated }: CreatePostV3Props) {
                                 type="button"
                                 onClick={handleEventClick}
                                 disabled={isPosting}
-                                className="flex items-center gap-1.5 h-10 px-2 sm:px-3 rounded-full hover:bg-green-50 text-green-500 transition-colors hover:text-green-600 disabled:opacity-50 shrink-0"
+                                className="flex items-center gap-1.5 h-10 px-2 sm:px-3 rounded-full hover:bg-lime-50 text-[#8BC342] transition-colors hover:text-[#6fa332] disabled:opacity-50 shrink-0"
                                 title="Go to Events"
                             >
                                 <Calendar className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
@@ -486,7 +486,7 @@ export default function CreatePostV3({ onPostCreated }: CreatePostV3Props) {
                         <button
                             type="submit"
                             disabled={isPosting || isUploadingAny || !canSubmit}
-                            className={`font-bold py-2 px-6 sm:px-10 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm sm:text-lg whitespace-nowrap ${postMode === 'poll' ? 'bg-purple-600 hover:bg-purple-700' : ''
+                            className={`font-bold py-2 px-6 sm:px-10 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm sm:text-lg whitespace-nowrap ${postMode === 'poll' ? 'bg-[#8BC342] hover:bg-[#6fa332]' : ''
                                 }`}
                             style={{
                                 backgroundColor: (isPosting || isUploadingAny || !canSubmit)

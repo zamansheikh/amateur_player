@@ -316,11 +316,11 @@ export default function FeedSidebar() {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         onFocus={() => searchQuery.trim() && setShowDropdown(true)}
-                        className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8BC342] focus:border-transparent"
                     />
                     {isSearchLoading && (
                         <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                            <Loader2 className="w-4 h-4 animate-spin text-green-600" />
+                            <Loader2 className="w-4 h-4 animate-spin text-[#8BC342]" />
                         </div>
                     )}
                 </form>
@@ -344,7 +344,7 @@ export default function FeedSidebar() {
                                                     className="w-full h-full object-cover"
                                                 />
                                             ) : (
-                                                <div className="w-full h-full flex items-center justify-center bg-green-100 text-green-600">
+                                                <div className="w-full h-full flex items-center justify-center bg-lime-100 text-[#8BC342]">
                                                     <User className="w-5 h-5" />
                                                 </div>
                                             )}
@@ -355,7 +355,7 @@ export default function FeedSidebar() {
                                                     {user.name}
                                                 </p>
                                                 {user.roles.is_pro && (
-                                                    <span className="bg-green-100 text-green-700 text-[10px] px-1.5 py-0.5 rounded-full font-bold">
+                                                    <span className="bg-lime-100 text-[#8BC342] text-[10px] px-1.5 py-0.5 rounded-full font-bold">
                                                         PRO
                                                     </span>
                                                 )}
@@ -440,12 +440,12 @@ export default function FeedSidebar() {
             <div className="bg-white rounded-xl p-4 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
-                        <Calendar className="w-5 h-5 text-green-600" />
+                        <Calendar className="w-5 h-5 text-[#8BC342]" />
                         <h3 className="text-lg font-semibold text-gray-900">Upcoming Events</h3>
                     </div>
                     <Link
                         href="/events"
-                        className="text-green-600 hover:text-green-700 text-sm flex items-center gap-1"
+                        className="text-[#8BC342] hover:text-[#6fa332] text-sm flex items-center gap-1"
                     >
                         View All <ArrowRight className="w-4 h-4" />
                     </Link>
@@ -453,11 +453,11 @@ export default function FeedSidebar() {
 
                 {upcomingEventLoading ? (
                     <div className="flex items-center justify-center py-4">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div>
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#8BC342]"></div>
                     </div>
                 ) : upcomingEvent ? (
                     <Link href={`/events/${upcomingEvent.event_id}`} className="block">
-                        <div className="border border-gray-100 rounded-lg p-3 hover:shadow-md transition-all hover:border-green-200 cursor-pointer">
+                        <div className="border border-gray-100 rounded-lg p-3 hover:shadow-md transition-all hover:border-lime-200 cursor-pointer">
                             {/* Event Header */}
                             <div className="flex items-start justify-between mb-2">
                                 <div className="flex-1 min-w-0">
@@ -471,7 +471,7 @@ export default function FeedSidebar() {
                                         </span>
                                     </div>
                                 </div>
-                                <span className="text-green-600 text-xs font-semibold whitespace-nowrap ml-2">
+                                <span className="text-[#8BC342] text-xs font-semibold whitespace-nowrap ml-2">
                                     {new Date(upcomingEvent.event_datetime).toLocaleDateString('en-US', {
                                         month: 'short',
                                         day: 'numeric'
@@ -494,7 +494,7 @@ export default function FeedSidebar() {
                                                 className="w-full h-full object-cover"
                                             />
                                         ) : (
-                                            <div className="w-full h-full flex items-center justify-center bg-green-100 text-green-600">
+                                            <div className="w-full h-full flex items-center justify-center bg-lime-100 text-[#8BC342]">
                                                 <User className="w-3 h-3" />
                                             </div>
                                         )}
@@ -508,8 +508,8 @@ export default function FeedSidebar() {
                                         onClick={handleInterestToggle}
                                         disabled={!user || interestLoading}
                                         className={`flex items-center gap-1 px-2 py-1 rounded-lg font-bold transition-all ${upcomingEvent.is_interested
-                                            ? 'bg-green-100 text-green-700'
-                                            : 'bg-gray-100 text-gray-600 hover:bg-green-50 hover:text-green-600'
+                                            ? 'bg-lime-100 text-[#8BC342]'
+                                            : 'bg-gray-100 text-gray-600 hover:bg-lime-50 hover:text-[#8BC342]'
                                             } ${interestLoading ? 'opacity-50' : ''}`}
                                     >
                                         <ThumbsUp className={`w-3 h-3 ${upcomingEvent.is_interested ? 'fill-current' : ''}`} />
@@ -525,7 +525,7 @@ export default function FeedSidebar() {
                         <p className="text-gray-500 text-sm">No upcoming events</p>
                         <Link
                             href="/events"
-                            className="text-green-600 hover:text-green-700 font-medium text-sm mt-1 inline-block"
+                            className="text-[#8BC342] hover:text-[#6fa332] font-medium text-sm mt-1 inline-block"
                         >
                             Browse all →
                         </Link>

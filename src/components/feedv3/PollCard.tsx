@@ -130,7 +130,7 @@ export default function PollCard({ postId, content, post, onVote }: PollCardProp
     const showResults = hasVoted || pollContent.has_expired;
 
     return (
-        <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-4 md:p-6 border border-purple-100">
+        <div className="bg-gradient-to-br from-lime-50 to-green-50 rounded-xl p-4 md:p-6 border border-lime-100">
             {/* Poll Header */}
             <div className="mb-4">
                 <h3 className="font-bold text-gray-900 text-lg md:text-xl mb-1">
@@ -154,7 +154,7 @@ export default function PollCard({ postId, content, post, onVote }: PollCardProp
                     </span>
                 </div>
                 <div className="flex items-center gap-1 bg-white px-2 py-1 rounded-full">
-                    <span className="text-xs font-medium text-purple-600">
+                    <span className="text-xs font-medium text-[#8BC342]">
                         {pollContent.poll_type === 'single' ? 'Single choice' : 'Multiple choice'}
                     </span>
                 </div>
@@ -174,8 +174,8 @@ export default function PollCard({ postId, content, post, onVote }: PollCardProp
                             onClick={() => handleOptionClick(option.id)}
                             disabled={pollContent.has_expired || isVoting}
                             className={`w-full relative overflow-hidden rounded-lg border-2 transition-all duration-200 ${isSelected
-                                ? "border-purple-500 bg-purple-50"
-                                : "border-gray-200 bg-white hover:border-purple-300"
+                                ? "border-[#8BC342] bg-lime-50"
+                                : "border-gray-200 bg-white hover:border-lime-300"
                                 } ${pollContent.has_expired ? "cursor-default" : "cursor-pointer"}`}
                         >
                             {/* Progress bar background */}
@@ -191,14 +191,14 @@ export default function PollCard({ postId, content, post, onVote }: PollCardProp
                                 <div className="flex items-center gap-3">
                                     {/* Checkbox/Radio indicator */}
                                     <div className={`w-5 h-5 rounded-${pollContent.poll_type === 'single' ? 'full' : 'md'} border-2 flex items-center justify-center ${isSelected || option.has_voted
-                                        ? "border-purple-500 bg-purple-500"
+                                        ? "border-[#8BC342] bg-[#8BC342]"
                                         : "border-gray-300"
                                         }`}>
                                         {(isSelected || option.has_voted) && (
                                             <Check className="w-3 h-3 text-white" />
                                         )}
                                     </div>
-                                    <span className={`font-medium ${option.has_voted ? "text-purple-700" : "text-gray-800"}`}>
+                                    <span className={`font-medium ${option.has_voted ? "text-[#8BC342]" : "text-gray-800"}`}>
                                         {option.text}
                                     </span>
                                     {isWinner && (
@@ -229,7 +229,7 @@ export default function PollCard({ postId, content, post, onVote }: PollCardProp
                         <button
                             onClick={handleVote}
                             disabled={selectedOptions.length === 0 || isVoting}
-                            className="flex-1 bg-purple-600 text-white py-2.5 px-4 rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            className="flex-1 bg-[#8BC342] text-white py-2.5 px-4 rounded-lg font-medium hover:bg-[#6fa332] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
                             {isVoting ? (
                                 <>
@@ -254,7 +254,7 @@ export default function PollCard({ postId, content, post, onVote }: PollCardProp
 
             {/* Analytics section for expired polls */}
             {pollContent.has_expired && pollContent.analytics && (
-                <div className="mt-4 pt-4 border-t border-purple-200">
+                <div className="mt-4 pt-4 border-t border-lime-200">
                     <div className="flex items-center gap-2 text-sm">
                         {pollContent.analytics.has_winner && pollContent.analytics.winner && (
                             <div className="flex items-center gap-2 bg-green-100 text-green-700 px-3 py-1.5 rounded-full">

@@ -375,8 +375,8 @@ export default function FeedV3PostCard({
                         {/* Post type badge */}
                         {post.post_type !== 'default' && (
                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${post.post_type === 'poll'
-                                ? 'bg-purple-100 text-purple-600'
-                                : 'bg-blue-100 text-blue-600'
+                                ? 'bg-lime-100 text-[#8BC342]'
+                                : 'bg-lime-100 text-[#8BC342]'
                                 }`}>
                                 {post.post_type === 'poll' ? '📊 Poll' : '🔄 Shared'}
                             </span>

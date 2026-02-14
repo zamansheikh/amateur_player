@@ -46,9 +46,9 @@ export default function SharedPostPreview({ originalPost }: SharedPostPreviewPro
 
         if (isPollContent(content)) {
             return (
-                <div className="bg-purple-50 rounded-lg p-3">
+                <div className="bg-lime-50 rounded-lg p-3">
                     <div className="flex items-center gap-2 mb-2">
-                        <span className="text-purple-600">📊</span>
+                        <span className="text-[#8BC342]">📊</span>
                         <span className="font-medium text-gray-800 text-sm">Poll</span>
                     </div>
                     <p className="text-gray-700 text-sm font-medium">{content.title}</p>
